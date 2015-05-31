@@ -120,8 +120,8 @@ Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 			&& (Math.abs(fr-r) < 1) && (Math.abs(fr-r) < 1)					// Rotation  match
 			)																// Already there
 		return;																// Quit
-var duration=0;														// Duration
-var start=+new Date();													// Start time
+	var duration=2000;														// Duration
+	var start=+new Date();													// Start time
 	var pan=ol.animation.pan({												// Pan
 	    duration: duration,													// Duration
 	    source: fc,															// Start value
@@ -137,8 +137,7 @@ var start=+new Date();													// Start time
 	    resolution: Math.min(4*o.getResolution(),2000),						// End value
 	    start: start														// Starting time
 	  });
-	
-   	this.map.beforeRender(pan,rotate);								// Pan, rotate and bounce
+  	this.map.beforeRender(pan,rotate);										// Pan, rotate
 	o.setResolution(v[2]);													// Set resolution								
 	o.setCenter(c);															// Set center
 	o.setRotation(v[3]);													// Set rotation								
