@@ -219,7 +219,7 @@
 				});				
 		$(window).resize(ResizePanes);											// Dynamic resizing
 		mps=new Space;															// Alloc map module
-		mps.InitMap();															// Init map
+		mps.InitMap("leftDiv");													// Init map
 		InitProject();															// Init project
 		ResizePanes();															// Resize panes
 		if (drupalMan) 															// If called from Drupal manager

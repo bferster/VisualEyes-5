@@ -15,7 +15,7 @@ function Space()														// CONSTRUCTOR
 	this.kmlLayers=[];														// Holds KML layers
 }
 
-Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
+Space.prototype.InitMap=function(div)									// INIT OPENLAYERS MAP
 {
 	this.controlKey=this.shiftKey=false;									// Shift/control key flags
 	this.showBoxes=false;													// Show boxes
@@ -72,7 +72,7 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 		];
 
 
-    this.map=new ol.Map( { target: 'leftDiv',									// Alloc OL
+    this.map=new ol.Map( { target: div,										// Alloc OL
         layers:this.layers,													// Layers array									
         controls: ol.control.defaults({										// Controls
 				}).extend([ new ol.control.ScaleLine() ]),					// Add scale
