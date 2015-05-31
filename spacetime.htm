@@ -125,13 +125,11 @@
 			if (o.marker) {													// If a marker spec'd
 				if (o.marker.match(/\.kml/i)) {								// A KML file
 					o.type="kml";											// Set type
-					mps.AddKMLLayer(o);										// Add KML layer								 
-					mps.loadCounter++;										// Add to count
+					o.id=mps.AddKMLLayer(o.marker);							// Add KML layer								 
 					}
 				else if (o.marker.match(/\.png|.gif|\.jpg|\.jpeg/i)) {		// An image file
 					o.type="image";											// Set type
-					mps.MakeMapImage(o);									// Make map image								 
-					mps.loadCounter++;										// Add to count
+					o.id=mps.AddImageLayer(o.marker,o.georef);				// Add image layer								 
 					}
 				}
 			}											

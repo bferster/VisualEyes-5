@@ -12,7 +12,7 @@ function Space()														// CONSTRUCTOR
 	Sound("click","init");													// Init sound
 	Sound("ding","init");													// Init sound
 	Sound("delete","init");													// Init sound
-	this.kmlLayers=[];														// Holds KML layers
+	this.overlays=[];														// Holds overlay layers
 }
 
 Space.prototype.InitMap=function(div)									// INIT OPENLAYERS MAP
@@ -143,26 +143,31 @@ Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 	o.setRotation(v[3]);													// Set rotation								
 	}
 
-Space.prototype.AddKMLLayer=function(mob) 								// ADD KML LAYER TO PROJECT
+Space.prototype.AddKMLLayer=function(url) 								// ADD KML LAYER TO PROJECT
 {
-	var u=mob.marker;														
-	if (u && u.match(/\/\//)) 												// If cross-domain
-		u="proxy.php?url="+u;												// Add proxy
-
-	this.kmlLayers.push(new ol.layer.Vector({  source: new ol.source.KML({	// New layer
-							title: "LAYER-"+this.kmlLayers.length,			// Set name
-				   			projection: ol.proj.get(this.curProjection),	// Set KML projection
-				    		url:u,											// URL
-				  			visible:false									// Hide it
-				  			})
-						}));
-
-	this.map.addLayer(this.kmlLayers[this.kmlLayers.length-1]);				// Add to map	
+	var o={};
    	var _this=this;															// Save context for callback
- 
-	this.kmlLayers[this.kmlLayers.length-1].getSource().once("change",function() {	// WHEN KML IS LOADED						
-       	_this.loadCounter--; 													// Dec
-		this.forEachFeature(function(f) {									// For each feature in KML
+	if (url && url.match(/\/\//)) 											// If cross-domain
+		url="proxy.php?url="+url;											// Add proxy
+
+	var index=this.overlays.length;											// Get index
+ 	o.type="kml";															// KML
+ 	o.vis=0;																// Visible
+	o.src=new ol.layer.Vector({  source: new ol.source.KML({				// New layer
+							title: "LAYER-"+this.overlays.length,			// Set name
+				   			projection: ol.proj.get(this.curProjection),	// Set KML projection
+				    		url:url,										// URL
+				  			})
+						});
+
+	this.overlays.push(o);													// Add to overlay
+	mps.loadCounter++;														// Add to count
+	this.map.addLayer(o.src);												// Add to map	
+ 	return index;															// Return layer ID
+
+	this.overlays[index].getSource().once("change",function(){				// WHEN KML IS LOADED						
+ 		this.ShowProgress();												// Update loading progress
+ 		this.forEachFeature(function(f) {									// For each feature in KML
 			if ((f.getGeometry().getType() == "Point") && f.get("name")){	// If a marker with a label
 				var sty=new ol.style.Style({								// Add style
 			      image: new ol.style.Icon( { src: "img/marker.png"	}),		// Add icon
@@ -211,26 +216,23 @@ Space.prototype.CreateCanvasLayer=function()							// CREATE CANVAS LAYER
     this.map.addLayer(this.canvasLayer);									// Add layer to map
 }
 
-Space.prototype.MakeMapImage=function(mob) 								// ADD MAP IMAGE TO PROJECT
+Space.prototype.AddImageLayer=function(url, geoRef) 						// ADD MAP IMAGE TO PROJECT
 {    
-    mob.mapImage=new MapImage(mob, this);									// Alloc mapimage obj
+	var o={};
+	var index=this.overlays.length;											// Get index
+ 	o.type="image";															// Image
+ 	o.vis=0;																// Visible
+    o.src=new MapImage(url,geoRef,this);									// Alloc mapimage obj
+	this.overlays.push(o);													// Add layer
+	mps.loadCounter++;														// Add to count
 
-	function MapImage(mob, _this) {											// MAPIMAGE CONSTRUCTOR
-	    
+	function MapImage(url, geoRef, _this) 									// MAPIMAGE CONSTRUCTOR
+	{    
 	    this.img=new Image();												// Alloc image
-		
-		function progress() {												// SHOW LOAD PROGRESS
-         	var str="";
-         	_this.loadCounter--; 											// Dec
-       		if (_this.loadCounter)											// If stuff to load
- 				str=_this.loadCounter+" maps to load";						// Set progress
- 			$("#loadProgress").text(str);									// Show status
-         	}					
-
-	    this.img.onload=progress;											// Add handler to remove from count after loaded
-        this.img.onerror=progress;											// Add handler to remove from count if error
+	    this.img.onload=_this.ShowProgress;									// Add handler to remove from count after loaded
+        this.img.onerror=_this.ShowProgress;								// Add handler to remove from count if error
         this.imgWidth;	 this.imgHeight;									// Set size, if any
-        var v=mob.georef.split(",");										// Split into parts
+        var v=geoRef.split(",");											// Split into parts
         this.n=v[0]-0;														// Set bounds
         this.s=v[1]-0;
         this.e=v[2]-0;
@@ -245,48 +247,60 @@ Space.prototype.MakeMapImage=function(mob) 								// ADD MAP IMAGE TO PROJECT
         this.centerYCoord = this.s + (Math.abs(this.n - this.s) / 2);
         this.center=ol.proj.transform([this.centerXCoord, this.centerYCoord], 'EPSG:4326', _this.curProjection);	// Get center
         this.rotation=v[4]*-1;												// Reverse direction
-		this.img.src=mob.marker;											// Set url
-  	}
+		this.img.src=url;													// Set url
+ 	}
 	
-MapImage.prototype.drawMapImage=function(alpha, _this)                   		// DRAW IMAGE
-{ 
-	if (!this.imgWidth) {
-		this.imgWidth=this.img.width;
-		this.imgHeight=this.img.height;
-		this.imgWidthMeters=Math.abs(this.east - this.west);            
-		this.imgHeightMeters=Math.abs(this.north - this.south);
+	MapImage.prototype.drawMapImage=function(alpha, _this)                   		// DRAW IMAGE
+	{ 
+		if (!this.imgWidth) {
+			this.imgWidth=this.img.width;
+			this.imgHeight=this.img.height;
+			this.imgWidthMeters=Math.abs(this.east - this.west);            
+			this.imgHeightMeters=Math.abs(this.north - this.south);
+			}
+		var canvasExtentWidth = _this.canvasExtent[2] - _this.canvasExtent[0];
+		var canvasExtentHeight = _this.canvasExtent[3] - _this.canvasExtent[1];
+		var xCenterOffset = _this.canvasWidth * (this.center[0]-_this.canvasExtent[0]) / canvasExtentWidth;
+		var yCenterOffset = _this.canvasHeight * (_this.canvasExtent[3]-this.center[1]) / canvasExtentHeight;
+		var drawWidth = _this.canvasWidth * (this.imgWidthMeters / canvasExtentWidth);
+		var drawHeight = _this.canvasHeight * (this.imgHeightMeters / canvasExtentHeight);
+		var ctx=_this.canvasContext;
+		if (ctx) {
+			ctx.globalAlpha = alpha / 100;
+			ctx.translate(xCenterOffset,yCenterOffset);
+			ctx.rotate(this.rotation * (Math.PI/180));
+			ctx.translate(-(drawWidth / 2), -(drawHeight / 2));
+			ctx.drawImage(this.img, 0, 0, drawWidth, drawHeight);
+			ctx.translate((drawWidth / 2), (drawHeight / 2));
+			ctx.rotate(-(this.rotation * (Math.PI / 180)));
+			ctx.translate(-xCenterOffset,-yCenterOffset);
+			ctx.globalAlpha=1;
+			}                  
 		}
-	var canvasExtentWidth = _this.canvasExtent[2] - _this.canvasExtent[0];
-	var canvasExtentHeight = _this.canvasExtent[3] - _this.canvasExtent[1];
-	var xCenterOffset = _this.canvasWidth * (this.center[0]-_this.canvasExtent[0]) / canvasExtentWidth;
-	var yCenterOffset = _this.canvasHeight * (_this.canvasExtent[3]-this.center[1]) / canvasExtentHeight;
-	var drawWidth = _this.canvasWidth * (this.imgWidthMeters / canvasExtentWidth);
-	var drawHeight = _this.canvasHeight * (this.imgHeightMeters / canvasExtentHeight);
-	var ctx=_this.canvasContext;
-	if (ctx) {
-		ctx.globalAlpha = alpha / 100;
-		ctx.translate(xCenterOffset,yCenterOffset);
-		ctx.rotate(this.rotation * (Math.PI/180));
-		ctx.translate(-(drawWidth / 2), -(drawHeight / 2));
-		ctx.drawImage(this.img, 0, 0, drawWidth, drawHeight);
-		ctx.translate((drawWidth / 2), (drawHeight / 2));
-		ctx.rotate(-(this.rotation * (Math.PI / 180)));
-		ctx.translate(-xCenterOffset,-yCenterOffset);
-		ctx.globalAlpha=1;
-		}                  
-	}
+	return index;															// Return layer ID
+
 }
 
 Space.prototype.DrawMapLayers=function()								// DRAW OL IMAGES
 {
-	var i,m;
-	if (this.canvasContext && sd.mobs) {  									// If a canvas up      
-		this.canvasContext.clearRect(0,0,this.canvasWidth,this.canvasHeight);	// Clear canvas
-   		for (i=0;i<sd.mobs.length;i++) {									// For each mob
-            m=sd.mobs[i];													// Get ptr
-            if (m.mapImage && m.vis)										// If an image alloc'd amd visible
-           		m.mapImage.drawMapImage(100,this);   						// Draw it   
+	var i,o;
+	if (this.canvasContext) {  												// If a canvas up      
+		this.canvasContext.clearRect(0,0,this.canvasWidth,this.canvasHeight); // Clear canvas
+   		for (i=0;i<this.overlays.length;i++) {								// For each overlay layer
+           o=this.overlays[i];												// Get ptr  to layer
+            if (o.vis && (o.type == "image"))								// If a visible image 
+           		o.src.drawMapImage(100,this);   							// Draw it   
             }
         }
 }
 
+
+
+Space.prototype.ShowProgress=function()									// SHOW RESORCE LOAD PROGRESS
+ {
+ 	var str="";
+ 	this.loadCounter--; 													// Dec
+	if (this.loadCounter)													// If stuff to load
+		str=this.loadCounter+" resources to load";							// Set progress
+	$("#STloadProgress").text(str);											// Show status
+ }					
