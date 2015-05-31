@@ -307,8 +307,6 @@ Space.prototype.DrawMapLayers=function()								// DRAW OL IMAGES
            		o.src.drawMapImage(100,this);   							// Draw it   
         	else if (o.type == "kml")										// If a kml 
        			o.src.set('visible',o.vis > 0);								// Show/hide it
-
-           
             }
         }
 }
