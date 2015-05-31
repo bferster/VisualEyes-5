@@ -1,9 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SPACE.JS 
-// Provide mapping componant
+// Provides mapping componant
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function TSMap()														// CONSTRUCTOR
+function Space()														// CONSTRUCTOR
 {
 	this.controlKey=this.shiftKey=false;									// Shift/control key flags
 	this.showBoxes=false;													// Show boxes
@@ -15,7 +15,7 @@ function TSMap()														// CONSTRUCTOR
 	this.kmlLayers=[];														// Holds KML layers
 }
 
-TSMap.prototype.InitMap=function()										// INIT OPENLAYERS MAP
+Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 {
 	this.controlKey=this.shiftKey=false;									// Shift/control key flags
 	this.showBoxes=false;													// Show boxes
@@ -96,7 +96,7 @@ TSMap.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 		});
 	}	
 
-TSMap.prototype.AddKMLLayer=function(mob) 								// ADD KML LAYER TO PROJECT
+Space.prototype.AddKMLLayer=function(mob) 								// ADD KML LAYER TO PROJECT
 {
 	var u=mob.marker;														
 	if (u && u.match(/\/\//)) 												// If cross-domain
@@ -135,8 +135,36 @@ TSMap.prototype.AddKMLLayer=function(mob) 								// ADD KML LAYER TO PROJECT
 
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// IMAGE OVERLAY
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-TSMap.prototype.MakeMapImage=function(mob) 								// ADD MAP IMAGE TO PROJECT
+Space.prototype.CreateCanvasLayer=function()							// CREATE CANVAS LAYER 
+{        
+   	var _this=this;															// Save context for callback
+ 
+    this.canvasLayer=new ol.layer.Image( {									// Make new image layer
+        source: new ol.source.ImageCanvas( {								// Add canvas sourcw
+            canvasFunction: function(extent, res, pixelRatio, size, proj) { // Render function
+				if (!_this.canvasCanvas) 									// If no canvas yet
+			        _this.canvasCanvas=document.createElement('canvas');	// Alloc canvas
+		       	_this.canvasWidth=size[0];									// Get width
+			    _this.canvasHeight=size[1];									// Hgt
+		    	_this.canvasCanvas.setAttribute('width',size[0]);			// Set canvas width
+			    _this.canvasCanvas.setAttribute('height',size[1]);			// Hgt
+	    		_this.canvasContext=_this.canvasCanvas.getContext('2d');	// Get context
+           		_this.canvasExtent=extent;									// Set extent
+		        _this.canvasRes=res;										// Set res
+				_this.DrawMapLayers();										// Make images
+	        	return _this.canvasCanvas 									// Return canvas reference
+	            }, 
+	        projection: this.curProjection									// Projection
+	        })
+	    });
+    this.map.addLayer(this.canvasLayer);									// Add layer to map
+}
+
+Space.prototype.MakeMapImage=function(mob) 								// ADD MAP IMAGE TO PROJECT
 {    
     mob.mapImage=new MapImage(mob, this);									// Alloc mapimage obj
 
@@ -173,7 +201,7 @@ TSMap.prototype.MakeMapImage=function(mob) 								// ADD MAP IMAGE TO PROJECT
 		this.img.src=mob.marker;											// Set url
   	}
 	
-MapImage.prototype.drawImage=function(alpha, _this)                   		// DRAW IMAGE
+MapImage.prototype.drawMapImage=function(alpha, _this)                   		// DRAW IMAGE
 { 
 	if (!this.imgWidth) {
 		this.imgWidth=this.img.width;
@@ -202,32 +230,7 @@ MapImage.prototype.drawImage=function(alpha, _this)                   		// DRAW 
 	}
 }
 
-TSMap.prototype.CreateCanvasLayer=function()							// CREATE CANVAS LAYER 
-{        
-   	var _this=this;															// Save context for callback
- 
-    this.canvasLayer=new ol.layer.Image( {									// Make new image layer
-        source: new ol.source.ImageCanvas( {								// Add canvas sourcw
-            canvasFunction: function(extent, res, pixelRatio, size, proj) { // Render function
-				if (!_this.canvasCanvas) 									// If no canvas yet
-			        _this.canvasCanvas=document.createElement('canvas');	// Alloc canvas
-		       	_this.canvasWidth=size[0];									// Get width
-			    _this.canvasHeight=size[1];									// Hgt
-		    	_this.canvasCanvas.setAttribute('width',size[0]);			// Set canvas width
-			    _this.canvasCanvas.setAttribute('height',size[1]);			// Hgt
-	    		_this.canvasContext=_this.canvasCanvas.getContext('2d');	// Get context
-           		_this.canvasExtent=extent;									// Set extent
-		        _this.canvasRes=res;										// Set res
-				_this.DrawMapLayers();										// Make images
-	        	return _this.canvasCanvas 									// Return canvas reference
-	            }, 
-	        projection: this.curProjection									// Projection
-	        })
-	    });
-    this.map.addLayer(this.canvasLayer);									// Add layer to map
-}
-
-TSMap.prototype.DrawMapLayers=function()								// DRAW OL IMAGES
+Space.prototype.DrawMapLayers=function()								// DRAW OL IMAGES
 {
 	var i,m;
 	if (this.canvasContext && sd.mobs) {  									// If a canvas up      
@@ -235,7 +238,7 @@ TSMap.prototype.DrawMapLayers=function()								// DRAW OL IMAGES
    		for (i=0;i<sd.mobs.length;i++) {									// For each mob
             m=sd.mobs[i];													// Get ptr
             if (m.mapImage && m.vis)										// If an image alloc'd amd visible
-           		m.mapImage.drawImage(100,this);   							// Draw it   
+           		m.mapImage.drawMapImage(100,this);   						// Draw it   
             }
         }
 }

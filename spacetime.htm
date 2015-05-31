@@ -218,8 +218,8 @@
 				ResizePanes();													// Resize panes
 				});				
 		$(window).resize(ResizePanes);											// Dynamic resizing
-		mps=new TSMap;
-		mps.InitMap();															// Init openlayers
+		mps=new Space;															// Alloc map module
+		mps.InitMap();															// Init map
 		InitProject();															// Init project
 		ResizePanes();															// Resize panes
 		if (drupalMan) 															// If called from Drupal manager
