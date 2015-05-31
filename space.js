@@ -194,6 +194,7 @@ Space.prototype.AddKMLLayer=function(url) 								// ADD KML LAYER TO PROJECT
 // IMAGE OVERLAY
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
 Space.prototype.ShowLayers=function(indices, mode)						// HIDE/SHOW LAYER 
 { 
 
