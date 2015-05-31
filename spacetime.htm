@@ -114,6 +114,8 @@
 
 			o={};
 			o.marker="test.kml";
+			o.marker="https://drive.google.com/open?id=0B4hdE1_3ZElJLUlRSWhoNkdSRFk&authuser=0"
+			
 			o.start=1665;
 			o.end=1665;
 			o.vis=1;
@@ -123,7 +125,16 @@
 		for (i=0;i<sd.mobs.length;++i) {									// For each mob	
 			o=sd.mobs[i];													// Point at mob
 			if (o.marker) {													// If a marker spec'd
-				if (o.marker.match(/\.kml/i)) {								// A KML file
+				if (o.marker.match(/drive\.google/i)) {						// An drive file
+					var id=o.marker.match(/id=(.+)&/);						// Extract id
+					if (id)	{												// An id found
+						o.type="kml";										// Set type
+						var s="//drive.google.com/uc?export=view&id="+id[1];// Construct 'direct' link
+						trace(s)
+						o.id=mps.AddKMLLayer(s);							// Add KML layer								 
+						}
+					}
+			else if (o.marker.match(/\.kml/i)) {							// A KML file
 					o.type="kml";											// Set type
 					o.id=mps.AddKMLLayer(o.marker);							// Add KML layer								 
 					}
@@ -212,6 +223,8 @@
 		$("#showDiv").animate({ opacity:1},4000, function() {					// Show interface
 				ResizePanes();													// Resize panes
 		mps.Goto("-79.91,32.79,500")
+		mps.ShowLayers([0,1],true);
+				
 				});				
 		$(window).resize(ResizePanes);											// Dynamic resizing
 		mps=new Space;															// Alloc map module

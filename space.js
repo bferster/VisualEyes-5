@@ -96,11 +96,13 @@ Space.prototype.InitMap=function(div)									// INIT OPENLAYERS MAP
 		});
 	}	
 
+
 Space.prototype.UpdateMapSize=function() 								// UPAFE MAP SIZE
 {
 	if (this.map)															// If OL initted
 		mps.map.updateSize();												// Update map
 }
+
 
 Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 {
@@ -156,15 +158,16 @@ Space.prototype.AddKMLLayer=function(url) 								// ADD KML LAYER TO PROJECT
 	o.src=new ol.layer.Vector({  source: new ol.source.KML({				// New layer
 							title: "LAYER-"+this.overlays.length,			// Set name
 				   			projection: ol.proj.get(this.curProjection),	// Set KML projection
-				    		url:url,										// URL
+				    		url: url										// URL
 				  			})
 						});
-
+	
+	o.src.set('visible',false)												// Hide it
 	this.overlays.push(o);													// Add to overlay
 	mps.loadCounter++;														// Add to count
 	this.map.addLayer(o.src);												// Add to map	
  	return index;															// Return layer ID
-
+ 
 	this.overlays[index].getSource().once("change",function(){				// WHEN KML IS LOADED						
  		this.ShowProgress();												// Update loading progress
  		this.forEachFeature(function(f) {									// For each feature in KML
@@ -191,6 +194,16 @@ Space.prototype.AddKMLLayer=function(url) 								// ADD KML LAYER TO PROJECT
 // IMAGE OVERLAY
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+Space.prototype.ShowLayers=function(indices, mode)						// HIDE/SHOW LAYER 
+{ 
+
+	for (i=0;i<indices.length;++i) 											// For each index
+		if ((indices[i] >= 0) && (indices[i] < this.overlays.length))		// If in range
+			this.overlays[indices[i]].vis=mode;								// Set vis       
+	this.DrawMapLayers();													// Do it
+}
+
+
 Space.prototype.CreateCanvasLayer=function()							// CREATE CANVAS LAYER 
 {        
    	var _this=this;															// Save context for callback
@@ -215,6 +228,7 @@ Space.prototype.CreateCanvasLayer=function()							// CREATE CANVAS LAYER
 	    });
     this.map.addLayer(this.canvasLayer);									// Add layer to map
 }
+
 
 Space.prototype.AddImageLayer=function(url, geoRef) 						// ADD MAP IMAGE TO PROJECT
 {    
@@ -250,6 +264,7 @@ Space.prototype.AddImageLayer=function(url, geoRef) 						// ADD MAP IMAGE TO PR
 		this.img.src=url;													// Set url
  	}
 	
+	
 	MapImage.prototype.drawMapImage=function(alpha, _this)                   		// DRAW IMAGE
 	{ 
 		if (!this.imgWidth) {
@@ -278,8 +293,8 @@ Space.prototype.AddImageLayer=function(url, geoRef) 						// ADD MAP IMAGE TO PR
 			}                  
 		}
 	return index;															// Return layer ID
-
 }
+
 
 Space.prototype.DrawMapLayers=function()								// DRAW OL IMAGES
 {
@@ -290,14 +305,17 @@ Space.prototype.DrawMapLayers=function()								// DRAW OL IMAGES
            o=this.overlays[i];												// Get ptr  to layer
             if (o.vis && (o.type == "image"))								// If a visible image 
            		o.src.drawMapImage(100,this);   							// Draw it   
+        	else if (o.type == "kml")										// If a kml 
+       			o.src.set('visible',o.vis > 0);								// Show/hide it
+
+           
             }
         }
 }
 
 
-
 Space.prototype.ShowProgress=function()									// SHOW RESORCE LOAD PROGRESS
- {
+{
  	var str="";
  	this.loadCounter--; 													// Dec
 	if (this.loadCounter)													// If stuff to load
