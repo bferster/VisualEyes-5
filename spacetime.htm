@@ -55,7 +55,11 @@
 </div>
 <div id="splashDiv" class="ts-splash"><img src="img/tslogo.png"></div>
 <script>
-	
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DISPLAY
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	var sd={};																	// Holds show data
 	var mps={};
 	var paneAnimationTimer=null;												// Times pane animations
@@ -65,7 +69,6 @@
 	var userName="",password="",curShow=0;										// Login info
 	var lastClickTime=0;														// Store last click time
 	var drupalMan=false;														// Flag for drupal manager	
-
 	var curSpanStart,curSpanEnd,curTime;
 	
 	function ResizePanes()													// RESIZE PANES
@@ -86,8 +89,7 @@
 		$("#bottomDiv").width(cx);												// Set bottom width
 		$("#bottomDiv").height(hgt-cy);											// Set bottom height
 		$("#bottomDiv").css("top",cy+"px");										// Set lr size pos
-		if (mps.map)																// If OL initted
-			mps.map.updateSize();												// Update map
+		mps.UpdateMapSize();													// Update map size to div size
 		Draw();																	// Redraw
 }		
 
@@ -95,6 +97,8 @@
 	{
 		var i;
 		if (!data) {
+			sd.lrRatio=.66;
+			sd.bRatio=.75;
 			sd.mobs=[];
 			var o={};
 			o.title="La Floride Francoise";
@@ -137,11 +141,6 @@
 	{
 		$("#rightDiv").html("<img src='http://www.viseyes.org/efolio/declaration.JPG' width='100%'>");
 		mps.DrawMapLayers();
-		var seg=mps.kmlLayers[0];
-//		seg.set("opacity",1);									// Set alpha
-//		seg.set('visible',true);								// Show it
-
-		
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -150,8 +149,6 @@
 
 	$(document).ready(function() {												// When loaded
 		var i;
-		sd.lrRatio=.66;
-		sd.bRatio=.75;
 		if (window.addEventListener) 											// If supported this way
 			window.addEventListener("message",shivaEventHandler,false);			// Add event handler
 		else																	// Use other method
@@ -216,6 +213,7 @@
 		$("#splashDiv").animate({ opacity:0},2000);								// Hide logo
 		$("#showDiv").animate({ opacity:1},4000, function() {					// Show interface
 				ResizePanes();													// Resize panes
+		mps.Goto("-79.91,32.79,500")
 				});				
 		$(window).resize(ResizePanes);											// Dynamic resizing
 		mps=new Space;															// Alloc map module
@@ -225,7 +223,6 @@
 		if (drupalMan) 															// If called from Drupal manager
 			window.parent.postMessage("ShivaReady=true","*");					// Send message to parent wind		
 	});
-
 
 	function SendShivaMessage(src, msg) 									// SEND SHIVA MESSAGE 
 	{
@@ -242,6 +239,10 @@
 	{
 		var str,i;
 	}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// HELPERS
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	function trace(msg, p1, p2, p3, p4)										// CONSOLE 
 	{

@@ -71,7 +71,6 @@ Space.prototype.InitMap=function(div)									// INIT OPENLAYERS MAP
 				}),
 		];
 
-
     this.map=new ol.Map( { target: div,										// Alloc OL
         layers:this.layers,													// Layers array									
         controls: ol.control.defaults({										// Controls
@@ -92,9 +91,58 @@ Space.prototype.InitMap=function(div)									// INIT OPENLAYERS MAP
 		var c=ol.proj.transform(o.getCenter(),_this.curProjection,'EPSG:4326');	// Get center
 		var pos=Math.floor(c[1]*10000)/10000+"|"+Math.floor(c[0]*10000)/10000+"|"+o.getZoom()+"|";	
 		pos+=Math.floor((o.getRotation()*180/Math.PI)*1000)/-1000;			// Rotation
-		SendShivaMessage("ShivaMap=move",pos);								// Send that view has changed
+		if (SendShivaMessage)												// If function spec'sd
+			SendShivaMessage("Space=move",pos);								// Send that view has changed
 		});
 	}	
+
+Space.prototype.UpdateMapSize=function() 								// UPAFE MAP SIZE
+{
+	if (this.map)															// If OL initted
+		mps.map.updateSize();												// Update map
+}
+
+Space.prototype.Goto=function(pos)										// SET VIEWPOINT
+{
+	var speed=1;															// Default speed
+	if ((!pos) || (pos.length < 5))											// No where to go
+		return;																// Quit
+	pos=pos.replace(/"/g,"");												// Remove quotes
+	var v=pos.split(",");													// Split up
+	var o=this.map.getView();												// Point at view
+	var c=ol.proj.transform([v[0]-0,""+v[1].replace(/\*/,"")-0],'EPSG:4326',this.curProjection);	// Get center
+	var fc=o.getCenter();													// Get from center
+	var fr=o.getRotation();													// Get from rotation		
+	var fs=o.getResolution();												// Get from resolution
+	var r=-v[4]*Math.PI/180;												// Get to rotation	
+	if ((Math.abs(fc[0]-c[0]) < 2) && (Math.abs(fc[1]-c[1]) < 2)			// Center match
+			&& (Math.abs(fs-v[2]) < 2) && (Math.abs(fs-v[2]) < 2)			// Resolution  match
+			&& (Math.abs(fr-r) < 1) && (Math.abs(fr-r) < 1)					// Rotation  match
+			)																// Already there
+		return;																// Quit
+var duration=0;														// Duration
+var start=+new Date();													// Start time
+	var pan=ol.animation.pan({												// Pan
+	    duration: duration,													// Duration
+	    source: fc,															// Start value
+	    start: start														// Starting time
+	  	});
+	var rotate=ol.animation.rotate({										// Rotate
+	    duration: duration,													// Duration
+	    rotation: fr,														// Start value
+	    start: start														// Starting time
+	  	});
+	 var bounce=ol.animation.bounce({										// Fly bounce
+	    duration: duration,													// Duration
+	    resolution: Math.min(4*o.getResolution(),2000),						// End value
+	    start: start														// Starting time
+	  });
+	
+   	this.map.beforeRender(pan,rotate);								// Pan, rotate and bounce
+	o.setResolution(v[2]);													// Set resolution								
+	o.setCenter(c);															// Set center
+	o.setRotation(v[3]);													// Set rotation								
+	}
 
 Space.prototype.AddKMLLayer=function(mob) 								// ADD KML LAYER TO PROJECT
 {
