@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="img/UVALogo.ico">
+	<title>Space+Time</title>
+ 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>	
+	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+	<script src="jquery.ui.touch-punch.min.js"></script>
+  	<link rel="stylesheet" href="http://openlayers.org/en/v3.0.0/css/ol.css" type="text/css">
+   	<script src="http://openlayers.org/en/v3.0.0/build/ol-debug.js" type="text/javascript"></script>
+ 
+	<style type="text/css">
+		body { 			font-family:Verdana,Geneva,sans-serif; font-size:9px; 
+						padding:0px;margin:0px;
+						}
+		.ts-rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+ 		.ts-unselectable { -moz-user-select: none;     -khtml-user-select: none;
+		   			 	-webkit-user-select: none;  -ms-user-select: none;   user-select: none;
+						}
+		.ts-base { 		position:absolute;height:100%;width:100%;
+						}	
+		.ts-left { 		}	
+		.ts-right { 	background-color:#eee;
+						}	
+		.ts-bottom { 	background-color:#ccc;width:100%;
+						}	
+		.ts-splash { 	text-align:center;vertical-align:center;pointer-events:none;
+						}
+		.ts-is {		border-radius:10px;padding-left:8px;padding-right:8px;padding-top:1px;
+						border:1px solid #999;font-size:12px;height;20px;width:200px;
+						}
+		.ts-bs {		border-radius:10px;padding-left:8px;padding-right:8px;padding-top:1px;
+						border:1px solid #999;font-size:12px;height;20px;color:#666;
+						}
+
+ 	</style>
+
+</head>
+<body>
+<div id="showDiv" style="opacity:0" class="ts-base">
+	<div id="leftDiv" style="position:absolute;opacity:inherit" class="ts-left"></div>
+	<div id="rightDiv" style="position:absolute;opacity:inherit" class="ts-right"></div>
+	<div id="lrSiz" style="position:absolute;width:8px;cursor:col-resize;opacity:inherit" class="ts-unselectable" title="Resize panes">
+		<div id="lrSiz1" style="position:absolute;width:40px;height:100%;left:-16px" class="ts-unselectable"></div>
+	</div>
+	<div id="bottomDiv" style="position:absolute;top:0px;opacity:inherit" class="ts-bottom ts-unselectable">
+		<iframe id="timelineIF" stlye="margin:0px;padding:0px;border:none" src="http://www.viseyes.org/shiva/go.htm?e=389" frameborder=0 width="100%" height="99%" scrolling="no"></iframe>
+	</div>
+	<div id="bSiz" style="position:absolute;height:8px;width:100%;cursor:row-resize;opacity:inherit" class="ts-unselectable" title="Resize timeline">
+		<div id="bSiz1" style="position:absolute;height:20px;width:100%;top:32px;left:0px" class="ts-unselectable"></div>
+	</div>
+</div>
+<div id="splashDiv" class="ts-splash"><img src="img/tslogo.png"></div>
+<script>
+	
+	var sd={};																	// Holds show data
+	var map={};
+	var mps={};
+	var paneAnimationTimer=null;												// Times pane animations
+	var imageAnimationTimer=[];													// Times image animations
+	var isMobile=false;															// Flag for mobile devices
+	var host="//viseyes.org/";													// Set host
+	var userName="",password="",curShow=0;										// Login info
+	var lastClickTime=0;														// Store last click time
+	var drupalMan=false;														// Flag for drupal manager	
+
+	var curSpanStart,curSpanEnd,curTime;
+	
+	function ResizePanes()													// RESIZE PANES
+	{ 
+		var wid=$("#showDiv").width();											// Width
+		var hgt=$("#showDiv").height();											// Height
+		var cx=wid*sd.lrRatio;													// Center
+		var cy=hgt*sd.bRatio;													// Center
+		$("#leftDiv").width(cx);												// Set left width
+		$("#rightDiv").width(wid-cx);											// Set right width
+		$("#rightDiv").css("left",cx+"px");										// Set right pos
+		$("#leftDiv").height(cy);												// Set left height
+		$("#rightDiv").height(hgt);												// Set right height
+		$("#lrSiz").css("left",cx+"px");										// Set lr size pos
+		$("#lrSiz").height(hgt);												// Set lr size height
+		$("#bSiz").css("top",cy+"px");											// Set b size pos
+		$("#bSiz").width(cx);													// Set b size width
+		$("#bottomDiv").width(cx);												// Set bottom width
+		$("#bottomDiv").height(hgt-cy);											// Set bottom height
+		$("#bottomDiv").css("top",cy+"px");										// Set lr size pos
+		if (map)																// If OL initted
+			map.updateSize();													// Update map
+		Draw();																	// Redraw
+}		
+
+	function InitProject(data)
+	{
+		var i;
+		if (!data) {
+			sd.mobs=[];
+			var o={};
+			o.title="La Floride Francoise";
+			o.desc="La Floride Francoise";
+			o.marker="http://farm9.staticflickr.com/8019/7310697988_18eb47c466_z.jpg";
+			o.start=1665;
+			o.end=1665;
+			o.citation="P[ierre] Duval, La Floride Francoise ([Paris, 1665?]).  From Florida Map Collection, USF Digital Collections, http://digital.lib.usf.edu/?u15.9042. Cumming, 158; Burden I, 485-486.";
+			o.georef="32.746269,31.756859,-80.332589,-81.998319,0";
+			o.goto="32.2359,-81.2021,173510,0,0.13";
+			o.vis=1;
+			sd.mobs.push(o);
+
+			o={};
+			o.marker="test.kml";
+			o.start=1665;
+			o.end=1665;
+			o.vis=1;
+			sd.mobs.push(o);
+		}
+			
+		for (i=0;i<sd.mobs.length;++i) {									// For each mob	
+			o=sd.mobs[i];													// Point at mob
+			if (o.marker) {													// If a marker spec'd
+				if (o.marker.match(/\.kml/i)) {								// A KML file
+					o.type="kml";											// Set type
+					mps.AddKMLLayer(o);										// Add KML layer								 
+					mps.loadCounter++;										// Add to count
+					}
+				else if (o.marker.match(/\.png|.gif|\.jpg|\.jpeg/i)) {		// An image file
+					o.type="image";											// Set type
+					mps.MakeMapImage(o);									// Make map image								 
+					mps.loadCounter++;										// Add to count
+					}
+				}
+			}											
+	}
+
+	function Draw()
+	{
+		$("#rightDiv").html("<img src='http://www.viseyes.org/efolio/declaration.JPG' width='100%'>");
+		mps.DrawMapImages();
+		var seg=mps.kmlLayers[0];
+		seg.set("opacity",1);									// Set alpha
+		seg.set('visible',true);								// Show it
+
+		
+	}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// MAP
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+function TSMap()														// CONSTRUCTOR
+{
+	this.controlKey=this.shiftKey=false;									// Shift/control key flags
+	this.showBoxes=false;													// Show boxes
+	this.showRoads=false;													// Hide Roads/borders
+	this.showScale=true;													// Show scale
+	Sound("click","init");													// Init sound
+	Sound("ding","init");													// Init sound
+	Sound("delete","init");													// Init sound
+	this.kmlLayers=[];															// Holds KML layers
+}
+
+TSMap.prototype.InitMap=function()											// INIT OPENLAYERS MAP
+{
+		this.controlKey=mps.shiftKey=false;										// Shift/control key flags
+		this.showBoxes=false;													// Show boxes
+		this.showRoads=false;													// Hide Roads/borders
+		this.showScale=true;													// Hide or show scale
+		this.baseLayer="Roadmap";												// Default layer
+		this.curProjection="EPSG:3857";											// Current projection
+		
+		this.layers=[															// Hold layers
+			new ol.layer.Tile({													// Sat 
+					visible: false,												// Invisible
+					source: new ol.source.MapQuest({layer: 'sat'}),				// MapQuest sat
+					projection: this.curProjection,								// Default projection
+					title: "Satellite"											// Set name
+					}),
+			new ol.layer.Tile({													// Terrain
+					visible: false,												// Invisible
+    				source: new ol.source.TileWMS({								// WMS
+     						url: 'http://demo.opengeo.org/geoserver/wms',		// Url
+     						params: { 'LAYERS': 'ne:NE1_HR_LC_SR_W_DR' }		// Params
+    						}),
+					projection: this.curProjection,								// Default projection
+					title: "Terrain"											// Set name
+					}),
+			new ol.layer.Tile({													// Watercolor
+					visible: false,												// Invisible
+					source: new ol.source.Stamen({layer: 'watercolor'}),		// Stamen watercolor
+					projection: this.curProjection,								// Default projection
+					title: "Watercolor"											// Set name
+					}),
+			new ol.layer.Tile({													// Toner
+					visible: false,												// Invisible
+					source: new ol.source.Stamen({layer: 'toner-lite'}),		// Stamen toner
+					projection: this.curProjection,								// Default projection
+					title: "B&W"												// Set name
+					}),
+			new ol.layer.Tile({													// Earth
+					visible: false,												// Invisible
+  					source: new ol.source.TileJSON({
+        				url: 'http://api.tiles.mapbox.com/v3/' +
+            			'mapbox.natural-earth-hypso-bathy.jsonp',
+        				crossOrigin: 'anonymous'
+   						}),
+ 					projection: this.curProjection,								// Default projection
+  					title: "Earth"												// Set name
+					}),
+			
+			new ol.layer.Tile({													// Roadmap
+					visible:false,												// Hide it
+					source: new ol.source.MapQuest({layer: 'osm'}),				// MapQuest roads
+					projection: this.curProjection,								// Default projection
+					title: "Roadmap"											// Set name
+ 					}),
+			];
+	
+
+	    map=new ol.Map( { target: 'leftDiv',									// Alloc OL
+	        layers:this.layers,													// Layers array									
+	        controls: ol.control.defaults({										// Controls
+					}).extend([ new ol.control.ScaleLine() ]),					// Add scale
+	        view: new ol.View({													// Views
+	          		center: ol.proj.transform( [-77,34],'EPSG:4326',this.curProjection),
+	          		minZoom: 2, maxZoom: 16, zoom: 3 })
+			});
+
+	   	for (i=0;i<this.layers.length;++i) 										// For each layer
+		    this.layers[i].set('visible',this.layers[i].get("title") == this.baseLayer); // Set visibility
+	  	this.CreateCanvasLayer();												// Canvas layer for map images
+      	
+		map.on('moveend', function(e) {											// On end of move
+          	mps.DrawMapImages();												// Redraw maps in new extent, if moved
+			var o=map.getView();												// Point at view
+			var c=ol.proj.transform(ValidCenter(o.getCenter()),mps.curProjection,'EPSG:4326');		// Get center
+			var pos=Math.floor(c[1]*10000)/10000+"|"+Math.floor(c[0]*10000)/10000+"|"+o.getZoom()+"|";	
+			pos+=Math.floor((o.getRotation()*180/Math.PI)*1000)/-1000;			// Rotation
+			SendShivaMessage("ShivaMap=move",pos);								// Send that view has changed
+			});
+	}	
+
+TSMap.prototype.AddKMLLayer=function(mob) 								// ADD KML LAYER TO PROJECT
+{
+	var u=mob.marker;														
+	if (u && u.match(/\/\//)) 												// If cross-domain
+		u="proxy.php?url="+u;												// Add proxy
+
+	this.kmlLayers.push(new ol.layer.Vector({  source: new ol.source.KML({	// New layer
+							title: "LAYER-"+this.kmlLayers.length,			// Set name
+				   			projection: ol.proj.get(mps.curProjection),		// Set KML projection
+				    		url:u,											// URL
+				  			visible:false									// Hide it
+				  			})
+						}));
+
+	map.addLayer(this.kmlLayers[this.kmlLayers.length-1]);					// Add to map	
+
+	this.kmlLayers[this.kmlLayers.length-1].getSource().once("change",function() {	// WHEN KML IS LOADED						
+       	mps.loadCounter--; 													// Dec
+		this.forEachFeature(function(f) {									// For each feature in KML
+			if ((f.getGeometry().getType() == "Point") && f.get("name")){	// If a marker with a label
+				var sty=new ol.style.Style({								// Add style
+			      image: new ol.style.Icon( { src: "img/marker.png"	}),		// Add icon
+			      text:	new ol.style.Text( {								// Text style
+				    	textAlign: "left", textBaseline: "middle",			// Set alignment
+				    	font: "bold 14px Arial",							// Set font
+				    	text: f.get("name"),								// Get label
+				   	 	fill: new ol.style.Fill({color: "#fff" }),			// Set color
+						stroke: new ol.style.Stroke( { color: "#000",width: 1 }),	// Set edge		   
+				    	offsetX: 16											// Set offset
+				 		})
+					});
+					f.setStyle(sty);										// Set style to show label	
+					}
+				});
+		});
+
+}
+
+
+TSMap.prototype.MakeMapImage=function(mob) 								// ADD MAP IMAGE TO PROJECT
+{    
+    mob.mapImage=new MapImage(mob);											// Alloc mapimage obj
+
+	function MapImage(mob) {												// MAPIMAGE CONSTRUCTOR
+	    
+	    this.img=new Image();												// Alloc image
+		
+		function progress() {												// SHOW LOAD PROGRESS
+         	var str="";
+         	mps.loadCounter--; 												// Dec
+       		if (mps.loadCounter)											// If stuff to load
+ 				str=mps.loadCounter+" maps to load";						// Set progress
+ 			$("#loadProgress").text(str);									// Show status
+         	}					
+
+	    this.img.onload=progress;											// Add handler to remove from count after loaded
+        this.img.onerror=progress;											// Add handler to remove from count if error
+        this.imgWidth;	 this.imgHeight;									// Set size, if any
+        var v=mob.georef.split(",");										// Split into parts
+        this.n=v[0]-0;														// Set bounds
+        this.s=v[1]-0;
+        this.e=v[2]-0;
+        this.w=v[3]-0;
+        var ne = ol.proj.transform([this.e, this.n], 'EPSG:4326', mps.curProjection);	// Project
+        var sw = ol.proj.transform([this.w, this.s], 'EPSG:4326', mps.curProjection);
+        this.north = ne[1];
+        this.south = sw[1];
+        this.east = ne[0];
+        this.west = sw[0];
+        this.centerXCoord = this.w + (Math.abs(this.e - this.w) / 2);
+        this.centerYCoord = this.s + (Math.abs(this.n - this.s) / 2);
+        this.center=ol.proj.transform([this.centerXCoord, this.centerYCoord], 'EPSG:4326', mps.curProjection);	// Get center
+        this.rotation=v[4]*-1;												// Reverse direction
+		this.img.src=mob.marker;											// Set url
+  	}
+	
+MapImage.prototype.drawImage=function(alpha)                   			// DRAW IMAGE
+{ 
+	if (!this.imgWidth) {
+		this.imgWidth=this.img.width;
+		this.imgHeight=this.img.height;
+		this.imgWidthMeters=Math.abs(this.east - this.west);            
+		this.imgHeightMeters=Math.abs(this.north - this.south);
+		}
+	var canvasExtentWidth = mps.canvasExtent[2] - mps.canvasExtent[0];
+	var canvasExtentHeight = mps.canvasExtent[3] - mps.canvasExtent[1];
+	var xCenterOffset = mps.canvasWidth * (this.center[0]-mps.canvasExtent[0]) / canvasExtentWidth;
+	var yCenterOffset = mps.canvasHeight * (mps.canvasExtent[3]-this.center[1]) / canvasExtentHeight;
+	var drawWidth = mps.canvasWidth * (this.imgWidthMeters / canvasExtentWidth);
+	var drawHeight = mps.canvasHeight * (this.imgHeightMeters / canvasExtentHeight);
+	var ctx=mps.canvasContext;
+	if (ctx) {
+		ctx.globalAlpha = alpha / 100;
+		ctx.translate(xCenterOffset,yCenterOffset);
+		ctx.rotate(this.rotation * (Math.PI/180));
+		ctx.translate(-(drawWidth / 2), -(drawHeight / 2));
+		ctx.drawImage(this.img, 0, 0, drawWidth, drawHeight);
+		ctx.translate((drawWidth / 2), (drawHeight / 2));
+		ctx.rotate(-(this.rotation * (Math.PI / 180)));
+		ctx.translate(-xCenterOffset,-yCenterOffset);
+		ctx.globalAlpha=1;
+		}                  
+	}
+}
+
+TSMap.prototype.CreateCanvasLayer=function()							// CREATE CANVAS LAYER 
+{        
+    this.canvasLayer=new ol.layer.Image( {									// Make new image layer
+        source: new ol.source.ImageCanvas( {								// Add canvas sourcw
+            canvasFunction: function(extent, res, pixelRatio, size, proj) { // Render function
+				if (!mps.canvasCanvas) 										// If no canvas yet
+			        mps.canvasCanvas=document.createElement('canvas');		// Alloc canvas
+		       	mps.canvasWidth=size[0];									// Get width
+			    mps.canvasHeight=size[1];									// Hgt
+		    	mps.canvasCanvas.setAttribute('width',size[0]);				// Set canvas width
+			    mps.canvasCanvas.setAttribute('height',size[1]);			// Hgt
+	    		mps.canvasContext=mps.canvasCanvas.getContext('2d');		// Get context
+           		mps.canvasExtent=extent;									// Set extent
+		        mps.canvasRes=res;											// Set res
+				mps.DrawMapImages();										// Make images
+	        	return mps.canvasCanvas 									// Return canvas reference
+	            }, 
+	        projection: this.curProjection									// Projection
+	        })
+	    });
+    map.addLayer(this.canvasLayer);											// Add layer to map
+}
+
+TSMap.prototype.DrawMapImages=function()								// DRAW OL IMAGES
+{
+	var i,m;
+	if (this.canvasContext && sd.mobs) {  									// If a canvas up      
+		this.canvasContext.clearRect(0,0,this.canvasWidth,this.canvasHeight);	// Clear canvas
+   		for (i=0;i<sd.mobs.length;i++) {									// For each mob
+            m=sd.mobs[i];													// Get ptr
+            if (m.mapImage && m.vis)										// If an image alloc'd amd visible
+           		m.mapImage.drawImage(100);   								// Draw it   
+            }
+        }
+}
+
+	function ValidCenter(c)												// MAKE SURE COORDS STAY IN MAIN MAP COORD SPACE
+  	{
+ 		return c;															// Return valid coord
+  	 	c=ol.proj.transform(c, mps.curProjection,'EPSG:4326' );				// Project
+	 	c[0]=c[0]%180;														// Keep -180 to 180 degrees
+ 	 	c=ol.proj.transform(c, 'EPSG:4326',mps.curProjection );				// Project back
+	}	
+
+	function Hex2RGBAString(col, alpha)
+	{	
+		var r=0,g=0,b=0,
+		alpha=alpha/100;
+		if (col) {																
+			r=parseInt(col.substr(1,2),16);
+			g=parseInt(col.substr(3,2),16);
+			b=parseInt(col.substr(5,2),16);
+			}
+		return("rgba("+r+","+g+","+b+","+alpha+")");
+	}
+	
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// EVENTS
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	$(document).ready(function() {												// When loaded
+		var i;
+		sd.lrRatio=.66;
+		sd.bRatio=.75;
+		if (window.addEventListener) 											// If supported this way
+			window.addEventListener("message",shivaEventHandler,false);			// Add event handler
+		else																	// Use other method
+			window.attachEvent("message",shivaEventHandler);					// Add handler
+		
+		isMobile=navigator.userAgent.match(/(ipad|iphone|ipod|android)/i) ? true : false; // Set mobile flag
+		var url=window.location.search.substring(1);							// Get query string
+		drupalMan=(""+url).match(/pr=d/);										// If called from Drupal manager
+		if (!url)																// Nothing on command line
+			url=1;																// Use default
+		if (drupalMan)	url="";													// If drupal, kill url
+		if (url && !isNaN(url)) {												// If a number
+			curShow=url;														// Save show number											
+			url="//qmediaplayer.com/loadshow.php?id="+url;						// Get from db
+			}	
+		else if ((url) && (!url.match(/\./)))									// No file extension
+			url+=".json";														// Add txt
+//		$.ajax({ url: url, dataType:'jsonp' });									// Get jsonp and call LoadShow() from it
+
+		$("#lrSiz").draggable({												// DRAG L-R WIDTH HANDLER
+			cursorAt:{left:16},	iframeFix:true,									// Cursor offset
+			cursor: "col-resize", axis:"x",										// X-only
+			start: function(event, ui) {										// On drag start
+				$("#lrSiz1").css({ width:"500px", left:"-500px" });				// Widen hiding div
+				},
+			drag: function(event, ui) {											// On drag
+				var wid=$("#showDiv").width();									// Max width
+			 	sd.lrRatio=Math.max(0,Math.min(1,(event.clientX-8)/wid));		// Set ratio between windows
+				if (Math.abs(sd.lrRatio-.66) < .015) 							// If close to center
+					sd.lrRatio=.66;												// Snap it there
+				ResizePanes();													// Resize panes
+				},
+			stop: function(event, ui) {											// On drag end
+				$("#lrSiz1").css({ width:"40px", left:"-16px" });				// Contract hiding div
+				ResizePanes();													// Resize panes
+				}
+			});
+			
+		$("#bSiz").draggable({												// DRAG TRANSCRIPT HEIGHT HANDLER		
+			cursor: "row-resize", axis:"y",										// Y-only
+			stop: function(event, ui) {											// When done
+				ResizePanes;													// Resize panes when done
+				},
+			drag: function(event, ui) {											// On drag
+				var hgt=$("#showDiv").height();									// Max height
+			 	sd.bRatio=Math.max(0,Math.min(1,(event.clientY-8)/hgt));		// Set ratio between windows
+				if (Math.abs(sd.bRatio-.75) < .015) 							// If close to center
+					sd.bRatio=.75;												// Snap it there
+				ResizePanes();													// Resize panes
+				}
+			});
+		$("#lrSiz").hover(														// L-R width
+			function(){ $(this).css("background-color","#acc3db")},				// Highlight
+			function(){ $(this).css("background-color","transparent")			// Hide
+			});
+		
+		$("#bSiz").hover(														// Bottom height
+			function(){ $(this).css("background-color","#acc3db")},				// Highlight
+			function(){ $(this).css("background-color","transparent")			// Hide
+			});
+	
+		$("#splashDiv").animate({ opacity:0},2000);								// Hide logo
+		$("#showDiv").animate({ opacity:1},4000, function() {					// Show interface
+				ResizePanes();													// Resize panes
+				});				
+		$(window).resize(ResizePanes);											// Dynamic resizing
+		mps=new TSMap;
+		mps.InitMap();															// Init openlayers
+		InitProject();															// Init project
+		ResizePanes();															// Resize panes
+		if (drupalMan) 															// If called from Drupal manager
+			window.parent.postMessage("ShivaReady=true","*");					// Send message to parent wind		
+	});
+
+
+	function SendShivaMessage(src, msg) 									// SEND SHIVA MESSAGE 
+	{
+		var str=src+"|show";													// Add src and window						
+		if (msg)																// If more to it
+			str+="|"+msg;														// Add it
+		if (window.parent)														// If has a parent
+			window.parent.postMessage(str,"*");									// Send message to parent wind
+		else																	// Local	
+			window.postMessage(str,"*");										// Send message to wind
+	}
+
+	function shivaEventHandler(e)											// ON SHIVA EVENT
+	{
+		var str,i;
+	}
+
+	function trace(msg, p1, p2, p3, p4)										// CONSOLE 
+	{
+		if (p4 != undefined)
+			console.log(msg,p1,p2,p3,p4);
+		else if (p3 != undefined)
+			console.log(msg,p1,p2,p3);
+		else if (p2 != undefined)
+			console.log(msg,p1,p2);
+		else if (p1 != undefined)
+			console.log(msg,p1);
+		else
+			console.log(msg);
+	}
+
+	function Sound(sound, mode)											// PLAY SOUND
+	{
+		var snd=new Audio();
+		if (!snd.canPlayType("audio/mpeg") || (snd.canPlayType("audio/mpeg") == "maybe")) 
+			snd=new Audio(sound+".ogg");
+		else	
+			snd=new Audio(sound+".mp3");
+		if (mode != "init")
+			snd.play();
+	}
+
+</script>
+</body></html>
+
