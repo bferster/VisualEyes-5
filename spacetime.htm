@@ -147,7 +147,14 @@
 
 	function Draw()
 	{
-		$("#rightDiv").html("<img src='http://www.viseyes.org/efolio/declaration.JPG' width='100%'>");
+		var str="<img src='http://www.viseyes.org/efolio/declaration.JPG' width='100%'> &nbsp; ";
+		str+=MakeSelect("testing",false,["0","1","2","3","4"]);
+		$("#rightDiv").html(str);
+		$("#testing").on("change", function() {
+			var i=$(this).val();
+			if (i == 1)	mps.ShowLayers([1],true);
+			if (i == 2)	mps.ShowLayers([1],false);
+			});
 		mps.DrawMapLayers();
 	}
 
@@ -278,6 +285,26 @@
 		if (mode != "init")
 			snd.play();
 	}
+
+	function MakeSelect(id, multi, items, sel, extra, values)				// CREATE HTML SELECT
+	{
+		var	str="<select class='ts-bs' id='"+id+"'";							// Header
+		if (multi)																// Multi select
+			str+="multiple='multiple' size='"+multi+"'";						// Add flag
+		if (extra)																// If extra param
+			str+=extra;															// Add them
+		str+=">";																// End header
+		for (i=0;i<items.length;++i) {											// For each option
+			str+="<option";														// Add tag
+			if (sel == items[i])												// If selected
+				str+=" selected='selected'"										// Add tag
+			if (values && values[i])											// If has a value
+				str+=" value='"+values[i]+"'";									// Add it
+			str+=">"+items[i]+"</option>";										// End option
+			}	
+		return str+"</select>";													// End select				
+	}
+
 
 </script>
 </body></html>

@@ -195,13 +195,23 @@ Space.prototype.AddKMLLayer=function(url) 								// ADD KML LAYER TO PROJECT
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-Space.prototype.ShowLayers=function(indices, mode)						// HIDE/SHOW LAYER 
+Space.prototype.ShowLayers=function(indices, mode)						// HIDE/SHOW LAYER(s)
 { 
 
 	for (i=0;i<indices.length;++i) 											// For each index
 		if ((indices[i] >= 0) && (indices[i] < this.overlays.length))		// If in range
 			this.overlays[indices[i]].vis=mode;								// Set vis       
 	this.DrawMapLayers();													// Do it
+}
+
+
+Space.prototype.StyleKMLFeatures=function(num, indices, style)			// STYLE KML FEATURE 
+{ 
+}
+
+
+Space.prototype.StyleMarker=function(indices, style)					// STYLE MARKER(s) 
+{ 
 }
 
 
