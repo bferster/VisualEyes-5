@@ -205,8 +205,24 @@ Space.prototype.ShowLayers=function(indices, mode)						// HIDE/SHOW LAYER(s)
 }
 
 
-Space.prototype.StyleKMLFeatures=function(num, indices, style)			// STYLE KML FEATURE 
+Space.prototype.StyleKMLFeatures=function(num, styles)			// STYLE KML FEATURE 
 { 
+	var i,fill,stroke;
+	if ((num < 0) || (num >= this.overlays.length) || (this.overlays[num].type != "kml"))	// If not a valid KML
+		return;																// Quit
+	var fa=this.overlays[num].src.getSource().getFeatures();				// Get KML feature array
+	for (i=0;i<styles.length;++i) {
+		var s=styles[i];
+	  	trace(s.f)
+	  	if (s.f)	
+	  		fill=new ol.style.Fill({ color: s.f, opacity: s.a });					// Fully transparent fill
+	  	if (s.s)	
+	  		stroke=new ol.style.Stroke({ color: s.s });				// Fully transparent stroke
+		sty=new ol.style.Style({ fill:fill,stroke:stroke });				// Create style
+	   		
+		fa[s.n].setStyle(sty);									
+		}
+
 }
 
 

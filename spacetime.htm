@@ -152,8 +152,8 @@
 		$("#rightDiv").html(str);
 		$("#testing").on("change", function() {
 			var i=$(this).val();
-			if (i == 1)	mps.ShowLayers([1],true);
-			if (i == 2)	mps.ShowLayers([1],false);
+			if (i == 1)	mps.StyleKMLFeatures(1,[{n:5,f:"#ff0000,a:.1"}]);
+			if (i == 2)	mps.StyleKMLFeatures(1,[{n:5,f:0x000ffff},{n:4,f:0xff0000ff}]);
 			});
 		mps.DrawMapLayers();
 	}
