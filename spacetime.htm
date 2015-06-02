@@ -226,19 +226,21 @@
 
 
 
+
+
 mps.Goto("-79.91,32.79,10000")
 mps.ShowLayers([0,1],true);
 
 $("#testing").on("change", function() {
 	var i=$(this).val();
-	if (i == 1)	mps.StyleKMLFeatures(1,[{n:5,f:"ff0000",a:.2,s:"00ff00",w:50}]);
-	if (i == 2)	mps.StyleKMLFeatures(1,[{n:5,f:"0000ff"},{n:4,f:"ffff00"}]);
-	if (i == 3)	mps.StyleKMLFeatures(1,[{n:"*",f:"ff00ff"}]);
+	if (i == 1)	mps.StyleKMLFeatures(1,[{n:5,f:"#ff0000",a:.2,s:"#00ff00",w:50}]);
+	if (i == 2)	mps.StyleKMLFeatures(1,[{n:5,f:"#0000ff"},{n:4,f:"#ffff00"}]);
+	if (i == 3)	mps.StyleKMLFeatures(1,[{n:"*",f:"#ff00ff"}]);
 	});
 	
-	
-	
-				
+
+
+
 				});				
 		$(window).resize(ResizePanes);											// Dynamic resizing
 		mps=new Space;															// Alloc map module

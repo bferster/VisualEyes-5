@@ -150,134 +150,6 @@ Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 // IMAGE OVERLAY
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Space.prototype.ShowLayers=function(indices, mode)						// HIDE/SHOW LAYER(s)				
-{ 
-	
-/* HIDE/SHOW LAYER(s)
- * @param {array} 	indices An array of indices specifying the layer(s) to hide or show.
- * @param {boolean}	mode true to show, false to hide.
-*/
-
-	var i;
-	for (i=0;i<indices.length;++i) 											// For each index
-		if ((indices[i] >= 0) && (indices[i] < this.overlays.length))		// If in range
-			this.overlays[indices[i]].vis=mode;								// Set vis       
-	this.DrawMapLayers();													// Do it
-}
-
-Space.prototype.AddKMLLayer=function(url) 								// ADD KML LAYER TO MAP						
-{
-
-/* 	ADD KML LAYER TO MAP
-  	@param {string} 	url URL of kml file
-  	@return {number}	index of new layer added to overlays array.
-*/
-
-	var o={};
-   	var _this=this;															// Save context for callback
-	if (url && url.match(/\/\//)) 											// If cross-domain
-		url="proxy.php?url="+url;											// Add proxy
-
-	var index=this.overlays.length;											// Get index
- 	o.type="kml";															// KML
- 	o.vis=0;																// Visible
-	o.src=new ol.layer.Vector({  source: new ol.source.KML({				// New layer
-							title: "LAYER-"+this.overlays.length,			// Set name
-				   			projection: ol.proj.get(this.curProjection),	// Set KML projection
-				    		url: url										// URL
-				  			})
-						});
-	
-	o.src.set('visible',false)												// Hide it
-	this.overlays.push(o);													// Add to overlay
-	mps.loadCounter++;														// Add to count
-	this.map.addLayer(o.src);												// Add to map	
- 	return index;															// Return layer ID
- 
-	this.overlays[index].getSource().once("change",function(){				// WHEN KML IS LOADED						
- 		this.ShowProgress();												// Update loading progress
- 		this.forEachFeature(function(f) {									// For each feature in KML
-			if ((f.getGeometry().getType() == "Point") && f.get("name")){	// If a marker with a label
-				var sty=new ol.style.Style({								// Add style
-			      image: new ol.style.Icon( { src: "img/marker.png"	}),		// Add icon
-			      text:	new ol.style.Text( {								// Text style
-				    	textAlign: "left", textBaseline: "middle",			// Set alignment
-				    	font: "bold 14px Arial",							// Set font
-				    	text: f.get("name"),								// Get label
-				   	 	fill: new ol.style.Fill({color: "#fff" }),			// Set color
-						stroke: new ol.style.Stroke( { color: "#000",width: 1 }),	// Set edge		   
-				    	offsetX: 16											// Set offset
-				 		})
-					});
-					f.setStyle(sty);										// Set style to show label	
-					}
-				});
-		});
-
-}
-
-Space.prototype.StyleKMLFeatures=function(num, styles)					// STYLE KML FEATURE(s)		  
-{ 
-	
-/* 
- 	@param {number} num The index of the KML overlay to color.
-	@param {array} 	styles An array of objects specifying the style to set any given feature to set
- 					Each element in the array consists of a style object to set a particular feature index:
-						n: {string} spec's feature index,or "*" for all
-						a: {number} opacity (0-1)
-						f: {string} fill color "rrggbb"
-						s: {string} stroke color "rrggbb"
-						w: {number} stroke width
-*/
-	
-	var i,r,g,b,a;
-	if ((num < 0) || (num >= this.overlays.length) || (this.overlays[num].type != "kml"))	// If not a valid KML
-		return;																// Quit
-	var features=this.overlays[num].src.getSource().getFeatures();			// Get KML feature array
-	var n=styles.length;													// Number of features to style
-	var last=n-1;															// Last style possible
-	if (styles[0].n == "*")
-		n=features.length;
-	for (i=0;i<n;++i) {														// For each feature to style
-		var s=styles[Math.min(i,last)];										// Point at style
-	  	if (s.f) {															// If fill spec'd
-		  	r=parseInt("0x"+s.f.substr(0,2),16);							// R
-			g=parseInt("0x"+s.f.substr(2,2),16);							// G
-			b=parseInt("0x"+s.f.substr(4,2),16);							// B
-	  		var fill=new ol.style.Fill({ color: [r,g,b,s.a ? s.a : 1]});	// Create fill with alpha
-	  		}
-	  	if (s.s) {															// If stroke spec'd	
-		  	r=parseInt("0x"+s.s.substr(0,2),16);							// R
-			g=parseInt("0x"+s.s.substr(2,2),16);							// G
-			b=parseInt("0x"+s.s.substr(4,2),16);							// B
-	  		var stroke=new ol.style.Stroke({ color: [r,g,b,s.a ? s.a : 1], width:s.w });	// Create stroke with alpha & width
-			}
-		sty=new ol.style.Style({ fill:fill,stroke:stroke });				// Create style
-		if (s.n == "*")														// If styling them all
-			features[i].setStyle(sty);										// Set next feature's style
-		else																// Justb styling on spec's bu s.n
-			features[s.n].setStyle(sty);									// Set particular feature's style
-		}
-}
-
-
-Space.prototype.StyleMarker=function(indices, style)					// STYLE MARKERS(s)			
-{
-	
-/* 
- 	@param {array} 	indices An array of indices specifying the marker(s) to hide or show.
-	@param {object} style Contains the tyle information for the marker(s):
-					a: {number} opacity (0-1)
-					f: {string} fill color "rrggbb"
-					s: {string} stroke color "rrggbb"
-					w: {number} stroke width
-					p: {string} popup text
-					t: {string} type
-					l: {string} label
-						
- */
-}
-
 Space.prototype.CreateOverlayLayer=function()							// CREATE CANVAS/VECTOR OVERLAY LAYERS				
 {        
    
@@ -338,6 +210,160 @@ iconFeature.setStyle(iconStyle);
 }
 
 
+
+Space.prototype.ShowLayers=function(indices, mode)						// HIDE/SHOW LAYER(s)				
+{ 
+	
+/* 
+ * @param {array} 	indices An array of indices specifying the layer(s) to hide or show.
+ * @param {boolean}	mode true to show, false to hide.
+*/
+
+	var i;
+	for (i=0;i<indices.length;++i) 											// For each index
+		if ((indices[i] >= 0) && (indices[i] < this.overlays.length))		// If in range
+			this.overlays[indices[i]].vis=mode;								// Set vis       
+	this.DrawMapLayers();													// Do it
+}
+
+
+Space.prototype.AddMarkerLayer=function(pos, style) 					// ADD MARKER LAYER TO MAP						
+{
+
+/* 	
+ 	@param {string} pos Contains bounds for the image "latitude,longitude,width,rotation".
+  					rotation is optional and defaults to 0 degrees.				
+	@param {object} style Consists of a style object :
+						a: {number} opacity (0-1)
+						f: {string} fill color "#rrggbb"
+						s: {string} stroke color "#rrggbb"
+						w: {number} stroke width
+						p: {string} popup text
+						t: {string} type
+						l: {string} label
+*/
+
+	var o={};
+	o.type="marker";														// Masker
+ 	o.vis=0;																// Invisible
+	this.overlays.push(o);													// Add to overlay
+}
+
+
+Space.prototype.StyleMarker=function(indices, style)					// STYLE MARKERS(s)			
+{
+	
+/* 
+ 	@param {array} 	indices An array of indices specifying the marker(s) to hide or show.
+	@param {object} style Contains the tyle information for the marker(s):
+					a: {number} opacity (0-1)
+					f: {string} fill color "#rrggbb"
+					s: {string} stroke color "#rrggbb"
+					w: {number} stroke width
+					p: {string} popup text
+					t: {string} type
+					l: {string} label
+						
+ */
+}
+
+Space.prototype.AddKMLLayer=function(url) 								// ADD KML LAYER TO MAP						
+{
+
+/* 	ADD KML LAYER TO MAP
+  	@param {string} 	url URL of kml file
+  	@return {number}	index of new layer added to overlays array.
+*/
+
+	var o={};
+   	var _this=this;															// Save context for callback
+	if (url && url.match(/\/\//)) 											// If cross-domain
+		url="proxy.php?url="+url;											// Add proxy
+
+	var index=this.overlays.length;											// Get index
+ 	o.type="kml";															// KML
+ 	o.vis=0;																// Visible
+	o.src=new ol.layer.Vector({  source: new ol.source.KML({				// New layer
+							title: "LAYER-"+this.overlays.length,			// Set name
+				   			projection: ol.proj.get(this.curProjection),	// Set KML projection
+				    		url: url										// URL
+				  			})
+						});
+	
+	o.src.set('visible',false)												// Hide it
+	this.overlays.push(o);													// Add to overlay
+	mps.loadCounter++;														// Add to count
+	this.map.addLayer(o.src);												// Add to map	
+ 	return index;															// Return layer ID
+ 
+	this.overlays[index].getSource().once("change",function(){				// WHEN KML IS LOADED						
+ 		this.ShowProgress();												// Update loading progress
+ 		this.forEachFeature(function(f) {									// For each feature in KML
+			if ((f.getGeometry().getType() == "Point") && f.get("name")){	// If a marker with a label
+				var sty=new ol.style.Style({								// Add style
+			      image: new ol.style.Icon( { src: "img/marker.png"	}),		// Add icon
+			      text:	new ol.style.Text( {								// Text style
+				    	textAlign: "left", textBaseline: "middle",			// Set alignment
+				    	font: "bold 14px Arial",							// Set font
+				    	text: f.get("name"),								// Get label
+				   	 	fill: new ol.style.Fill({color: "#fff" }),			// Set color
+						stroke: new ol.style.Stroke( { color: "#000",width: 1 }),	// Set edge		   
+				    	offsetX: 16											// Set offset
+				 		})
+					});
+					f.setStyle(sty);										// Set style to show label	
+					}
+				});
+		});
+
+}
+
+
+Space.prototype.StyleKMLFeatures=function(num, styles)					// STYLE KML FEATURE(s)		  
+{ 
+	
+/* 
+ 	@param {number} num The index of the KML overlay to color.
+	@param {array} 	styles An array of objects specifying the style to set any given feature to set
+ 					Each element in the array consists of a style object to set a particular feature index:
+						n: {string} spec's feature index,or "*" for all
+						a: {number} opacity (0-1)
+						f: {string} fill color "#rrggbb"
+						s: {string} stroke color "#rrggbb"
+						w: {number} stroke width
+*/
+	
+	var i,r,g,b,a;
+	if ((num < 0) || (num >= this.overlays.length) || (this.overlays[num].type != "kml"))	// If not a valid KML
+		return;																// Quit
+	var features=this.overlays[num].src.getSource().getFeatures();			// Get KML feature array
+	var n=styles.length;													// Number of features to style
+	var last=n-1;															// Last style possible
+	if (styles[0].n == "*")
+		n=features.length;
+	for (i=0;i<n;++i) {														// For each feature to style
+		var s=styles[Math.min(i,last)];										// Point at style
+	  	if (s.f) {															// If fill spec'd
+		  	r=parseInt("0x"+s.f.substr(1,2),16);							// R
+			g=parseInt("0x"+s.f.substr(3,2),16);							// G
+			b=parseInt("0x"+s.f.substr(5,2),16);							// B
+	  		var fill=new ol.style.Fill({ color: [r,g,b,s.a ? s.a : 1]});	// Create fill with alpha
+	  		}
+	  	if (s.s) {															// If stroke spec'd	
+		  	r=parseInt("0x"+s.s.substr(1,2),16);							// R
+			g=parseInt("0x"+s.s.substr(3,2),16);							// G
+			b=parseInt("0x"+s.s.substr(5,2),16);							// B
+	  		var stroke=new ol.style.Stroke({ color: [r,g,b,s.a ? s.a : 1], width:s.w });	// Create stroke with alpha & width
+			}
+		sty=new ol.style.Style({ fill:fill,stroke:stroke });				// Create style
+		if (s.n == "*")														// If styling them all
+			features[i].setStyle(sty);										// Set next feature's style
+		else																// Justb styling on spec's bu s.n
+			features[s.n].setStyle(sty);									// Set particular feature's style
+		}
+}
+
+
 Space.prototype.AddImageLayer=function(url, geoRef) 						// ADD MAP IMAGE TO PROJECT
 {    
 
@@ -365,7 +391,7 @@ Space.prototype.AddImageLayer=function(url, geoRef) 						// ADD MAP IMAGE TO PR
 	 	@param {string} geoReg Contains bounds for the image "north,south,east,west,rotation".
 	 					rotation is optional and defaults to 0 degrees.				
 	 	@param {object} 	_this Context of the Space object
-	 */
+	*/
 	
 	    this.img=new Image();												// Alloc image
 	    this.img.onload=_this.ShowProgress;									// Add handler to remove from count after loaded
@@ -419,12 +445,13 @@ Space.prototype.AddImageLayer=function(url, geoRef) 						// ADD MAP IMAGE TO PR
 	return index;															// Return layer ID
 }
 
-/** 
- * DRAW OVERLAY LAYERS
- * Draws or shows overlay elements based on the .vis element.
- */
-Space.prototype.DrawMapLayers=function()								
+Space.prototype.DrawMapLayers=function()								// DRAW OVERLAY LAYERS							
 {
+
+/* 
+ 	Draws or shows overlay elements based on the .vis element.
+*/
+
 	var i,o;
 	if (this.canvasContext) {  												// If a canvas up      
 		this.canvasContext.clearRect(0,0,this.canvasWidth,this.canvasHeight); // Clear canvas
