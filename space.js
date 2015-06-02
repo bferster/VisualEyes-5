@@ -82,7 +82,7 @@ Space.prototype.InitMap=function(div)									// INIT OPENLAYERS MAP
 
    	for (i=0;i<this.layers.length;++i) 										// For each layer
 	    this.layers[i].set('visible',this.layers[i].get("title") == this.baseLayer); // Set visibility
-  	this.CreateCanvasLayer();												// Canvas layer for map images
+  	this.CreateOverlayLayer();												// Canvas and vector layer for map overlays
   	var _this=this;															// Save context for callback
    	
 	this.map.on('moveend', function(e) {									// On end of move
@@ -145,8 +145,34 @@ Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 	o.setRotation(v[3]);													// Set rotation								
 	}
 
-Space.prototype.AddKMLLayer=function(url) 								// ADD KML LAYER TO PROJECT
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// IMAGE OVERLAY
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Space.prototype.ShowLayers=function(indices, mode)						// HIDE/SHOW LAYER(s)				
+{ 
+	
+/* HIDE/SHOW LAYER(s)
+ * @param {array} 	indices An array of indices specifying the layer(s) to hide or show.
+ * @param {boolean}	mode true to show, false to hide.
+*/
+
+	var i;
+	for (i=0;i<indices.length;++i) 											// For each index
+		if ((indices[i] >= 0) && (indices[i] < this.overlays.length))		// If in range
+			this.overlays[indices[i]].vis=mode;								// Set vis       
+	this.DrawMapLayers();													// Do it
+}
+
+Space.prototype.AddKMLLayer=function(url) 								// ADD KML LAYER TO MAP						
 {
+
+/* 	ADD KML LAYER TO MAP
+  	@param {string} 	url URL of kml file
+  	@return {number}	index of new layer added to overlays array.
+*/
+
 	var o={};
    	var _this=this;															// Save context for callback
 	if (url && url.match(/\/\//)) 											// If cross-domain
@@ -190,49 +216,75 @@ Space.prototype.AddKMLLayer=function(url) 								// ADD KML LAYER TO PROJECT
 
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// IMAGE OVERLAY
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-Space.prototype.ShowLayers=function(indices, mode)						// HIDE/SHOW LAYER(s)
+Space.prototype.StyleKMLFeatures=function(num, styles)					// STYLE KML FEATURE(s)		  
 { 
-
-	for (i=0;i<indices.length;++i) 											// For each index
-		if ((indices[i] >= 0) && (indices[i] < this.overlays.length))		// If in range
-			this.overlays[indices[i]].vis=mode;								// Set vis       
-	this.DrawMapLayers();													// Do it
-}
-
-
-Space.prototype.StyleKMLFeatures=function(num, styles)			// STYLE KML FEATURE 
-{ 
-	var i,fill,stroke;
+	
+/* 
+ 	@param {number} num The index of the KML overlay to color.
+	@param {array} 	styles An array of objects specifying the style to set any given feature to set
+ 					Each element in the array consists of a style object to set a particular feature index:
+						n: {string} spec's feature index,or "*" for all
+						a: {number} opacity (0-1)
+						f: {string} fill color "rrggbb"
+						s: {string} stroke color "rrggbb"
+						w: {number} stroke width
+*/
+	
+	var i,r,g,b,a;
 	if ((num < 0) || (num >= this.overlays.length) || (this.overlays[num].type != "kml"))	// If not a valid KML
 		return;																// Quit
-	var fa=this.overlays[num].src.getSource().getFeatures();				// Get KML feature array
-	for (i=0;i<styles.length;++i) {
-		var s=styles[i];
-	  	trace(s.f)
-	  	if (s.f)	
-	  		fill=new ol.style.Fill({ color: s.f, opacity: s.a });					// Fully transparent fill
-	  	if (s.s)	
-	  		stroke=new ol.style.Stroke({ color: s.s });				// Fully transparent stroke
+	var features=this.overlays[num].src.getSource().getFeatures();			// Get KML feature array
+	var n=styles.length;													// Number of features to style
+	var last=n-1;															// Last style possible
+	if (styles[0].n == "*")
+		n=features.length;
+	for (i=0;i<n;++i) {														// For each feature to style
+		var s=styles[Math.min(i,last)];										// Point at style
+	  	if (s.f) {															// If fill spec'd
+		  	r=parseInt("0x"+s.f.substr(0,2),16);							// R
+			g=parseInt("0x"+s.f.substr(2,2),16);							// G
+			b=parseInt("0x"+s.f.substr(4,2),16);							// B
+	  		var fill=new ol.style.Fill({ color: [r,g,b,s.a ? s.a : 1]});	// Create fill with alpha
+	  		}
+	  	if (s.s) {															// If stroke spec'd	
+		  	r=parseInt("0x"+s.s.substr(0,2),16);							// R
+			g=parseInt("0x"+s.s.substr(2,2),16);							// G
+			b=parseInt("0x"+s.s.substr(4,2),16);							// B
+	  		var stroke=new ol.style.Stroke({ color: [r,g,b,s.a ? s.a : 1], width:s.w });	// Create stroke with alpha & width
+			}
 		sty=new ol.style.Style({ fill:fill,stroke:stroke });				// Create style
-	   		
-		fa[s.n].setStyle(sty);									
+		if (s.n == "*")														// If styling them all
+			features[i].setStyle(sty);										// Set next feature's style
+		else																// Justb styling on spec's bu s.n
+			features[s.n].setStyle(sty);									// Set particular feature's style
 		}
-
 }
 
 
-Space.prototype.StyleMarker=function(indices, style)					// STYLE MARKER(s) 
-{ 
+Space.prototype.StyleMarker=function(indices, style)					// STYLE MARKERS(s)			
+{
+	
+/* 
+ 	@param {array} 	indices An array of indices specifying the marker(s) to hide or show.
+	@param {object} style Contains the tyle information for the marker(s):
+					a: {number} opacity (0-1)
+					f: {string} fill color "rrggbb"
+					s: {string} stroke color "rrggbb"
+					w: {number} stroke width
+					p: {string} popup text
+					t: {string} type
+					l: {string} label
+						
+ */
 }
 
-
-Space.prototype.CreateCanvasLayer=function()							// CREATE CANVAS LAYER 
+Space.prototype.CreateOverlayLayer=function()							// CREATE CANVAS/VECTOR OVERLAY LAYERS				
 {        
+   
+ /* 
+  	Creates the canvas layer needed to show images and the
+  	vector layer to show markers
+ */
    	var _this=this;															// Save context for callback
  
     this.canvasLayer=new ol.layer.Image( {									// Make new image layer
@@ -253,12 +305,49 @@ Space.prototype.CreateCanvasLayer=function()							// CREATE CANVAS LAYER
 	        projection: this.curProjection									// Projection
 	        })
 	    });
+ 
+/*   
+  var iconStyle = new ol.style.Style({
+  image: new ol.style.Icon( ({
+    anchor: [0.5, 46],
+    anchorXUnits: 'fraction',
+    anchorYUnits: 'pixels',
+    opacity: 0.75,
+    src: 'img/tslogo.png'
+  }))
+});
+
+var iconFeature = new ol.Feature({
+  geometry: new ol.geom.Point([0, 0]),
+  name: 'Null Island',
+  population: 4000,
+  rainfall: 500
+});
+iconFeature.setStyle(iconStyle);
+*/ 
+ 
+   
+    this.markerLayer=new ol.layer.Vector( {									// Make new vector layer
+        source: new ol.source.Vector({
+ //       features: [iconFeature]	
+        }), 									// Add source
+	    projection: this.curProjection										// Projection
+	   })
     this.map.addLayer(this.canvasLayer);									// Add layer to map
+    this.map.addLayer(this.markerLayer);									// Add layer to map
 }
 
 
 Space.prototype.AddImageLayer=function(url, geoRef) 						// ADD MAP IMAGE TO PROJECT
 {    
+
+/* 
+  	@param {string} url URL of image file (jpeg, png or gif)
+ 	@param {string} geoReg Contains bounds for the image "north,south,east,west,rotation".
+  					rotation is optional and defaults to 0 degrees.				
+  	@return {number}index of new layer added to overlays array.
+*/
+
 	var o={};
 	var index=this.overlays.length;											// Get index
  	o.type="image";															// Image
@@ -267,8 +356,17 @@ Space.prototype.AddImageLayer=function(url, geoRef) 						// ADD MAP IMAGE TO PR
 	this.overlays.push(o);													// Add layer
 	mps.loadCounter++;														// Add to count
 
-	function MapImage(url, geoRef, _this) 									// MAPIMAGE CONSTRUCTOR
+	function MapImage(url, geoRef, _this) 								// MAPIMAGE CONSTRUCTOR
 	{    
+
+	/* 
+	 	@constructor
+	 	@param {string} url URL of image file (jpeg, png or gif)
+	 	@param {string} geoReg Contains bounds for the image "north,south,east,west,rotation".
+	 					rotation is optional and defaults to 0 degrees.				
+	 	@param {object} 	_this Context of the Space object
+	 */
+	
 	    this.img=new Image();												// Alloc image
 	    this.img.onload=_this.ShowProgress;									// Add handler to remove from count after loaded
         this.img.onerror=_this.ShowProgress;								// Add handler to remove from count if error
@@ -291,8 +389,7 @@ Space.prototype.AddImageLayer=function(url, geoRef) 						// ADD MAP IMAGE TO PR
 		this.img.src=url;													// Set url
  	}
 	
-	
-	MapImage.prototype.drawMapImage=function(alpha, _this)                   		// DRAW IMAGE
+	MapImage.prototype.drawMapImage=function(opacity, _this)               	// DRAW IMAGE
 	{ 
 		if (!this.imgWidth) {
 			this.imgWidth=this.img.width;
@@ -308,7 +405,7 @@ Space.prototype.AddImageLayer=function(url, geoRef) 						// ADD MAP IMAGE TO PR
 		var drawHeight = _this.canvasHeight * (this.imgHeightMeters / canvasExtentHeight);
 		var ctx=_this.canvasContext;
 		if (ctx) {
-			ctx.globalAlpha = alpha / 100;
+			ctx.globalAlpha = opacity;
 			ctx.translate(xCenterOffset,yCenterOffset);
 			ctx.rotate(this.rotation * (Math.PI/180));
 			ctx.translate(-(drawWidth / 2), -(drawHeight / 2));
@@ -322,8 +419,11 @@ Space.prototype.AddImageLayer=function(url, geoRef) 						// ADD MAP IMAGE TO PR
 	return index;															// Return layer ID
 }
 
-
-Space.prototype.DrawMapLayers=function()								// DRAW OL IMAGES
+/** 
+ * DRAW OVERLAY LAYERS
+ * Draws or shows overlay elements based on the .vis element.
+ */
+Space.prototype.DrawMapLayers=function()								
 {
 	var i,o;
 	if (this.canvasContext) {  												// If a canvas up      
@@ -331,7 +431,7 @@ Space.prototype.DrawMapLayers=function()								// DRAW OL IMAGES
    		for (i=0;i<this.overlays.length;i++) {								// For each overlay layer
            o=this.overlays[i];												// Get ptr  to layer
             if (o.vis && (o.type == "image"))								// If a visible image 
-           		o.src.drawMapImage(100,this);   							// Draw it   
+           		o.src.drawMapImage(o.vis,this);   							// Draw it   
         	else if (o.type == "kml")										// If a kml 
        			o.src.set('visible',o.vis > 0);								// Show/hide it
             }
