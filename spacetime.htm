@@ -107,7 +107,7 @@
 			o.start=1665;
 			o.end=1665;
 			o.citation="P[ierre] Duval, La Floride Francoise ([Paris, 1665?]).  From Florida Map Collection, USF Digital Collections, http://digital.lib.usf.edu/?u15.9042. Cumming, 158; Burden I, 485-486.";
-			o.georef="32.746269,31.756859,-80.332589,-81.998319,0";
+			o.geoRef="32.746269,31.756859,-80.332589,-81.998319,0";
 			o.goto="32.2359,-81.2021,173510,0,0.13";
 			o.vis=1;
 			sd.mobs.push(o);
@@ -120,8 +120,22 @@
 			o.end=1665;
 			o.vis=1;
 			sd.mobs.push(o);
-		}
 			
+			o={};
+			o.marker="dot";
+			o.start=1665;
+			o.end=1665;
+			o.vis=1;
+			o.geoRef="-77.653305,38.7842739,20,0";
+			o.title="Charlottesville, VA";
+			o.desc="This is Charlottesville, VA";
+			o.color="#ffff00";
+			o.edge="#999999";
+			o.size=16;
+			o.opacity=.5;
+			sd.mobs.push(o);
+		}
+
 		for (i=0;i<sd.mobs.length;++i) {									// For each mob	
 			o=sd.mobs[i];													// Point at mob
 			if (o.marker) {													// If a marker spec'd
@@ -133,17 +147,31 @@
 						o.id=mps.AddKMLLayer(s);							// Add KML layer								 
 						}
 					}
-			else if (o.marker.match(/\.kml/i)) {							// A KML file
+				else if (o.marker.match(/\.kml/i)) {						// A KML file
 					o.type="kml";											// Set type
 					o.id=mps.AddKMLLayer(o.marker);							// Add KML layer								 
 					}
 				else if (o.marker.match(/\.png|.gif|\.jpg|\.jpeg/i)) {		// An image file
 					o.type="image";											// Set type
-					o.id=mps.AddImageLayer(o.marker,o.georef);				// Add image layer								 
+					o.id=mps.AddImageLayer(o.marker,o.geoRef);				// Add image layer								 
+					}
+				else{ 														// Must be an icon
+					o.type="icon";											// Set type
+					var s={};												// Not style
+					o.spaceMarker ?	s.m=o.spaceMarker : s.m=o.marker;		// Use space marker first, then time marker
+					o.spaceTitle  ?	s.t=o.spaceTitle  : s.t=o.title;			
+					o.spaceDesc   ?	s.d=o.spaceDesc   : s.d=o.desc;				
+					o.spaceColor  ?	s.f=o.spaceColor  : s.f=o.color;			
+					o.spaceEdge   ?	s.s=o.spaceEdge   : s.s=o.edge;				
+					o.spaceSize   ?	s.w=o.spaceSize   : s.w=o.size;				
+					o.spaceTextCol  ? s.tc=o.spaceTextCol  : s.tc=o.textCol;				
+					o.spaceTextFont ? s.tf=o.spaceTextFont : s.tf=o.font;				
+					o.spaceOpacity  ? s.a=o.spaceOpacity   : s.a=o.opacity;				
+					mps.AddMarkerLayer(o.geoRef,s);							// Add marker to overlays
 					}
 				}
-			}											
-	}
+			}
+		}
 
 	function Draw()
 	{

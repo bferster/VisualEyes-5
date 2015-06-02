@@ -176,33 +176,9 @@ Space.prototype.CreateOverlayLayer=function()							// CREATE CANVAS/VECTOR OVER
 	            }, 
 	        projection: this.curProjection									// Projection
 	        })
-	    });
- 
-/*   
-  var iconStyle = new ol.style.Style({
-  image: new ol.style.Icon( ({
-    anchor: [0.5, 46],
-    anchorXUnits: 'fraction',
-    anchorYUnits: 'pixels',
-    opacity: 0.75,
-    src: 'img/tslogo.png'
-  }))
-});
-
-var iconFeature = new ol.Feature({
-  geometry: new ol.geom.Point([0, 0]),
-  name: 'Null Island',
-  population: 4000,
-  rainfall: 500
-});
-iconFeature.setStyle(iconStyle);
-*/ 
- 
-   
+	    }); 
     this.markerLayer=new ol.layer.Vector( {									// Make new vector layer
-        source: new ol.source.Vector({
- //       features: [iconFeature]	
-        }), 									// Add source
+        source: new ol.source.Vector({}),									// Add source
 	    projection: this.curProjection										// Projection
 	   })
     this.map.addLayer(this.canvasLayer);									// Add layer to map
@@ -231,40 +207,85 @@ Space.prototype.AddMarkerLayer=function(pos, style) 					// ADD MARKER LAYER TO 
 {
 
 /* 	
- 	@param {string} pos Contains bounds for the image "latitude,longitude,width,rotation".
+ 	@param {string} pos Contains bounds for the image "latitude,longitude".
   					rotation is optional and defaults to 0 degrees.				
 	@param {object} style Consists of a style object :
 						a: {number} opacity (0-1)
 						f: {string} fill color "#rrggbb"
 						s: {string} stroke color "#rrggbb"
-						w: {number} stroke width
-						p: {string} popup text
-						t: {string} type
-						l: {string} label
+						r: {number} rotation
+						w: {number} width
+						d: {string} description for popup
+						m: {string} type
+						t: {string} label
+						tc: {string} text color
+						ts: {string} text format
 */
 
 	var o={};
-	o.type="marker";														// Masker
+	o.type="icon";															// Icon
  	o.vis=0;																// Invisible
 	this.overlays.push(o);													// Add to overlay
+  	var v=pos.split(",");													// Split into parts
+	var c=ol.proj.transform([v[0]-0,""+v[1]-0],'EPSG:4326',this.curProjection);	// Transform
+	var mark=new ol.Feature({
+		geometry: new ol.geom.Point(c),
+	 	});
+ 	this.markerLayer.getSource().addFeature(mark);
+ 	this.StyleMarker([this.markerLayer.getSource().getFeatures().length-1],style);
 }
 
 
-Space.prototype.StyleMarker=function(indices, style)					// STYLE MARKERS(s)			
+Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)			
 {
 	
 /* 
  	@param {array} 	indices An array of indices specifying the marker(s) to hide or show.
-	@param {object} style Contains the tyle information for the marker(s):
-					a: {number} opacity (0-1)
-					f: {string} fill color "#rrggbb"
-					s: {string} stroke color "#rrggbb"
-					w: {number} stroke width
-					p: {string} popup text
-					t: {string} type
-					l: {string} label
-						
+	@param {object} style Consists of a style object :
+						a: {number} opacity (0-1)
+						f: {string} fill color "#rrggbb"
+						s: {string} stroke color "#rrggbb"
+						r: {number} rotation
+						w: {number} width
+						d: {string} description for popup
+						m: {string} type
+						t: {string} label
+						tc: {string} text color
+						tf: {string} text format
  */
+
+	var i;
+	if (sty.f) {															// If fill spec'd
+	  	r=parseInt("0x"+sty.f.substr(1,2),16);								// R
+		g=parseInt("0x"+sty.f.substr(3,2),16);								// G
+		b=parseInt("0x"+sty.f.substr(5,2),16);								// B
+  		var fill=new ol.style.Fill({ color: [r,g,b,sty.a ? sty.a : 1]});	// Create fill with alpha
+  		}
+  	if (sty.s) {															// If stroke spec'd	
+	  	r=parseInt("0x"+sty.s.substr(1,2),16);								// R
+		g=parseInt("0x"+sty.s.substr(3,2),16);								// G
+		b=parseInt("0x"+sty.s.substr(5,2),16);								// B
+  		var stroke=new ol.style.Stroke({ color: [r,g,b,sty.a ? sty.a : 1], width:1 });	// Create stroke with alpha & width
+		}
+  	trace(sty.tf)
+  	
+   	var s=new ol.style.Style({												// Create new style
+		text: new ol.style.Text( {											// Text style
+			textAlign: "center", textBaseline: "top",						// Set alignment
+			font: sty.tf,													// Set font
+			text: sty.t,													// Get label
+			fill: new ol.style.Fill({color: sty.tc }),						// Set color
+			offsetY: sty.w/2,												// Set offset
+			}),
+	  	image: new ol.style.Circle({
+	    	radius:sty.w/2,
+			fill: fill,
+			stroke:stroke,
+	  		})
+		});
+	
+	for (i=0;i<indices.length;++i)											// For each layer
+		this.markerLayer.getSource().getFeatures()[indices[i]].setStyle(s);	// Set style
 }
 
 Space.prototype.AddKMLLayer=function(url) 								// ADD KML LAYER TO MAP						
