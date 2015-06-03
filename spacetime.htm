@@ -8,8 +8,8 @@
 	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
 	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
 	<script src="jquery.ui.touch-punch.min.js"></script>
-  	<link rel="stylesheet" href="http://openlayers.org/en/v3.0.0/css/ol.css" type="text/css">
-   	<script src="http://openlayers.org/en/v3.0.0/build/ol-debug.js" type="text/javascript"></script>
+  	<link rel="stylesheet" href="http://openlayers.org/en/v3.5.0/css/ol.css" type="text/css">
+   	<script src="http://openlayers.org/en/v3.5.0/build/ol-debug.js" type="text/javascript"></script>
   	<script src="space.js" type="text/javascript"></script>
  
  	<style type="text/css">
@@ -129,10 +129,8 @@
 			o.geoRef="-77.653305,38.7842739,20,0";
 			o.title="Charlottesville, VA";
 			o.desc="This is Charlottesville, VA";
-			o.color="#ffff00";
-			o.edge="#999999";
-			o.size=16;
-			o.opacity=.5;
+			o.color="#ff0000";
+			o.size=12;
 			sd.mobs.push(o);
 		}
 
@@ -256,7 +254,7 @@
 
 
 
-mps.Goto("-79.91,32.79,10000")
+//mps.Goto("-79.91,32.79,10000")
 mps.ShowLayers([0,1],true);
 
 $("#testing").on("change", function() {
@@ -264,6 +262,11 @@ $("#testing").on("change", function() {
 	if (i == 1)	mps.StyleKMLFeatures(1,[{n:5,f:"#ff0000",a:.2,s:"#00ff00",w:50}]);
 	if (i == 2)	mps.StyleKMLFeatures(1,[{n:5,f:"#0000ff"},{n:4,f:"#ffff00"}]);
 	if (i == 3)	mps.StyleKMLFeatures(1,[{n:"*",f:"#ff00ff"}]);
+	if (i == 3)	mps.StyleKMLFeatures(1,[{n:"*",f:"#ff00ff"}]);
+	if (i == 4) GetTextBox("Marker","Type shape","", function(str) {
+							mps.StyleMarker([0],{m:str,w:18,t:"OK",f:"#0000ff"});
+							}); 
+
 	});
 	
 
@@ -343,6 +346,26 @@ $("#testing").on("change", function() {
 		return str+"</select>";													// End select				
 	}
 
+	
+	function GetTextBox(title, content, def, callback)					// GET TEXT LINE BOX
+	{
+		Sound("click");															// Ding sound
+		$("#alertBoxDiv").remove();												// Remove any old ones
+		$("body").append("<div class='ts-unselectable' id='alertBoxDiv'></div>");														
+		var str="<p><img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
+		str+="<span id='gtBoxTi'style='font-size:18px;text-shadow:1px 1px #ccc;color:#990000'><b>"+title+"</b></span><p>";
+		str+="<div style='font-size:14px;margin:14px'>"+content;
+		str+="<p><input class='ts-is' type='text' id='gtBoxTt' value='"+def+"'></p></div>";
+		$("#alertBoxDiv").append(str);	
+		$("#alertBoxDiv").dialog({ width:400, buttons: {
+					            	"OK": 		function() { callback($("#gtBoxTt").val()); $(this).remove(); },
+					            	"Cancel":  	function() { $(this).remove(); }
+									}});	
+		$(".ui-dialog-titlebar").hide();
+		$(".ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix").css("border","none");
+		$(".ui-dialog").css({"border-radius":"14px", "box-shadow":"4px 4px 8px #ccc"});
+ 		$(".ui-button").css({"border-radius":"30px","outline":"none"});
+ 	}
 
 </script>
 </body></html>

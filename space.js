@@ -266,24 +266,74 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 		g=parseInt("0x"+sty.s.substr(3,2),16);								// G
 		b=parseInt("0x"+sty.s.substr(5,2),16);								// B
   		var stroke=new ol.style.Stroke({ color: [r,g,b,sty.a ? sty.a : 1], width:1 });	// Create stroke with alpha & width
-		}
-  	trace(sty.tf)
-  	
-   	var s=new ol.style.Style({												// Create new style
-		text: new ol.style.Text( {											// Text style
-			textAlign: "center", textBaseline: "top",						// Set alignment
-			font: sty.tf,													// Set font
-			text: sty.t,													// Get label
-			fill: new ol.style.Fill({color: sty.tc }),						// Set color
-			offsetY: sty.w/2,												// Set offset
-			}),
-	  	image: new ol.style.Circle({
-	    	radius:sty.w/2,
-			fill: fill,
-			stroke:stroke,
-	  		})
-		});
+		}	
+ 	var w2=sty.w/2;															// Half width
+
+ 	switch(sty.m) {															// Route on marker style
+ 		case "dot":
+			var image=new ol.style.Circle({									
+	    		radius: w2, fill: fill, stroke:stroke
+	  			});
+	  		break;
+		case "square":
+			var image=new ol.style.RegularShape({								
+		    	radius: w2, fill: fill, stroke:stroke, points: 4, angle: Math.PI/4
+	  			});
+	  		break;
+		case "star":
+			var image=new ol.style.RegularShape({								
+  	  			radius: w2, fill: fill, stroke:stroke, points: 5, radius2:sty.w/4
+  				});
+ 	  		break;
+		case "diamond":
+			var image=new ol.style.RegularShape({								
+	    		radius: w2, fill: fill, stroke:stroke, points: 4
+	  			});
+	  		break;
+		case "triu":
+			var image=new ol.style.RegularShape({								
+	    		radius: w2, fill: fill, stroke:stroke, points: 3
+	   			});
+	  		break;
+		case "trid":
+			var image=new ol.style.RegularShape({								
+	    		radius: w2, fill: fill, stroke:stroke, points: 3,angle: Math.PI
+	 			});
+	  		break;
+		case "trir":
+			var image=new ol.style.RegularShape({								
+	    		radius: w2, fill: fill, stroke:stroke, points: 3,angle: Math.PI/2
+	 			});
+	  		break;
+		case "tril":
+			var image=new ol.style.RegularShape({								
+	    		radius: w2, fill: fill, stroke:stroke, points: 3,angle: -Math.PI/2
+	 			});
+	  		break;
+		case "crosshair":
+			var image=new ol.style.RegularShape({								
+	    		radius: w2, fill: fill, stroke:stroke, points: 4, radius2: 1, angle: 0
+	  			});
+	  		break;
+		case "cross":
+			var image=new ol.style.RegularShape({							
+	    		radius: w2, fill: fill, stroke:stroke, points: 4, radius2: sty.w/6, angle: 0
+	  			});
+	  		break;
+	  		}
+	if (sty.m && sty.m.match(/\//))	 										// Must be an image file
+		var image=new ol.style.Icon({ src: sty.m });						// Add icon
 	
+	var text=new ol.style.Text( {											// Text style
+		textAlign: "center", textBaseline: "top",							// Set alignment
+		font: sty.tf,														// Set font
+		text: sty.t,														// Get label
+		fill: new ol.style.Fill({color: sty.tc }),							// Set color
+		offsetY: w2,														// Set offset
+		});  
+   	var s=new ol.style.Style({												// Create new style
+		image: image, text: text											// Add icon, text
+		});
 	for (i=0;i<indices.length;++i)											// For each layer
 		this.markerLayer.getSource().getFeatures()[indices[i]].setStyle(s);	// Set style
 }
@@ -304,9 +354,11 @@ Space.prototype.AddKMLLayer=function(url) 								// ADD KML LAYER TO MAP
 	var index=this.overlays.length;											// Get index
  	o.type="kml";															// KML
  	o.vis=0;																// Visible
-	o.src=new ol.layer.Vector({  source: new ol.source.KML({				// New layer
+	
+	o.src=new ol.layer.Vector({  source: new ol.source.Vector({				// New layer
 							title: "LAYER-"+this.overlays.length,			// Set name
 				   			projection: ol.proj.get(this.curProjection),	// Set KML projection
+				    		format: new ol.format.KML(),					// KML format
 				    		url: url										// URL
 				  			})
 						});
