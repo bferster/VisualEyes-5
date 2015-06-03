@@ -124,6 +124,7 @@ Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 		return;																// Quit
 	var duration=2000;														// Duration
 	var start=+new Date();													// Start time
+start=0;	
 	var pan=ol.animation.pan({												// Pan
 	    duration: duration,													// Duration
 	    source: fc,															// Start value
@@ -136,13 +137,14 @@ Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 	  	});
 	 var bounce=ol.animation.bounce({										// Fly bounce
 	    duration: duration,													// Duration
-	    resolution: Math.min(4*o.getResolution(),2000),						// End value
+	    resolution: 2*o.getResolution(),									// End value
 	    start: start														// Starting time
 	  });
   	this.map.beforeRender(pan,rotate);										// Pan, rotate
 	o.setResolution(v[2]);													// Set resolution								
 	o.setCenter(c);															// Set center
-	o.setRotation(v[3]);													// Set rotation								
+	if (v[3] != undefined)													// If set
+		o.setRotation(v[3]);												// Set rotation								
 	}
 
 
