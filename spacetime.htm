@@ -16,6 +16,17 @@
 		body { 			font-family:Verdana,Geneva,sans-serif; font-size:9px; 
 						padding:0px;margin:0px;
 						}
+		.spacePopup	{ 	position:absolute;padding:12px;border-radius:6px;max-width:300px; 
+						border:1px solid #999;background-color:#fff;font-size:11px;
+						overflow-x:hidden;display:none;
+						}
+		.spacePopupPic { margin-right:8px;vertical-align:top;cursor:zoom-in;
+						border:1px solid #999;width:80px;
+						}				
+		.spacePopupDesc { color:#555;
+						}				
+		.spacePopupTitle {	margin-bottom:8px;color:#555;
+						}
 		.ts-rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
  		.ts-unselectable { -moz-user-select: none;     -khtml-user-select: none;
 		   			 	-webkit-user-select: none;  -ms-user-select: none;   user-select: none;
@@ -128,7 +139,8 @@
 			o.vis=1;
 			o.geoRef="-77.653305,38.7842739,20,0";
 			o.title="Charlottesville, VA";
-			o.desc="This is Charlottesville, VA";
+			o.desc="This is Charlottesville, home of the University of Virginia, UVA is known for its historic foundations, student-run honor code, and secret societies.";
+			o.pic="http://www.jgwaarchitects.com/images/portfolio-images/educational/UVA_02.jpg";
 			o.color="#ff0000";
 			o.size=12;
 			sd.mobs.push(o);
@@ -165,7 +177,7 @@
 					o.spaceTextCol  ? s.tc=o.spaceTextCol  : s.tc=o.textCol;				
 					o.spaceTextFont ? s.tf=o.spaceTextFont : s.tf=o.font;				
 					o.spaceOpacity  ? s.a=o.spaceOpacity   : s.a=o.opacity;				
-					mps.AddMarkerLayer(o.geoRef,s);							// Add marker to overlays
+					mps.AddMarkerLayer(o.geoRef,s,i);						// Add marker to overlays
 					}
 				}
 			}

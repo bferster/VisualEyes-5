@@ -23,6 +23,7 @@ Space.prototype.InitMap=function(div)									// INIT OPENLAYERS MAP
 	this.showScale=true;													// Hide or show scale
 	this.baseLayer="Roadmap";												// Default layer
 	this.curProjection="EPSG:3857";											// Current projection
+	this.div=div;															// Current div
 	
 	this.layers=[															// Hold layers
 		new ol.layer.Tile({													// Sat 
@@ -83,6 +84,7 @@ Space.prototype.InitMap=function(div)									// INIT OPENLAYERS MAP
    	for (i=0;i<this.layers.length;++i) 										// For each layer
 	    this.layers[i].set('visible',this.layers[i].get("title") == this.baseLayer); // Set visibility
   	this.CreateOverlayLayer();												// Canvas and vector layer for map overlays
+  	this.InitPopups();														// Init popup layer
   	var _this=this;															// Save context for callback
    	
 	this.map.on('moveend', function(e) {									// On end of move
@@ -205,12 +207,12 @@ Space.prototype.ShowLayers=function(indices, mode)						// HIDE/SHOW LAYER(s)
 }
 
 
-Space.prototype.AddMarkerLayer=function(pos, style) 					// ADD MARKER LAYER TO MAP						
+Space.prototype.AddMarkerLayer=function(pos, style, id) 				// ADD MARKER LAYER TO MAP						
 {
 
 /* 	
  	@param {string} pos Contains bounds for the image "latitude,longitude".
-  					rotation is optional and defaults to 0 degrees.				
+  					    rotation is optional and defaults to 0 degrees.				
 	@param {object} style Consists of a style object :
 						a: {number} opacity (0-1)
 						f: {string} fill color "#rrggbb"
@@ -230,11 +232,11 @@ Space.prototype.AddMarkerLayer=function(pos, style) 					// ADD MARKER LAYER TO 
 	this.overlays.push(o);													// Add to overlay
   	var v=pos.split(",");													// Split into parts
 	var c=ol.proj.transform([v[0]-0,""+v[1]-0],'EPSG:4326',this.curProjection);	// Transform
-	var mark=new ol.Feature({
-		geometry: new ol.geom.Point(c),
-	 	});
- 	this.markerLayer.getSource().addFeature(mark);
- 	this.StyleMarker([this.markerLayer.getSource().getFeatures().length-1],style);
+	var mark=new ol.Feature({ geometry: new ol.geom.Point(c) });			// Create feature at coord
+ 	var index=this.markerLayer.getSource().getFeatures().length;			// Index of feature
+ 	mark.setId("Mob-"+id);													// Set id of mob
+ 	this.markerLayer.getSource().addFeature(mark);							// Add it
+ 	this.StyleMarker([index],style);										// Style marker
 }
 
 
@@ -541,8 +543,85 @@ Space.prototype.DrawMapLayers=function()								// DRAW OVERLAY LAYERS
 }
 
 
+Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES						
+{
+  	var _this=this;															// Save context for callbacks
+
+ 	this.map.on('click', function(evt) {									// ON MAP CLICK
+  			var feature=_this.map.forEachFeatureAtPixel(evt.pixel,			// Look through features
+      			function(feature, layer) {									// On match to location
+        			return feature;											// Return feature
+      			});
+			if (feature) {													// If one found
+  				var id=feature.getId()+"";
+    				if (id.match(/Mob-/)) {
+  					o=sd.mobs[id.substr(4)];
+ 					if (o.title) 		var title=o.title;					// Lead with title
+  					if (o.spaceTitle) 	var title=o.spaceTitle;				// Space over-rides
+ 					if (o.desc) 		var desc=o.desc;					// Lead with desc
+  					if (o.spaceDesc) 	var desc=o.spaceDesc;				// Space over-rides
+  					if (o.pic) 			var pic=o.pic;						// Lead with pic
+  					if (o.spacePic) 	var title=o.spacePic;				// Space over-rides
+     				_this.ShowPopup(evt.pixel[0],evt.pixel[1],title,desc,pic);
+					}
+			  	} 
+			else 															// No feature found
+				_this.ShowPopup();											// Kill any existing pop
+			});
+
+	this.map.on('pointermove', function(e) {								// ON MOUSE MOVE
+		if (e.dragging) {													// If dragging
+			_this.Popup();													// Kill any existing pop
+	    	return;															// Quit
+	  		}
+	  	var pixel=_this.map.getEventPixel(e.originalEvent);					// Get pos
+	  	var hit=_this.map.hasFeatureAtPixel(pixel);							// Anything there?
+	  	$("#"+_this.div).css("cursor",hit ? "pointer" : "");				// Change cursor
+		});
+}
+
+
+Space.prototype.ShowPopup=function(x,y, title, desc, pic)				// SHOW POPUP
+{
+
+/* 
+ 	Draws popup at coordinates x, y. 
+ 	If no coordinates given, popup is removed.
+ 	@param {number} x horizontal placement
+ 	@param {number} y vertical placement
+ 	@param {string} text to show in popup. Can be HTML formattee.
+ 	@param {string} title to show in popup in bold. Can be HTML formatted.
+ 	@param {string} pic URL of image file (jpeg, png or gif)
+	
+*/
+
+	$("#st-popup").remove();												// Remove any pre-existing popup
+	if (x == undefined)														// If no x defined
+		return;																// We're just removing
+	var str="<div id='st-popup' class='spacePopup'>";						// Add message
+	if (title)																// If title set
+		str+="<div class='spacePopupTitle'><b>"+title+"</b></div>";			// Add it
+	str+="<table style='width:100%'><tr>";
+	if (pic) {																// If pic set
+		str+="<td><img src='"+pic+"' class='spacePopupPic' ";
+		str+="onclick=''</td>";
+		}
+	if (desc)																// If desc set
+		str+="<td class='spacePopupDesc'>"+desc+"</div></td>";				// Add it
+	$("body").append("</tr></table>"+str);									// Add popup
+	$("#st-popup").css({left:(x+8)+"px",top:(y+20)+"px"});					// Position
+	$("#st-popup").fadeIn(300);												// Fade in
+}
+
+
 Space.prototype.ShowProgress=function()									// SHOW RESORCE LOAD PROGRESS
 {
+
+/* 
+ 	Shows progress of resource loading.
+ 	Set the contents of a div with id "#STloadProgress" 
+*/
+
  	var str="";
  	this.loadCounter--; 													// Dec
 	if (this.loadCounter)													// If stuff to load
