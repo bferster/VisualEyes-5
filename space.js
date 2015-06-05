@@ -276,12 +276,14 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 
 	var i;
 	if (sty.f) {															// If fill spec'd
+	  	if (sty.f.length == 4) sty.f+=sty.f.substr(1,3);					// Turn #555 into #55555
 	  	r=parseInt("0x"+sty.f.substr(1,2),16);								// R
 		g=parseInt("0x"+sty.f.substr(3,2),16);								// G
 		b=parseInt("0x"+sty.f.substr(5,2),16);								// B
   		var fill=new ol.style.Fill({ color: [r,g,b,sty.a ? sty.a : 1]});	// Create fill with alpha
   		}
   	if (sty.s) {															// If stroke spec'd	
+	  	if (sty.s.length == 4) sty.s+=sty.s.substr(1,3);					// Turn #555 into #55555
 	  	r=parseInt("0x"+sty.s.substr(1,2),16);								// R
 		g=parseInt("0x"+sty.s.substr(3,2),16);								// G
 		b=parseInt("0x"+sty.s.substr(5,2),16);								// B
@@ -437,12 +439,14 @@ Space.prototype.StyleKMLFeatures=function(num, styles)					// STYLE KML FEATURE(
 	for (i=0;i<n;++i) {														// For each feature to style
 		var s=styles[Math.min(i,last)];										// Point at style
 	  	if (s.f) {															// If fill spec'd
+		  	if (s.f.length == 4) s.f+=s.f.substr(1,3);						// Turn #555 into #55555
 		  	r=parseInt("0x"+s.f.substr(1,2),16);							// R
 			g=parseInt("0x"+s.f.substr(3,2),16);							// G
 			b=parseInt("0x"+s.f.substr(5,2),16);							// B
 	  		var fill=new ol.style.Fill({ color: [r,g,b,s.a ? s.a : 1]});	// Create fill with alpha
 	  		}
 	  	if (s.s) {															// If stroke spec'd	
+		  	if (s.s.length == 4) s.s+=s.s.substr(1,3);						// Turn #555 into #55555
 		  	r=parseInt("0x"+s.s.substr(1,2),16);							// R
 			g=parseInt("0x"+s.s.substr(3,2),16);							// G
 			b=parseInt("0x"+s.s.substr(5,2),16);							// B
@@ -584,7 +588,7 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
   					if (o.spaceDesc) 	var desc=o.spaceDesc;				// Space over-rides
   					if (o.pic) 			var pic=o.pic;						// Lead with pic
   					if (o.spacePic) 	var title=o.spacePic;				// Space over-rides
-     				_this.ShowPopup(evt.pixel[0],evt.pixel[1],title,desc,pic);
+      				_this.ShowPopup(evt.pixel[0],evt.pixel[1],title,desc,pic,o.start);
 					}
 			  	} 
 			else 															// No feature found
@@ -593,7 +597,7 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
 
 	this.map.on('pointermove', function(e) {								// ON MOUSE MOVE
 		if (e.dragging) {													// If dragging
-			_this.PopupShow();												// Kill any existing pop
+			_this.ShowPopup();												// Kill any existing pop
 	    	return;															// Quit
 	  		}
 	  	var pixel=_this.map.getEventPixel(e.originalEvent);					// Get pos
@@ -603,21 +607,22 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
 }
 
 
-Space.prototype.ShowPopup=function(x,y, title, desc, pic)				// SHOW POPUP
+Space.prototype.ShowPopup=function(x,y, title, desc, pic, date)			// SHOW POPUP
 {
 
 /* 
  	Draws popup at coordinates x, y. 
  	If no coordinates given, popup is removed.
  	If x coord is -1, a centered larger popup is drawn.
- 	Single click on pic shown only the pic. 
- 	Double-click on box makes larger, centered.
- 	title, desc and pic are all optional.
+ 	Click on pic shown only the pic. 
+ 	Click on box makes larger, centered.
+ 	title, desc, pic, and date are all optional.
  	@param {number} x horizontal placement
  	@param {number} y vertical placement
  	@param {string} desc text to show in popup. Can be HTML formatted.
  	@param {string} title to show in popup in bold. Can be HTML formatted.
  	@param {string} pic URL of image file (jpeg, png or gif)
+	@param {string} date date to show
 */
 
  	var _this=this;															// Save context for callbacks
@@ -626,12 +631,14 @@ Space.prototype.ShowPopup=function(x,y, title, desc, pic)				// SHOW POPUP
 		return;																// We're just removing
 	var str="<div id='st-popup' class='spacePopup'>";						// Add message
 	if (title)																// If title set
-		str+="<div class='spacePopupTitle'><b>"+title+"</b></div>";			// Add it
-	str+="<table style='width:100%'><tr>";
+		str+="<div class='spacePopupTitle'><b>"+title+"</b>";				// Add it
+	if (date)																// If date set
+		str+="<span class='spacePopupDate'>"+date+"</span>";				// Add it
+	str+="</div><table style='width:100%'><tr>";
 	if (pic) 																// If pic set
 		str+="<td style='vertical-align:top'><img id='poppic' src='"+pic+"' class='spacePopupPic'></td>";	// Add image
 	if (desc)																// If desc set
-		str+="<td class='spacePopupDesc'>"+desc+"</div></td>";				// Add it
+		str+="<td class='spacePopupDesc' id='popdesc'>"+desc+"</div></td>";	// Add it
 	$("body").append("</tr></table>"+str);									// Add popup
 	if (x < 0) {															// Bigger 
 		$("#poppic").css("cursor","");										// Normal cursor
@@ -644,26 +651,27 @@ Space.prototype.ShowPopup=function(x,y, title, desc, pic)				// SHOW POPUP
 	$("#st-popup").css({left:(x+8)+"px",top:(y+20)+"px"});					// Position
 	$("#st-popup").fadeIn(300);												// Fade in
 	
-	$("#poppic").click( function() {										// ON CLICK OF PIC
-		$("#poppic").css("cursor","auto");									// Normal cursor
-		$("#st-popup").css("max-height","none");							// Make it taller
-		$("#st-popup").css("max-width",$("#"+_this.div).width()*.75);		// Make it wider
-		$("#poppic").width($("#"+_this.div).width()*.75)					// Make pic bigger
+	$("#popdesc").click( function() {										// ON CLICK OF TEXT
+		$("#popdesc").css("cursor","auto");									// Normal cursor
+		$("#st-popup").css("max-width",$("#"+_this.div).width()*.66);		// Make it wider
+		$("#st-popup").css("max-height",$("#"+_this.div).height()*.66);		// Make it taller
+		$("#poppic").width($("#"+_this.div).width()*(desc ? .33 : .66))		// Make pic bigger
 		x=$("#"+_this.div).width()/2-$("#st-popup").width()/2;				// Center it
 		$("#st-popup").css({left:(x+8)+"px",top:"70px"});					// Position
-		});
-	
-	$("#st-popup").dblclick( function() {									// ON DOUBLE CLICK
-		$("#poppic").css("cursor","auto");									// Normal cursor
-		$("#st-popup").css("max-width",$("#"+_this.div).width()*.75);		// Make it wider
-		$("#st-popup").css("max-height",$("#"+_this.div).height()*.75);		// Make it taller
-		$("#poppic").width($("#"+_this.div).width()*(desc ? .5 : .75))		// Make pic bigger
-		x=$("#"+_this.div).width()/2-$("#st-popup").width()/2;				// Center it
-		y=50;																// Near top			
-		$("#st-popup").css({left:(x+8)+"px",top:(y+20)+"px"});				// Position
 		});	
-}
 
+	$("#poppic").click( function(e) {										// ON CLICK OF PIC
+		$("#st-popup").css("cursor","auto");								// Normal cursor
+		$("#poppic").css("cursor","auto");									// Normal cursor
+		$("#st-popup").css("max-height","none");							// Make it taller
+		$("#st-popup").css("max-width",$("#"+_this.div).width()*.66);		// Make it wider
+		$("#poppic").width($("#"+_this.div).width()*.66)					// Make pic bigger
+		x=$("#"+_this.div).width()/2-$("#st-popup").width()/2;				// Center it
+		$("#st-popup").css({left:(x+8)+"px",top:"70px"});					// Position
+		e.stopPropagation()
+		});
+
+}
 
 Space.prototype.ShowProgress=function()									// SHOW RESORCE LOAD PROGRESS
 {
