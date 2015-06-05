@@ -593,7 +593,7 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
 
 	this.map.on('pointermove', function(e) {								// ON MOUSE MOVE
 		if (e.dragging) {													// If dragging
-			_this.Popup();													// Kill any existing pop
+			_this.PopupShow();												// Kill any existing pop
 	    	return;															// Quit
 	  		}
 	  	var pixel=_this.map.getEventPixel(e.originalEvent);					// Get pos
