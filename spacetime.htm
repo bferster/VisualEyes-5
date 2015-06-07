@@ -29,23 +29,23 @@
 						}
 		.spacePopupDate { margin-left:8px;color:#999;font-size:8px
 						}
-		.ts-rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
- 		.ts-unselectable { -moz-user-select: none;     -khtml-user-select: none;
+		.ve-rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+ 		.ve-unselectable { -moz-user-select: none;     -khtml-user-select: none;
 		   			 	-webkit-user-select: none;  -ms-user-select: none;   user-select: none;
 						}
-		.ts-base { 		position:absolute;height:100%;width:100%;
+		.ve-base { 		position:absolute;height:100%;width:100%;
 						}	
-		.ts-left { 		}	
-		.ts-right { 	background-color:#eee;
+		.ve-left { 		}	
+		.ve-right { 	background-color:#eee;
 						}	
-		.ts-bottom { 	background-color:#ccc;width:100%;
+		.ve-bottom { 	background-color:#ccc;width:100%;
 						}	
-		.ts-splash { 	text-align:center;vertical-align:center;pointer-events:none;
+		.ve-splash { 	text-align:center;vertical-align:center;pointer-events:none;
 						}
-		.ts-is {		border-radius:10px;padding-left:8px;padding-right:8px;padding-top:1px;
+		.ve-is {		border-radius:10px;padding-left:8px;padding-right:8px;padding-top:1px;
 						border:1px solid #999;font-size:12px;height;20px;width:200px;
 						}
-		.ts-bs {		border-radius:10px;padding-left:8px;padding-right:8px;padding-top:1px;
+		.ve-bs {		border-radius:10px;padding-left:8px;padding-right:8px;padding-top:1px;
 						border:1px solid #999;font-size:12px;height;20px;color:#666;
 						}
 
@@ -53,20 +53,20 @@
 
 </head>
 <body>
-<div id="showDiv" style="opacity:0" class="ts-base">
-	<div id="leftDiv" style="position:absolute;opacity:inherit" class="ts-left"></div>
-	<div id="rightDiv" style="position:absolute;opacity:inherit" class="ts-right"></div>
-	<div id="lrSiz" style="position:absolute;width:8px;cursor:col-resize;opacity:inherit" class="ts-unselectable" title="Resize panes">
-		<div id="lrSiz1" style="position:absolute;width:40px;height:100%;left:-16px" class="ts-unselectable"></div>
+<div id="showDiv" style="opacity:0" class="ve-base">
+	<div id="leftDiv" style="position:absolute;opacity:inherit" class="ve-left"></div>
+	<div id="rightDiv" style="position:absolute;opacity:inherit" class="ve-right"></div>
+	<div id="lrSiz" style="position:absolute;width:8px;cursor:col-resize;opacity:inherit" class="ve-unselectable" title="Resize panes">
+		<div id="lrSiz1" style="position:absolute;width:40px;height:100%;left:-16px" class="ve-unselectable"></div>
 	</div>
-	<div id="bottomDiv" style="position:absolute;top:0px;opacity:inherit" class="ts-bottom ts-unselectable">
+	<div id="bottomDiv" style="position:absolute;top:0px;opacity:inherit" class="ve-bottom ve-unselectable">
 		<iframe id="timelineIF" stlye="margin:0px;padding:0px;border:none" src="http://www.viseyes.org/shiva/go.htm?e=2398" frameborder=0 width="100%" height="99%" scrolling="no"></iframe>
 	</div>
-	<div id="bSiz" style="position:absolute;height:8px;width:100%;cursor:row-resize;opacity:inherit" class="ts-unselectable" title="Resize timeline">
-		<div id="bSiz1" style="position:absolute;height:20px;width:100%;top:32px;left:0px" class="ts-unselectable"></div>
+	<div id="bSiz" style="position:absolute;height:8px;width:100%;cursor:row-resize;opacity:inherit" class="ve-unselectable" title="Resize timeline">
+		<div id="bSiz1" style="position:absolute;height:20px;width:100%;top:32px;left:0px" class="ve-unselectable"></div>
 	</div>
 </div>
-<div id="splashDiv" class="ts-splash"><img src="img/tslogo.png"></div>
+<div id="splashDiv" class="ve-splash"><img src="img/velogo.png"></div>
 <script>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -343,7 +343,7 @@ $(this).val(0)
 
 	function MakeSelect(id, multi, items, sel, extra, values)				// CREATE HTML SELECT
 	{
-		var	str="<select class='ts-bs' id='"+id+"'";							// Header
+		var	str="<select class='ve-bs' id='"+id+"'";							// Header
 		if (multi)																// Multi select
 			str+="multiple='multiple' size='"+multi+"'";						// Add flag
 		if (extra)																// If extra param
@@ -365,11 +365,11 @@ $(this).val(0)
 	{
 		Sound("click");															// Ding sound
 		$("#alertBoxDiv").remove();												// Remove any old ones
-		$("body").append("<div class='ts-unselectable' id='alertBoxDiv'></div>");														
+		$("body").append("<div class='ve-unselectable' id='alertBoxDiv'></div>");														
 		var str="<p><img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
 		str+="<span id='gtBoxTi'style='font-size:18px;text-shadow:1px 1px #ccc;color:#990000'><b>"+title+"</b></span><p>";
 		str+="<div style='font-size:14px;margin:14px'>"+content;
-		str+="<p><input class='ts-is' type='text' id='gtBoxTt' value='"+def+"'></p></div>";
+		str+="<p><input class='ve-is' type='text' id='gtBoxTt' value='"+def+"'></p></div>";
 		$("#alertBoxDiv").append(str);	
 		$("#alertBoxDiv").dialog({ width:400, buttons: {
 					            	"OK": 		function() { callback($("#gtBoxTt").val()); $(this).remove(); },

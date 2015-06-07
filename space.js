@@ -678,12 +678,12 @@ Space.prototype.ShowProgress=function()									// SHOW RESORCE LOAD PROGRESS
 
 /* 
  	Shows progress of resource loading.
- 	Set the contents of a div with id "#STloadProgress" 
+ 	Set the contents of a div with id "#SloadProgress" 
 */
 
  	var str="";
  	this.loadCounter--; 													// Dec
 	if (this.loadCounter)													// If stuff to load
 		str=this.loadCounter+" resources to load";							// Set progress
-	$("#STloadProgress").text(str);											// Show status
+	$("#SloadProgress").text(str);											// Show status
  }					
