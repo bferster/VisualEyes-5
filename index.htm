@@ -143,11 +143,11 @@
 			o.geoRef="-77.653305,38.7842739,20,0";
 			o.title="Robinson Preaches";
 			o.desc="Robinson preaches on \"The Sin of the Modern Dance.\" Makes flying visit to Warm Sulphur & Hot Springs; preaches to white and colored";
-			o.pic="//www.viseyes.org/spacetime/Robinson.jpg";
+			o.pic="//www.viseyes.org/visualeyes/projects/Robinson.jpg";
 			o.color="#ff9900";
 			o.edge="#666666";
 			o.size=20;
-			sd.mobs.push(o);
+			sd.mobs.push(o);s
 		}
 
 		for (i=0;i<sd.mobs.length;++i) {									// For each mob	
@@ -262,8 +262,8 @@
 			function(){ $(this).css("background-color","transparent")			// Hide
 			});
 	
-		$("#splashDiv").animate({ opacity:0},2000);								// Hide logo
-		$("#showDiv").animate({ opacity:1},4000, function() {					// Show interface
+		$("#splashDiv").delay(1000).animate({ opacity:0},500);					// Hide logo
+		$("#showDiv").animate({ opacity:1},5000, function() {					// Show interface
 				ResizePanes();													// Resize panes
 
 
