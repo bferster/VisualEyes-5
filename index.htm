@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="img/UVALogo.ico">
+	<title>VisualEyes 5</title>
+ 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>	
+	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+	<script src="jquery.ui.touch-punch.min.js"></script>
+  	<link rel="stylesheet" href="http://openlayers.org/en/v3.5.0/css/ol.css" type="text/css">
+   	<script src="http://openlayers.org/en/v3.5.0/build/ol-debug.js" type="text/javascript"></script>
+  	<script src="space.js" type="text/javascript"></script>
+ 
+ 	<style type="text/css">
+		body { 			font-family:Verdana,Geneva,sans-serif; font-size:9px; 
+						padding:0px;margin:0px;
+						}
+		.spacePopup	{ 	position:absolute;padding:12px;border-radius:6px;display:none; 
+						border:1px solid #999;background-color:#fff;font-size:11px;
+						overflow-x:hidden;max-height:300px;max-width:300px;
+						}
+		.spacePopupPic { margin-right:8px;vertical-align:top;cursor:zoom-in;
+						border:1px solid #999;width:80px;
+						}				
+		.spacePopupDesc { vertical-align:top;color:#555;cursor:zoom-in;
+						}				
+		.spacePopupTitle {	margin-bottom:8px;color:#555;
+						}
+		.spacePopupDate { margin-left:8px;color:#999;font-size:8px
+						}
+		.ve-rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+ 		.ve-unselectable { -moz-user-select: none;     -khtml-user-select: none;
+		   			 	-webkit-user-select: none;  -ms-user-select: none;   user-select: none;
+						}
+		.ve-base { 		position:absolute;height:100%;width:100%;
+						}	
+		.ve-left { 		}	
+		.ve-right { 	background-color:#eee;
+						}	
+		.ve-bottom { 	background-color:#ccc;width:100%;
+						}	
+		.ve-splash { 	text-align:center;vertical-align:center;pointer-events:none;
+						}
+		.ve-is {		border-radius:10px;padding-left:8px;padding-right:8px;padding-top:1px;
+						border:1px solid #999;font-size:12px;height;20px;width:200px;
+						}
+		.ve-bs {		border-radius:10px;padding-left:8px;padding-right:8px;padding-top:1px;
+						border:1px solid #999;font-size:12px;height;20px;color:#666;
+						}
+
+ 	</style>
+
+</head>
+<body>
+<div id="showDiv" style="opacity:0" class="ve-base">
+	<div id="leftDiv" style="position:absolute;opacity:inherit" class="ve-left"></div>
+	<div id="rightDiv" style="position:absolute;opacity:inherit" class="ve-right"></div>
+	<div id="lrSiz" style="position:absolute;width:8px;cursor:col-resize;opacity:inherit" class="ve-unselectable" title="Resize panes">
+		<div id="lrSiz1" style="position:absolute;width:40px;height:100%;left:-16px" class="ve-unselectable"></div>
+	</div>
+	<div id="bottomDiv" style="position:absolute;top:0px;opacity:inherit" class="ve-bottom ve-unselectable">
+		<iframe id="timelineIF" stlye="margin:0px;padding:0px;border:none" src="http://www.viseyes.org/shiva/go.htm?e=2398" frameborder=0 width="100%" height="99%" scrolling="no"></iframe>
+	</div>
+	<div id="bSiz" style="position:absolute;height:8px;width:100%;cursor:row-resize;opacity:inherit" class="ve-unselectable" title="Resize timeline">
+		<div id="bSiz1" style="position:absolute;height:20px;width:100%;top:32px;left:0px" class="ve-unselectable"></div>
+	</div>
+</div>
+<div id="splashDiv" class="ve-splash"><img src="img/velogo.png"></div>
+<script>
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DISPLAY
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	var sd={};																	// Holds show data
+	var mps={};
+	var paneAnimationTimer=null;												// Times pane animations
+	var imageAnimationTimer=[];													// Times image animations
+	var isMobile=false;															// Flag for mobile devices
+	var host="//viseyes.org/";													// Set host
+	var userName="",password="",curShow=0;										// Login info
+	var lastClickTime=0;														// Store last click time
+	var drupalMan=false;														// Flag for drupal manager	
+	var curSpanStart,curSpanEnd,curTime;
+	
+	function ResizePanes()													// RESIZE PANES
+	{ 
+		var wid=$("#showDiv").width();											// Width
+		var hgt=$("#showDiv").height();											// Height
+		var cx=wid*sd.lrRatio;													// Center
+		var cy=hgt*sd.bRatio;													// Center
+		$("#leftDiv").width(cx);												// Set left width
+		$("#rightDiv").width(wid-cx);											// Set right width
+		$("#rightDiv").css("left",cx+"px");										// Set right pos
+		$("#leftDiv").height(cy);												// Set left height
+		$("#rightDiv").height(hgt);												// Set right height
+		$("#lrSiz").css("left",cx+"px");										// Set lr size pos
+		$("#lrSiz").height(hgt);												// Set lr size height
+		$("#bSiz").css("top",cy+"px");											// Set b size pos
+		$("#bSiz").width(cx);													// Set b size width
+		$("#bottomDiv").width(cx);												// Set bottom width
+		$("#bottomDiv").height(hgt-cy);											// Set bottom height
+		$("#bottomDiv").css("top",cy+"px");										// Set lr size pos
+		mps.UpdateMapSize();													// Update map size to div size
+		Draw();																	// Redraw
+}		
+
+	function InitProject(data)
+	{
+		var i;
+		if (!data) {
+			sd.lrRatio=.66;
+			sd.bRatio=.75;
+			sd.mobs=[];
+			var o={};
+			o.title="La Floride Francoise";
+			o.desc="La Floride Francoise";
+			o.marker="http://farm9.staticflickr.com/8019/7310697988_18eb47c466_z.jpg";
+			o.start=1665;
+			o.end=1665;
+			o.citation="P[ierre] Duval, La Floride Francoise ([Paris, 1665?]).  From Florida Map Collection, USF Digital Collections, http://digital.lib.usf.edu/?u15.9042. Cumming, 158; Burden I, 485-486.";
+			o.geoRef="32.746269,31.756859,-80.332589,-81.998319,0";
+			o.goto="32.2359,-81.2021,173510,0,0.13";
+			o.vis=1;
+			sd.mobs.push(o);
+
+			o={};
+			o.marker="test.kml";
+//			o.marker="https://drive.google.com/open?id=0B4hdE1_3ZElJLUlRSWhoNkdSRFk&authuser=0"
+			
+			o.start=1665;
+			o.end=1665;
+			o.vis=1;
+			sd.mobs.push(o);
+			
+			o={};
+			o.marker="star";
+			o.start="10/18/1890";
+			o.vis=1;
+			o.geoRef="-77.653305,38.7842739,20,0";
+			o.title="Robinson Preaches";
+			o.desc="Robinson preaches on \"The Sin of the Modern Dance.\" Makes flying visit to Warm Sulphur & Hot Springs; preaches to white and colored";
+			o.pic="//www.viseyes.org/spacetime/Robinson.jpg";
+			o.color="#ff9900";
+			o.edge="#666666";
+			o.size=20;
+			sd.mobs.push(o);
+		}
+
+		for (i=0;i<sd.mobs.length;++i) {									// For each mob	
+			o=sd.mobs[i];													// Point at mob
+			if (o.marker) {													// If a marker spec'd
+				if (o.marker.match(/drive\.google/i)) {						// An drive file
+					var id=o.marker.match(/id=(.+)&/);						// Extract id
+					if (id)	{												// An id found
+						o.type="kml";										// Set type
+						var s="//drive.google.com/uc?export=view&id="+id[1];// Construct 'direct' link
+						o.id=mps.AddKMLLayer(s);							// Add KML layer								 
+						}
+					}
+				else if (o.marker.match(/\.kml/i)) {						// A KML file
+					o.type="kml";											// Set type
+					o.id=mps.AddKMLLayer(o.marker);							// Add KML layer								 
+					}
+				else if (o.marker.match(/\.png|.gif|\.jpg|\.jpeg/i)) {		// An image file
+					o.type="image";											// Set type
+					o.id=mps.AddImageLayer(o.marker,o.geoRef);				// Add image layer								 
+					}
+				else{ 														// Must be an icon
+					o.type="icon";											// Set type
+					var s={};												// Not style
+					o.spaceMarker ?	s.m=o.spaceMarker : s.m=o.marker;		// Use space marker first, then time marker
+					o.spaceTitle  ?	s.t=o.spaceTitle  : s.t=o.title;			
+					o.spaceDesc   ?	s.d=o.spaceDesc   : s.d=o.desc;				
+					o.spaceColor  ?	s.f=o.spaceColor  : s.f=o.color;			
+					o.spaceEdge   ?	s.s=o.spaceEdge   : s.s=o.edge;				
+					o.spaceSize   ?	s.w=o.spaceSize   : s.w=o.size;				
+					o.spaceTextCol  ? s.tc=o.spaceTextCol  : s.tc=o.textCol;				
+					o.spaceTextFont ? s.tf=o.spaceTextFont : s.tf=o.font;				
+					o.spaceOpacity  ? s.a=o.spaceOpacity   : s.a=o.opacity;				
+					mps.AddMarkerLayer(o.geoRef,s,i);						// Add marker to overlays
+					}
+				}
+			}
+		}
+
+	function Draw()
+	{
+		var str="<img src='http://www.viseyes.org/efolio/declaration.JPG' width='100%'> &nbsp; ";
+		str+=MakeSelect("testing",false,["0","1","2","3","4"]);
+		$("#rightDiv").html(str);
+		mps.DrawMapLayers();
+	}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// EVENTS
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	$(document).ready(function() {												// When loaded
+		var i;
+		if (window.addEventListener) 											// If supported this way
+			window.addEventListener("message",shivaEventHandler,false);			// Add event handler
+		else																	// Use other method
+			window.attachEvent("message",shivaEventHandler);					// Add handler
+		
+		isMobile=navigator.userAgent.match(/(ipad|iphone|ipod|android)/i) ? true : false; // Set mobile flag
+		var url=window.location.search.substring(1);							// Get query string
+		drupalMan=(""+url).match(/pr=d/);										// If called from Drupal manager
+		if (!url)																// Nothing on command line
+			url=1;																// Use default
+		if (drupalMan)	url="";													// If drupal, kill url
+		if (url && !isNaN(url)) {												// If a number
+			curShow=url;														// Save show number											
+			url="//qmediaplayer.com/loadshow.php?id="+url;						// Get from db
+			}	
+		else if ((url) && (!url.match(/\./)))									// No file extension
+			url+=".json";														// Add txt
+//		$.ajax({ url: url, dataType:'jsonp' });									// Get jsonp and call LoadShow() from it
+
+		$("#lrSiz").draggable({												// DRAG L-R WIDTH HANDLER
+			cursorAt:{left:16},	iframeFix:true,									// Cursor offset
+			cursor: "col-resize", axis:"x",										// X-only
+			start: function(event, ui) {										// On drag start
+				$("#lrSiz1").css({ width:"500px", left:"-500px" });				// Widen hiding div
+				},
+			drag: function(event, ui) {											// On drag
+				var wid=$("#showDiv").width();									// Max width
+			 	sd.lrRatio=Math.max(0,Math.min(1,(event.clientX-8)/wid));		// Set ratio between windows
+				if (Math.abs(sd.lrRatio-.66) < .015) 							// If close to center
+					sd.lrRatio=.66;												// Snap it there
+				ResizePanes();													// Resize panes
+				},
+			stop: function(event, ui) {											// On drag end
+				$("#lrSiz1").css({ width:"40px", left:"-16px" });				// Contract hiding div
+				ResizePanes();													// Resize panes
+				}
+			});
+			
+		$("#bSiz").draggable({												// DRAG TRANSCRIPT HEIGHT HANDLER		
+			cursor: "row-resize", axis:"y",										// Y-only
+			stop: function(event, ui) {											// When done
+				ResizePanes;													// Resize panes when done
+				},
+			drag: function(event, ui) {											// On drag
+				var hgt=$("#showDiv").height();									// Max height
+			 	sd.bRatio=Math.max(0,Math.min(1,(event.clientY-8)/hgt));		// Set ratio between windows
+				if (Math.abs(sd.bRatio-.75) < .015) 							// If close to center
+					sd.bRatio=.75;												// Snap it there
+				ResizePanes();													// Resize panes
+				}
+			});
+		$("#lrSiz").hover(														// L-R width
+			function(){ $(this).css("background-color","#acc3db")},				// Highlight
+			function(){ $(this).css("background-color","transparent")			// Hide
+			});
+		
+		$("#bSiz").hover(														// Bottom height
+			function(){ $(this).css("background-color","#acc3db")},				// Highlight
+			function(){ $(this).css("background-color","transparent")			// Hide
+			});
+	
+		$("#splashDiv").animate({ opacity:0},2000);								// Hide logo
+		$("#showDiv").animate({ opacity:1},4000, function() {					// Show interface
+				ResizePanes();													// Resize panes
+
+
+
+
+
+mps.Goto("-79.91,32.79,10000")
+mps.ShowLayers([0,1],true);
+
+$("#testing").on("change", function() {
+	var i=$(this).val();
+	if (i == 1)	mps.StyleKMLFeatures(1,[{n:5,f:"#ff0000",a:.2,s:"#00ff00",w:50}]);
+	if (i == 2)	mps.StyleKMLFeatures(1,[{n:5,f:"#0000ff"},{n:4,f:"#ffff00"}]);
+	if (i == 3)	mps.StyleKMLFeatures(1,[{n:"*",f:"#ff00ff"}]);
+	if (i == 3)	mps.StyleKMLFeatures(1,[{n:"*",f:"#ff00ff"}]);
+	if (i == 4) GetTextBox("Marker","Type shape","", function(str) {
+							mps.StyleMarker([0],{m:str,w:35,t:"OK",f:"#0000ff"});
+							}); 
+$(this).val(0)
+	});
+	
+
+
+
+				});				
+		$(window).resize(ResizePanes);											// Dynamic resizing
+		mps=new Space;															// Alloc map module
+		mps.InitMap("leftDiv");													// Init map
+		InitProject();															// Init project
+		ResizePanes();															// Resize panes
+		if (drupalMan) 															// If called from Drupal manager
+			window.parent.postMessage("ShivaReady=true","*");					// Send message to parent wind		
+	});
+
+	function SendShivaMessage(src, msg) 									// SEND SHIVA MESSAGE 
+	{
+		var str=src+"|show";													// Add src and window						
+		if (msg)																// If more to it
+			str+="|"+msg;														// Add it
+		if (window.parent)														// If has a parent
+			window.parent.postMessage(str,"*");									// Send message to parent wind
+		else																	// Local	
+			window.postMessage(str,"*");										// Send message to wind
+	}
+
+	function shivaEventHandler(e)											// ON SHIVA EVENT
+	{
+		var str,i;
+	}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// HELPERS
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	function trace(msg, p1, p2, p3, p4)										// CONSOLE 
+	{
+		if (p4 != undefined)
+			console.log(msg,p1,p2,p3,p4);
+		else if (p3 != undefined)
+			console.log(msg,p1,p2,p3);
+		else if (p2 != undefined)
+			console.log(msg,p1,p2);
+		else if (p1 != undefined)
+			console.log(msg,p1);
+		else
+			console.log(msg);
+	}
+
+	function Sound(sound, mode)											// PLAY SOUND
+	{
+		var snd=new Audio();
+		if (!snd.canPlayType("audio/mpeg") || (snd.canPlayType("audio/mpeg") == "maybe")) 
+			snd=new Audio("img/"+sound+".ogg");
+		else	
+			snd=new Audio("img/"+sound+".mp3");
+		if (mode != "init")
+			snd.play();
+	}
+
+	function MakeSelect(id, multi, items, sel, extra, values)				// CREATE HTML SELECT
+	{
+		var	str="<select class='ve-bs' id='"+id+"'";							// Header
+		if (multi)																// Multi select
+			str+="multiple='multiple' size='"+multi+"'";						// Add flag
+		if (extra)																// If extra param
+			str+=extra;															// Add them
+		str+=">";																// End header
+		for (i=0;i<items.length;++i) {											// For each option
+			str+="<option";														// Add tag
+			if (sel == items[i])												// If selected
+				str+=" selected='selected'"										// Add tag
+			if (values && values[i])											// If has a value
+				str+=" value='"+values[i]+"'";									// Add it
+			str+=">"+items[i]+"</option>";										// End option
+			}	
+		return str+"</select>";													// End select				
+	}
+
+	
+	function GetTextBox(title, content, def, callback)					// GET TEXT LINE BOX
+	{
+		Sound("click");															// Ding sound
+		$("#alertBoxDiv").remove();												// Remove any old ones
+		$("body").append("<div class='ve-unselectable' id='alertBoxDiv'></div>");														
+		var str="<p><img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
+		str+="<span id='gtBoxTi'style='font-size:18px;text-shadow:1px 1px #ccc;color:#990000'><b>"+title+"</b></span><p>";
+		str+="<div style='font-size:14px;margin:14px'>"+content;
+		str+="<p><input class='ve-is' type='text' id='gtBoxTt' value='"+def+"'></p></div>";
+		$("#alertBoxDiv").append(str);	
+		$("#alertBoxDiv").dialog({ width:400, buttons: {
+					            	"OK": 		function() { callback($("#gtBoxTt").val()); $(this).remove(); },
+					            	"Cancel":  	function() { $(this).remove(); }
+									}});	
+		$(".ui-dialog-titlebar").hide();
+		$(".ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix").css("border","none");
+		$(".ui-dialog").css({"border-radius":"14px", "box-shadow":"4px 4px 8px #ccc"});
+ 		$(".ui-button").css({"border-radius":"30px","outline":"none"});
+ 	}
+
+</script>
+</body></html>
+
