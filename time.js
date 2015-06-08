@@ -22,9 +22,9 @@ function Timeline()														// CONSTRUCTOR
 	this.hasTicks=true;
 	this.hasTickLabels=true
 	this.timeSegmentPos="Top";
-	this.timeSegTextOff="#000";
-	this.timeSegTextOn="#009900";
+	this.timeSegTextColor="#000";
 	this.timeSegColor="#ccc";
+	this.curSeg=-1;
 	this.timeSegments=[ {start:"1862", end:"1886", title:"Winchester", col:"#ccc"},
 						{start:"1886", end:"1889", title:"New York", col:"#ccc"},
 						{start:"1889", end:"1892", title:"Charlottesville", col:"#ccc"},
@@ -74,17 +74,39 @@ Timeline.prototype.InitTimeline=function(div)							// INIT TIMELINE
 			for (i=0;i<this.timeSegments.length;++i) { 						// For each tick
 				this.timeSegments[i].pct=(this.timeSegments[i].end-this.timeSegments[i].start)/this.dur;// Calc percentage
 				str+="<div class='time-seg' id='timeseg"+i+"' ";			// Add div
-				str+="style='color:"+this.timeSegTextOff+";background-color:"+this.timeSegColor+"'>";
+				str+="style='color:"+this.timeSegTextColor+";background-color:"+this.timeSegColor+"'>";
 				str+=this.timeSegments[i].title+"</div>";					// Add title
 				}	
 			str+="<div class='time-seg' id='timeseg"+i+"' ";				// Add div
-			str+="style='color:"+this.timeSegTextOn+";background-color:"+this.timeSegColor+"'>";
-			str+="&nbsp;&nbsp;Show All&nbsp;&nbsp;</div>";												// Add ALL
+			str+="style='color:"+this.timeSegTextColor+";background-color:#acc3db'>";
+			str+="&nbsp;&nbsp;&nbsp;Show all&nbsp;&nbsp;&nbsp;</div>";		// Add All
 			$(this.div).append(str+"</div>");								// Add segment bar				
 			$("#timeseg0").css({"border-top-left-radius":"10px","border-bottom-left-radius":"10px"});
-			$("#timeseg"+this.timeSegments.length-2).css({"border-top-left-radius":"10px","border-bottom-left-radius":"10px"});
-			trace("#timeseg"+(this.timeSegments.length-2))
-			}
+			$("#timeseg"+(this.timeSegments.length-1)).css({"border-top-right-radius":"10px","border-bottom-right-radius":"10px"});
+			$("#timeseg"+(this.timeSegments.length)).css({"border-top-left-radius":"10px","border-bottom-left-radius":"10px"});
+			$("#timeseg"+(this.timeSegments.length)).css({"border-top-right-radius":"10px","border-bottom-right-radius":"10px"});
+			
+			for (i=0;i<this.timeSegments.length+1;++i) { 					// For each segment
+				
+				$("#timeseg"+i).hover(										// ON SEG HOVER
+	//				function(){ $(this).css("background-color","#acc3db")},	// Highlight
+	//				function(){ $(this).css("background-color","#ccc")}		// Hide
+					);
+				
+				$("#timeseg"+i).click( function(e) {							// ON SEG CLICK
+					var i;
+					var id=e.target.id.substr(7);								// Get ID
+					for (i=0;i<_this.timeSegments.length+1;++i)  				// For each segment
+						$("#timeseg"+i).css({"background-color":"#ccc"});		// Clear it
+					$(this).css({"background-color":"#acc3db" });				// Highlight picked one
+					if (id < _this.timeSegments.length)							// If a seg
+						_this.curSeg=id;										// Its current
+					else														// All but
+						_this.curSeg=-1;										// Flag all
+				});
+				}
+				
+		}
 		
 		function ShowTime(x, time)
 		{
