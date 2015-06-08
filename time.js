@@ -89,8 +89,8 @@ Timeline.prototype.InitTimeline=function(div)							// INIT TIMELINE
 			for (i=0;i<this.timeSegments.length+1;++i) { 					// For each segment
 				
 				$("#timeseg"+i).hover(										// ON SEG HOVER
-	//				function(){ $(this).css("background-color","#acc3db")},	// Highlight
-	//				function(){ $(this).css("background-color","#ccc")}		// Hide
+					function(){ $(this).css("color","#fff")},				// Highlight
+					function(){ $(this).css("color",_this.timeSegTextColor)} // Hide
 					);
 				
 				$("#timeseg"+i).click( function(e) {							// ON SEG CLICK
@@ -137,7 +137,6 @@ Timeline.prototype.InitTimeline=function(div)							// INIT TIMELINE
     	}
 	this.UpdateTimelineSize();
 	this.Draw();
-
 }	
 
 
