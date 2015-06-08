@@ -36,7 +36,7 @@ Space.prototype.InitMap=function(div)									// INIT OPENLAYERS MAP
 	this.showScale=true;													// Hide or show scale
 	this.baseLayer="Roadmap";												// Default layer
 	this.curProjection="EPSG:3857";											// Current projection
-	this.div=div;															// Current div
+	this.div="#"+div;														// Current div selector
 	
 	this.layers=[															// Hold layers
 		new ol.layer.Tile({													// Sat 
@@ -603,7 +603,7 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
 	  		}
 	  	var pixel=_this.map.getEventPixel(e.originalEvent);					// Get pos
 	  	var hit=_this.map.hasFeatureAtPixel(pixel);							// Anything there?
-	  	$("#"+_this.div).css("cursor",hit ? "pointer" : "");				// Change cursor
+	  	$(_this.div).css("cursor",hit ? "pointer" : "");					// Change cursor
 		});
 }
 
@@ -643,10 +643,10 @@ Space.prototype.ShowPopup=function(x,y, title, desc, pic, date)			// SHOW POPUP
 	$("body").append("</tr></table>"+str);									// Add popup
 	if (x < 0) {															// Bigger 
 		$("#poppic").css("cursor","");										// Normal cursor
-		$("#st-popup").css("max-width",$("#"+this.div).width()*.75);		// Make it wider
-		$("#st-popup").css("max-height",$("#"+this.div).height()*.75);		// Make it taller
-		$("#poppic").width($("#"+this.div).width()*(desc ? .5 : .75))		// Make pic bigger
-		x=$("#"+this.div).width()/2-$("#st-popup").width()/2;				// Center it
+		$("#st-popup").css("max-width",$(this.div).width()*.75);			// Make it wider
+		$("#st-popup").css("max-height",$(this.div).height()*.75);			// Make it taller
+		$("#poppic").width($(this.div).width()*(desc ? .5 : .75))			// Make pic bigger
+		x=$(this.div).width()/2-$("#st-popup").width()/2;					// Center it
 		y=50;																// Near top			
 		}
 	$("#st-popup").css({left:(x+8)+"px",top:(y+20)+"px"});					// Position
@@ -654,10 +654,10 @@ Space.prototype.ShowPopup=function(x,y, title, desc, pic, date)			// SHOW POPUP
 	
 	$("#popdesc").click( function() {										// ON CLICK OF TEXT
 		$("#popdesc").css("cursor","auto");									// Normal cursor
-		$("#st-popup").css("max-width",$("#"+_this.div).width()*.66);		// Make it wider
-		$("#st-popup").css("max-height",$("#"+_this.div).height()*.66);		// Make it taller
-		$("#poppic").width($("#"+_this.div).width()*(desc ? .33 : .66))		// Make pic bigger
-		x=$("#"+_this.div).width()/2-$("#st-popup").width()/2;				// Center it
+		$("#st-popup").css("max-width",$(_this.div).width()*.66);			// Make it wider
+		$("#st-popup").css("max-height",$(_this.div).height()*.66);			// Make it taller
+		$("#poppic").width($(_this.div).width()*(desc ? .33 : .66))			// Make pic bigger
+		x=$(_this.div).width()/2-$("#st-popup").width()/2;					// Center it
 		$("#st-popup").css({left:(x+8)+"px",top:"70px"});					// Position
 		});	
 
@@ -665,9 +665,9 @@ Space.prototype.ShowPopup=function(x,y, title, desc, pic, date)			// SHOW POPUP
 		$("#st-popup").css("cursor","auto");								// Normal cursor
 		$("#poppic").css("cursor","auto");									// Normal cursor
 		$("#st-popup").css("max-height","none");							// Make it taller
-		$("#st-popup").css("max-width",$("#"+_this.div).width()*.66);		// Make it wider
-		$("#poppic").width($("#"+_this.div).width()*.66)					// Make pic bigger
-		x=$("#"+_this.div).width()/2-$("#st-popup").width()/2;				// Center it
+		$("#st-popup").css("max-width",$(_this.div).width()*.66);			// Make it wider
+		$("#poppic").width($(_this.div).width()*.66)						// Make pic bigger
+		x=$(_this.div).width()/2-$("#st-popup").width()/2;					// Center it
 		$("#st-popup").css({left:(x+8)+"px",top:"70px"});					// Position
 		e.stopPropagation()
 		});
