@@ -11,11 +11,12 @@ function Timeline()														// CONSTRUCTOR
   	@constructor
 
 */
+
 	this.dur=0;
-	this.start="1862"
-	this.end="1922"
+	this.start=this.DateToTime("1862")
+	this.end=this.DateToTime("1922")
 	this.timeColor="#009900";
-	this.timeFormat="Year";
+	this.timeFormat="Mon Year";
 	this.hasTimebar=true; 
 	this.showStartEnd=true; 
 	this.sliderTime="Bottom";
@@ -25,14 +26,14 @@ function Timeline()														// CONSTRUCTOR
 	this.timeSegTextColor="#000";
 	this.timeSegColor="#ccc";
 	this.curSeg=-1;
-	this.timeSegments=[ {start:"1862", end:"1886", title:"Winchester", col:"#ccc"},
-						{start:"1886", end:"1889", title:"New York", col:"#ccc"},
-						{start:"1889", end:"1892", title:"Charlottesville", col:"#ccc"},
-						{start:"1892", end:"1898", title:"Pennsylvania", col:"#ccc"},
-						{start:"1898", end:"1902", title:"Boston", col:"#ccc"},
-						{start:"1902", end:"1906", title:"Connecticut", col:"#ccc"},
-						{start:"1906", end:"1910", title:"Indiana", col:"#ccc"},
-						{start:"1910", end:"1922", title:"Traveling", col:"#ccc"}];
+	this.timeSegments=[ {start:this.DateToTime("1862"), end:this.DateToTime("1886"), title:"Winchester", col:"#ccc"},
+						{start:this.DateToTime("1886"), end:this.DateToTime("1889"), title:"New York", col:"#ccc"},
+						{start:this.DateToTime("1889"), end:this.DateToTime("1892"), title:"Charlottesville", col:"#ccc"},
+						{start:this.DateToTime("1892"), end:this.DateToTime("1898"), title:"Pennsylvania", col:"#ccc"},
+						{start:this.DateToTime("1898"), end:this.DateToTime("1902"), title:"Boston", col:"#ccc"},
+						{start:this.DateToTime("1902"), end:this.DateToTime("1906"), title:"Connecticut", col:"#ccc"},
+						{start:this.DateToTime("1906"), end:this.DateToTime("1910"), title:"Indiana", col:"#ccc"},
+						{start:this.DateToTime("1910"), end:this.DateToTime("1922"), title:"Traveling", col:"#ccc"}];
 	Sound("click","init");													// Init sound
 	Sound("ding","init");													// Init sound
 	Sound("delete","init");													// Init sound
@@ -87,22 +88,23 @@ Timeline.prototype.InitTimeline=function(div)							// INIT TIMELINE
 			$("#timeseg"+(this.timeSegments.length)).css({"border-top-right-radius":"10px","border-bottom-right-radius":"10px"});
 			
 			for (i=0;i<this.timeSegments.length+1;++i) { 					// For each segment
-				
+
 				$("#timeseg"+i).hover(										// ON SEG HOVER
-					function(){ $(this).css("color","#fff")},				// Highlight
+					function(){ $(this).css("color","#0000ff")},			// Highlight
 					function(){ $(this).css("color",_this.timeSegTextColor)} // Hide
 					);
 				
-				$("#timeseg"+i).click( function(e) {							// ON SEG CLICK
-					var i;
-					var id=e.target.id.substr(7);								// Get ID
-					for (i=0;i<_this.timeSegments.length+1;++i)  				// For each segment
-						$("#timeseg"+i).css({"background-color":"#ccc"});		// Clear it
-					$(this).css({"background-color":"#acc3db" });				// Highlight picked one
-					if (id < _this.timeSegments.length)							// If a seg
-						_this.curSeg=id;										// Its current
-					else														// All but
-						_this.curSeg=-1;										// Flag all
+				$("#timeseg"+i).click( function(e) {						// ON SEG CLICK
+					var i,s,e;
+					var id=e.target.id.substr(7);							// Get ID
+					for (i=0;i<_this.timeSegments.length+1;++i)  			// For each segment
+						$("#timeseg"+i).css({"background-color":"#ccc"});	// Clear it
+					$(this).css({"background-color":"#acc3db" });			// Highlight picked one
+					if (id < _this.timeSegments.length)						// If a seg
+						_this.curSeg=id;									// Its current
+					else													// All but
+						_this.curSeg=-1;									// Flag all
+					_this.Draw();											// Redraw timeline
 				});
 				}
 				
@@ -122,15 +124,15 @@ Timeline.prototype.InitTimeline=function(div)							// INIT TIMELINE
 	 		min: _this.start-0, max: _this.end-0,							// Start/end
 			step: 1,
 			create: function(event,ui) {									// On create
-				var x=$($('#timeSlider').children('.ui-slider-handle')).offset().left;        			
- 		     	ShowTime($(this).offset().left+4,_this.start-0);			// Show start time			
+		     	var x=$("#timeSlider").offset().left+5;						// Start
+		     	ShowTime(x,_this.start-0);									// Show start time			
      		},
 			slide: function(event,ui) {										// On slide
-  				var x=$($('#timeSlider').children('.ui-slider-handle')).offset().left;        			
+  				var x=$($('#timeSlider').children('.ui-slider-handle')).offset().left-7;        			
  		     	ShowTime(x,ui.value);										// Show time			
      			},
  			stop: function(event,ui) {										// On slide stop
-				var x=$($('#timeSlider').children('.ui-slider-handle')).offset().left;        			
+				var x=$($('#timeSlider').children('.ui-slider-handle')).offset().left-7;        			
  		     	ShowTime(x,ui.value);										// Show time			
      			}
     		});
@@ -146,13 +148,41 @@ Timeline.prototype.FormatTime=function(time, format) 						// UPDATE TIMELINE PA
 	Format time int human readable format
  	@param {number} time number of ms += 1/1/1970
 	@param {string} format type of format. If not set, this.timeFormat is used.
+	@return {string} time formatted at date.
 */
-	var str=time
- 
-
-	return str;
+	var str;
+	var mos=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+	d=new Date(time*36000000);													// Convert minutes to ms
+	if (!format)																// If no format spec'd
+		format=this.timeFormat;													// Use global format
+	if (format == "Mo/Year") 													// 1/1900
+		str=(d.getMonth()+1)+"/"+d.getFullYear();								// Set it
+	else if (format == "Mo/Day/Year") 											// 1/1/1900
+		str=(d.getMonth()+1)+"/"+(d.getDay()+1)+"/"+d.getFullYear();			// Set it
+	else if (format == "Mon Year") 												// Jan 1900
+		str=mos[d.getMonth()]+" "+d.getFullYear();								// Set it
+	else if (format == "Mon Day, Year") 										// Jan 1, 1900
+		str=mos[d.getMonth()]+" "+(d.getDay()+1)+", "+d.getFullYear();			// Set it
+	else																		// Default to only year
+		str=d.getFullYear();													// Set it
+ 	return str;																	// Return formatted date
 
 }
+
+Timeline.prototype.DateToTime=function(date) 							// CONVERT DATE TO MINS +/- 1960
+{
+/* 	
+	Format time int human readable format
+ 	@param {number} 
+	@return {string} number of mins += 1/1/1970
+*/
+	var d=new Date();
+	d.setFullYear(date);
+ 	var time=d.getTime()/36000000;
+  	return time;
+
+}
+
 
 Timeline.prototype.UpdateTimelineSize=function() 						// UPDATE TIMELINE PANES
 {
@@ -192,7 +222,7 @@ Timeline.prototype.UpdateTimelineSize=function() 						// UPDATE TIMELINE PANES
 			$("#timeseg"+i).css({ left:x+"px",width:w2+"px" });				// Position and size
 			x+=w2+2;														// Advance
 			}
-		$("#timeseg"+i).css({ left:x+10+"px" });								// Position
+		$("#timeseg"+i).css({ left:x+10+"px" });							// Position
 		if (this.timeSegmentPos == "Top") {									// If on top of timebar
 			t=$("#timeBar").offset().top-$(this.div).offset().top-30;		// Set pos
 			if (this.sliderTime == "Top")	t-=12;							// If slider time on top, move it up
@@ -212,9 +242,25 @@ Timeline.prototype.Draw=function() 										// DRAW TIMELINE
 
 /* 
 */
-
-
-}
+	var s,e;
+	if (this.curSeg == -1)	{											// If showing all segs
+		s=this.start-0;													// Get start
+		e=this.end-0;													// Get end
+		}
+	else{																// Showing  segment
+		s=this.timeSegments[this.curSeg].start-0;						// Get start
+		e=this.timeSegments[this.curSeg].end-0;							// Get end
+		}
+	this.UpdateTimelineSize();											// Reset timeline size
+	$("#timeStart").html(this.FormatTime(s)+"&nbsp;&nbsp;&nbsp;");		// Set start
+	$("#timeEnd").html("&nbsp;&nbsp;&nbsp;"+this.FormatTime(e)); 		// Set end
+	$("#ticklab1").html(this.FormatTime(s+(e-s)/4));					// Add label div
+	$("#ticklab3").html(this.FormatTime(s+(e-s)/2));					// Add label div
+	$("#ticklab5").html(this.FormatTime(s+(e-s)/4*3));					// Add label div
+	$("#timeSlider").slider("option",{min:s,max:e,value:s}); 			// Set slider
+ 	var x=$($('#timeSlider').children('.ui-slider-handle')).offset().left-67;    // Current slider position    			
+ 	$("#sliderTime").css({left:x+"px"})									// Position time slider text
+   }
 
 
 Timeline.prototype.Goto=function(time)									// SET TIME
