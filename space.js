@@ -543,11 +543,12 @@ Space.prototype.AddImageLayer=function(url, geoRef) 						// ADD MAP IMAGE TO PR
 	return index;															// Return layer ID
 }
 
-Space.prototype.DrawMapLayers=function()								// DRAW OVERLAY LAYERS							
+Space.prototype.DrawMapLayers=function(time)								// DRAW OVERLAY LAYERS							
 {
 
 /* 
  	Draws or shows overlay elements based on the .vis element.
+ 	@param {number} time mumber of mins += 1/1/1970
 */
 
 	var i,o;
