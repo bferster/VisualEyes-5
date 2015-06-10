@@ -58,8 +58,9 @@
 		.time-playerspeed { position:absolute;width:40px;text-align:center;font-size:9px;color:#999;
 							}
 		.time-playerslider.ui-slider .ui-slider-handle {
-							height:6px;width:6px;margin-top:8px;border-radius:10px;
-							background:#999;border:none;cursor:pointer;
+							height:0px;width:0px;margin-top:7px;cursor:pointer;
+							border-left: 5px solid transparent;border-right: 5px solid transparent;
+							border-bottom: 8px solid #999;
 							}
 		.ve-unselectable { -moz-user-select: none;     -khtml-user-select: none;
 		   			 	-webkit-user-select: none;  	-ms-user-select: none;   user-select: none;
@@ -133,7 +134,7 @@
 		$("#bottomDiv").height(hgt-cy);											// Set bottom height
 		$("#bottomDiv").css("top",cy+"px");										// Set lr size pos
 		mps.UpdateMapSize();													// Update map size to div size
-		tln.UpdateTimelineSize();												// Update timeline to div size
+		tln.UpdateTimeline();													// Update timeline to div size
 		Draw();																	// Redraw
 }		
 
@@ -216,8 +217,9 @@
 			}
 		}
 
-	function Draw()
+	function Draw(time)
 	{
+		trace(time)
 		var str="<img src='http://www.viseyes.org/efolio/declaration.JPG' width='100%'> &nbsp; ";
 		str+=MakeSelect("testing",false,["0","1","2","3","4"]);
 		$("#rightDiv").html(str);
