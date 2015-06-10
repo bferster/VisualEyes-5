@@ -47,9 +47,20 @@
 							}
 		.time-ticks { 		position:absolute;width:2px;height:8px;background-color:#ccc;
 							}
-		.time-ticklabel { 	position:absolute;width:100px;text-align:center;color:#666
+		.time-ticklabel { 	position:absolute;width:100px;text-align:center;color:#999
+							}
+		.time-timeplayer { 	position:absolute;color:#999;margin-left:18px;margin-right:18px;width:141px;
 							}
 
+		.time-playerslider{ background:#ccc;height:4px;width:80px;border:none;display:inline-block;
+							margin-left:6px;
+							}
+		.time-playerspeed { position:absolute;width:40px;text-align:center;font-size:9px;color:#999;
+							}
+		.time-playerslider.ui-slider .ui-slider-handle {
+							height:6px;width:6px;margin-top:8px;border-radius:10px;
+							background:#999;border:none;cursor:pointer;
+							}
 		.ve-unselectable { -moz-user-select: none;     -khtml-user-select: none;
 		   			 	-webkit-user-select: none;  	-ms-user-select: none;   user-select: none;
 						}
@@ -74,12 +85,11 @@
 </head>
 <body>
 <div id="showDiv" style="opacity:0" class="ve-base">
+	<div id="bottomDiv" style="position:absolute;top:0px;opacity:inherit" class="ve-bottom ve-unselectable"></div>
 	<div id="leftDiv" style="position:absolute;opacity:inherit" class="ve-left"></div>
 	<div id="rightDiv" style="position:absolute;opacity:inherit" class="ve-right"></div>
 	<div id="lrSiz" style="position:absolute;width:8px;cursor:col-resize;opacity:inherit" class="ve-unselectable" title="Resize panes">
 		<div id="lrSiz1" style="position:absolute;width:40px;height:100%;left:-16px" class="ve-unselectable"></div>
-	</div>
-	<div id="bottomDiv" style="position:absolute;top:0px;opacity:inherit" class="ve-bottom ve-unselectable">
 	</div>
 	<div id="bSiz" style="position:absolute;height:8px;width:100%;cursor:row-resize;opacity:inherit" class="ve-unselectable" title="Resize timeline">
 		<div id="bSiz1" style="position:absolute;height:20px;width:100%" class="ve-unselectable"></div>
