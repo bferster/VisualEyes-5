@@ -144,17 +144,17 @@
 		if (!data) {
 			sd.lrRatio=.66;
 			sd.bRatio=.75;
+			sd.spaceTextCol="#ffffff";
+			sd.spaceTextFont="bold 12px sans-serif ";
+			
 			sd.mobs=[];
 			var o={};
-			o.title="La Floride Francoise";
-			o.desc="La Floride Francoise";
-			o.marker="http://farm9.staticflickr.com/8019/7310697988_18eb47c466_z.jpg";
-			o.start=1665;
-			o.end=1665;
-			o.citation="P[ierre] Duval, La Floride Francoise ([Paris, 1665?]).  From Florida Map Collection, USF Digital Collections, http://digital.lib.usf.edu/?u15.9042. Cumming, 158; Burden I, 485-486.";
-			o.geoRef="32.746269,31.756859,-80.332589,-81.998319,0";
-			o.goto="32.2359,-81.2021,173510,0,0.13";
+			o.marker="//www.viseyes.org/visualeyes/projects/WinchesterMap.jpg";
+			o.start="1862";
+			o.end="1889";
+			o.geoRef="39.228788398479615,39.149512265542775,-78.09690370109803,-78.19686447861471,0";
 			o.vis=1;
+			o.opacity=.5;
 			sd.mobs.push(o);
 
 			o={};
@@ -168,21 +168,84 @@
 			
 			o={};
 			o.marker="star";
+			o.start="1/12/1862";
+			o.vis=1;
+			o.geoRef="-78.16,39.19,20,0";
+			o.title="Robinson born";
+			o.desc="JW Robinson is born in Winchester, VA";
+			o.pic="//www.viseyes.org/visualeyes/projects/Robinson.jpg";
+			o.goto="-78.16,39.19,3";
+			o.color="#ff9900";
+			o.edge="#666";
+			o.row=1;
+			sd.mobs.push(o);
+	
+			o={};
+			o.marker="dot";
+			o.start="6/8/1886";
+			o.vis=1;
+			o.geoRef="-74.0,40.71,20,0";
+			o.title="Moves to New York";
+			o.desc="Robinson moves to New York";
+			o.pic="http://www.artvalue.com/photos/auction/0/50/50908/mcnulty-william-c-1889-1963-us-towers-in-the-sky-new-york-3005289.jpg";
+			o.color="#ff9900";
+			o.edge="#666";
+			o.row=1;
+			sd.mobs.push(o);
+
+			o={};
+			o.marker="line";
+			o.start="4/12/1861";
+			o.end="6/22/1865";
+			o.vis=1;
+			o.title="The Civil War";
+			o.color="#000099";
+			o.edge="4";
+			o.row=3;
+			sd.mobs.push(o);
+
+			o={};
+			o.marker="dot";
 			o.start="10/18/1890";
 			o.vis=1;
-			o.geoRef="-77.653305,38.7842739,20,0";
-			o.title="Robinson Preaches";
+			o.geoRef="-78.47,38.03,20,0";
+			o.title="Preaches";
 			o.desc="Robinson preaches on \"The Sin of the Modern Dance.\" Makes flying visit to Warm Sulphur & Hot Springs; preaches to white and colored";
-			o.pic="//www.viseyes.org/visualeyes/projects/Robinson.jpg";
+			o.pic="http://cache3.asset-cache.net/gc/3324589-18th-november-1876-a-negro-preacher-and-his-gettyimages.jpg?v=1&c=IWSAsset&k=2&d=Ii%2B0Kt7D5sFp80jNN4JI45PlsvacwrzwgTe7NErJHbm9oovnoUgNThvcTVmTc7Yb"
 			o.color="#ff9900";
-			o.edge="#666666";
-			o.size=20;
-			sd.mobs.push(o);s
-		}
+			o.edge="#666";
+			o.row=1;
+			sd.mobs.push(o);
+
+			o={};
+			o.marker="dot";
+			o.start="5/16/1907";
+			o.vis=1;
+			o.geoRef="-86.15,39.76,20,0";
+			o.title="Publishes sermon";
+			o.desc="Robinson publishes sermon synopsis, \"Peacocks and Apes,\" with antilynching commentary";
+			o.pic="http://cache3.asset-cache.net/gc/3324589-18th-november-1876-a-negro-preacher-and-his-gettyimages.jpg?v=1&c=IWSAsset&k=2&d=Ii%2B0Kt7D5sFp80jNN4JI45PlsvacwrzwgTe7NErJHbm9oovnoUgNThvcTVmTc7Yb"
+			o.color="#ff9900";
+			o.edge="#666";
+			o.row=1;
+			sd.mobs.push(o);
+
+			sd.timeSegments=[ 	{start:tln.DateToTime("1862"), end:tln.DateToTime("1886"), title:"Winchester", col:"#ccc"},
+								{start:tln.DateToTime("1886"), end:tln.DateToTime("1889"), title:"New York", col:"#ccc"},
+								{start:tln.DateToTime("1889"), end:tln.DateToTime("1898"), title:"Charlottesville", col:"#ccc"},
+								{start:tln.DateToTime("1898"), end:tln.DateToTime("1902"), title:"Boston", col:"#ccc"},
+								{start:tln.DateToTime("1902"), end:tln.DateToTime("1906"), title:"Connecticut", col:"#ccc"},
+								{start:tln.DateToTime("1906"), end:tln.DateToTime("1910"), title:"Indiana", col:"#ccc"},
+								{start:tln.DateToTime("1910"), end:tln.DateToTime("1922"), title:"Traveling", col:"#ccc"}];
+		
+			}
 
 		for (i=0;i<sd.mobs.length;++i) {									// For each mob	
 			o=sd.mobs[i];													// Point at mob
-			if (o.marker) {													// If a marker spec'd
+			if (o.start)	o.start=tln.DateToTime(o.start);				// Convert date to time
+			if (o.end)		o.end=tln.DateToTime(o.end);					// Convert date to time
+			
+			if (o.marker && o.geoRef) {										// If a marker spec'd AND a georef
 				if (o.marker.match(/drive\.google/i)) {						// An drive file
 					var id=o.marker.match(/id=(.+)&/);						// Extract id
 					if (id)	{												// An id found
@@ -197,7 +260,7 @@
 					}
 				else if (o.marker.match(/\.png|.gif|\.jpg|\.jpeg/i)) {		// An image file
 					o.type="image";											// Set type
-					o.id=mps.AddImageLayer(o.marker,o.geoRef);				// Add image layer								 
+					o.id=mps.AddImageLayer(o.marker,o.geoRef, o.opacity);	// Add image layer								 
 					}
 				else{ 														// Must be an icon
 					o.type="icon";											// Set type
@@ -208,13 +271,15 @@
 					o.spaceColor  ?	s.f=o.spaceColor  : s.f=o.color;			
 					o.spaceEdge   ?	s.s=o.spaceEdge   : s.s=o.edge;				
 					o.spaceSize   ?	s.w=o.spaceSize   : s.w=o.size;				
-					o.spaceTextCol  ? s.tc=o.spaceTextCol  : s.tc=o.textCol;				
-					o.spaceTextFont ? s.tf=o.spaceTextFont : s.tf=o.font;				
+					o.spaceTextCol  ? s.tc=o.spaceTextCol  : s.tc=sd.spaceTextCol;				
+					o.spaceTextFont ? s.tf=o.spaceTextFont : s.tf=sd.spaceTextFont;				
 					o.spaceOpacity  ? s.a=o.spaceOpacity   : s.a=o.opacity;				
 					mps.AddMarkerLayer(o.geoRef,s,i);						// Add marker to overlays
 					}
 				}
 			}
+
+		tln.InitTimeline("bottomDiv",sd);									// Initialize timeline
 		}
 
 	function Draw(time)
@@ -300,7 +365,7 @@
 
 
 
-mps.Goto("-79.91,32.79,10000")
+mps.Goto("-80.00,38.41,1500")
 mps.ShowLayers([0,1],true);
 
 $("#testing").on("change", function() {
@@ -323,7 +388,6 @@ $(this).val(0)
 		mps=new Space;															// Alloc map module
 		mps.InitMap("leftDiv");													// Init map
 		tln=new Timeline;														// Alloc time module
-		tln.InitTimeline("bottomDiv");											// Init timeline
 		InitProject();															// Init project
 		ResizePanes();															// Resize panes
 		if (drupalMan) 															// If called from Drupal manager
@@ -343,6 +407,7 @@ $(this).val(0)
 
 	function shivaEventHandler(e)											// ON SHIVA EVENT
 	{
+		trace(e)
 		var str,i;
 	}
 
@@ -395,7 +460,7 @@ $(this).val(0)
 	}
 
 	
-	function GetTextBox(title, content, def, callback)					// GET TEXT LINE BOX
+	function GetTextBox(title, content, def, callback)						// GET TEXT LINE BOX
 	{
 		Sound("click");															// Ding sound
 		$("#alertBoxDiv").remove();												// Remove any old ones

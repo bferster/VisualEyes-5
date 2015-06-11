@@ -12,11 +12,11 @@ function Space()														// CONSTRUCTOR
   	Styling of popups dependent on css: .spacePopup*.*
 
 */
- 
- 	this.controlKey=this.shiftKey=false;									// Shift/control key flags
+  	this.controlKey=this.shiftKey=false;									// Shift/control key flags
 	this.showBoxes=false;													// Show boxes
 	this.showRoads=false;													// Hide Roads/borders
 	this.showScale=true;													// Show scale
+	this.timeFormat="Mon Day, Year";										// Default time format
 	Sound("click","init");													// Init sound
 	Sound("ding","init");													// Init sound
 	Sound("delete","init");													// Init sound
@@ -217,9 +217,16 @@ Space.prototype.ShowLayers=function(indices, mode)						// HIDE/SHOW LAYER(s)
 */
 
 	var i;
-	for (i=0;i<indices.length;++i) 											// For each index
-		if ((indices[i] >= 0) && (indices[i] < this.overlays.length))		// If in range
-			this.overlays[indices[i]].vis=mode;								// Set vis       
+	for (i=0;i<indices.length;++i) { 										// For each index
+		if ((indices[i] >= 0) && (indices[i] < this.overlays.length)) {		// If in range
+			a=this.overlays[indices[i]].alpha;								// Get alpha
+			trace(this.overlays[indices[i]])
+			if (mode)														// If showing
+				this.overlays[indices[i]].vis=a ? a : 1;					// Set vis
+			else
+				this.overlays[indices[i]].vis=0;							// Set vis
+			}       
+		}
 	this.DrawMapLayers();													// Do it
 }
 
@@ -275,7 +282,7 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 						tf: {string} text format
  */
 
-	var i;
+	var i,w2=8;
 	if (sty.f) {															// If fill spec'd
 	  	if (sty.f.length == 4) sty.f+=sty.f.substr(1,3);					// Turn #555 into #55555
 	  	r=parseInt("0x"+sty.f.substr(1,2),16);								// R
@@ -290,12 +297,13 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 		b=parseInt("0x"+sty.s.substr(5,2),16);								// B
   		var stroke=new ol.style.Stroke({ color: [r,g,b,sty.a ? sty.a : 1], width:1 });	// Create stroke with alpha & width
 		}	
- 	var w2=sty.w/2;															// Half width
 
- 	switch(sty.m) {															// Route on marker style
+ 	if (sty.w)	w2=sty.w/2;													// If spec'd use it																
+
+	switch(sty.m) {															// Route on marker style
  		case "dot":
 			var image=new ol.style.Circle({									
-	    		radius: w2, fill: fill, stroke:stroke
+	    		radius: w2*3/4, fill: fill, stroke:stroke
 	  			});
 	  		break;
 		case "square":
@@ -305,7 +313,7 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 	  		break;
 		case "star":
 			var image=new ol.style.RegularShape({								
-  	  			radius: w2, fill: fill, stroke:stroke, points: 5, radius2:sty.w/4
+  	  			radius: w2, fill: fill, stroke:stroke, points: 5, radius2: w2/2
   				});
  	  		break;
 		case "diamond":
@@ -333,14 +341,9 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 	    		radius: w2, fill: fill, stroke:stroke, points: 3,angle: -Math.PI/2
 	 			});
 	  		break;
-		case "crosshair":
+		case "cross":
 			var image=new ol.style.RegularShape({								
 	    		radius: w2, fill: fill, stroke:stroke, points: 4, radius2: 1, angle: 0
-	  			});
-	  		break;
-		case "cross":
-			var image=new ol.style.RegularShape({							
-	    		radius: w2, fill: fill, stroke:stroke, points: 4, radius2: sty.w/6, angle: 0
 	  			});
 	  		break;
 	  		}
@@ -352,6 +355,7 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 		font: sty.tf,														// Set font
 		text: sty.t,														// Get label
 		fill: new ol.style.Fill({color: sty.tc }),							// Set color
+		stroke: new ol.style.Stroke({color: "#666", width:1 }),				// Outline
 		offsetY: w2,														// Set offset
 		});  
    	var s=new ol.style.Style({												// Create new style
@@ -462,7 +466,7 @@ Space.prototype.StyleKMLFeatures=function(num, styles)					// STYLE KML FEATURE(
 }
 
 
-Space.prototype.AddImageLayer=function(url, geoRef) 						// ADD MAP IMAGE TO PROJECT
+Space.prototype.AddImageLayer=function(url, geoRef, alpha) 				// ADD MAP IMAGE TO PROJECT
 {    
 
 /* 
@@ -477,6 +481,7 @@ Space.prototype.AddImageLayer=function(url, geoRef) 						// ADD MAP IMAGE TO PR
  	o.type="image";															// Image
  	o.vis=0;																// Visible
     o.src=new MapImage(url,geoRef,this);									// Alloc mapimage obj
+	o.alpha=alpha;															// Save alpha
 	this.overlays.push(o);													// Add layer
 	mps.loadCounter++;														// Add to count
 
@@ -591,6 +596,9 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
   					if (o.pic) 			var pic=o.pic;						// Lead with pic
   					if (o.spacePic) 	var title=o.spacePic;				// Space over-rides
       				_this.ShowPopup(evt.pixel[0],evt.pixel[1],title,desc,pic,o.start);
+					trace(o.goto)
+					if (o.goto)												// If a goto defined
+						_this.Goto(o.goto);									// Go there
 					}
 			  	} 
 			else 															// No feature found
@@ -634,8 +642,10 @@ Space.prototype.ShowPopup=function(x,y, title, desc, pic, date)			// SHOW POPUP
 	var str="<div id='st-popup' class='spacePopup'>";						// Add message
 	if (title)																// If title set
 		str+="<div class='spacePopupTitle'><b>"+title+"</b>";				// Add it
-	if (date)																// If date set
+	if (date) {																// If date set
+		date=this.FormatTime(date);											// Format time to date
 		str+="<span class='spacePopupDate'>"+date+"</span>";				// Add it
+		}
 	str+="</div><table style='width:100%'><tr>";
 	if (pic) 																// If pic set
 		str+="<td style='vertical-align:top'><img id='poppic' src='"+pic+"' class='spacePopupPic'></td>";	// Add image
@@ -688,4 +698,32 @@ Space.prototype.ShowProgress=function()									// SHOW RESORCE LOAD PROGRESS
 	if (this.loadCounter)													// If stuff to load
 		str=this.loadCounter+" resources to load";							// Set progress
 	$("#SloadProgress").text(str);											// Show status
- }					
+ }	
+ 
+ 
+ Space.prototype.FormatTime=function(time, format) 						// FORMAT TIME TO DATE
+{
+/* 	
+	Format time int human readable format
+ 	@param {number} time number of ms += 1/1/1970
+	@param {string} format type of format. If not set, this.timeFormat is used.
+	@return {string} time formatted at date.
+*/
+	var str;
+	var mos=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+	d=new Date(time*36000000);												// Convert minutes to ms
+	if (!format)															// If no format spec'd
+		format=this.timeFormat;												// Use global format
+	if (format == "Mo/Year") 												// 1/1900
+		str=(d.getMonth()+1)+"/"+d.getFullYear();							// Set it
+	else if (format == "Mo/Day/Year") 										// 1/1/1900
+		str=(d.getMonth()+1)+"/"+(d.getDay()+1)+"/"+d.getFullYear();		// Set it
+	else if (format == "Mon Year") 											// Jan 1900
+		str=mos[d.getMonth()]+" "+d.getFullYear();							// Set it
+	else if (format == "Mon Day, Year") 									// Jan 1, 1900
+		str=mos[d.getMonth()]+" "+(d.getDay()+1)+", "+d.getFullYear();		// Set it
+	else																	// Default to only year
+		str=d.getFullYear();												// Set it
+ 	return str;																// Return formatted date
+}
+				

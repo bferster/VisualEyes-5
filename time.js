@@ -12,6 +12,7 @@ function Timeline()														// CONSTRUCTOR
 
 */
 
+	var sd={};
 	this.start=this.DateToTime("1862")
 	this.end=this.DateToTime("1922")
 	this.timeColor="#009900";
@@ -26,15 +27,8 @@ function Timeline()														// CONSTRUCTOR
 	this.segmentColor="#ccc";
 	this.playerSpeed=5000;
 	this.curSeg=-1;
-	this.timeSegments=[ {start:this.DateToTime("1862"), end:this.DateToTime("1886"), title:"Winchester", col:"#ccc"},
-						{start:this.DateToTime("1886"), end:this.DateToTime("1889"), title:"New York", col:"#ccc"},
-						{start:this.DateToTime("1889"), end:this.DateToTime("1892"), title:"Charlottesville", col:"#ccc"},
-						{start:this.DateToTime("1892"), end:this.DateToTime("1898"), title:"Pennsylvania", col:"#ccc"},
-						{start:this.DateToTime("1898"), end:this.DateToTime("1902"), title:"Boston", col:"#ccc"},
-						{start:this.DateToTime("1902"), end:this.DateToTime("1906"), title:"Connecticut", col:"#ccc"},
-						{start:this.DateToTime("1906"), end:this.DateToTime("1910"), title:"Indiana", col:"#ccc"},
-						{start:this.DateToTime("1910"), end:this.DateToTime("1922"), title:"Traveling", col:"#ccc"}];
-
+	this.hastimeView=true
+	
 	this.curTime=this.curStart=this.start;									// Set start
 	this.curEnd=this.end;													// Set end
 	if (this.sound) {														// If clicking
@@ -44,20 +38,21 @@ function Timeline()														// CONSTRUCTOR
 		}
 }
 
-Timeline.prototype.InitTimeline=function(div)							// INIT TIMELINE
+Timeline.prototype.InitTimeline=function(div, data)						// INIT TIMELINE
 {
 /* 
   	Init library and connect to div
   	@param {string} div div to draw timeline into
  */
+	this.sd=data;															// Point at setting and data
 	this.div="#"+div;														// Current div selector
 	if (this.hasTimeBar) 													// If a timebar
 		this.AddTimeBar();													// Add it
 	if (this.playerSpeed) 													// If it has player
 		this.AddPlayer();													// Add them
-	if (this.timeSegments) 													// If it has time segments
+	if (this.sd.timeSegments) 												// If it has time segments
 		this.AddTimeSegments();												// Add them
-	this.UpdateTimeline();												// Resize 
+	this.UpdateTimeline();													// Resize 
 }	
 
 
@@ -98,11 +93,12 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 			}		
 		}	
 
-	if (this.timeSegments) {												// If segments
-		w-=(this.timeSegments.length-1)*2;									// Remove spaces between segs
+	var ts=this.sd.timeSegments;											// Point at time segments
+	if (ts) {																// If segments
+		w-=(ts.length-1)*2;													// Remove spaces between segs
 		x=(this.hasTimeBar) ? $("#timeSlider").offset().left : m;			// Starting point
-		for (i=0;i<this.timeSegments.length;++i) { 							// For each seg
-			w2=this.timeSegments[i].pct*w;									// Width
+		for (i=0;i<ts.length;++i) { 										// For each seg
+			w2=ts[i].pct*w;													// Width
 			$("#timeseg"+i).css({ left:x+"px",width:w2+"px" });				// Position and size
 			x+=w2+2;														// Advance
 			}
@@ -123,8 +119,8 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 		e=this.end-0;														// Get end
 		}
 	else{																	// Showing  segment
-		s=this.timeSegments[this.curSeg].start-0;							// Get start
-		e=this.timeSegments[this.curSeg].end-0;								// Get end
+		s=ts[this.curSeg].start-0;											// Get start
+		e=ts[this.curSeg].end-0;											// Get end
 		}
 	$("#timeStart").html(this.FormatTime(s)+"&nbsp;&nbsp;&nbsp;");			// Set start
 	$("#timeEnd").html("&nbsp;&nbsp;&nbsp;"+this.FormatTime(e)); 			// Set end
@@ -132,13 +128,12 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 	$("#ticklab3").html(this.FormatTime(s+(e-s)/2));						// Add label div
 	$("#ticklab5").html(this.FormatTime(s+(e-s)/4*3));						// Add label div
 	$("#timeSlider").slider("option",{min:s,max:e,value:s}); 				// Set slider
- 	if (this.hasTimeBar)													// If a timebar
- 		x=$($('#timeSlider').children('.ui-slider-handle')).offset().left-67;  // Current slider position    			
- 	$("#sliderTime").css({left:x+"px"})										// Position time slider text
 
 	this.curStart=s;														// Save start
 	this.curEnd=e;															// Save end
 	this.curDur=e-s;														// Save duration
+	this.curTime=Math.min(Math.max(this.curTime,s),e);						// Cap at at bounds
+	this.Goto(this.curTime);												// Go there
 }
 
 
@@ -277,23 +272,24 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 	var i,str;
 	var _this=this;															// Save context for callback
 	var dur=this.end-this.start;
+	var ts=this.sd.timeSegments;											// Point at segments
 	str="<div id='segmentBar' style='position:absolute'>"					// Enclosing div
-	for (i=0;i<this.timeSegments.length;++i) { 								// For each tick
-		this.timeSegments[i].pct=(this.timeSegments[i].end-this.timeSegments[i].start)/dur;	// Calc percentage
+	for (i=0;i<ts.length;++i) { 											// For each tick
+		ts[i].pct=(ts[i].end-ts[i].start)/dur;								// Calc percentage
 		str+="<div class='time-seg' id='timeseg"+i+"' ";					// Add div
 		str+="style='color:"+this.segmentTextColor+";background-color:"+this.segmentColor+"'>";
-		str+=this.timeSegments[i].title+"</div>";							// Add title
+		str+=ts[i].title+"</div>";											// Add title
 		}	
 	str+="<div class='time-seg' id='timeseg"+i+"' ";						// Add div
 	str+="style='color:"+this.segmentTextColor+";background-color:#acc3db'>";
 	str+="&nbsp;&nbsp;&nbsp;Show all&nbsp;&nbsp;&nbsp;</div>";				// Add All
 	$(this.div).append(str+"</div>");										// Add segment bar				
 	$("#timeseg0").css({"border-top-left-radius":"10px","border-bottom-left-radius":"10px"});
-	$("#timeseg"+(this.timeSegments.length-1)).css({"border-top-right-radius":"10px","border-bottom-right-radius":"10px"});
-	$("#timeseg"+(this.timeSegments.length)).css({"border-top-left-radius":"10px","border-bottom-left-radius":"10px"});
-	$("#timeseg"+(this.timeSegments.length)).css({"border-top-right-radius":"10px","border-bottom-right-radius":"10px"});
+	$("#timeseg"+(ts.length-1)).css({"border-top-right-radius":"10px","border-bottom-right-radius":"10px"});
+	$("#timeseg"+(ts.length)).css({"border-top-left-radius":"10px","border-bottom-left-radius":"10px"});
+	$("#timeseg"+(ts.length)).css({"border-top-right-radius":"10px","border-bottom-right-radius":"10px"});
 	
-	for (i=0;i<this.timeSegments.length+1;++i) { 							// For each segment
+	for (i=0;i<ts.length+1;++i) { 											// For each segment
 
 		$("#timeseg"+i).hover(												// ON SEG HOVER
 			function(){ $(this).css("color","#999")},						// Highlight
@@ -301,22 +297,25 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 			);
 		
 		$("#timeseg"+i).click( function(e) {								// ON SEG CLICK
-			var i,s,e;
+			var i;
 			var id=e.target.id.substr(7);									// Get ID
 			if (_this.sound)												// If clicking
 				Sound("click");												// Click sound
-			for (i=0;i<_this.timeSegments.length+1;++i)  					// For each segment
+			for (i=0;i<ts.length+1;++i)  									// For each segment
 				$("#timeseg"+i).css({"background-color":"#ccc"});			// Clear it
 			$(this).css({"background-color":"#acc3db" });					// Highlight picked one
-			if (id < _this.timeSegments.length)								// If a seg
+			var s=_this.start;												// Assume timeline start
+			if (id < ts.length)	{											// If a seg
 				_this.curSeg=id;											// Its current
+				s=ts[id].start;												// Start at segment start
+				}
 			else															// All button
 				_this.curSeg=-1;											// Flag all
+			_this.curTime=s;
 			_this.UpdateTimeline();											// Redraw timeline
 			});
 		}
 }
-
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -330,9 +329,9 @@ Timeline.prototype.Goto=function(time, segment)							// SET TIME AND [SEGMENT]
 	Got to time and maybe change segment
  	@param {number} time time to goto mumber of mins += 1/1/1970
 */
-	if (segment != undefined && this.timeSegments) {						// If setting a segment
+	if (segment != undefined && this.sd.timeSegments) {						// If setting a segment
 		if (segment < 0)													// If all button
-			segment=this.timeSegments.length+1;								// Set to last
+			segment=this.sd.timeSegments.length+1;							// Set to last
 		$("#timeseg"+segment).trigger();									// Trigger click
 		}
 	$("#timeSlider").slider("option","value",time);							// Trigger slider
@@ -374,7 +373,7 @@ Timeline.prototype.Play=function(start) 								// PLAY TIMELINE
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-Timeline.prototype.FormatTime=function(time, format) 					// UPDATE TIMELINE PANES
+Timeline.prototype.FormatTime=function(time, format) 					// FORMAT TIME TO DATE
 {
 /* 	
 	Format time int human readable format
@@ -398,18 +397,25 @@ Timeline.prototype.FormatTime=function(time, format) 					// UPDATE TIMELINE PAN
 	else																	// Default to only year
 		str=d.getFullYear();												// Set it
  	return str;																// Return formatted date
-
 }
 
-Timeline.prototype.DateToTime=function(date) 							// CONVERT DATE TO MINS +/- 1960
+Timeline.prototype.DateToTime=function(dateString) 						// CONVERT DATE TO MINS +/- 1960
 {
 /* 	
 	Format time int human readable format
  	@param {number} 
 	@return {string} number of mins += 1/1/1970
 */
+	if (!dateString)														// No date
+		return 0;															// Quit
 	var d=new Date();														// Make new date
-	d.setFullYear(date);													// Set it to time
+	var v=(dateString+"").split("/");										// Split date into parts
+	if (v.length == 3)														// Mon/Day/Year
+		d.setFullYear(v[2],v[0]-1,v[1]);									// Set it to time
+	else if (v.length == 2)													// Mon/Year
+		d.setFullYear(v[1],v[0]-1);											// Set it to time
+	else																	// Year
+		d.setFullYear(v[0]);												// Set it to time
  	var time=d.getTime()/36000000;											// Conver ms to minutes
   	return time;															// Return minutes +/- 1970
 
