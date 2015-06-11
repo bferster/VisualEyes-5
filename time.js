@@ -180,8 +180,9 @@ Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
 	function ShowTime(x, time) {											// SHOW TIME AT HANDLE
 		if ((_this.sliderTime == "Top") || (_this.sliderTime == "Bottom")){ // If showing date
   			_this.curTime=time												// Set now
-   			var y=(_this.sliderTime == "Top") ? -22 : 26;					// Top or bottom
- 			$("#sliderTime").html(_this.FormatTime(time));					// Show value
+  			_this.SendMessage("time",_this.curTime+"|scroll");				// Send new time
+  			var y=(_this.sliderTime == "Top") ? -22 : 26;					// Top or bottom
+			$("#sliderTime").html(_this.FormatTime(time));					// Show value
  			$("#sliderTime").css({top:y+"px",left:x-66+"px"})				// Position text
  			}
 		}
@@ -308,6 +309,8 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 			if (id < ts.length)	{											// If a seg
 				_this.curSeg=id;											// Its current
 				s=ts[id].start;												// Start at segment start
+				if (ts[id].click && ts[id].click.match(/geo:/))				// If a geo set
+					_this.SendMessage("geo",ts[id].click.substr(4));		// Move map
 				}
 			else															// All button
 				_this.curSeg=-1;											// Flag all
@@ -337,7 +340,7 @@ Timeline.prototype.Goto=function(time, segment)							// SET TIME AND [SEGMENT]
 	$("#timeSlider").slider("option","value",time);							// Trigger slider
 	var x=$($("#timeSlider").children('.ui-slider-handle')).offset().left;	// Get pos       			
 	this.curTime=time														// Set now
-	Draw(time);																// Redraw project
+	this.SendMessage("time",this.curTime+"|goto");							// Send new time
 	if ((this.sliderTime == "Top") || (this.sliderTime == "Bottom")){ 		// If showing date
 		var y=(this.sliderTime == "Top") ? -22 : 26;						// Top or bottom
 		$("#sliderTime").html(this.FormatTime(time));						// Show value
@@ -421,3 +424,13 @@ Timeline.prototype.DateToTime=function(dateString) 						// CONVERT DATE TO MINS
 
 }
 
+Timeline.prototype.SendMessage=function(cmd, msg) 						// SEND MESSAGE
+{
+	var str="Time="+cmd;													// Add src and window						
+	if (msg)																// If more to it
+		str+="|"+msg;														// Add it
+	if (window.parent)														// If has a parent
+		window.parent.postMessage(str,"*");									// Send message to parent wind
+	else																	// Local	
+		window.postMessage(str,"*");										// Send message to wind
+}

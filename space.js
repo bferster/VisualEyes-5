@@ -106,8 +106,7 @@ Space.prototype.InitMap=function(div)									// INIT OPENLAYERS MAP
 		var c=ol.proj.transform(o.getCenter(),_this.curProjection,'EPSG:4326');	// Get center
 		var pos=Math.floor(c[1]*10000)/10000+"|"+Math.floor(c[0]*10000)/10000+"|"+o.getZoom()+"|";	
 		pos+=Math.floor((o.getRotation()*180/Math.PI)*1000)/-1000;			// Rotation
-		if (SendShivaMessage)												// If function spec'sd
-			SendShivaMessage("Space=move",pos);								// Send that view has changed
+		_this.SendMessage("move",pos+"|scroll");							// Send that view has changed
 		});
 	}	
 
@@ -220,7 +219,6 @@ Space.prototype.ShowLayers=function(indices, mode)						// HIDE/SHOW LAYER(s)
 	for (i=0;i<indices.length;++i) { 										// For each index
 		if ((indices[i] >= 0) && (indices[i] < this.overlays.length)) {		// If in range
 			a=this.overlays[indices[i]].alpha;								// Get alpha
-			trace(this.overlays[indices[i]])
 			if (mode)														// If showing
 				this.overlays[indices[i]].vis=a ? a : 1;					// Set vis
 			else
@@ -596,7 +594,7 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
   					if (o.pic) 			var pic=o.pic;						// Lead with pic
   					if (o.spacePic) 	var title=o.spacePic;				// Space over-rides
       				_this.ShowPopup(evt.pixel[0],evt.pixel[1],title,desc,pic,o.start);
-					trace(o.goto)
+					_this.SendMessage("time",o.start);						// Send new time
 					if (o.goto)												// If a goto defined
 						_this.Goto(o.goto);									// Go there
 					}
@@ -701,7 +699,7 @@ Space.prototype.ShowProgress=function()									// SHOW RESORCE LOAD PROGRESS
  }	
  
  
- Space.prototype.FormatTime=function(time, format) 						// FORMAT TIME TO DATE
+Space.prototype.FormatTime=function(time, format) 						// FORMAT TIME TO DATE
 {
 /* 	
 	Format time int human readable format
@@ -727,3 +725,13 @@ Space.prototype.ShowProgress=function()									// SHOW RESORCE LOAD PROGRESS
  	return str;																// Return formatted date
 }
 				
+Space.prototype.SendMessage=function(cmd, msg) 							// SEND MESSAGE
+{
+	var str="Space="+cmd;													// Add src and window						
+	if (msg)																// If more to it
+		str+="|"+msg;														// Add it
+	if (window.parent)														// If has a parent
+		window.parent.postMessage(str,"*");									// Send message to parent wind
+	else																	// Local	
+		window.postMessage(str,"*");										// Send message to wind
+}

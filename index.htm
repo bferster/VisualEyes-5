@@ -154,13 +154,11 @@
 			o.end="1889";
 			o.geoRef="39.228788398479615,39.149512265542775,-78.09690370109803,-78.19686447861471,0";
 			o.vis=1;
-			o.opacity=.5;
 			sd.mobs.push(o);
 
 			o={};
 			o.marker="test.kml";
 //			o.marker="https://drive.google.com/open?id=0B4hdE1_3ZElJLUlRSWhoNkdSRFk&authuser=0"
-			
 			o.start=1665;
 			o.end=1665;
 			o.vis=1;
@@ -230,7 +228,7 @@
 			o.row=1;
 			sd.mobs.push(o);
 
-			sd.timeSegments=[ 	{start:tln.DateToTime("1862"), end:tln.DateToTime("1886"), title:"Winchester", col:"#ccc"},
+			sd.timeSegments=[ 	{start:tln.DateToTime("1862"), end:tln.DateToTime("1886"), title:"Winchester", col:"#ccc", click:"geo:-78.16,39.19,3"},
 								{start:tln.DateToTime("1886"), end:tln.DateToTime("1889"), title:"New York", col:"#ccc"},
 								{start:tln.DateToTime("1889"), end:tln.DateToTime("1898"), title:"Charlottesville", col:"#ccc"},
 								{start:tln.DateToTime("1898"), end:tln.DateToTime("1902"), title:"Boston", col:"#ccc"},
@@ -396,7 +394,7 @@ $(this).val(0)
 
 	function SendShivaMessage(src, msg) 									// SEND SHIVA MESSAGE 
 	{
-		var str=src+"|show";													// Add src and window						
+		var str=src;															// Add src and window						
 		if (msg)																// If more to it
 			str+="|"+msg;														// Add it
 		if (window.parent)														// If has a parent
@@ -407,8 +405,18 @@ $(this).val(0)
 
 	function shivaEventHandler(e)											// ON SHIVA EVENT
 	{
-		trace(e)
-		var str,i;
+		var v;
+//		trace(e.data);
+		if (e.data && e.data.match(/Space=/)) {									// If a space event
+			v=e.data.split("|");												// Split into parts
+			if (e.data.match(/=time/))											// Set time
+				tln.Goto(v[1]);													// Move timeline
+			}
+		else if (e.data && e.data.match(/Time=/)) {								// If a time event
+			v=e.data.split("|");												// Split into parts
+			if (e.data.match(/=geo/))											// Set position
+				mps.Goto(v[1])													// Move map
+			}
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
