@@ -34,7 +34,7 @@ Space.prototype.InitMap=function(div)									// INIT OPENLAYERS MAP
 	this.showBoxes=false;													// Show boxes
 	this.showRoads=false;													// Hide Roads/borders
 	this.showScale=true;													// Hide or show scale
-	this.baseLayer="Roadmap";												// Default layer
+	this.baseLayer="Roadmap";													// Default layer
 	this.curProjection="EPSG:3857";											// Current projection
 	this.div="#"+div;														// Current div selector
 	
