@@ -148,7 +148,7 @@
 		if (!data) {
 			sd.spaceTextCol="#ffffff";
 			sd.spaceTextFont="bold 12px sans-serif ";
-			sd.baseMap="WaterColor";
+			sd.baseMap="Roadmap";
 			
 			var o={};
 			o.marker="//www.viseyes.org/visualeyes/projects/WinchesterMap.jpg";
@@ -279,6 +279,7 @@
 				}
 			}
 
+		mps.SetBaseMap(sd.baseMap);											// Set basemap layer
 		tln.InitTimeline("bottomDiv",sd);									// Initialize timeline
 		}
 

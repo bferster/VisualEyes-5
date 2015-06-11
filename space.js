@@ -34,7 +34,6 @@ Space.prototype.InitMap=function(div)									// INIT OPENLAYERS MAP
 	this.showBoxes=false;													// Show boxes
 	this.showRoads=false;													// Hide Roads/borders
 	this.showScale=true;													// Hide or show scale
-	this.baseLayer="Roadmap";													// Default layer
 	this.curProjection="EPSG:3857";											// Current projection
 	this.div="#"+div;														// Current div selector
 	
@@ -94,8 +93,7 @@ Space.prototype.InitMap=function(div)									// INIT OPENLAYERS MAP
           		minZoom: 2, maxZoom: 16, zoom: 3 })
 		});
 
-   	for (i=0;i<this.layers.length;++i) 										// For each layer
-	    this.layers[i].set('visible',this.layers[i].get("title") == this.baseLayer); // Set visibility
+	this.SetBaseMap("Roadmap");												// Set basemap
   	this.CreateOverlayLayer();												// Canvas and vector layer for map overlays
   	this.InitPopups();														// Init popup layer
   	var _this=this;															// Save context for callback
@@ -111,7 +109,7 @@ Space.prototype.InitMap=function(div)									// INIT OPENLAYERS MAP
 	}	
 
 
-Space.prototype.UpdateMapSize=function() 								// UPAFE MAP SIZE
+Space.prototype.UpdateMapSize=function() 								// UPDATE MAP SIZE
 {
 
 /* 
@@ -121,6 +119,22 @@ Space.prototype.UpdateMapSize=function() 								// UPAFE MAP SIZE
 	if (this.map)															// If OL initted
 		mps.map.updateSize();												// Update map
 }
+
+
+Space.prototype.SetBaseMap=function(newMap) 							// SET BASE MAP
+{
+
+/* 
+  	Set base map
+  	@param {string} 	newMap	Name of map layer to show
+  
+*/
+	if (this.map)															// If OL initted
+   		for (i=0;i<this.layers.length;++i) 									// For each layer
+	    	this.layers[i].set('visible',this.layers[i].get("title") == newMap); // Set visibility
+}
+
+
 
 
 Space.prototype.Goto=function(pos)										// SET VIEWPOINT
@@ -211,7 +225,7 @@ Space.prototype.ShowLayers=function(indices, mode)						// HIDE/SHOW LAYER(s)
 { 
 	
 /* 
-  	@param {array} 	indices An array of indices specifying the layer(s) to hide or show.
+  	@param {array} 		indices An array of indices specifying the layer(s) to hide or show.
  	@param {boolean}	mode true to show, false to hide.
 */
 
