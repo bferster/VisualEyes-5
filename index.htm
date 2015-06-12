@@ -41,7 +41,7 @@
 							}
 		.time-timeslider.ui-slider .ui-slider-handle {
 							height:30px;width:8px;margin-top:-8px;
-							background:#009900;border:none;cursor:pointer
+							background:#009900;border:none;cursor:pointer;
 							}
 		.time-slidertime { 	position:absolute;width:100px;text-align:center;
 							}
@@ -49,7 +49,7 @@
 							}
 		.time-ticklabel { 	position:absolute;width:100px;text-align:center;color:#999
 							}
-		.time-timeplayer { 	position:absolute;color:#999;margin-left:18px;margin-right:18px;width:141px;
+		.time-timeplayer { 	position:absolute;color:#999;margin-left:18px;margin-right:18px;width:123px;
 							}
 
 		.time-playerslider{ background:#ccc;height:4px;width:80px;border:none;display:inline-block;
@@ -62,24 +62,26 @@
 							border-left: 5px solid transparent;border-right: 5px solid transparent;
 							border-bottom: 8px solid #999;
 							}
-		.ve-unselectable { -moz-user-select: none;     -khtml-user-select: none;
-		   			 	-webkit-user-select: none;  	-ms-user-select: none;   user-select: none;
-						}
-		.ve-base { 		position:absolute;height:100%;width:100%;
-						}	
-		.ve-left { 		}	
-		.ve-right { 	background-color:#eee;overflow-y:auto;
-						}	
-		.ve-bottom { 	background-color:#eee;width:100%;
-						}	
-		.ve-splash { 	text-align:center;vertical-align:center;pointer-events:none;
-						}
-		.ve-is {		border-radius:10px;padding-left:8px;padding-right:8px;padding-top:1px;
-						border:1px solid #999;font-size:12px;height;20px;width:200px;
-						}
-		.ve-bs {		border-radius:10px;padding-left:8px;padding-right:8px;padding-top:1px;
-						border:1px solid #999;font-size:12px;height;20px;color:#666;
-						}
+		.time-timeview { 	position:absolute;color:#666;overflow:hidden;width:100%;
+							}
+		.ve-unselectable { 	-moz-user-select: none;     -khtml-user-select: none;
+		   			 		-webkit-user-select: none;  	-ms-user-select: none;   user-select: none;
+							}
+		.ve-base { 			position:absolute;height:100%;width:100%;
+							}	
+		.ve-left { 			}	
+		.ve-right { 		background-color:#eee;overflow-y:auto;
+							}	
+		.ve-bottom { 		background-color:#eee;width:100%;
+							}	
+		.ve-splash { 		text-align:center;vertical-align:center;pointer-events:none;
+							}
+		.ve-is {			border-radius:10px;padding-left:8px;padding-right:8px;padding-top:1px;
+							border:1px solid #999;font-size:12px;height;20px;width:200px;
+							}
+		.ve-bs {			border-radius:10px;padding-left:8px;padding-right:8px;padding-top:1px;
+							border:1px solid #999;font-size:12px;height;20px;color:#666;
+							}
 
  	</style>
 
@@ -151,7 +153,7 @@
 			sd.baseMap="Roadmap";
 			
 			var o={};
-			o.marker="//www.viseyes.org/visualeyes/projects/WinchesterMap.jpg";
+			o.spaceMarker="//www.viseyes.org/visualeyes/projects/WinchesterMap.jpg";
 			o.start="1862";
 			o.end="1889";
 			o.geoRef="39.228788398479615,39.149512265542775,-78.09690370109803,-78.19686447861471,0";
@@ -159,10 +161,9 @@
 			sd.mobs.push(o);
 
 			o={};
-			o.marker="test.kml";
-//			o.marker="https://drive.google.com/open?id=0B4hdE1_3ZElJLUlRSWhoNkdSRFk&authuser=0"
-			o.start=1665;
-			o.end=1665;
+			o.spaceMarker="test.kml";
+//			o.spaceMarker="https://drive.google.com/open?id=0B4hdE1_3ZElJLUlRSWhoNkdSRFk&authuser=0"
+			o.start="1880";
 			o.vis=1;
 			sd.mobs.push(o);
 			
@@ -177,7 +178,7 @@
 			o.goto="-78.16,39.19,3";
 			o.color="#ff9900";
 			o.edge="#666";
-			o.row=1;
+			o.row=2;
 			sd.mobs.push(o);
 	
 			o={};
@@ -190,7 +191,7 @@
 			o.pic="http://www.artvalue.com/photos/auction/0/50/50908/mcnulty-william-c-1889-1963-us-towers-in-the-sky-new-york-3005289.jpg";
 			o.color="#ff9900";
 			o.edge="#666";
-			o.row=1;
+			o.row=3;
 			sd.mobs.push(o);
 
 			o={};
@@ -201,7 +202,7 @@
 			o.title="The Civil War";
 			o.color="#000099";
 			o.edge="4";
-			o.row=3;
+			o.row=1;
 			sd.mobs.push(o);
 
 			o={};
@@ -214,7 +215,7 @@
 			o.pic="http://cache3.asset-cache.net/gc/3324589-18th-november-1876-a-negro-preacher-and-his-gettyimages.jpg?v=1&c=IWSAsset&k=2&d=Ii%2B0Kt7D5sFp80jNN4JI45PlsvacwrzwgTe7NErJHbm9oovnoUgNThvcTVmTc7Yb"
 			o.color="#ff9900";
 			o.edge="#666";
-			o.row=1;
+			o.row=4;
 			sd.mobs.push(o);
 
 			o={};
@@ -227,7 +228,7 @@
 			o.pic="http://cache3.asset-cache.net/gc/3324589-18th-november-1876-a-negro-preacher-and-his-gettyimages.jpg?v=1&c=IWSAsset&k=2&d=Ii%2B0Kt7D5sFp80jNN4JI45PlsvacwrzwgTe7NErJHbm9oovnoUgNThvcTVmTc7Yb"
 			o.color="#ff9900";
 			o.edge="#666";
-			o.row=1;
+			o.row=5;
 			sd.mobs.push(o);
 
 			sd.timeSegments=[ 	{start:tln.DateToTime("1862"), end:tln.DateToTime("1886"), title:"Winchester", col:"#ccc", click:"geo:-78.16,39.19,3"},
@@ -245,24 +246,25 @@
 			if (o.start)	o.start=tln.DateToTime(o.start);				// Convert date to time
 			if (o.end)		o.end=tln.DateToTime(o.end);					// Convert date to time
 			
-			if (o.marker && o.geoRef) {										// If a marker spec'd AND a georef
-				if (o.marker.match(/drive\.google/i)) {						// An drive file
-					var id=o.marker.match(/id=(.+)&/);						// Extract id
+			if (o.marker || o.spaceMarker) {								// If a marker spec'd 
+				var marker=o.spaceMarker ? o.spaceMarker : o.marker;		// Use spaceMarker first, then marker
+				if (marker.match(/drive\.google/i)) {						// An drive file
+					var id=marker.match(/id=(.+)&/);						// Extract id
 					if (id)	{												// An id found
 						o.type="kml";										// Set type
 						var s="//drive.google.com/uc?export=view&id="+id[1];// Construct 'direct' link
 						o.id=mps.AddKMLLayer(s);							// Add KML layer								 
 						}
 					}
-				else if (o.marker.match(/\.kml/i)) {						// A KML file
+				else if (marker.match(/\.kml/i)) {							// A KML file
 					o.type="kml";											// Set type
-					o.id=mps.AddKMLLayer(o.marker);							// Add KML layer								 
+					o.id=mps.AddKMLLayer(marker);							// Add KML layer								 
 					}
-				else if (o.marker.match(/\.png|.gif|\.jpg|\.jpeg/i)) {		// An image file
+				else if (marker.match(/\.png|.gif|\.jpg|\.jpeg/i) && o.geoRef) { // An image file
 					o.type="image";											// Set type
-					o.id=mps.AddImageLayer(o.marker,o.geoRef, o.opacity);	// Add image layer								 
+					o.id=mps.AddImageLayer(marker,o.geoRef, o.opacity);		// Add image layer								 
 					}
-				else{ 														// Must be an icon
+				else if (o.geoRef) { 										// Must be an icon
 					o.type="icon";											// Set type
 					var s={};												// Not style
 					o.spaceMarker ?	s.m=o.spaceMarker : s.m=o.marker;		// Use space marker first, then time marker

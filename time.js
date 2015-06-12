@@ -13,8 +13,9 @@ function Timeline()														// CONSTRUCTOR
 */
 
 	var sd={};
-	this.start=this.DateToTime("1862")
-	this.end=this.DateToTime("1922")
+	this.margin=18;
+	this.start=this.DateToTime("1/1860")
+	this.end=this.DateToTime("12/1922")
 	this.timeColor="#009900";
 	this.timeFormat="Mon Year";
 	this.hasTimeBar=true; 
@@ -27,7 +28,8 @@ function Timeline()														// CONSTRUCTOR
 	this.segmentColor="#ccc";
 	this.playerSpeed=5000;
 	this.curSeg=-1;
-	this.hastimeView=true
+	this.hasTimeView=true;
+	this.timeViewTextSize=11;
 	
 	this.curTime=this.curStart=this.start;									// Set start
 	this.curEnd=this.end;													// Set end
@@ -49,9 +51,11 @@ Timeline.prototype.InitTimeline=function(div, data)						// INIT TIMELINE
 	if (this.hasTimeBar) 													// If a timebar
 		this.AddTimeBar();													// Add it
 	if (this.playerSpeed) 													// If it has player
-		this.AddPlayer();													// Add them
+		this.AddPlayer();													// Add it
 	if (this.sd.timeSegments) 												// If it has time segments
 		this.AddTimeSegments();												// Add them
+	if (this.hasTimeView) 													// If it has time view
+		this.AddTimeView();													// Add it
 	this.UpdateTimeline();													// Resize 
 }	
 
@@ -62,18 +66,19 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 	Resize timeline to fit container div
 */
 	var s,e,x;
-	var i,w2,m=18;
-	var w=$(this.div).width()-m-m-m;										// Width of bar
-	var t=$(this.div).height()-$("#timeBar").height()-30-m;					// Top position
+	var i,w2,m=this.margin;
+	var w=$(this.div).width()-m-m;											// Width of time area
+	var t=$(this.div).height()-$("#timeBar").height()-20-m;					// Top position
 	if (this.segmentPos == "Bottom")										// If putting segments below timebar
 		t-=30;																// Shift it higher
-	$("#timeBar").css({top:t+"px",left:m+"px", width:w+"px"})
+	$("#timeBar").css({top:t+"px",left:m+"px", width:w+"px"});				// Position div
 	var sw=$("#timeStart").width();											// Start date width
 	var ew=$("#timeEnd").width();											// End date width
 	var pw=$("#timePlayer").width();										// Player width
 	w-=(sw+ew+pw);															// Surrounding divs
+	var l=m+sw;																// Left side of time area
 	$("#timeSlider").width(w);												// Set slider width
-	$("#timePlayer").css({top:t-1+"px",left:w+sw+ew+m+"px"});				// Position player
+	$("#timePlayer").css({top:t-1+"px",left:w+ew+l+"px"});					// Position player
 	
 	if (this.hasTimeBar)													// If a timebar
 		w=$("#timeSlider").width();											// Width of slider bar
@@ -95,21 +100,18 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 
 	var ts=this.sd.timeSegments;											// Point at time segments
 	if (ts) {																// If segments
-		w-=(ts.length-1)*2;													// Remove spaces between segs
+		var w1=w-(ts.length-1)*2;											// Remove spaces between segs
 		x=(this.hasTimeBar) ? $("#timeSlider").offset().left : m;			// Starting point
 		for (i=0;i<ts.length;++i) { 										// For each seg
-			w2=ts[i].pct*w;													// Width
+			w2=ts[i].pct*w1;												// Width
 			$("#timeseg"+i).css({ left:x+"px",width:w2+"px" });				// Position and size
 			x+=w2+2;														// Advance
 			}
 		$("#timeseg"+i).css({ left:x+10+"px" });							// Position
-		if (this.hasTimeBar) {												// If a timebar
-			if (this.segmentPos == "Top") {									// If on top of timebar
-				t=$("#timeBar").offset().top-$(this.div).offset().top-30;	// Set pos
-				if (this.sliderTime == "Top")	t-=12;						// If slider time on top, move it up
-				}
-			else															// Below timebar
-				t=$(this.div).height()-$("#timeBar").height()-16-m;			// Set pos
+		t=$(this.div).height()-$("#segmentBar").height()-m;					// Set pos
+		if (this.hasTimeBar && (this.segmentPos == "Top")) {				// If on top of timebar
+			t=$("#timeBar").offset().top-$(this.div).offset().top-30;		// Set pos
+			if (this.sliderTime == "Top")	t-=12;							// If slider time on top, move it up
 			}
 		$("#segmentBar").css({top:t+"px"});									// Position
 		}
@@ -129,6 +131,22 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 	$("#ticklab5").html(this.FormatTime(s+(e-s)/4*3));						// Add label div
 	$("#timeSlider").slider("option",{min:s,max:e,value:s}); 				// Set slider
 
+	if (this.hasTimeView) {													// If a timeview
+		var h=$(this.div).height();											// Total bottom height
+		if (this.hasTimeBar) {												// If a timebar
+			h-=$("#timeBar").height()+m+24;									// Account for it
+			if (this.sliderTime == "Top")									// If a top date
+				h-=12;														// Account for it
+			}
+		if (this.segmentPos == "Top")										// If top segment bar
+			h+=6;															// Shift
+		h-=$("#segmentBar").height()+m;										// Account for segments
+		$("#timeViewBar").height(h);										// Set height
+//		$("#timeViewBar").width(w);											// Set width
+//		$("#timeViewBar").css({ left:l+"px"});								// Set left
+		$("#timeViewSVG").width($(this.div).width());						// Resize SVG
+		$("#timeViewSVG").height(h);										// Resize SVG
+		}
 	this.curStart=s;														// Save start
 	this.curEnd=e;															// Save end
 	this.curDur=e-s;														// Save duration
@@ -274,7 +292,7 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 	var _this=this;															// Save context for callback
 	var dur=this.end-this.start;
 	var ts=this.sd.timeSegments;											// Point at segments
-	str="<div id='segmentBar' style='position:absolute'>"					// Enclosing div
+	str="<div id='segmentBar' style='position:absolute;height:16px;'>"		// Enclosing div
 	for (i=0;i<ts.length;++i) { 											// For each tick
 		ts[i].pct=(ts[i].end-ts[i].start)/dur;								// Calc percentage
 		str+="<div class='time-seg' id='timeseg"+i+"' ";					// Add div
@@ -320,6 +338,46 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 		}
 }
 
+Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
+{
+/* 	
+	Add time segments to div
+*/
+	var i,x,ex,y,o,str;
+	var scale=1;
+	var _this=this;															// Save context for callback
+	var dur=this.end-this.start;											// Timeline duration
+	var w=$(this.div).width();												// Get width
+	var h=$("timeViewBar").height();										// Get Height
+	var rowHgt=12;															// Set row height
+	var rowPad=4;															// Space between rows
+	str="<div id='timeViewBar' class='time-timeview'>"						// Enclosing div
+	str+="<div id='xtimeViewSVG' style='position:absolute'>";				// SVG div
+	str+="<svg id='timeViewSVG'>";											// Add svg 
+	var sw=$("#timeStart").width()+this.margin;								// Start of time area
+	for (i=0;i<this.sd.mobs.length;++i) {									// For each mob
+		o=this.sd.mobs[i];													// Point at mob
+		if (!o.marker)														// No marker set
+			continue;														// Skip
+		x=(o.start-this.start)/dur;											// Percent in timeline
+		trace(x,w)
+		x=(x*w*scale)+sw;														// Percent in div
+		y=0;																// No
+		if (o.row)															// If a row spec'd
+			y=o.row*rowHgt+(o.row-1)*rowPad;								// Position it
+		
+	
+		 str+="<circle id='mob"+i+"' cx='"+x+"' cy='"+(y+6)+"' r='6' fill='"+o.color+"'/>";
+		 if (o.title) {
+		 	str+="<text x="+(x+9)+" y="+(y+this.timeViewTextSize-1)+" fill='#666' ";
+		 	str+="font-size="+this.timeViewTextSize+">"+o.title+"</text>";
+		 	}
+		}
+	str+="</svg></div>";
+	
+	$(this.div).append(str+"</div>");									// Add timeview bar				
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // EVENTS 
@@ -337,6 +395,8 @@ Timeline.prototype.Goto=function(time, segment)							// SET TIME AND [SEGMENT]
 			segment=this.sd.timeSegments.length+1;							// Set to last
 		$("#timeseg"+segment).trigger();									// Trigger click
 		}
+	if (!this.hasTimeBar)													// No time bar
+		return;																// Quit
 	$("#timeSlider").slider("option","value",time);							// Trigger slider
 	var x=$($("#timeSlider").children('.ui-slider-handle')).offset().left;	// Get pos       			
 	this.curTime=time														// Set now
