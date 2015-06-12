@@ -371,7 +371,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 		w2=o.size ? o.size/2 : 6;											// Set size
 		if (o.row)															// If a row spec'd
 			y=o.row*rowHgt+(o.row-1)*rowPad;								// Position it
-		 str+="<circle id='svgMark"+i+"' cy="+y+" r="+w2+" fill='"+o.color+"' style='cursor:pointer' title='sfsf'/>";	// Add dot
+		 str+="<circle id='svgMark"+i+"' cy="+y+" r="+w2+" fill='"+o.color+"' style='cursor:pointer'/>";	// Add dot
 		 if (o.title) {														// If a title
 		 	str+="<text id='svgText"+i+"' y="+(y+to)+" fill='#666' ";		// Add text
 		 	str+="font-size="+this.timeViewTextSize+">"+o.title+"</text>";
