@@ -294,7 +294,8 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 						tf: {string} text format
  */
 
-	var i,w2=8;
+	var i;
+	var w2=sty.w ? sty.w*.6667 : 8;											// Set size
 	if (sty.f) {															// If fill spec'd
 	  	if (sty.f.length == 4) sty.f+=sty.f.substr(1,3);					// Turn #555 into #55555
 	  	r=parseInt("0x"+sty.f.substr(1,2),16);								// R

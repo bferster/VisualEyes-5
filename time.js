@@ -69,6 +69,7 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 	var i,w2,m=this.margin;
 	var w=$(this.div).width()-m-m;											// Width of time area
 	var t=$(this.div).height()-$("#timeBar").height()-20-m;					// Top position
+	var dur=this.end-this.start;											// Timeline 
 	if (this.segmentPos == "Bottom")										// If putting segments below timebar
 		t-=30;																// Shift it higher
 	$("#timeBar").css({top:t+"px",left:m+"px", width:w+"px"});				// Position div
@@ -142,10 +143,18 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 			h+=6;															// Shift
 		h-=$("#segmentBar").height()+m;										// Account for segments
 		$("#timeViewBar").height(h);										// Set height
-//		$("#timeViewBar").width(w);											// Set width
-//		$("#timeViewBar").css({ left:l+"px"});								// Set left
-		$("#timeViewSVG").width($(this.div).width());						// Resize SVG
-		$("#timeViewSVG").height(h);										// Resize SVG
+		for (i=0;i<this.sd.mobs.length;++i) {								// For each mob
+			o=this.sd.mobs[i];												// Point at mob
+			if (!o.marker)													// No marker set
+				continue;													// Skip
+			x=(o.start-this.start)/dur;										// Percent in timeline
+			x=(x*w)+ew;														// Percent in div
+			w2=o.size ? o.size+4 : 10;										// Calc offset
+			$("#svgMark"+i).attr("cx",x);									// Move mark center (circles)
+			$("#svgMark"+i).attr("x",x+w2);									// Move mark 
+			$("#svgText"+i).attr("x",x+w2);									// Move text
+			}
+
 		}
 	this.curStart=s;														// Save start
 	this.curEnd=e;															// Save end
@@ -343,39 +352,33 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 /* 	
 	Add time segments to div
 */
-	var i,x,ex,y,o,str;
-	var scale=1;
+	var i,y,o,str,w2;
 	var _this=this;															// Save context for callback
 	var dur=this.end-this.start;											// Timeline duration
-	var w=$(this.div).width();												// Get width
 	var h=$("timeViewBar").height();										// Get Height
 	var rowHgt=12;															// Set row height
 	var rowPad=4;															// Space between rows
 	str="<div id='timeViewBar' class='time-timeview'>"						// Enclosing div
 	str+="<div id='xtimeViewSVG' style='position:absolute'>";				// SVG div
-	str+="<svg id='timeViewSVG'>";											// Add svg 
+	str+="<svg width='10000' height='2000'>";								// Add svg 
 	var sw=$("#timeStart").width()+this.margin;								// Start of time area
+	var to=this.timeViewTextSize*.3;										// Text offset
 	for (i=0;i<this.sd.mobs.length;++i) {									// For each mob
 		o=this.sd.mobs[i];													// Point at mob
 		if (!o.marker)														// No marker set
 			continue;														// Skip
-		x=(o.start-this.start)/dur;											// Percent in timeline
-		trace(x,w)
-		x=(x*w*scale)+sw;														// Percent in div
 		y=0;																// No
+		w2=o.size ? o.size/2 : 6;											// Set size
 		if (o.row)															// If a row spec'd
 			y=o.row*rowHgt+(o.row-1)*rowPad;								// Position it
-		
-	
-		 str+="<circle id='mob"+i+"' cx='"+x+"' cy='"+(y+6)+"' r='6' fill='"+o.color+"'/>";
-		 if (o.title) {
-		 	str+="<text x="+(x+9)+" y="+(y+this.timeViewTextSize-1)+" fill='#666' ";
+		 str+="<circle id='svgMark"+i+"' cy="+y+" r="+w2+" fill='"+o.color+"' style='cursor:pointer' title='sfsf'/>";	// Add dot
+		 if (o.title) {														// If a title
+		 	str+="<text id='svgText"+i+"' y="+(y+to)+" fill='#666' ";		// Add text
 		 	str+="font-size="+this.timeViewTextSize+">"+o.title+"</text>";
 		 	}
 		}
-	str+="</svg></div>";
-	
-	$(this.div).append(str+"</div>");									// Add timeview bar				
+	str+="</svg></div>";													// End div
+	$(this.div).append(str+"</div>");										// Add timeview bar				
 }
 
 
