@@ -313,7 +313,7 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 
  	if (sty.w)	w2=sty.w/2;													// If spec'd use it																
 
-	switch(sty.m) {															// Route on marker style
+	switch(sty.m.toLowerCase()) {											// Route on marker style
  		case "dot":
 			var image=new ol.style.Circle({									
 	    		radius: w2*3/4, fill: fill, stroke:stroke
@@ -353,11 +353,6 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 			var image=new ol.style.RegularShape({								
 	    		radius: w2, fill: fill, stroke:stroke, points: 3,angle: -Math.PI/2
 	 			});
-	  		break;
-		case "cross":
-			var image=new ol.style.RegularShape({								
-	    		radius: w2, fill: fill, stroke:stroke, points: 4, radius2: 1, angle: 0
-	  			});
 	  		break;
 	  		}
 	if (sty.m && sty.m.match(/\//))	 										// Must be an image file

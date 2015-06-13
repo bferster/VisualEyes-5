@@ -65,7 +65,7 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 /* 
 	Resize timeline to fit container div
 */
-	var s,e,x;
+	var s,e,x,y;
 	var i,w2,m=this.margin;
 	var w=$(this.div).width()-m-m;											// Width of time area
 	var t=$(this.div).height()-$("#timeBar").height()-20-m;					// Top position
@@ -143,16 +143,25 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 			h+=6;															// Shift
 		h-=$("#segmentBar").height()+m;										// Account for segments
 		$("#timeViewBar").height(h);										// Set height
+		var rowHgt=12;														// Set row height
+		var rowPad=4;														// Space between rows
 		for (i=0;i<this.sd.mobs.length;++i) {								// For each mob
 			o=this.sd.mobs[i];												// Point at mob
 			if (!o.marker)													// No marker set
 				continue;													// Skip
 			x=(o.start-this.start)/dur;										// Percent in timeline
 			x=(x*w)+ew;														// Percent in div
-			w2=o.size ? o.size+4 : 10;										// Calc offset
-			$("#svgMark"+i).attr("cx",x);									// Move mark center (circles)
-			$("#svgMark"+i).attr("x",x+w2);									// Move mark 
-			$("#svgText"+i).attr("x",x+w2);									// Move text
+			y=h-rowHgt;														// Default to 1st row
+			if (o.row)														// If a row spec'd
+				y=h-(o.row*rowHgt+(o.row-1)*rowPad);						// Position it
+			$("#svgMarker"+i).attr("transform","translate("+x+","+y+")");	// Move marker
+			if (o.end) {													// If a spanned event
+				x=(o.end-o.start)/dur*w;									// Calc span
+				$("#svgMarkerEnd"+i).attr("x1",x);							// Move end
+				$("#svgMarkerEnd"+i).attr("x2",x);							// Move end
+				$("#svgMarkerMid"+i).attr("x2",x);							// Move middle
+				$("#svgMarkerBar"+i).attr("width",x);						// Move bar
+				}
 			}
 
 		}
@@ -352,33 +361,97 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 /* 	
 	Add time segments to div
 */
-	var i,y,o,str,w2;
+	var i,j,o,str,w2,r;
 	var _this=this;															// Save context for callback
-	var dur=this.end-this.start;											// Timeline duration
-	var h=$("timeViewBar").height();										// Get Height
-	var rowHgt=12;															// Set row height
-	var rowPad=4;															// Space between rows
 	str="<div id='timeViewBar' class='time-timeview'>"						// Enclosing div
 	str+="<div id='xtimeViewSVG' style='position:absolute'>";				// SVG div
 	str+="<svg width='10000' height='2000'>";								// Add svg 
-	var sw=$("#timeStart").width()+this.margin;								// Start of time area
-	var to=this.timeViewTextSize*.3;										// Text offset
+	var to=this.timeViewTextSize*.33;										// Text offset
 	for (i=0;i<this.sd.mobs.length;++i) {									// For each mob
 		o=this.sd.mobs[i];													// Point at mob
 		if (!o.marker)														// No marker set
 			continue;														// Skip
-		y=0;																// No
 		w2=o.size ? o.size/2 : 6;											// Set size
-		if (o.row)															// If a row spec'd
-			y=o.row*rowHgt+(o.row-1)*rowPad;								// Position it
-		 str+="<circle id='svgMark"+i+"' cy="+y+" r="+w2+" fill='"+o.color+"' style='cursor:pointer'/>";	// Add dot
-		 if (o.title) {														// If a title
-		 	str+="<text id='svgText"+i+"' y="+(y+to)+" fill='#666' ";		// Add text
+			str+="<g id='svgMarker"+i+"'style='cursor:pointer'>";			// Group head
+		if (o.marker == "dot") {											// A dot
+			str+="<circle r="+w2+" fill='"+o.color+"' />";					// Add dot
+			}
+		else if (o.marker == "square") {									// A square
+			str+="<rect x="+(-w2)+" y="+(-w2)+" height="+(w2+w2)+" width="+(w2+w2)+" fill='"+o.color+"'/>"; 	// Add rect
+			}
+		else if (o.marker == "Star") {										// A star
+			var xx,yy,angle;
+			str+="<polygon fill='"+o.color+"' points='";					// Add polygon
+ 			angle=Math.PI/5;												// 1/5th angle
+    		w2++;
+    		for (j=0;j<10;++j) {											// For each point											
+     			r=(j&1) == 0 ? w2 : w2/2;   								// Use outer or inner radius depending on iteration
+       			xx=Math.cos(j*angle-(angle/2))*r;							// Calc x
+      			yy=Math.sin(j*angle-(angle/2))*r;							// Calc y
+				str+=xx+","+yy+" ";											// Add coord
+				}
+			str+="'/>";														// End polygon
+			--w2;
+			}
+		else if (o.marker == "TriUp") {										// An up triangle
+			str+="<polygon fill='"+o.color+"' points='";					// Add polygon
+			str+="0,"+(-w2)+" "+w2+","+(w2)+" "+(-w2)+","+(w2)+"'/>";		// Points
+			}
+		else if (o.marker == "TriDown") {									// A down triangle
+			str+="<polygon fill='"+o.color+"' points='";					// Add polygon
+			str+=(-w2)+","+(w2)+" "+w2+","+(w2)+" "+(0)+","+(w2)+"'/>";		// Points
+			}
+		else if (o.marker == "TriLeft") {									// A left triangle
+			str+="<polygon fill='"+o.color+"' points='";					// Add polygon
+			str+=(-w2)+","+(0)+" "+w2+","+(-w2)+" "+(w2)+","+(w2)+"'/>";	// Points
+			}
+		else if (o.marker == "TriRight") {									// A right triangle
+			str+="<polygon fill='"+o.color+"' points='";					// Add polygon
+			str+=(-w2)+","+(y-w2)+" "+w2+","+(y)+" "+(-w2)+","+(y+w2)+"'/>";	// Points
+			}
+		else if (o.marker == "Diamond") {									// A diamond
+			str+="<polygon fill='"+o.color+"' points='";					// Add polygon
+			str+=(-w2)+","+(0)+" "+(0)+","+(-w2)+" "+(w2)+","+(0)+" "+(0)+","+(w2)+"'/>";	// Points
+			}
+		else if (o.marker == "Line") {										// A line
+			str+="<line stroke='"+o.color+"' ";								// Line start
+			str+="x1=0 y1="+(-w2)+" x2=0 y2="+(w2)+"/>";					// Points
+			str+="<line id='svgMarkerMid"+i+"' stroke='"+o.color+"' ";		// Line end
+			str+="x1=0 y1=0 x2=1000 y2-0/>";								// Points
+			str+="<line id='svgMarkerEnd"+i+"' stroke='"+o.color+"' ";		// Line middle
+			str+="x1=1000 y1="+(-w2)+" x2=1000 y2="+(w2)+"/>";				// Points
+			}
+		else if (o.marker == "Bar") {										// A bar
+			str+="<rect 'svgMarkerBar"+i+" y="+(-w2)+" height="+(w2+w2)+" width=100 fill='"+o.color+"'/>"; 	// Add bar
+			}
+		else
+			str+="<circle r="+w2+" fill='"+o.color+"' />";					// Default to dot
+		if (o.title) {														// If a title
+		 	str+="<text id='svgMarkerText"+i+"' x="+(w2+6)+" y="+to+" fill='#666' "; // Add text
 		 	str+="font-size="+this.timeViewTextSize+">"+o.title+"</text>";
 		 	}
+		str+="</g>";														// End group
 		}
 	str+="</svg></div>";													// End div
 	$(this.div).append(str+"</div>");										// Add timeview bar				
+
+	for (i=0;i<this.sd.mobs.length;++i) {									// For each mob
+		
+		$("#svgMarker"+i).on('click', function(e) {							// ON MARKER CLICK
+				var id=e.currentTarget.id.substr(9);						// Get ID
+				o=_this.sd.mobs[id];										// Point at mob
+		    	var y=$(_this.div).offset().top;							// Point below map
+		    	mps.ShowPopup(e.offsetX,y,o.title,o.desc,o.pic,o.start);	// Show popup
+				_this.SendMessage("time",o.start);							// Send new time
+				if (o.goto)													// If a goto defined
+					_this.SendMessage("geo",o.goto);						// Move map
+				});
+		}
+	
+	$("#timeViewBar").on('click', function(e) {								// TIMESEG CLICK
+		if ($(e.toElement).width() > 1000)									// Not on a marker
+	   		mps.ShowPopup();												// Clear any open popup
+		});
 }
 
 

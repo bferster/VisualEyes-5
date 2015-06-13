@@ -168,7 +168,7 @@
 			sd.mobs.push(o);
 			
 			o={};
-			o.marker="star";
+			o.marker="Star";
 			o.start="1/12/1862";
 			o.vis=1;
 			o.geoRef="-78.16,39.19,20,0";
@@ -182,7 +182,7 @@
 			sd.mobs.push(o);
 	
 			o={};
-			o.marker="dot";
+			o.marker="Square";
 			o.start="6/8/1886";
 			o.vis=1;
 			o.geoRef="-74.0,40.71,20,0";
@@ -195,18 +195,17 @@
 			sd.mobs.push(o);
 
 			o={};
-			o.marker="line";
+			o.marker="Bar";
 			o.start="4/12/1861";
 			o.end="6/22/1865";
 			o.vis=1;
 			o.title="The Civil War";
-			o.color="#000099";
-			o.edge="4";
-			o.row=1;
+			o.color="#b9d9f7";
+			o.row=6;
 			sd.mobs.push(o);
 
 			o={};
-			o.marker="dot";
+			o.marker="Dot";
 			o.start="10/18/1890";
 			o.vis=1;
 			o.geoRef="-78.47,38.03,20,0";
@@ -219,7 +218,7 @@
 			sd.mobs.push(o);
 
 			o={};
-			o.marker="dot";
+			o.marker="Dot";
 			o.start="5/16/1907";
 			o.vis=1;
 			o.geoRef="-86.15,39.76,20,0";
@@ -421,7 +420,9 @@ $(this).val(0)
 			v=e.data.split("|");												// Split into parts
 			if (e.data.match(/=geo/))											// Set position
 				mps.Goto(v[1])													// Move map
-			}
+			if (e.data.match(/=time/))											// New time
+				Draw(v[1])														// Redraw
+		}	
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
