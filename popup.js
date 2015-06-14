@@ -70,7 +70,7 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 					$("#st-popup").css({top:(y+20)+"px"});											// Re-position
 				}
 		});
-	$("#popdesc").click( function() {										// ON CLICK OF TEXT
+	$("#st-popup").click( function(e) {										// ON CLICK OF TEXT
 		$("#popdesc").css("cursor","auto");									// Normal cursor
 		$("#st-popup").css("max-width",$(_this.div).width()*.66);			// Make it wider
 		$("#st-popup").css("max-height",$("body").height()-100);			// Make it taller
@@ -80,6 +80,8 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 		});	
 
 	$("#poppic").click( function(e) {										// ON CLICK OF PIC
+		if ($("#st-popup").width() < 301)									// If not enlarged
+			return;															// Do nothing							
 		$("#st-popup").css("cursor","auto");								// Normal cursor
 		$("#poppic").css("cursor","auto");									// Normal cursor
 		$("#st-popup").css("max-height","none");							// Any height
