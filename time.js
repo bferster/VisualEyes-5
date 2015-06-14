@@ -477,8 +477,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 				o=_this.sd.mobs[id];										// Point at mob
 			    pop.ShowPopup(_this.div,_this.timeFormat,e.pageX+8,e.pageY-70,o.title,o.desc,o.pic,o.start,o.end);	// Show popup
 				_this.SendMessage("time",o.start);							// Send new time
-				trace(e)
-				if (o.goto)													// If a goto defined
+					if (o.goto)													// If a goto defined
 					_this.SendMessage("geo",o.goto);						// Move map
 				});
 		}
