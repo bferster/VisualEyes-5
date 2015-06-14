@@ -17,7 +17,6 @@ function Timeline()														// CONSTRUCTOR
 	this.start=this.DateToTime("1/1860")
 	this.end=this.DateToTime("12/1922")
 	this.timeColor="#009900";
-	this.timeFormat="Mon Year";
 	this.hasTimeBar=true; 
 	this.showStartEnd=true; 
 	this.sliderTime="Bottom";
@@ -40,6 +39,7 @@ function Timeline()														// CONSTRUCTOR
 		}
 }
 
+
 Timeline.prototype.InitTimeline=function(div, data)						// INIT TIMELINE
 {
 /* 
@@ -48,6 +48,7 @@ Timeline.prototype.InitTimeline=function(div, data)						// INIT TIMELINE
  */
 	this.sd=data;															// Point at setting and data
 	this.div="#"+div;														// Current div selector
+	this.timeFormat=sd.timeFormat;											// Set date format
 	if (this.hasTimeBar) 													// If a timebar
 		this.AddTimeBar();													// Add it
 	if (this.playerSpeed) 													// If it has player
@@ -70,6 +71,7 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 	var w=$(this.div).width()-m-m;											// Width of time area
 	var t=$(this.div).height()-$("#timeBar").height()-20-m;					// Top position
 	var dur=this.end-this.start;											// Timeline 
+	this.timeFormat=sd.timeFormat;											// Set date format
 	if (this.segmentPos == "Bottom")										// If putting segments below timebar
 		t-=30;																// Shift it higher
 	$("#timeBar").css({top:t+"px",left:m+"px", width:w+"px"});				// Position div
@@ -125,11 +127,11 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 		s=ts[this.curSeg].start-0;											// Get start
 		e=ts[this.curSeg].end-0;											// Get end
 		}
-	$("#timeStart").html(this.FormatTime(s)+"&nbsp;&nbsp;&nbsp;");			// Set start
-	$("#timeEnd").html("&nbsp;&nbsp;&nbsp;"+this.FormatTime(e)); 			// Set end
-	$("#ticklab1").html(this.FormatTime(s+(e-s)/4));						// Add label div
-	$("#ticklab3").html(this.FormatTime(s+(e-s)/2));						// Add label div
-	$("#ticklab5").html(this.FormatTime(s+(e-s)/4*3));						// Add label div
+	$("#timeStart").html(pop.FormatTime(s)+"&nbsp;&nbsp;&nbsp;");			// Set start
+	$("#timeEnd").html("&nbsp;&nbsp;&nbsp;"+pop.FormatTime(e)); 			// Set end
+	$("#ticklab1").html(pop.FormatTime(s+(e-s)/4));							// Add label div
+	$("#ticklab3").html(pop.FormatTime(s+(e-s)/2));							// Add label div
+	$("#ticklab5").html(pop.FormatTime(s+(e-s)/4*3));						// Add label div
 	$("#timeSlider").slider("option",{min:s,max:e,value:s}); 				// Set slider
 
 	if (this.hasTimeView) {													// If a timeview
@@ -155,15 +157,9 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 			if (o.row)														// If a row spec'd
 				y=h-(o.row*rowHgt+(o.row-1)*rowPad);						// Position it
 			$("#svgMarker"+i).attr("transform","translate("+x+","+y+")");	// Move marker
-			if (o.end) {													// If a spanned event
-				x=(o.end-o.start)/dur*w;									// Calc span
-				$("#svgMarkerEnd"+i).attr("x1",x);							// Move end
-				$("#svgMarkerEnd"+i).attr("x2",x);							// Move end
-				$("#svgMarkerMid"+i).attr("x2",x);							// Move middle
-				$("#svgMarkerBar"+i).attr("width",x);						// Move bar
-				}
+			if (o.end)														// If a spanned event
+				$("#svgMarkerBar"+i).attr("width",(o.end-o.start)/dur*w);	// Move bar
 			}
-
 		}
 	this.curStart=s;														// Save start
 	this.curEnd=e;															// Save end
@@ -196,17 +192,17 @@ Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
 	str="<div id='timeBar' class='time-timebar'>";							// Add timebar div
 	str+="<div id='timecontrol'>"											// Block timebar unit
 	if (this.showStartEnd && this.start) 									// If showing start date
-		str+="<span id='timeStart' class='time-startend'>"+_this.FormatTime(this.start)+"&nbsp;&nbsp;&nbsp;</span>";	// Add start date
+		str+="<span id='timeStart' class='time-startend'>"+pop.FormatTime(this.start)+"&nbsp;&nbsp;&nbsp;</span>";	// Add start date
 	str+="<div id='timeSlider' class='time-timeslider'></div>";				// Add slider div
 	if (this.showStartEnd && this.end) 										// If showing end date
-		str+="<span id='timeEnd' class='time-startend'>&nbsp;&nbsp;&nbsp;"+_this.FormatTime(this.end)+"</span>";		// Add end date
+		str+="<span id='timeEnd' class='time-startend'>&nbsp;&nbsp;&nbsp;"+pop.FormatTime(this.end)+"</span>";		// Add end date
 	if (this.hasTicks) {													// If it has tick marks
 		for (i=0;i<7;++i) 													// For each tick
 			str+="<div class='time-ticks' id='tick"+i+"'></div>";			// Add tick div
 		if (this.hasTickLabels) {											// If showing labels
-			str+="<div class='time-ticklabel' id='ticklab1'>"+_this.FormatTime(this.start-0+(this.end-this.start)/4)+"</div>";	 // Add label div
-			str+="<div class='time-ticklabel' id='ticklab3'>"+_this.FormatTime(this.start-0+(this.end-this.start)/2)+"</div>";	 // Add label div
-			str+="<div class='time-ticklabel' id='ticklab5'>"+_this.FormatTime(this.start-0+(this.end-this.start)/4*3)+"</div>"; // Add label div
+			str+="<div class='time-ticklabel' id='ticklab1'>"+pop.FormatTime(this.start-0+(this.end-this.start)/4)+"</div>";	 // Add label div
+			str+="<div class='time-ticklabel' id='ticklab3'>"+pop.FormatTime(this.start-0+(this.end-this.start)/2)+"</div>";	 // Add label div
+			str+="<div class='time-ticklabel' id='ticklab5'>"+pop.FormatTime(this.start-0+(this.end-this.start)/4*3)+"</div>"; // Add label div
 			}
 		}
 	if (this.sliderTime != "None") 											// If showing start date
@@ -218,7 +214,7 @@ Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
   			_this.curTime=time												// Set now
   			_this.SendMessage("time",_this.curTime+"|scroll");				// Send new time
   			var y=(_this.sliderTime == "Top") ? -22 : 26;					// Top or bottom
-			$("#sliderTime").html(_this.FormatTime(time));					// Show value
+			$("#sliderTime").html(pop.FormatTime(time));					// Show value
  			$("#sliderTime").css({top:y+"px",left:x-66+"px"})				// Position text
  			}
 		}
@@ -414,13 +410,15 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 			str+=(-w2)+","+(0)+" "+(0)+","+(-w2)+" "+(w2)+","+(0)+" "+(0)+","+(w2)+"'/>";	// Points
 			}
 		else if (o.marker == "Line") {										// A line
+			str+="<rect 'svgMarkerBar"+i+" y="+(-this.timeViewTextSize/2-1)+" height="+(this.timeViewTextSize+2)+" width=100 fill='none' stroke='"+o.color+"'/>"; 	// Add bar
+/*
 			str+="<line stroke='"+o.color+"' ";								// Line start
 			str+="x1=0 y1="+(-w2)+" x2=0 y2="+(w2)+"/>";					// Points
 			str+="<line id='svgMarkerMid"+i+"' stroke='"+o.color+"' ";		// Line end
 			str+="x1=0 y1=0 x2=1000 y2-0/>";								// Points
 			str+="<line id='svgMarkerEnd"+i+"' stroke='"+o.color+"' ";		// Line middle
 			str+="x1=1000 y1="+(-w2)+" x2=1000 y2="+(w2)+"/>";				// Points
-			}
+*/			}
 		else if (o.marker == "Bar") {										// A bar
 			str+="<rect 'svgMarkerBar"+i+" y="+(-w2)+" height="+(w2+w2)+" width=100 fill='"+o.color+"'/>"; 	// Add bar
 			}
@@ -440,8 +438,8 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 		$("#svgMarker"+i).on('click', function(e) {							// ON MARKER CLICK
 				var id=e.currentTarget.id.substr(9);						// Get ID
 				o=_this.sd.mobs[id];										// Point at mob
-		    	var y=$(_this.div).offset().top;							// Point below map
-		    	mps.ShowPopup(e.offsetX,y,o.title,o.desc,o.pic,o.start);	// Show popup
+		    	var y=$(_this.div).offset().top+e.offsetY-32;				// Point below top of div
+			    pop.ShowPopup(_this.div,_this.timeFormat,e.offsetX+8,y,o.title,o.desc,o.pic,o.start,o.end);	// Show popup
 				_this.SendMessage("time",o.start);							// Send new time
 				if (o.goto)													// If a goto defined
 					_this.SendMessage("geo",o.goto);						// Move map
@@ -450,7 +448,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 	
 	$("#timeViewBar").on('click', function(e) {								// TIMESEG CLICK
 		if ($(e.toElement).width() > 1000)									// Not on a marker
-	   		mps.ShowPopup();												// Clear any open popup
+	   		pop.ShowPopup();												// Clear any open popup
 		});
 }
 
@@ -479,7 +477,7 @@ Timeline.prototype.Goto=function(time, segment)							// SET TIME AND [SEGMENT]
 	this.SendMessage("time",this.curTime+"|goto");							// Send new time
 	if ((this.sliderTime == "Top") || (this.sliderTime == "Bottom")){ 		// If showing date
 		var y=(this.sliderTime == "Top") ? -22 : 26;						// Top or bottom
-		$("#sliderTime").html(this.FormatTime(time));						// Show value
+		$("#sliderTime").html(pop.FormatTime(time));						// Show value
 		$("#sliderTime").css({top:y+"px",left:x-66+"px"})					// Position text
 		}
 }
@@ -511,32 +509,6 @@ Timeline.prototype.Play=function(start) 								// PLAY TIMELINE
 // HELPERS 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-Timeline.prototype.FormatTime=function(time, format) 					// FORMAT TIME TO DATE
-{
-/* 	
-	Format time int human readable format
- 	@param {number} time number of ms += 1/1/1970
-	@param {string} format type of format. If not set, this.timeFormat is used.
-	@return {string} time formatted at date.
-*/
-	var str;
-	var mos=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-	d=new Date(time*36000000);												// Convert minutes to ms
-	if (!format)															// If no format spec'd
-		format=this.timeFormat;												// Use global format
-	if (format == "Mo/Year") 												// 1/1900
-		str=(d.getMonth()+1)+"/"+d.getFullYear();							// Set it
-	else if (format == "Mo/Day/Year") 										// 1/1/1900
-		str=(d.getMonth()+1)+"/"+(d.getDay()+1)+"/"+d.getFullYear();		// Set it
-	else if (format == "Mon Year") 											// Jan 1900
-		str=mos[d.getMonth()]+" "+d.getFullYear();							// Set it
-	else if (format == "Mon Day, Year") 									// Jan 1, 1900
-		str=mos[d.getMonth()]+" "+(d.getDay()+1)+", "+d.getFullYear();		// Set it
-	else																	// Default to only year
-		str=d.getFullYear();												// Set it
- 	return str;																// Return formatted date
-}
 
 Timeline.prototype.DateToTime=function(dateString) 						// CONVERT DATE TO MINS +/- 1960
 {

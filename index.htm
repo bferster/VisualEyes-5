@@ -12,23 +12,24 @@
    	<script src="http://openlayers.org/en/v3.5.0/build/ol-debug.js" type="text/javascript"></script>
   	<script src="space.js" type="text/javascript"></script>
   	<script src="time.js" type="text/javascript"></script>
+  	<script src="popup.js" type="text/javascript"></script>
  
  	<style type="text/css">
 		body { 				font-family:Verdana,Geneva,sans-serif; font-size:9px; 
 							padding:0px;margin:0px;
 							}
-		.spacePopup	{ 		position:absolute;padding:12px;border-radius:6px;display:none; 
+		.popup-main	{ 		position:absolute;padding:12px;border-radius:6px;display:none; 
 							border:1px solid #999;background-color:#fff;font-size:11px;
-							overflow-x:hidden;max-height:300px;max-width:300px;
+							overflow-x:hidden;max-height:100px;max-width:300px;
 							}
-		.spacePopupPic { 	margin-right:8px;vertical-align:top;cursor:zoom-in;
+		.popup-pic { 		margin-right:8px;vertical-align:top;cursor:zoom-in;
 							border:1px solid #999;width:80px;
 							}				
-		.spacePopupDesc { 	vertical-align:top;color:#555;cursor:zoom-in;
+		.popup-desc { 		vertical-align:top;color:#555;cursor:zoom-in;
 							}				
-		.spacePopupTitle {	margin-bottom:8px;color:#555;
+		.popup-title {		margin-bottom:8px;color:#555;
 							}
-		.spacePopupDate { 	margin-left:8px;color:#999;font-size:8px
+		.popup-date { 		color:#999;font-size:9px;
 							}
 		.time-timebar { 	position:absolute;color:#999;
 							}
@@ -108,6 +109,7 @@
 	var sd={};																	// Holds show data
 	var mps={};
 	var tln={};
+	var pop={};
 	var paneAnimationTimer=null;												// Times pane animations
 	var imageAnimationTimer=[];													// Times image animations
 	var isMobile=false;															// Flag for mobile devices
@@ -147,11 +149,7 @@
 		sd.bRatio=.75;
 		sd.mobs=[];
 		
-		if (!data) {
-			sd.spaceTextCol="#ffffff";
-			sd.spaceTextFont="bold 12px sans-serif ";
-			sd.baseMap="Roadmap";
-			
+		if (!data) {			
 			var o={};
 			o.spaceMarker="//www.viseyes.org/visualeyes/projects/WinchesterMap.jpg";
 			o.start="1862";
@@ -195,12 +193,14 @@
 			sd.mobs.push(o);
 
 			o={};
-			o.marker="Bar";
+			o.marker="Line";
 			o.start="4/12/1861";
 			o.end="6/22/1865";
+			o.desc="<b>The American Civil War</b>, widely known in the United States as simply the Civil War as well as other sectional names, was a civil war fought from 1861 to 1865 to determine the survival of the Union or independence for the Confederacy. Among the 34 states in January 1861, seven Southern slave states individually declared their secession from the United States and formed the Confederate States of America. The Confederacy, often simply called the South, grew to include eleven states, and although they claimed thirteen states and additional western territories, the Confederacy was never diplomatically recognized by a foreign country. The states that remained loyal and did not declare secession were known as the Union or the North. The war had its origin in the fractious issue of slavery, especially the extension of slavery into the western territories.[N 1] After four years of combat, which left over 600,000 Union and Confederate soldiers dead and destroyed much of the South's infrastructure, the Confederacy collapsed and slavery was abolished. Then began the Reconstruction and the processes of restoring national unity and guaranteeing civil rights to the freed slaves.";
+			o.pic="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/US_Secession_map_1861.svg/787px-US_Secession_map_1861.svg.png"
 			o.vis=1;
 			o.title="The Civil War";
-			o.color="#b9d9f7";
+			o.color="#d63333";
 			o.row=5;
 			sd.mobs.push(o);
 
@@ -230,6 +230,11 @@
 			o.row=4;
 			sd.mobs.push(o);
 
+			sd.spaceTextCol="#ffffff";
+			sd.spaceTextFont="bold 12px sans-serif ";
+			sd.baseMap="Roadmap";
+			sd.timeFormat="Mon Year";
+
 			sd.timeSegments=[ 	{start:tln.DateToTime("1862"), end:tln.DateToTime("1886"), title:"Winchester", col:"#ccc", click:"geo:-78.16,39.19,3"},
 								{start:tln.DateToTime("1886"), end:tln.DateToTime("1889"), title:"New York", col:"#ccc", click:"geo:-74.0,40.71,300"},
 								{start:tln.DateToTime("1889"), end:tln.DateToTime("1898"), title:"Charlottesville", col:"#ccc", click:"geo:-78.47,38.03,300"},
@@ -238,8 +243,12 @@
 								{start:tln.DateToTime("1906"), end:tln.DateToTime("1910"), title:"Indiana", col:"#ccc", click:"geo:-86.15,39.76,300"},
 								{start:tln.DateToTime("1910"), end:tln.DateToTime("1922"), title:"Traveling", col:"#ccc", click:"geo:-80.00,38.41,1500"}];
 		
+			
 			}
 
+		
+		mps.SetDateFormat(sd.timeFormat);									// Set date format
+		
 		for (i=0;i<sd.mobs.length;++i) {									// For each mob	
 			o=sd.mobs[i];													// Point at mob
 			if (o.start)	o.start=tln.DateToTime(o.start);				// Convert date to time
@@ -387,9 +396,10 @@ $(this).val(0)
 
 				});				
 		$(window).resize(ResizePanes);											// Dynamic resizing
-		mps=new Space;															// Alloc map module
-		mps.InitMap("leftDiv");													// Init map
+		mps=new Space("leftDiv");												// Alloc map module
+		mps.InitMap();															// Init map
 		tln=new Timeline;														// Alloc time module
+		pop=new Popup("leftDiv");												// Alloc popup module
 		InitProject();															// Init project
 		ResizePanes();															// Resize panes
 		if (drupalMan) 															// If called from Drupal manager

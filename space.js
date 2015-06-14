@@ -4,14 +4,14 @@
 // Requires: Sound()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function Space()														// CONSTRUCTOR
+function Space(div)														// CONSTRUCTOR
 {
 
 /* 
   	@constructor
-  	Styling of popups dependent on css: .spacePopup*.*
-
 */
+
+	this.div="#"+div;														// Current div selector
   	this.controlKey=this.shiftKey=false;									// Shift/control key flags
 	this.showBoxes=false;													// Show boxes
 	this.showRoads=false;													// Hide Roads/borders
@@ -23,7 +23,14 @@ function Space()														// CONSTRUCTOR
 	this.overlays=[];														// Holds overlay layers
 }
 
-Space.prototype.InitMap=function(div)									// INIT OPENLAYERS MAP
+
+Space.prototype.SetDateFormat=function(timeFormat)						// SET DATE FORMAT
+{
+	this.timeFormat=timeFormat;												// Set it
+}
+
+
+Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 {
 /* 
   	Init library and connect opnelayers to div
@@ -35,7 +42,6 @@ Space.prototype.InitMap=function(div)									// INIT OPENLAYERS MAP
 	this.showRoads=false;													// Hide Roads/borders
 	this.showScale=true;													// Hide or show scale
 	this.curProjection="EPSG:3857";											// Current projection
-	this.div="#"+div;														// Current div selector
 	
 	this.layers=[															// Hold layers
 		new ol.layer.Tile({													// Sat 
@@ -84,7 +90,7 @@ Space.prototype.InitMap=function(div)									// INIT OPENLAYERS MAP
 				}),
 		];
 
-    this.map=new ol.Map( { target: div,										// Alloc OL
+    this.map=new ol.Map( { target: this.div.substr(1),						// Alloc OL
         layers:this.layers,													// Layers array									
         controls: ol.control.defaults({										// Controls
 				}).extend([ new ol.control.ScaleLine() ]),					// Add scale
@@ -603,19 +609,19 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
   					if (o.spaceDesc) 	var desc=o.spaceDesc;				// Space over-rides
   					if (o.pic) 			var pic=o.pic;						// Lead with pic
   					if (o.spacePic) 	var title=o.spacePic;				// Space over-rides
-      				_this.ShowPopup(evt.pixel[0],evt.pixel[1],title,desc,pic,o.start);
+       				pop.ShowPopup(_this.div,_this.timeFormat,evt.pixel[0],evt.pixel[1],title,desc,pic,o.start,o.end);
 					_this.SendMessage("time",o.start);						// Send new time
 					if (o.goto)												// If a goto defined
 						_this.Goto(o.goto);									// Go there
 					}
 			  	} 
 			else 															// No feature found
-				_this.ShowPopup();											// Kill any existing pop
+				pop.ShowPopup();											// Kill any existing pop
 			});
 
 	this.map.on('pointermove', function(e) {								// ON MOUSE MOVE
 		if (e.dragging) {													// If dragging
-			_this.ShowPopup();												// Kill any existing pop
+			pop.ShowPopup();												// Kill any existing pop
 	    	return;															// Quit
 	  		}
 	  	var pixel=_this.map.getEventPixel(e.originalEvent);					// Get pos
@@ -624,74 +630,6 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
 		});
 }
 
-
-Space.prototype.ShowPopup=function(x,y, title, desc, pic, date)			// SHOW POPUP
-{
-
-/* 
- 	Draws popup at coordinates x, y. 
- 	If no coordinates given, popup is removed.
- 	If x coord is -1, a centered larger popup is drawn.
- 	Click on pic shown only the pic. 
- 	Click on box makes larger, centered.
- 	title, desc, pic, and date are all optional.
- 	@param {number} x horizontal placement
- 	@param {number} y vertical placement
- 	@param {string} desc text to show in popup. Can be HTML formatted.
- 	@param {string} title to show in popup in bold. Can be HTML formatted.
- 	@param {string} pic URL of image file (jpeg, png or gif)
-	@param {string} date date to show
-*/
-
- 	var _this=this;															// Save context for callbacks
-	$("#st-popup").remove();												// Remove any pre-existing popup
-	if (x == undefined)														// If no x defined
-		return;																// We're just removing
-	var str="<div id='st-popup' class='spacePopup'>";						// Add message
-	if (title)																// If title set
-		str+="<div class='spacePopupTitle'><b>"+title+"</b>";				// Add it
-	if (date) {																// If date set
-		date=this.FormatTime(date);											// Format time to date
-		str+="<span class='spacePopupDate'>"+date+"</span>";				// Add it
-		}
-	str+="</div><table style='width:100%'><tr>";
-	if (pic) 																// If pic set
-		str+="<td style='vertical-align:top'><img id='poppic' src='"+pic+"' class='spacePopupPic'></td>";	// Add image
-	if (desc)																// If desc set
-		str+="<td class='spacePopupDesc' id='popdesc'>"+desc+"</div></td>";	// Add it
-	$("body").append("</tr></table>"+str);									// Add popup
-	if (x < 0) {															// Bigger 
-		$("#poppic").css("cursor","");										// Normal cursor
-		$("#st-popup").css("max-width",$(this.div).width()*.75);			// Make it wider
-		$("#st-popup").css("max-height",$(this.div).height()*.75);			// Make it taller
-		$("#poppic").width($(this.div).width()*(desc ? .5 : .75))			// Make pic bigger
-		x=$(this.div).width()/2-$("#st-popup").width()/2;					// Center it
-		y=50;																// Near top			
-		}
-	$("#st-popup").css({left:(x+8)+"px",top:(y+20)+"px"});					// Position
-	$("#st-popup").fadeIn(300);												// Fade in
-	
-	$("#popdesc").click( function() {										// ON CLICK OF TEXT
-		$("#popdesc").css("cursor","auto");									// Normal cursor
-		$("#st-popup").css("max-width",$(_this.div).width()*.66);			// Make it wider
-		$("#st-popup").css("max-height",$(_this.div).height()*.66);			// Make it taller
-		$("#poppic").width($(_this.div).width()*(desc ? .33 : .66))			// Make pic bigger
-		x=$(_this.div).width()/2-$("#st-popup").width()/2;					// Center it
-		$("#st-popup").css({left:(x+8)+"px",top:"70px"});					// Position
-		});	
-
-	$("#poppic").click( function(e) {										// ON CLICK OF PIC
-		$("#st-popup").css("cursor","auto");								// Normal cursor
-		$("#poppic").css("cursor","auto");									// Normal cursor
-		$("#st-popup").css("max-height","none");							// Make it taller
-		$("#st-popup").css("max-width",$(_this.div).width()*.66);			// Make it wider
-		$("#poppic").width($(_this.div).width()*.66)						// Make pic bigger
-		x=$(_this.div).width()/2-$("#st-popup").width()/2;					// Center it
-		$("#st-popup").css({left:(x+8)+"px",top:"70px"});					// Position
-		e.stopPropagation()
-		});
-
-}
 
 Space.prototype.ShowProgress=function()									// SHOW RESORCE LOAD PROGRESS
 {
@@ -708,32 +646,6 @@ Space.prototype.ShowProgress=function()									// SHOW RESORCE LOAD PROGRESS
 	$("#SloadProgress").text(str);											// Show status
  }	
  
- 
-Space.prototype.FormatTime=function(time, format) 						// FORMAT TIME TO DATE
-{
-/* 	
-	Format time int human readable format
- 	@param {number} time number of ms += 1/1/1970
-	@param {string} format type of format. If not set, this.timeFormat is used.
-	@return {string} time formatted at date.
-*/
-	var str;
-	var mos=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-	d=new Date(time*36000000);												// Convert minutes to ms
-	if (!format)															// If no format spec'd
-		format=this.timeFormat;												// Use global format
-	if (format == "Mo/Year") 												// 1/1900
-		str=(d.getMonth()+1)+"/"+d.getFullYear();							// Set it
-	else if (format == "Mo/Day/Year") 										// 1/1/1900
-		str=(d.getMonth()+1)+"/"+(d.getDay()+1)+"/"+d.getFullYear();		// Set it
-	else if (format == "Mon Year") 											// Jan 1900
-		str=mos[d.getMonth()]+" "+d.getFullYear();							// Set it
-	else if (format == "Mon Day, Year") 									// Jan 1, 1900
-		str=mos[d.getMonth()]+" "+(d.getDay()+1)+", "+d.getFullYear();		// Set it
-	else																	// Default to only year
-		str=d.getFullYear();												// Set it
- 	return str;																// Return formatted date
-}
 				
 Space.prototype.SendMessage=function(cmd, msg) 							// SEND MESSAGE
 {
