@@ -167,7 +167,7 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 		
 		w=$($("#timeSlider")).width()/10;									// Spacing
 		x=$("#timeSlider").offset().left;									// Starting point
-		for (i=0;i<8;++i) {													// For each grid line
+		for (i=0;i<9;++i) {													// For each grid line
 			x+=w;															// Advance
 			$("#svgGrid"+i).attr("transform","translate("+x+", 0)");		// Move grid
 			$("#svgGridDate"+i).html(pop.FormatTime(s+(e-s)*((i+1)/10),this.timeFormat));
@@ -378,7 +378,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 
 	if (this.timeGridColor) {												// If a grid
 		x=100;
-		for (i=0;i<8;++i) {													// For each grid line
+		for (i=0;i<9;++i) {													// For each grid line
 			(i == 4)? r="#4ddb4d" : r=this.timeGridColor;					// Color center?
 			str+="<g id='svgGrid"+i+"'>";									// Group start
 			str+="<line stroke='"+r+"' ";									// Grid line
