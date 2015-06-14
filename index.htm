@@ -73,7 +73,7 @@
 		.ve-left { 			}	
 		.ve-right { 		background-color:#eee;overflow-y:auto;
 							}	
-		.ve-bottom { 		background-color:#eee;width:100%;
+		.ve-bottom { 		background-color:#f8f8f8;width:100%;
 							}	
 		.ve-splash { 		text-align:center;vertical-align:center;pointer-events:none;
 							}
@@ -199,14 +199,14 @@
 			o.desc="<b>The American Civil War</b>, widely known in the United States as simply the Civil War as well as other sectional names, was a civil war fought from 1861 to 1865 to determine the survival of the Union or independence for the Confederacy. Among the 34 states in January 1861, seven Southern slave states individually declared their secession from the United States and formed the Confederate States of America. The Confederacy, often simply called the South, grew to include eleven states, and although they claimed thirteen states and additional western territories, the Confederacy was never diplomatically recognized by a foreign country. The states that remained loyal and did not declare secession were known as the Union or the North. The war had its origin in the fractious issue of slavery, especially the extension of slavery into the western territories.[N 1] After four years of combat, which left over 600,000 Union and Confederate soldiers dead and destroyed much of the South's infrastructure, the Confederacy collapsed and slavery was abolished. Then began the Reconstruction and the processes of restoring national unity and guaranteeing civil rights to the freed slaves.";
 			o.pic="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/US_Secession_map_1861.svg/787px-US_Secession_map_1861.svg.png"
 			o.vis=1;
-			o.title="The Civil War";
+			o.title="Civil War";
 			o.color="#d63333";
 			o.row=5;
 			sd.mobs.push(o);
 
 			o={};
 			o.marker="Dot";
-			o.start="10/18/1890";
+			o.start="6/1891";
 			o.vis=1;
 			o.geoRef="-78.47,38.03,20,0";
 			o.title="Preaches";
@@ -234,7 +234,9 @@
 			sd.spaceTextFont="bold 12px sans-serif ";
 			sd.baseMap="Roadmap";
 			sd.timeFormat="Mon Year";
-
+			sd.start="1/1860";
+			sd.end="12/1922";
+			
 			sd.timeSegments=[ 	{start:tln.DateToTime("1/1860"), end:tln.DateToTime("1886"), title:"Winchester", col:"#ccc", click:"geo:-78.16,39.19,3"},
 								{start:tln.DateToTime("1886"), end:tln.DateToTime("1889"), title:"New York", col:"#ccc", click:"geo:-74.0,40.71,300"},
 								{start:tln.DateToTime("1889"), end:tln.DateToTime("1898"), title:"Charlottesville", col:"#ccc", click:"geo:-78.47,38.03,300"},

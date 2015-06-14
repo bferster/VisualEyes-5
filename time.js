@@ -13,25 +13,6 @@ function Timeline()														// CONSTRUCTOR
 */
 
 	var sd={};
-	this.margin=18;
-	this.start=this.DateToTime("1/1860")
-	this.end=this.DateToTime("12/1922")
-	this.timeColor="#009900";
-	this.hasTimeBar=true; 
-	this.showStartEnd=true; 
-	this.sliderTime="Bottom";
-	this.hasTicks=true;
-	this.hasTickLabels=true
-	this.segmentPos="Top";
-	this.segmentTextColor="#000";
-	this.segmentColor="#ccc";
-	this.playerSpeed=5000;
-	this.curSeg=-1;
-	this.hasTimeView=true;
-	this.timeGridColor="#ccc";
-	this.timeGridDate=true;
-	this.timeViewTextSize=11;
-	
 	this.curTime=this.curStart=this.start;									// Set start
 	this.curEnd=this.end;													// Set end
 	if (this.sound) {														// If clicking
@@ -48,9 +29,32 @@ Timeline.prototype.InitTimeline=function(div, data)						// INIT TIMELINE
   	Init library and connect to div
   	@param {string} div div to draw timeline into
  */
+	this.margin=18;
 	this.sd=data;															// Point at setting and data
+	this.curSeg=-1;															// Assume all segs
 	this.div="#"+div;														// Current div selector
+
 	this.timeFormat=sd.timeFormat;											// Set date format
+	this.start=this.DateToTime(sd.start);									// Start date
+	this.end=this.DateToTime(sd.end);										// End date
+	this.timeColor=sd.timeColor ? sd.timeColor : "#009900"; 				// Time slider color
+	this.hasTimeBar=sd.hasTimeBar ? sd.hasTimeBar : true; 					// Time bar?
+	this.showStartEnd=sd.showStartEnd ? sd.showStartEnd : true; 			// Show start/end dates?
+	this.sliderTime=sd.sliderTime ? sd.sliderTime : "Bottom"; 				// Slider time pos
+	this.hasTicks=sd.hasTicks ? sd.hasTicks : true; 						// Has tick marks?
+	this.hasTickLabels=sd.hasTickLabels ? sd.hasTickLabels : true; 			// Has tick labels?
+	this.segmentPos=sd.segmentPos ? sd.segmentPos : "Top"; 					// Segment bar pos
+	this.hasTimeView=sd.hasTimeView ? sd.hasTimeView : true; 				// Has timeview?
+	this.timeGridDate=sd.timeGridDate ? sd.timeGridDate : true; 			// Has timeview grid?
+	this.segmentTextColor=sd.segmentTextColor ? sd.segmentTextColor : "#00";// Segment text color
+	this.segmentColor=sd.segmentColor ? sd.segmentColor : "#ccc"; 			// Segment color
+	this.playerSpeed=sd.playerSpeed ? sd.playerSpeed : 5000; 				// Time to cross timeline / 2
+	this.timeGridColor=sd.timeGridColor ? sd.timeGridColor : "#ccc"; 		// Timeview grid color (undefined for none)
+	this.timeViewTextSize=sd.timeViewTextSize ? sd.timeViewTextSize : "11"; // Timeview text size
+	this.timeViewTextColor=sd.timeViewTextColor ? sd.timeViewTextColor : "#666"; //Timeview text color
+
+
+	
 	if (this.hasTimeBar) 													// If a timebar
 		this.AddTimeBar();													// Add it
 	if (this.playerSpeed) 													// If it has player
@@ -68,7 +72,7 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 /* 
 	Resize timeline to fit container div
 */
-	var s,e,x,y;
+	var s,e,x,y,dur;
 	var i,w2,m=this.margin;
 	var w=$(this.div).width()-m-m;											// Width of time area
 	var t=$(this.div).height()-$("#timeBar").height()-20-m;					// Top position
@@ -130,6 +134,7 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 		s=ts[this.curSeg].start-0;											// Get start
 		e=ts[this.curSeg].end-0;											// Get end
 		}
+	dur=e-s;																// Calc dur
 	$("#timeStart").html(pop.FormatTime(s,this.timeFormat)+"&nbsp;&nbsp;&nbsp;");	// Set start
 	$("#timeEnd").html("&nbsp;&nbsp;&nbsp;"+pop.FormatTime(e,this.timeFormat)); 	// Set end
 	$("#ticklab1").html(pop.FormatTime(s+(e-s)/4,this.timeFormat));			// Add label div
@@ -156,15 +161,21 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 			if (!o.marker)													// No marker set
 				continue;													// Skip
 			x=(o.start-this.start)/dur;										// Percent in timeline
-			x=(x*w)+ew;														// Percent in div
+			x=(x*w)+ew+m;													// Percent in div
 			y=h-rowHgt;														// Default to 1st row
 			if (o.row)														// If a row spec'd
 				y=h-(o.row*rowHgt+(o.row-1)*rowPad);						// Position it
 			$("#svgMarker"+i).attr("transform","translate("+x+","+y+")");	// Move marker
-			if (o.end)														// If a spanned event
-				$("#svgMarkerBar"+i).attr("width",(o.end-o.start)/dur*w);	// Move bar
+			if (o.end)	 {													// If a spanned event
+				x=(o.end-o.start)/dur*w;									// Calc end
+				$("#svgMarkerBar"+i).attr("width",x);						// Move bar
+				$("#svgMarkerEnd"+i).attr("x1",x);							// Move end line
+				$("#svgMarkerEnd"+i).attr("x2",x);							// Move end line
+				$("#svgMarkerMid"+i).attr("x2",x);							// Move mid line
+				$("#svgMarkerText"+i).attr("text-anchor","middle");			// Center text
+				$("#svgMarkerText"+i).attr("x",x/2);						// Center origin 
+				}
 			}
-		
 		w=$($("#timeSlider")).width()/10;									// Spacing
 		x=$("#timeSlider").offset().left;									// Starting point
 		for (i=0;i<9;++i) {													// For each grid line
@@ -176,7 +187,7 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 		
 	this.curStart=s;														// Save start
 	this.curEnd=e;															// Save end
-	this.curDur=e-s;														// Save duration
+	this.curDur=dur;														// Save duration
 	this.curTime=Math.min(Math.max(this.curTime,s),e);						// Cap at at bounds
 	this.Goto(this.curTime);												// Go there
 }
@@ -377,9 +388,8 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 	str+="<svg width='10000' height='2000'>";								// Add svg 
 
 	if (this.timeGridColor) {												// If a grid
-		x=100;
 		for (i=0;i<9;++i) {													// For each grid line
-			(i == 4)? r="#4ddb4d" : r=this.timeGridColor;					// Color center?
+			r=this.timeGridColor;											// Color 
 			str+="<g id='svgGrid"+i+"'>";									// Group start
 			str+="<line stroke='"+r+"' ";									// Grid line
 			str+="x1=0 x2=0 y1=14 y2=1000/>";								// Points
@@ -388,7 +398,6 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 		 		str+="font-size=9 text-anchor='middle'></text>";
 				}
 			str+="</g>";													// End group
-			x+=100;
 			}
 		}
 
@@ -440,27 +449,24 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 			str+=(-w2)+","+(0)+" "+(0)+","+(-w2)+" "+(w2)+","+(0)+" "+(0)+","+(w2)+"'/>";	// Points
 			}
 		else if (o.marker == "Line") {										// A line
-			str+="<rect 'svgMarkerBar"+i+" y="+(-this.timeViewTextSize/2-1)+" height="+(this.timeViewTextSize+2)+" width=100 fill='none' stroke='"+o.color+"'/>"; 	// Add bar
-/*
 			str+="<line stroke='"+o.color+"' ";								// Line start
-			str+="x1=0 y1="+(-w2)+" x2=0 y2="+(w2)+"/>";					// Points
+			str+="x1=0 y1="+(-w2-2)+" x2=0 y2=0/>";							// Points
 			str+="<line id='svgMarkerMid"+i+"' stroke='"+o.color+"' ";		// Line end
-			str+="x1=0 y1=0 x2=1000 y2-0/>";								// Points
+			str+="x1=0 y1="+(-w2-2)+" x2=100 y2="+(-w2-2)+"/>";					// Points
 			str+="<line id='svgMarkerEnd"+i+"' stroke='"+o.color+"' ";		// Line middle
-			str+="x1=1000 y1="+(-w2)+" x2=1000 y2="+(w2)+"/>";				// Points
-*/			}
+			str+="x1=100 y1="+(-w2-2)+" x2=100 y2=0/>";						// Points
+			}
 		else if (o.marker == "Bar") {										// A bar
-			str+="<rect y="+(-w2)+" height="+(w2+w2)+" width=100 fill='"+o.color+"'/>"; 	// Add bar
+			str+="<rect id='svgMarkerBar"+i+"' y="+(-w2)+" height="+(w2+w2)+" fill='"+o.color+"'/>"; 	// Add bar
 			}
 		else
 			str+="<circle r="+w2+" fill='"+o.color+"' />";					// Default to dot
 		if (o.title) {														// If a title
-		 	str+="<text x="+(w2+6)+" y="+to+" fill='#666' "; 				// Add text
+		 	str+="<text id='svgMarkerText"+i+"' x="+(w2+6)+" y="+to+" fill='"+this.timeViewTextColor+"' "; // Add text
 		 	str+="font-size="+this.timeViewTextSize+">"+o.title+"</text>";
 		 	}
 		str+="</g>";														// End group
 		}
-	
 	str+="</svg></div>";													// End div
 	$(this.div).append(str+"</div>");										// Add timeview bar				
 
@@ -469,7 +475,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 		$("#svgMarker"+i).on('click', function(e) {							// ON MARKER CLICK
 				var id=e.currentTarget.id.substr(9);						// Get ID
 				o=_this.sd.mobs[id];										// Point at mob
-			    pop.ShowPopup(_this.div,_this.timeFormat,e.pageX+8,e.pageY-3,o.title,o.desc,o.pic,o.start,o.end);	// Show popup
+			    pop.ShowPopup(_this.div,_this.timeFormat,e.pageX+8,e.pageY-70,o.title,o.desc,o.pic,o.start,o.end);	// Show popup
 				_this.SendMessage("time",o.start);							// Send new time
 				trace(e)
 				if (o.goto)													// If a goto defined
