@@ -36,8 +36,10 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
   	this.div=div;															// Set div
   	var _this=this;															// Save context for callbacks
 	$("#st-popup").remove();												// Remove any pre-existing popup
-	if (x == undefined)														// If no x defined
+	if (x == undefined)	{													// If no x defined
+		trace(123)
 		return;																// We're just removing
+	}
 	var str="<div id='st-popup' class='popup-main'>";						// Add message
 	if (title)																// If title set
 		str+="<div class='popup-title'><b>"+title+"</b>";					// Add it

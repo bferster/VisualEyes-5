@@ -360,7 +360,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 	var i,j,o,str,w2,r;
 	var _this=this;															// Save context for callback
 	str="<div id='timeViewBar' class='time-timeview'>"						// Enclosing div
-	str+="<div id='xtimeViewSVG' style='position:absolute'>";				// SVG div
+	str+="<div id='timeViewSVG' style='position:absolute'>";				// SVG div
 	str+="<svg width='10000' height='2000'>";								// Add svg 
 	var to=this.timeViewTextSize*.33;										// Text offset
 	for (i=0;i<this.sd.mobs.length;++i) {									// For each mob
@@ -438,17 +438,17 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 		$("#svgMarker"+i).on('click', function(e) {							// ON MARKER CLICK
 				var id=e.currentTarget.id.substr(9);						// Get ID
 				o=_this.sd.mobs[id];										// Point at mob
-		    	var y=$(_this.div).offset().top+e.offsetY-32;				// Point below top of div
-			    pop.ShowPopup(_this.div,_this.timeFormat,e.offsetX+8,y,o.title,o.desc,o.pic,o.start,o.end);	// Show popup
+			    pop.ShowPopup(_this.div,_this.timeFormat,e.pageX+8,e.pageY-3,o.title,o.desc,o.pic,o.start,o.end);	// Show popup
 				_this.SendMessage("time",o.start);							// Send new time
+				trace(e)
 				if (o.goto)													// If a goto defined
 					_this.SendMessage("geo",o.goto);						// Move map
 				});
 		}
 	
-	$("#timeViewBar").on('click', function(e) {								// TIMESEG CLICK
-		if ($(e.toElement).width() > 1000)									// Not on a marker
-	   		pop.ShowPopup();												// Clear any open popup
+	$("#timeViewSVG").on('click', function(e) {								// TIMESEG CLICK
+		if (e.target.tagName == "svg")										// Not on a marker
+   			pop.ShowPopup();												// Clear any open popup
 		});
 }
 
