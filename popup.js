@@ -107,9 +107,6 @@ Popup.prototype.FormatTime=function(time, format) 						// FORMAT TIME TO DATE
 	var str;
 	var mos=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 	d=new Date(time*36000000);												// Convert minutes to ms
-//	trace(this.timeFormat)
-	if (!format)															// If no format spec'd
-		format=this.timeFormat;												// Use global format
 	if (format == "Mo/Year") 												// 1/1900
 		str=(d.getMonth()+1)+"/"+d.getFullYear();							// Set it
 	else if (format == "Mo/Day/Year") 										// 1/1/1900

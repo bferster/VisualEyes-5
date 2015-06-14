@@ -28,6 +28,8 @@ function Timeline()														// CONSTRUCTOR
 	this.playerSpeed=5000;
 	this.curSeg=-1;
 	this.hasTimeView=true;
+	this.timeGridColor="#ccc";
+	this.timeGridDate=true;
 	this.timeViewTextSize=11;
 	
 	this.curTime=this.curStart=this.start;									// Set start
@@ -90,9 +92,9 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 	if (this.hasTicks && this.hasTimeBar) {									// If ticks
 		var x=$("#timeSlider").offset().left-m;								// Starting point
 		var tw=w/8;															// Space between ticks
-		for (i=0;i<=7;++i) {												// For each tick
+		for (i=0;i<9;++i) {												// For each tick
 			x+=tw;															// Move over
-			$("#tick"+i).css( {top:"11px",left:x+"px"} );					// Position
+			$("#tick"+i).css( {top:"11px",left:x+"px"} );				// Position
 			if ((i == 1) || (i == 3) || (i == 5)) {							// A shorter tick
 				$("#tick"+i).height(14);									// Size
 				if (this.hasTickLabels) 									// If showing labels
@@ -103,6 +105,7 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 
 	var ts=this.sd.timeSegments;											// Point at time segments
 	if (ts) {																// If segments
+		w=$($("#timeSlider")).width();											// Width of slider
 		var w1=w-(ts.length-1)*2;											// Remove spaces between segs
 		x=(this.hasTimeBar) ? $("#timeSlider").offset().left : m;			// Starting point
 		for (i=0;i<ts.length;++i) { 										// For each seg
@@ -127,15 +130,15 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 		s=ts[this.curSeg].start-0;											// Get start
 		e=ts[this.curSeg].end-0;											// Get end
 		}
-	$("#timeStart").html(pop.FormatTime(s)+"&nbsp;&nbsp;&nbsp;");			// Set start
-	$("#timeEnd").html("&nbsp;&nbsp;&nbsp;"+pop.FormatTime(e)); 			// Set end
-	$("#ticklab1").html(pop.FormatTime(s+(e-s)/4));							// Add label div
-	$("#ticklab3").html(pop.FormatTime(s+(e-s)/2));							// Add label div
-	$("#ticklab5").html(pop.FormatTime(s+(e-s)/4*3));						// Add label div
+	$("#timeStart").html(pop.FormatTime(s,this.timeFormat)+"&nbsp;&nbsp;&nbsp;");	// Set start
+	$("#timeEnd").html("&nbsp;&nbsp;&nbsp;"+pop.FormatTime(e,this.timeFormat)); 	// Set end
+	$("#ticklab1").html(pop.FormatTime(s+(e-s)/4,this.timeFormat));			// Add label div
+	$("#ticklab3").html(pop.FormatTime(s+(e-s)/2,this.timeFormat));			// Add label div
+	$("#ticklab5").html(pop.FormatTime(s+(e-s)/4*3,this.timeFormat));		// Add label div
 	$("#timeSlider").slider("option",{min:s,max:e,value:s}); 				// Set slider
 
 	if (this.hasTimeView) {													// If a timeview
-		var h=$(this.div).height();											// Total bottom height
+		var h=$(this.div).height()-m-8;										// Total bottom height
 		if (this.hasTimeBar) {												// If a timebar
 			h-=$("#timeBar").height()+m+24;									// Account for it
 			if (this.sliderTime == "Top")									// If a top date
@@ -144,7 +147,8 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 		if (this.segmentPos == "Top")										// If top segment bar
 			h+=6;															// Shift
 		h-=$("#segmentBar").height()+m;										// Account for segments
-		$("#timeViewBar").height(h);										// Set height
+		$("#timeViewBar").height(h+8);										// Set height
+		$("#timeViewBar").css("top",8+"px");								// Set top
 		var rowHgt=12;														// Set row height
 		var rowPad=4;														// Space between rows
 		for (i=0;i<this.sd.mobs.length;++i) {								// For each mob
@@ -160,7 +164,16 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 			if (o.end)														// If a spanned event
 				$("#svgMarkerBar"+i).attr("width",(o.end-o.start)/dur*w);	// Move bar
 			}
+		
+		w=$($("#timeSlider")).width()/10;									// Spacing
+		x=$("#timeSlider").offset().left;									// Starting point
+		for (i=0;i<8;++i) {													// For each grid line
+			x+=w;															// Advance
+			$("#svgGrid"+i).attr("transform","translate("+x+", 0)");		// Move grid
+			$("#svgGridDate"+i).html(pop.FormatTime(s+(e-s)*((i+1)/10),this.timeFormat));
+			}	
 		}
+		
 	this.curStart=s;														// Save start
 	this.curEnd=e;															// Save end
 	this.curDur=e-s;														// Save duration
@@ -192,17 +205,17 @@ Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
 	str="<div id='timeBar' class='time-timebar'>";							// Add timebar div
 	str+="<div id='timecontrol'>"											// Block timebar unit
 	if (this.showStartEnd && this.start) 									// If showing start date
-		str+="<span id='timeStart' class='time-startend'>"+pop.FormatTime(this.start)+"&nbsp;&nbsp;&nbsp;</span>";	// Add start date
+		str+="<span id='timeStart' class='time-startend'>"+pop.FormatTime(this.start,this.timeFormat)+"&nbsp;&nbsp;&nbsp;</span>";	// Add start date
 	str+="<div id='timeSlider' class='time-timeslider'></div>";				// Add slider div
 	if (this.showStartEnd && this.end) 										// If showing end date
-		str+="<span id='timeEnd' class='time-startend'>&nbsp;&nbsp;&nbsp;"+pop.FormatTime(this.end)+"</span>";		// Add end date
+		str+="<span id='timeEnd' class='time-startend'>&nbsp;&nbsp;&nbsp;"+pop.FormatTime(this.end,this.timeFormat)+"</span>";		// Add end date
 	if (this.hasTicks) {													// If it has tick marks
 		for (i=0;i<7;++i) 													// For each tick
 			str+="<div class='time-ticks' id='tick"+i+"'></div>";			// Add tick div
 		if (this.hasTickLabels) {											// If showing labels
-			str+="<div class='time-ticklabel' id='ticklab1'>"+pop.FormatTime(this.start-0+(this.end-this.start)/4)+"</div>";	 // Add label div
-			str+="<div class='time-ticklabel' id='ticklab3'>"+pop.FormatTime(this.start-0+(this.end-this.start)/2)+"</div>";	 // Add label div
-			str+="<div class='time-ticklabel' id='ticklab5'>"+pop.FormatTime(this.start-0+(this.end-this.start)/4*3)+"</div>"; // Add label div
+			str+="<div class='time-ticklabel' id='ticklab1'>"+pop.FormatTime(this.start-0+(this.end-this.start)/4,this.timeFormat)+"</div>";	 // Add label div
+			str+="<div class='time-ticklabel' id='ticklab3'>"+pop.FormatTime(this.start-0+(this.end-this.start)/2,this.timeFormat)+"</div>";	 // Add label div
+			str+="<div class='time-ticklabel' id='ticklab5'>"+pop.FormatTime(this.start-0+(this.end-this.start)/4*3,this.timeFormat)+"</div>"; 	 // Add label div
 			}
 		}
 	if (this.sliderTime != "None") 											// If showing start date
@@ -214,7 +227,7 @@ Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
   			_this.curTime=time												// Set now
   			_this.SendMessage("time",_this.curTime+"|scroll");				// Send new time
   			var y=(_this.sliderTime == "Top") ? -22 : 26;					// Top or bottom
-			$("#sliderTime").html(pop.FormatTime(time));					// Show value
+			$("#sliderTime").html(pop.FormatTime(time,_this.timeFormat));	// Show value
  			$("#sliderTime").css({top:y+"px",left:x-66+"px"})				// Position text
  			}
 		}
@@ -362,6 +375,23 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 	str="<div id='timeViewBar' class='time-timeview'>"						// Enclosing div
 	str+="<div id='timeViewSVG' style='position:absolute'>";				// SVG div
 	str+="<svg width='10000' height='2000'>";								// Add svg 
+
+	if (this.timeGridColor) {												// If a grid
+		x=100;
+		for (i=0;i<8;++i) {													// For each grid line
+			(i == 4)? r="#4ddb4d" : r=this.timeGridColor;					// Color center?
+			str+="<g id='svgGrid"+i+"'>";									// Group start
+			str+="<line stroke='"+r+"' ";									// Grid line
+			str+="x1=0 x2=0 y1=14 y2=1000/>";								// Points
+			if (this.timeGridDate) {										// If showing datws
+			 	str+="<text id='svg\GridDate"+i+"' y=8 fill='#999' "; 		// Add text
+		 		str+="font-size=9 text-anchor='middle'></text>";
+				}
+			str+="</g>";													// End group
+			x+=100;
+			}
+		}
+
 	var to=this.timeViewTextSize*.33;										// Text offset
 	for (i=0;i<this.sd.mobs.length;++i) {									// For each mob
 		o=this.sd.mobs[i];													// Point at mob
@@ -420,16 +450,17 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 			str+="x1=1000 y1="+(-w2)+" x2=1000 y2="+(w2)+"/>";				// Points
 */			}
 		else if (o.marker == "Bar") {										// A bar
-			str+="<rect 'svgMarkerBar"+i+" y="+(-w2)+" height="+(w2+w2)+" width=100 fill='"+o.color+"'/>"; 	// Add bar
+			str+="<rect y="+(-w2)+" height="+(w2+w2)+" width=100 fill='"+o.color+"'/>"; 	// Add bar
 			}
 		else
 			str+="<circle r="+w2+" fill='"+o.color+"' />";					// Default to dot
 		if (o.title) {														// If a title
-		 	str+="<text id='svgMarkerText"+i+"' x="+(w2+6)+" y="+to+" fill='#666' "; // Add text
+		 	str+="<text x="+(w2+6)+" y="+to+" fill='#666' "; 				// Add text
 		 	str+="font-size="+this.timeViewTextSize+">"+o.title+"</text>";
 		 	}
 		str+="</g>";														// End group
 		}
+	
 	str+="</svg></div>";													// End div
 	$(this.div).append(str+"</div>");										// Add timeview bar				
 
@@ -477,7 +508,7 @@ Timeline.prototype.Goto=function(time, segment)							// SET TIME AND [SEGMENT]
 	this.SendMessage("time",this.curTime+"|goto");							// Send new time
 	if ((this.sliderTime == "Top") || (this.sliderTime == "Bottom")){ 		// If showing date
 		var y=(this.sliderTime == "Top") ? -22 : 26;						// Top or bottom
-		$("#sliderTime").html(pop.FormatTime(time));						// Show value
+		$("#sliderTime").html(pop.FormatTime(time,this.timeFormat));		// Show value
 		$("#sliderTime").css({top:y+"px",left:x-66+"px"})					// Position text
 		}
 }
