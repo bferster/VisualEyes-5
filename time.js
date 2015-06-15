@@ -1,10 +1,10 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TIME.JS 
 // Provides timeline component
-// Requires: Sound()
+// Requires: Popup.js()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function Timeline()														// CONSTRUCTOR
+function Timeline(pop)														// CONSTRUCTOR
 {
 
 /* 
@@ -13,13 +13,9 @@ function Timeline()														// CONSTRUCTOR
 */
 
 	var sd={};
+	this.pop=pop;															// Point at popup lib
 	this.curTime=this.curStart=this.start;									// Set start
 	this.curEnd=this.end;													// Set end
-	if (this.hasSound) {													// If clicking
-		Sound("click","init");												// Init sound
-		Sound("ding","init");												// Init sound
-		Sound("delete","init");												// Init sound
-		}
 }
 
 
@@ -52,7 +48,7 @@ Timeline.prototype.InitTimeline=function(div, data)						// INIT TIMELINE
 	this.timeGridColor=sd.timeGridColor ? sd.timeGridColor : "#ccc"; 		// Timeview grid color (undefined for none)
 	this.timeViewTextSize=sd.timeViewTextSize ? sd.timeViewTextSize : "11"; // Timeview text size
 	this.hasBackBut=sd.hasBackBut ? sd.hasBackBut : true; 					// Has forward/back buttons?
-	this.hasSound=sd.hasSound ? sd.hasSound : true; 						// Has sound?
+	this.muteSound=sd.muteSound ? sd.muteSound : false; 					// Sound  muted?
 	this.timeViewTextColor=sd.timeViewTextColor ? sd.timeViewTextColor : "#666"; //Timeview text color
 	
 	if (this.hasTimeBar) 													// If a timebar
@@ -135,12 +131,12 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 		e=ts[this.curSeg].end-0;											// Get end
 		}
 	dur=e-s;																// Calc dur
-	$("#timeStart").html(pop.FormatTime(s,this.timeFormat)+"&nbsp;&nbsp;&nbsp;");	// Set start
-	$("#timeEnd").html("&nbsp;&nbsp;&nbsp;"+pop.FormatTime(e,this.timeFormat)); 	// Set end
-	$("#ticklab1").html(pop.FormatTime(s+(e-s)/4,this.timeFormat));			// Add label div
-	$("#ticklab3").html(pop.FormatTime(s+(e-s)/2,this.timeFormat));			// Add label div
-	$("#ticklab5").html(pop.FormatTime(s+(e-s)/4*3,this.timeFormat));		// Add label div
-	$("#timeSlider").slider("option",{min:s,max:e,value:s}); 				// Set slider
+	$("#timeStart").html(this.pop.FormatTime(s,this.timeFormat)+"&nbsp;&nbsp;&nbsp;");	// Set start
+	$("#timeEnd").html("&nbsp;&nbsp;&nbsp;"+this.pop.FormatTime(e,this.timeFormat)); 	// Set end
+	$("#ticklab1").html(this.pop.FormatTime(s+(e-s)/4,this.timeFormat));				// Add label div
+	$("#ticklab3").html(this.pop.FormatTime(s+(e-s)/2,this.timeFormat));				// Add label div
+	$("#ticklab5").html(this.pop.FormatTime(s+(e-s)/4*3,this.timeFormat));				// Add label div
+	$("#timeSlider").slider("option",{min:s,max:e,value:s}); 							// Set slider
 
 	if (this.hasTimeView) {													// If a timeview
 		var h=$(this.div).height()-m-8;										// Total bottom height
@@ -184,7 +180,7 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 		for (i=0;i<9;++i) {													// For each grid line
 			x+=w;															// Advance
 			$("#svgGrid"+i).attr("transform","translate("+x+", 0)");		// Move grid
-			$("#svgGridDate"+i).html(pop.FormatTime(s+(e-s)*((i+1)/10),this.timeFormat));
+			$("#svgGridDate"+i).html(this.pop.FormatTime(s+(e-s)*((i+1)/10),this.timeFormat));
 			}	
 		}
 		
@@ -241,7 +237,7 @@ Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
   			_this.curTime=time												// Set now
   			_this.SendMessage("time",_this.curTime+"|scroll");				// Send new time
   			var y=(_this.sliderTime == "Top") ? -22 : 26;					// Top or bottom
-			$("#sliderTime").html(pop.FormatTime(time,_this.timeFormat));	// Show value
+			$("#sliderTime").html(_this.pop.FormatTime(time,_this.timeFormat));	// Show value
  			$("#sliderTime").css({top:y+"px",left:x-66+"px"})				// Position text
  			}
 		}
@@ -274,12 +270,12 @@ Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
 		for (i=0;i<v.length;++i) {											// For each sorted time
 			if (v[i] > _this.curTime) {										// If past now
 				_this.Goto(v[i]);											// Go to time
-				if (_this.hasSound)	Sound("click");							// Click sound							
+				_this.pop.Sound("click",_this.muteSound);					// Click sound							
 				break;														// Quit looking
 				}
 			}
-		if ((i == v.length) && (_this.hasSound))							// If nothing found
-			Sound("delete");												// Delete sound
+		if (i == v.length) 													// If nothing found
+			_this.pop.Sound("delete",_this.muteSound);						// Delete sound							
 		});
 			
  	$("#timeEnd").click( function() {										// ON END DATE CLICK
@@ -291,10 +287,10 @@ Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
 		v.sort(function(a, b){return a-b});									// Ascending sort															)
 		for (i=0;i<v.length;++i) {											// For each sorted time
 			if (v[i] >= _this.curTime) {									// If past now
-				if ((i == 0) && (_this.hasSound))							// If nothing found
-					Sound("delete");										// Delete sound
+				if (i == 0)													// If nothing found
+					_this.pop.Sound("delete",_this.muteSound);					// Delete sound							
 				else {
-					if (_this.hasSound)	Sound("click");						// Click sound							
+					_this.pop.Sound("click",_this.muteSound);				// Click sound							
 					_this.Goto(v[i-1]);										// Go to time
 					}
 				break;														// Quit looking
@@ -339,8 +335,7 @@ Timeline.prototype.AddPlayer=function() 								// ADD TIME PLAYER
 		});
 	
 	$("#playerButton").click( function() {									// ON PLAY CLICK
-			if (_this.hasSound)												// If clicking
-				Sound("click");												// Click sound
+			_this.pop.Sound("click",_this.muteSound);						// Click sound							
 			if ($(this).prop("src").match("play")) 							// If not playing
 				_this.Play(_this.curTime);									// Play	
 			else															// If in pause
@@ -385,8 +380,7 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 		$("#timeseg"+i).click( function(e) {								// ON SEG CLICK
 			var i;
 			var id=e.target.id.substr(7);									// Get ID
-			if (_this.hasSound)												// If clicking
-				Sound("click");												// Click sound
+			_this.pop.Sound("click",_this.muteSound);						// Click sound
 			for (i=0;i<ts.length+1;++i)  									// For each segment
 				$("#timeseg"+i).css({"background-color":"#ccc"});			// Clear it
 			$(this).css({"background-color":"#acc3db" });					// Highlight picked one
@@ -505,16 +499,16 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 		$("#svgMarker"+i).on('click', function(e) {							// ON MARKER CLICK
 				var id=e.currentTarget.id.substr(9);						// Get ID
 				o=_this.sd.mobs[id];										// Point at mob
-			    pop.ShowPopup(_this.div,_this.timeFormat,e.pageX+8,e.pageY-70,o.title,o.desc,o.pic,o.start,o.end);	// Show popup
+			    _this.pop.ShowPopup(_this.div,_this.timeFormat,e.pageX+8,e.pageY-70,o.title,o.desc,o.pic,o.start,o.end);	// Show popup
 				_this.SendMessage("time",o.start);							// Send new time
-					if (o.goto)													// If a goto defined
+					if (o.goto)												// If a goto defined
 					_this.SendMessage("geo",o.goto);						// Move map
 				});
 		}
 	
 	$("#timeViewSVG").on('click', function(e) {								// TIMESEG CLICK
 		if (e.target.tagName == "svg")										// Not on a marker
-   			pop.ShowPopup();												// Clear any open popup
+   			_this.pop.ShowPopup();											// Clear any open popup
 		});
 }
 
@@ -543,7 +537,7 @@ Timeline.prototype.Goto=function(time, segment)							// SET TIME AND [SEGMENT]
 	this.SendMessage("time",this.curTime+"|goto");							// Send new time
 	if ((this.sliderTime == "Top") || (this.sliderTime == "Bottom")){ 		// If showing date
 		var y=(this.sliderTime == "Top") ? -22 : 26;						// Top or bottom
-		$("#sliderTime").html(pop.FormatTime(time,this.timeFormat));		// Show value
+		$("#sliderTime").html(this.pop.FormatTime(time,this.timeFormat));	// Show value
 		$("#sliderTime").css({top:y+"px",left:x-66+"px"})					// Position text
 		}
 }

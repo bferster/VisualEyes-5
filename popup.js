@@ -1,7 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // POPUP.JS 
-// Provides popup
-// Requires: Sound()
+// Provides popup and some utilities
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function Popup()														// CONSTRUCTOR
@@ -12,6 +11,9 @@ function Popup()														// CONSTRUCTOR
   	Styling of popups dependent on css: .popup-*.*
 
 */
+		this.Sound("click",true);											// Init sound
+		this.Sound("ding",true);											// Init sound
+		this.Sound("delete",true);											// Init sound
 
 }
 
@@ -36,10 +38,9 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
   	this.div=div;															// Set div
   	var _this=this;															// Save context for callbacks
 	$("#st-popup").remove();												// Remove any pre-existing popup
-	if (x == undefined)	{													// If no x defined
-		trace(123)
+	if (x == undefined)														// If no x defined
 		return;																// We're just removing
-	}
+
 	var str="<div id='st-popup' class='popup-main'>";						// Add message
 	if (title)																// If title set
 		str+="<div class='popup-title'><b>"+title+"</b>";					// Add it
@@ -123,7 +124,7 @@ Popup.prototype.FormatTime=function(time, format) 						// FORMAT TIME TO DATE
 	
 Popup.prototype.GetTextBox=function (title, content, def, callback)		// GET TEXT LINE BOX
 {
-	Sound("click");															// Ding sound
+	this.Sound("click");													// Ding sound
 	$("#alertBoxDiv").remove();												// Remove any old ones
 	$("body").append("<div class='ve-unselectable' id='alertBoxDiv'></div>");														
 	var str="<p><img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
@@ -165,9 +166,9 @@ Popup.prototype.ShowLightBox=function(title, content)				// LIGHTBOX
 }
 
 
-Popup.prototype.LightBoxAlert=function(msg) 						//	SHOW LIGHTBOX ALERT
+Popup.prototype.LightBoxAlert=function(msg) 							//	SHOW LIGHTBOX ALERT
 {
-	Sound("delete");														// Delete sound
+	this.Sound("delete");													// Delete sound
 	$("#lightBoxTitle").html("<span style='color:#990000'>"+msg+"</span>");	// Put new
 }
 	
@@ -254,5 +255,16 @@ Popup.prototype.GetCookie=function(cname) {							// GET COOKIE
 	  }
 	return "";
 }
+
+Popup.prototype.Sound=function(sound, mute)					// PLAY SOUND
+{
+	var snd=new Audio();										// Init audio object
+	if (!snd.canPlayType("audio/mpeg") || (snd.canPlayType("audio/mpeg") == "maybe")) 
+		snd=new Audio("img/"+sound+".ogg");						// Use ogg
+	else	
+		snd=new Audio("img/"+sound+".mp3");						// Use mp3
+	if (!mute)													// If not initing or muting	
+		snd.play();												// Play sound
+	}
 
 			

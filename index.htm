@@ -240,7 +240,7 @@
 			sd.timeFormat="Mon Year";
 			sd.start="1/1860";
 			sd.end="12/1922";
-			sd.hasSound=true;
+			sd.muteSound=false;
 			
 			sd.timeSegments=[ 	{start:tln.DateToTime("1/1860"), end:tln.DateToTime("1886"), title:"Winchester", col:"#ccc", click:"geo:-78.16,39.19,3"},
 								{start:tln.DateToTime("1886"), end:tln.DateToTime("1889"), title:"New York", col:"#ccc", click:"geo:-74.0,40.71,300"},
@@ -397,10 +397,10 @@ mps.ShowLayers([0,1],true);
 
 				});				
 		$(window).resize(ResizePanes);											// Dynamic resizing
-		mps=new Space("leftDiv");												// Alloc map module
-		mps.InitMap();															// Init map
-		tln=new Timeline;														// Alloc time module
 		pop=new Popup("leftDiv");												// Alloc popup module
+		mps=new Space("leftDiv",pop);											// Alloc map module
+		tln=new Timeline(pop);													// Alloc time module
+		mps.InitMap();															// Init map
 		InitProject();															// Init project
 		ResizePanes();															// Resize panes
 		if (drupalMan) 															// If called from Drupal manager
@@ -437,8 +437,7 @@ mps.ShowLayers([0,1],true);
 	}
 
 	$("#settingsBut").click(function() {										// SETTINGS BUTTON CLICK
-		trace(sd.hasSound)
-		if (sd.hasSound)	Sound("click");										// Click sound							
+		Sound("click",sd.muteSound);											// Click sound							
 	});
 
 
@@ -458,17 +457,6 @@ mps.ShowLayers([0,1],true);
 			console.log(msg,p1);
 		else
 			console.log(msg);
-	}
-
-	function Sound(sound, mode)											// PLAY SOUND
-	{
-		var snd=new Audio();
-		if (!snd.canPlayType("audio/mpeg") || (snd.canPlayType("audio/mpeg") == "maybe")) 
-			snd=new Audio("img/"+sound+".ogg");
-		else	
-			snd=new Audio("img/"+sound+".mp3");
-		if (mode != "init")
-			snd.play();
 	}
 
 	function MakeSelect(id, multi, items, sel, extra, values)				// CREATE HTML SELECT

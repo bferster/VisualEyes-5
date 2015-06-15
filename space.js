@@ -1,10 +1,10 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SPACE.JS 
 // Provides mapping component
-// Requires: Sound()
+// Requires: popup.js
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function Space(div)														// CONSTRUCTOR
+function Space(div, pop)														// CONSTRUCTOR
 {
 
 /* 
@@ -12,14 +12,12 @@ function Space(div)														// CONSTRUCTOR
 */
 
 	this.div="#"+div;														// Current div selector
+  	this.pop=pop;															// Point at popup lib
   	this.controlKey=this.shiftKey=false;									// Shift/control key flags
 	this.showBoxes=false;													// Show boxes
 	this.showRoads=false;													// Hide Roads/borders
 	this.showScale=true;													// Show scale
 	this.timeFormat="Mon Day, Year";										// Default time format
-	Sound("click","init");													// Init sound
-	Sound("ding","init");													// Init sound
-	Sound("delete","init");													// Init sound
 	this.overlays=[];														// Holds overlay layers
 }
 
@@ -609,19 +607,19 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
   					if (o.spaceDesc) 	var desc=o.spaceDesc;				// Space over-rides
   					if (o.pic) 			var pic=o.pic;						// Lead with pic
   					if (o.spacePic) 	var title=o.spacePic;				// Space over-rides
-       				pop.ShowPopup(_this.div,_this.timeFormat,evt.pixel[0],evt.pixel[1],title,desc,pic,o.start,o.end);
+       				_this.pop.ShowPopup(_this.div,_this.timeFormat,evt.pixel[0],evt.pixel[1],title,desc,pic,o.start,o.end);
 					_this.SendMessage("time",o.start);						// Send new time
 					if (o.goto)												// If a goto defined
 						_this.Goto(o.goto);									// Go there
 					}
 			  	} 
 			else 															// No feature found
-				pop.ShowPopup();											// Kill any existing pop
+				_this.pop.ShowPopup();										// Kill any existing pop
 			});
 
 	this.map.on('pointermove', function(e) {								// ON MOUSE MOVE
 		if (e.dragging) {													// If dragging
-			pop.ShowPopup();												// Kill any existing pop
+			_this.pop.ShowPopup();											// Kill any existing pop
 	    	return;															// Quit
 	  		}
 	  	var pixel=_this.map.getEventPixel(e.originalEvent);					// Get pos
