@@ -140,4 +140,119 @@ Popup.prototype.GetTextBox=function (title, content, def, callback)		// GET TEXT
 	$(".ui-dialog").css({"border-radius":"14px", "box-shadow":"4px 4px 8px #ccc"});
 	$(".ui-button").css({"border-radius":"30px","outline":"none"});
 }
+
+
+Popup.prototype.ShowLightBox=function(title, content)				// LIGHTBOX
+{
+	var str="<div id='lightBoxDiv' style='position:fixed;width:100%;height:100%;";	
+	str+="background:url(images/overlay.png) repeat;top:0px;left:0px';</div>";
+	$("body").append(str);														
+	var	width=500;
+	var x=$("#lightBoxDiv").width()/2-250;
+	if (this.version == 1) 
+		x=Math.max(x,950)
+	var y=$("#lightBoxDiv").height()/2-200;
+	if (this.xPos != undefined)
+		x=this.xPos;
+	str="<div id='lightBoxIntDiv' class='unselectable' style='position:absolute;padding:16px;width:400px;font-size:12px";
+	str+=";border-radius:12px;z-index:2003;"
+	str+="border:1px solid; left:"+x+"px;top:"+y+"px;background-color:#f8f8f8'>";
+	str+="<img src='images/qlogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
+	str+="<span id='lightBoxTitle' style='font-size:18px;text-shadow:1px 1px #ccc'><b>"+title+"</b></span>";
+	str+="<div id='lightContentDiv'>"+content+"</div>";					
+	$("#lightBoxDiv").append(str);	
+	$("#lightBoxDiv").css("z-index",2500);						
+}
+
+
+Popup.prototype.LightBoxAlert=function(msg) 						//	SHOW LIGHTBOX ALERT
+{
+	Sound("delete");														// Delete sound
+	$("#lightBoxTitle").html("<span style='color:#990000'>"+msg+"</span>");	// Put new
+}
+	
+Popup.prototype.ColorPicker=function (name, transCol) 					//	DRAW COLORPICKER
+{
+	if (!transCol)															// If no transparent color set
+		transCol="";														// Use null
+	$("#colorPickerDiv").remove();											// Remove old one
+	var x=$("#"+name).offset().left+10;										// Get left
+	var y=$("#"+name).offset().top+10;										// Top
+	var	str="<div id='colorPickerDiv' style='position:absolute;left:"+x+"px;top:"+y+"px;width:160px;height:225px;z-index:100;border-radius:12px;background-color:#eee'>";
+	$("body").append("</div>"+str);											// Add palette to dialog
+	$("#colorPickerDiv").draggable();										// Make it draggable
+	str="<p style='text-shadow:1px 1px white' align='center'><b>Choose a new color</b></p>";
+	str+="<img src='colorpicker.gif' style='position:absolute;left:5px;top:28px' />";
+	str+="<input id='shivaDrawColorInput' type='text' style='position:absolute;left:22px;top:29px;width:96px;background:transparent;border:none;'>";
+	$("#colorPickerDiv").html(str);											// Fill div
+	$("#colorPickerDiv").on("click",onColorPicker);							// Mouseup listener
+
+	function onColorPicker(e) {
+		
+		var col;
+		var cols=["000000","444444","666666","999999","CCCCCC","EEEEEE","E7E7E7","FFFFFF",
+				  "FF0000","FF9900","FFFF00","00FF00","00FFFF","0000FF","9900FF","FF00FF",	
+				  "F4CCCC","FCE5CD","FFF2CC","D9EAD3","D0E0E3","CFE2F3","D9D2E9","EDD1DC",
+				  "EA9999","F9CB9C","FFE599","BED7A8","A2C4C9","9FC5E8","B4A7D6","D5A6BD",
+				  "E06666","F6B26B","FFD966","9C347D","76A5AF","6FA8DC","8E7CC3","C27BA0",
+				  "CC0000","E69138","F1C232","6AA84F","45818E","3D85C6","674EA7","A64D79",
+				  "990000","B45F06","BF9000","38761D","134F5C","0B5394","351C75","741B47",
+				  "660000","783F04","7F6000","274E13","0C343D","073763","20124D","4C1130"
+				 ];
+		var x=e.pageX-this.offsetLeft;										// Offset X from page
+		var y=e.pageY-this.offsetTop;										// Y
+		if ((x < 102) && (y < 45))											// In text area
+			return;															// Quit
+		$("#colorPickerDiv").off("click",this.onColorPicker);				// Remove mouseup listener
+		if ((x > 102) && (x < 133) && (y < 48))	{							// In OK area
+			if ($("#shivaDrawColorInput").val())							// If something there
+				col="#"+$("#shivaDrawColorInput").val();					// Get value
+			else															// Blank
+				x=135;														// Force a quit
+			}
+		$("#colorPickerDiv").remove();										// Remove
+		if ((x > 133) && (y < 48)) 											// In quit area
+			return;															// Return
+		if (y > 193) 														// In trans area
+			col=transCol;													// Set trans
+		else if (y > 48) {													// In color grid
+			x=Math.floor((x-14)/17);										// Column
+			y=Math.floor((y-51)/17);										// Row
+			col="#"+cols[x+(y*8)];											// Get color
+			}
+		if (col == transCol)												// No color 
+			$("#"+name).css({ "border":"1px dashed #000","background-color":"#fff" }); 	// Set dot
+		else				
+			$("#"+name).css({ "border":"1px solid #000","background-color":col }); 		// Set dot
+		$("#"+name).data(name,col);											// Set color
+	}
+
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+//  HELPERS
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+
+Popup.prototype.SetCookie=function(cname, cvalue, exdays)			// SET COOKIE
+{
+	var d=new Date();
+	d.setTime(d.getTime()+(exdays*24*60*60*1000));
+	var expires = "expires="+d.toGMTString();
+	document.cookie = cname + "=" + cvalue + "; " + expires;
+}
+
+
+Popup.prototype.GetCookie=function(cname) {							// GET COOKIE
+	var name=cname+"=",c;
+	var ca=document.cookie.split(';');
+	for (var i=0;i<ca.length;i++)  {
+	  c=ca[i].trim();
+	  if (c.indexOf(name) == 0) 
+	  	return c.substring(name.length,c.length);
+	  }
+	return "";
+}
+
 			
