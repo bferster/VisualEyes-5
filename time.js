@@ -51,9 +51,9 @@ Timeline.prototype.InitTimeline=function(div, data)						// INIT TIMELINE
 	this.playerSpeed=sd.playerSpeed ? sd.playerSpeed : 5000; 				// Time to cross timeline / 2
 	this.timeGridColor=sd.timeGridColor ? sd.timeGridColor : "#ccc"; 		// Timeview grid color (undefined for none)
 	this.timeViewTextSize=sd.timeViewTextSize ? sd.timeViewTextSize : "11"; // Timeview text size
+	this.hasBackBut=sd.hasBackBut ? sd.hasBackBut : true; 					// Has forward/back buttons?
+	this.sound=sd.hasSound ? sd.hasSound : true; 							// Has sound?
 	this.timeViewTextColor=sd.timeViewTextColor ? sd.timeViewTextColor : "#666"; //Timeview text color
-
-
 	
 	if (this.hasTimeBar) 													// If a timebar
 		this.AddTimeBar();													// Add it
@@ -156,12 +156,15 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 		$("#timeViewBar").css("top",8+"px");								// Set top
 		var rowHgt=12;														// Set row height
 		var rowPad=4;														// Space between rows
+		var offx=(s-this.start)/(this.end-this.start)*-w;					// Offset from full timeline start
+			$("#svgMarkers").attr("transform","translate("+offx+",0)");		// Move markers group
+			
 		for (i=0;i<this.sd.mobs.length;++i) {								// For each mob
 			o=this.sd.mobs[i];												// Point at mob
 			if (!o.marker)													// No marker set
 				continue;													// Skip
-			x=(o.start-this.start)/dur;										// Percent in timeline
-			x=(x*w)+ew+m;													// Percent in div
+			x=(o.start-s)/dur;												// Percent in timeline
+			x=(x*w)+ew+m-offx;												// Percent in div
 			y=h-rowHgt;														// Default to 1st row
 			if (o.row)														// If a row spec'd
 				y=h-(o.row*rowHgt+(o.row-1)*rowPad);						// Position it
@@ -216,17 +219,17 @@ Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
 	str="<div id='timeBar' class='time-timebar'>";							// Add timebar div
 	str+="<div id='timecontrol'>"											// Block timebar unit
 	if (this.showStartEnd && this.start) 									// If showing start date
-		str+="<span id='timeStart' class='time-startend'>"+pop.FormatTime(this.start,this.timeFormat)+"&nbsp;&nbsp;&nbsp;</span>";	// Add start date
+		str+="<span id='timeStart' class='time-startend' title='Go to previous event'></span>";			// Add start date
 	str+="<div id='timeSlider' class='time-timeslider'></div>";				// Add slider div
 	if (this.showStartEnd && this.end) 										// If showing end date
-		str+="<span id='timeEnd' class='time-startend'>&nbsp;&nbsp;&nbsp;"+pop.FormatTime(this.end,this.timeFormat)+"</span>";		// Add end date
+		str+="<span id='timeEnd' class='time-startend' title='Go to next event'></span>";				// Add end date
 	if (this.hasTicks) {													// If it has tick marks
 		for (i=0;i<7;++i) 													// For each tick
 			str+="<div class='time-ticks' id='tick"+i+"'></div>";			// Add tick div
 		if (this.hasTickLabels) {											// If showing labels
-			str+="<div class='time-ticklabel' id='ticklab1'>"+pop.FormatTime(this.start-0+(this.end-this.start)/4,this.timeFormat)+"</div>";	 // Add label div
-			str+="<div class='time-ticklabel' id='ticklab3'>"+pop.FormatTime(this.start-0+(this.end-this.start)/2,this.timeFormat)+"</div>";	 // Add label div
-			str+="<div class='time-ticklabel' id='ticklab5'>"+pop.FormatTime(this.start-0+(this.end-this.start)/4*3,this.timeFormat)+"</div>"; 	 // Add label div
+			str+="<div class='time-ticklabel' id='ticklab1'></div>";	 	// Add label div
+			str+="<div class='time-ticklabel' id='ticklab3'></div>";	 	// Add label div
+			str+="<div class='time-ticklabel' id='ticklab5'></div>"; 	 	// Add label div
 			}
 		}
 	if (this.sliderTime != "None") 											// If showing start date
@@ -257,20 +260,46 @@ Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
 		stop: function(event,ui) {											// On slide stop
 			var x=$($(this).children('.ui-slider-handle')).offset().left;	// Get pos       			
 	     	ShowTime(x,ui.value);											// Show time			
-		 	Draw(ui.value);														// Redraw project
+		 	Draw(ui.value);													// Redraw project
 			}
 		});
  
  	$("#timeStart").click( function() {										// ON START DATE CLICK
-		if (_this.sound)													// If clicking
-			Sound("click");													// Click sound
-		_this.Goto(_this.curStart);											// Go to beginning
+		var i,v=[];
+		for (i=0;i<_this.sd.mobs.length;++i) {								// For each mob
+			if (_this.sd.mobs[i].marker)									// No marker set
+				v.push(_this.sd.mobs[i].start);								// Add to array
+			}
+		v.sort(function(a, b){return a-b});									// Descending sort															)
+		for (i=0;i<v.length;++i) {											// For each sorted time
+			if (v[i] > _this.curTime) {										// If past now
+				_this.Goto(v[i]);											// Go to time
+				if (_this.sound)	Sound("click");							// Click sound							
+				break;														// Quit looking
+				}
+			}
+		if ((i == v.length) && (_this.sound))								// If nothing found
+			Sound("delete");												// Delete sound
 		});
 			
  	$("#timeEnd").click( function() {										// ON END DATE CLICK
-		if (_this.sound)													// If clicking
-			Sound("click");													// Click sound
-		_this.Goto(_this.curEnd);											// Go to end
+		var i,v=[];
+		for (i=0;i<_this.sd.mobs.length;++i) {								// For each mob
+			if (_this.sd.mobs[i].marker)									// No marker set
+				v.push(_this.sd.mobs[i].start);								// Add to array
+			}
+		v.sort(function(a, b){return a-b});									// Ascending sort															)
+		for (i=0;i<v.length;++i) {											// For each sorted time
+			if (v[i] >= _this.curTime) {									// If past now
+				if ((i == 0) && (_this.sound))								// If nothing found
+					Sound("delete");										// Delete sound
+				else {
+					if (_this.sound)	Sound("click");						// Click sound							
+					_this.Goto(v[i-1]);										// Go to time
+					}
+				break;														// Quit looking
+				}
+			}
 		});
 
  }
@@ -402,12 +431,13 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 		}
 
 	var to=this.timeViewTextSize*.33;										// Text offset
+	str+="<g id='svgMarkers'>";												// Markers group head
 	for (i=0;i<this.sd.mobs.length;++i) {									// For each mob
 		o=this.sd.mobs[i];													// Point at mob
 		if (!o.marker)														// No marker set
 			continue;														// Skip
 		w2=o.size ? o.size/2 : 6;											// Set size
-			str+="<g id='svgMarker"+i+"'style='cursor:pointer'>";			// Group head
+		str+="<g id='svgMarker"+i+"'style='cursor:pointer'>";				// Individual marker group head
 		if (o.marker == "dot") {											// A dot
 			str+="<circle r="+w2+" fill='"+o.color+"' />";					// Add dot
 			}
@@ -467,7 +497,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 		 	}
 		str+="</g>";														// End group
 		}
-	str+="</svg></div>";													// End div
+	str+="</g></svg></div>";												// End markers group, svg, & div
 	$(this.div).append(str+"</div>");										// Add timeview bar				
 
 	for (i=0;i<this.sd.mobs.length;++i) {									// For each mob
