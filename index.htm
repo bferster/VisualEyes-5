@@ -296,14 +296,11 @@
 
 		mps.SetBaseMap(sd.baseMap);											// Set basemap layer
 		tln.InitTimeline("bottomDiv",sd);									// Initialize timeline
-		}
 
-	function Draw(time)
-	{
-		var str="<img src='http://www.viseyes.org/efolio/declaration.JPG' width='100%'> &nbsp; ";
-		str+=MakeSelect("testing",false,["0","1","2","3","4"]);
-		$("#rightDiv").html(str);
-		mps.DrawMapLayers();
+
+var str="<img src='http://www.viseyes.org/efolio/declaration.JPG' width='100%'> &nbsp; ";
+str+=MakeSelect("testing",false,["0","1","2","3","4"]);
+$("#rightDiv").html(str);
 $("#testing").on("change", function() {
 	var i=$(this).val();
 	if (i == 1)	mps.StyleKMLFeatures(1,[{n:5,f:"#ff0000",a:.2,s:"#00ff00",w:50}]);
@@ -315,6 +312,15 @@ $("#testing").on("change", function() {
 							}); 
 $(this).val(0)
 	});
+
+
+
+	}
+		
+
+	function Draw(time)
+	{
+		mps.DrawMapLayers();
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
