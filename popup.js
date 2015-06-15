@@ -143,6 +143,25 @@ Popup.prototype.GetTextBox=function (title, content, def, callback)		// GET TEXT
 }
 
 
+Popup.prototype.Dialog=function (title, content)			// DIALOG BOX
+{
+	this.Sound("click");													// Ding sound
+	$("#alertBoxDiv").remove();												// Remove any old ones
+	$("body").append("<div class='ve-unselectable' id='alertBoxDiv'></div>");														
+	var str="<p><img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
+	str+="<span id='gtBoxTi'style='font-size:18px;text-shadow:1px 1px #ccc;color:#666'><b>"+title+"</b></span><p>";
+	str+="<div style='font-size:14px;margin:14px'>"+content+"</div>";
+	$("#alertBoxDiv").append(str);	
+	$("#alertBoxDiv").dialog({ width:400, buttons: {
+				            	"OK": 		function() { $(this).remove(); },
+								}});	
+	$(".ui-dialog-titlebar").hide();
+	$(".ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix").css("border","none");
+	$(".ui-dialog").css({"border-radius":"14px", "box-shadow":"4px 4px 8px #ccc"});
+	$(".ui-button").css({"border-radius":"30px","outline":"none"});
+}
+
+
 Popup.prototype.ShowLightBox=function(title, content)				// LIGHTBOX
 {
 	var str="<div id='lightBoxDiv' style='position:fixed;width:100%;height:100%;";	
@@ -158,7 +177,7 @@ Popup.prototype.ShowLightBox=function(title, content)				// LIGHTBOX
 	str="<div id='lightBoxIntDiv' class='unselectable' style='position:absolute;padding:16px;width:400px;font-size:12px";
 	str+=";border-radius:12px;z-index:2003;"
 	str+="border:1px solid; left:"+x+"px;top:"+y+"px;background-color:#f8f8f8'>";
-	str+="<img src='images/qlogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
+	str+="<img src='imgshantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
 	str+="<span id='lightBoxTitle' style='font-size:18px;text-shadow:1px 1px #ccc'><b>"+title+"</b></span>";
 	str+="<div id='lightContentDiv'>"+content+"</div>";					
 	$("#lightBoxDiv").append(str);	
@@ -166,12 +185,7 @@ Popup.prototype.ShowLightBox=function(title, content)				// LIGHTBOX
 }
 
 
-Popup.prototype.LightBoxAlert=function(msg) 							//	SHOW LIGHTBOX ALERT
-{
-	this.Sound("delete");													// Delete sound
-	$("#lightBoxTitle").html("<span style='color:#990000'>"+msg+"</span>");	// Put new
-}
-	
+
 Popup.prototype.ColorPicker=function (name, transCol) 					//	DRAW COLORPICKER
 {
 	if (!transCol)															// If no transparent color set

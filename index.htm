@@ -436,9 +436,22 @@ mps.ShowLayers([0,1],true);
 		}	
 	}
 
-	$("#settingsBut").click(function() {										// SETTINGS BUTTON CLICK
-		Sound("click",sd.muteSound);											// Click sound							
-	});
+	$("#settingsBut").click(function(e) {										// SETTINGS BUTTON CLICK
+		pop.Sound("click",sd.muteSound);										// Click sound							
+		var str="<table><tr height='18'>";
+		str+="<tr><td>Mute clicks?</td><td><input id='setmute' type='checkbox'></td></tr>";
+		str+="<tr><td>Location</td><td><input id='setgeo' style='width:220px' type='input'></td></tr>";
+		str+="</table>";
+		pop.Dialog("VisualEyes settings",str);		
+		
+		$("#setmute").prop("checked",sd.mute);									// Set mute box
+		$("#setmute").on("click", function(e) {									// MUTE HANDLER
+			sd.muteSounds=$("#setmute").prop("checked");						// Set
+			}); 
+		$("#setmute").on("click", function(e) {									// MUTE HANDLER
+			sd.muteSounds=$("#setmute").prop("checked");						// Set
+			}); 
+		});																		// End settings
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
