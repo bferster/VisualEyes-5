@@ -15,7 +15,7 @@ function Timeline()														// CONSTRUCTOR
 	var sd={};
 	this.curTime=this.curStart=this.start;									// Set start
 	this.curEnd=this.end;													// Set end
-	if (this.sound) {														// If clicking
+	if (this.hasSound) {													// If clicking
 		Sound("click","init");												// Init sound
 		Sound("ding","init");												// Init sound
 		Sound("delete","init");												// Init sound
@@ -52,7 +52,7 @@ Timeline.prototype.InitTimeline=function(div, data)						// INIT TIMELINE
 	this.timeGridColor=sd.timeGridColor ? sd.timeGridColor : "#ccc"; 		// Timeview grid color (undefined for none)
 	this.timeViewTextSize=sd.timeViewTextSize ? sd.timeViewTextSize : "11"; // Timeview text size
 	this.hasBackBut=sd.hasBackBut ? sd.hasBackBut : true; 					// Has forward/back buttons?
-	this.sound=sd.hasSound ? sd.hasSound : true; 							// Has sound?
+	this.hasSound=sd.hasSound ? sd.hasSound : true; 						// Has sound?
 	this.timeViewTextColor=sd.timeViewTextColor ? sd.timeViewTextColor : "#666"; //Timeview text color
 	
 	if (this.hasTimeBar) 													// If a timebar
@@ -274,11 +274,11 @@ Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
 		for (i=0;i<v.length;++i) {											// For each sorted time
 			if (v[i] > _this.curTime) {										// If past now
 				_this.Goto(v[i]);											// Go to time
-				if (_this.sound)	Sound("click");							// Click sound							
+				if (_this.hasSound)	Sound("click");							// Click sound							
 				break;														// Quit looking
 				}
 			}
-		if ((i == v.length) && (_this.sound))								// If nothing found
+		if ((i == v.length) && (_this.hasSound))							// If nothing found
 			Sound("delete");												// Delete sound
 		});
 			
@@ -291,10 +291,10 @@ Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
 		v.sort(function(a, b){return a-b});									// Ascending sort															)
 		for (i=0;i<v.length;++i) {											// For each sorted time
 			if (v[i] >= _this.curTime) {									// If past now
-				if ((i == 0) && (_this.sound))								// If nothing found
+				if ((i == 0) && (_this.hasSound))							// If nothing found
 					Sound("delete");										// Delete sound
 				else {
-					if (_this.sound)	Sound("click");						// Click sound							
+					if (_this.hasSound)	Sound("click");						// Click sound							
 					_this.Goto(v[i-1]);										// Go to time
 					}
 				break;														// Quit looking
@@ -339,7 +339,7 @@ Timeline.prototype.AddPlayer=function() 								// ADD TIME PLAYER
 		});
 	
 	$("#playerButton").click( function() {									// ON PLAY CLICK
-			if (_this.sound)												// If clicking
+			if (_this.hasSound)												// If clicking
 				Sound("click");												// Click sound
 			if ($(this).prop("src").match("play")) 							// If not playing
 				_this.Play(_this.curTime);									// Play	
@@ -385,7 +385,7 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 		$("#timeseg"+i).click( function(e) {								// ON SEG CLICK
 			var i;
 			var id=e.target.id.substr(7);									// Get ID
-			if (_this.sound)												// If clicking
+			if (_this.hasSound)												// If clicking
 				Sound("click");												// Click sound
 			for (i=0;i<ts.length+1;++i)  									// For each segment
 				$("#timeseg"+i).css({"background-color":"#ccc"});			// Clear it

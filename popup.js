@@ -119,4 +119,25 @@ Popup.prototype.FormatTime=function(time, format) 						// FORMAT TIME TO DATE
 		str=d.getFullYear();												// Set it
  	return str;																// Return formatted date
 }
-				
+	
+	
+Popup.prototype.GetTextBox=function (title, content, def, callback)		// GET TEXT LINE BOX
+{
+	Sound("click");															// Ding sound
+	$("#alertBoxDiv").remove();												// Remove any old ones
+	$("body").append("<div class='ve-unselectable' id='alertBoxDiv'></div>");														
+	var str="<p><img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
+	str+="<span id='gtBoxTi'style='font-size:18px;text-shadow:1px 1px #ccc;color:#990000'><b>"+title+"</b></span><p>";
+	str+="<div style='font-size:14px;margin:14px'>"+content;
+	str+="<p><input class='ve-is' type='text' id='gtBoxTt' value='"+def+"'></p></div>";
+	$("#alertBoxDiv").append(str);	
+	$("#alertBoxDiv").dialog({ width:400, buttons: {
+				            	"OK": 		function() { callback($("#gtBoxTt").val()); $(this).remove(); },
+				            	"Cancel":  	function() { $(this).remove(); }
+								}});	
+	$(".ui-dialog-titlebar").hide();
+	$(".ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix").css("border","none");
+	$(".ui-dialog").css({"border-radius":"14px", "box-shadow":"4px 4px 8px #ccc"});
+	$(".ui-button").css({"border-radius":"30px","outline":"none"});
+}
+			

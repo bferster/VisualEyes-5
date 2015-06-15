@@ -89,11 +89,13 @@
 </head>
 <body>
 <div id="showDiv" style="opacity:0" class="ve-base">
-	<div id="bottomDiv" style="position:absolute;top:0px;opacity:inherit" class="ve-bottom ve-unselectable"></div>
+	<div id="bottomDiv" style="position:absolute;top:0px;opacity:inherit" class="ve-bottom ve-unselectable">
+		<img id="settingsBut" src="img/settingsbut.gif" style="position:absolute;cursor:pointer">
+	</div>
 	<div id="leftDiv" style="position:absolute;opacity:inherit" class="ve-left"></div>
 	<div id="rightDiv" style="position:absolute;opacity:inherit" class="ve-right"></div>
 	<div id="lrSiz" style="position:absolute;width:8px;cursor:col-resize;opacity:inherit" class="ve-unselectable" title="Resize panes">
-		<div id="lrSiz1" style="position:absolute;width:40px;height:100%;left:-16px" class="ve-unselectable"></div>
+		<div id="lrSiz1" style="position:absolute;width:40px;height:100%;left:-8px" class="ve-unselectable"></div>
 	</div>
 	<div id="bSiz" style="position:absolute;height:8px;width:100%;cursor:row-resize;opacity:inherit" class="ve-unselectable" title="Resize timeline">
 		<div id="bSiz1" style="position:absolute;height:20px;width:100%" class="ve-unselectable"></div>
@@ -137,10 +139,12 @@
 		$("#bottomDiv").width(cx);												// Set bottom width
 		$("#bottomDiv").height(hgt-cy);											// Set bottom height
 		$("#bottomDiv").css("top",cy+"px");										// Set lr size pos
+		$("#settingsBut").css({ top:$("#bottomDiv").height()-18,left:cx-18});	// Settings button
 		mps.UpdateMapSize();													// Update map size to div size
 		tln.UpdateTimeline();													// Update timeline to div size
 		Draw();																	// Redraw
 }		
+
 
 	function InitProject(data)
 	{
@@ -236,6 +240,7 @@
 			sd.timeFormat="Mon Year";
 			sd.start="1/1860";
 			sd.end="12/1922";
+			sd.hasSound=true;
 			
 			sd.timeSegments=[ 	{start:tln.DateToTime("1/1860"), end:tln.DateToTime("1886"), title:"Winchester", col:"#ccc", click:"geo:-78.16,39.19,3"},
 								{start:tln.DateToTime("1886"), end:tln.DateToTime("1889"), title:"New York", col:"#ccc", click:"geo:-74.0,40.71,300"},
@@ -299,6 +304,17 @@
 		str+=MakeSelect("testing",false,["0","1","2","3","4"]);
 		$("#rightDiv").html(str);
 		mps.DrawMapLayers();
+$("#testing").on("change", function() {
+	var i=$(this).val();
+	if (i == 1)	mps.StyleKMLFeatures(1,[{n:5,f:"#ff0000",a:.2,s:"#00ff00",w:50}]);
+	if (i == 2)	mps.StyleKMLFeatures(1,[{n:5,f:"#0000ff"},{n:4,f:"#ffff00"}]);
+	if (i == 3)	mps.StyleKMLFeatures(1,[{n:"*",f:"#ff00ff"}]);
+	if (i == 3)	mps.StyleKMLFeatures(1,[{n:"*",f:"#ff00ff"}]);
+	if (i == 4) pop.GetTextBox("Marker","Type shape","", function(str) {
+							mps.StyleMarker([0],{m:str,w:35,t:"OK",f:"#0000ff"});
+							}); 
+$(this).val(0)
+	});
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -340,7 +356,7 @@
 				ResizePanes();													// Resize panes
 				},
 			stop: function(event, ui) {											// On drag end
-				$("#lrSiz1").css({ width:"40px", left:"-16px" });				// Contract hiding div
+				$("#lrSiz1").css({ width:"40px", left:"-8px" });				// Contract hiding div
 				ResizePanes();													// Resize panes
 				}
 			});
@@ -378,21 +394,6 @@
 
 mps.Goto("-80.00,38.41,1500")
 mps.ShowLayers([0,1],true);
-
-$("#testing").on("change", function() {
-	var i=$(this).val();
-	if (i == 1)	mps.StyleKMLFeatures(1,[{n:5,f:"#ff0000",a:.2,s:"#00ff00",w:50}]);
-	if (i == 2)	mps.StyleKMLFeatures(1,[{n:5,f:"#0000ff"},{n:4,f:"#ffff00"}]);
-	if (i == 3)	mps.StyleKMLFeatures(1,[{n:"*",f:"#ff00ff"}]);
-	if (i == 3)	mps.StyleKMLFeatures(1,[{n:"*",f:"#ff00ff"}]);
-	if (i == 4) GetTextBox("Marker","Type shape","", function(str) {
-							mps.StyleMarker([0],{m:str,w:35,t:"OK",f:"#0000ff"});
-							}); 
-$(this).val(0)
-	});
-	
-
-
 
 				});				
 		$(window).resize(ResizePanes);											// Dynamic resizing
@@ -434,6 +435,12 @@ $(this).val(0)
 				Draw(v[1])														// Redraw
 		}	
 	}
+
+	$("#settingsBut").click(function() {										// SETTINGS BUTTON CLICK
+		trace(sd.hasSound)
+		if (sd.hasSound)	Sound("click");										// Click sound							
+	});
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // HELPERS
@@ -484,25 +491,6 @@ $(this).val(0)
 	}
 
 	
-	function GetTextBox(title, content, def, callback)						// GET TEXT LINE BOX
-	{
-		Sound("click");															// Ding sound
-		$("#alertBoxDiv").remove();												// Remove any old ones
-		$("body").append("<div class='ve-unselectable' id='alertBoxDiv'></div>");														
-		var str="<p><img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
-		str+="<span id='gtBoxTi'style='font-size:18px;text-shadow:1px 1px #ccc;color:#990000'><b>"+title+"</b></span><p>";
-		str+="<div style='font-size:14px;margin:14px'>"+content;
-		str+="<p><input class='ve-is' type='text' id='gtBoxTt' value='"+def+"'></p></div>";
-		$("#alertBoxDiv").append(str);	
-		$("#alertBoxDiv").dialog({ width:400, buttons: {
-					            	"OK": 		function() { callback($("#gtBoxTt").val()); $(this).remove(); },
-					            	"Cancel":  	function() { $(this).remove(); }
-									}});	
-		$(".ui-dialog-titlebar").hide();
-		$(".ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix").css("border","none");
-		$(".ui-dialog").css({"border-radius":"14px", "box-shadow":"4px 4px 8px #ccc"});
- 		$(".ui-button").css({"border-radius":"30px","outline":"none"});
- 	}
 
 </script>
 </body></html>
