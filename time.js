@@ -42,7 +42,7 @@ Timeline.prototype.InitTimeline=function(div, data)						// INIT TIMELINE
 	this.segmentPos=sd.segmentPos ? sd.segmentPos : "Top"; 					// Segment bar pos
 	this.hasTimeView=sd.hasTimeView ? sd.hasTimeView : true; 				// Has timeview?
 	this.timeGridDate=sd.timeGridDate ? sd.timeGridDate : true; 			// Has timeview grid?
-	this.segmentTextColor=sd.segmentTextColor ? sd.segmentTextColor : "#00";// Segment text color
+	this.segmentTextColor=sd.segmentTextColor ? sd.segmentTextColor : "#000";// Segment text color
 	this.segmentColor=sd.segmentColor ? sd.segmentColor : "#ccc"; 			// Segment color
 	this.playerSpeed=sd.playerSpeed ? sd.playerSpeed : 5000; 				// Time to cross timeline / 2
 	this.timeGridColor=sd.timeGridColor ? sd.timeGridColor : "#ccc"; 		// Timeview grid color (undefined for none)
@@ -373,7 +373,7 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 	for (i=0;i<ts.length+1;++i) { 											// For each segment
 
 		$("#timeseg"+i).hover(												// ON SEG HOVER
-			function(){ $(this).css("color","#999")},						// Highlight
+			function(){ $(this).css("color","#009900")},						// Highlight
 			function(){ $(this).css("color",_this.segmentTextColor)} 		// Hide
 			);
 		
@@ -388,8 +388,8 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 			if (id < ts.length)	{											// If a seg
 				_this.curSeg=id;											// Its current
 				s=ts[id].start;												// Start at segment start
-				if (ts[id].click && ts[id].click.match(/geo:/))				// If a geo set
-					_this.SendMessage("geo",ts[id].click.substr(4));		// Move map
+				if (ts[id].click && ts[id].click.match(/where:/))			// If a geo set
+					_this.SendMessage("where",ts[id].click.substr(6));		// Move map
 				}
 			else															// All button
 				_this.curSeg=-1;											// Flag all

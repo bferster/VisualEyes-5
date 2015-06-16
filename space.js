@@ -108,7 +108,7 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 		var c=ol.proj.transform(o.getCenter(),_this.curProjection,'EPSG:4326');	// Get center
 		var pos=Math.floor(c[1]*10000)/10000+"|"+Math.floor(c[0]*10000)/10000+"|"+o.getResolution()+"|";	
 		pos+=Math.floor((o.getRotation()*180/Math.PI)*1000)/-1000;			// Rotation
-		$("#setgeo").val(Math.floor(c[1]*10000)/10000+","+Math.floor(c[0]*10000)/10000+","+o.getResolution());
+		$("#setwhere").val(Math.floor(c[1]*10000)/10000+","+Math.floor(c[0]*10000)/10000+","+o.getResolution());
 		_this.SendMessage("move",pos+"|scroll");							// Send that view has changed
 		});
 	}	

@@ -158,7 +158,7 @@
 			o.spaceMarker="//www.viseyes.org/visualeyes/projects/WinchesterMap.jpg";
 			o.start="1862";
 			o.end="1889";
-			o.geoRef="39.228788398479615,39.149512265542775,-78.09690370109803,-78.19686447861471,0";
+			o.where="39.228788398479615,39.149512265542775,-78.09690370109803,-78.19686447861471,0";
 			o.vis=1;
 			sd.mobs.push(o);
 
@@ -173,7 +173,7 @@
 			o.marker="Star";
 			o.start="1/12/1862";
 			o.vis=1;
-			o.geoRef="-78.16,39.19,20,0";
+			o.where="-78.16,39.19,20,0";
 			o.title="Robinson born";
 			o.desc="JW Robinson is born in Winchester, VA";
 			o.pic="//www.viseyes.org/visualeyes/projects/Robinson.jpg";
@@ -187,7 +187,7 @@
 			o.marker="Square";
 			o.start="6/8/1886";
 			o.vis=1;
-			o.geoRef="-74.0,40.71,20,0";
+			o.where="-74.0,40.71,20,0";
 			o.title="Moves to New York";
 			o.desc="Robinson moves to New York";
 			o.pic="http://www.artvalue.com/photos/auction/0/50/50908/mcnulty-william-c-1889-1963-us-towers-in-the-sky-new-york-3005289.jpg";
@@ -212,7 +212,7 @@
 			o.marker="Dot";
 			o.start="6/1891";
 			o.vis=1;
-			o.geoRef="-78.47,38.03,20,0";
+			o.where="-78.47,38.03,20,0";
 			o.title="Preaches";
 			o.desc="Robinson preaches on \"The Sin of the Modern Dance.\" Makes flying visit to Warm Sulphur & Hot Springs; preaches to white and colored";
 			o.pic="http://cache3.asset-cache.net/gc/3324589-18th-november-1876-a-negro-preacher-and-his-gettyimages.jpg?v=1&c=IWSAsset&k=2&d=Ii%2B0Kt7D5sFp80jNN4JI45PlsvacwrzwgTe7NErJHbm9oovnoUgNThvcTVmTc7Yb"
@@ -225,7 +225,7 @@
 			o.marker="Dot";
 			o.start="5/16/1907";
 			o.vis=1;
-			o.geoRef="-86.15,39.76,20,0";
+			o.where="-86.15,39.76,20,0";
 			o.title="Publishes sermon";
 			o.desc="Robinson publishes sermon synopsis, \"Peacocks and Apes,\" with antilynching commentary";
 			o.pic="http://cache3.asset-cache.net/gc/3324589-18th-november-1876-a-negro-preacher-and-his-gettyimages.jpg?v=1&c=IWSAsset&k=2&d=Ii%2B0Kt7D5sFp80jNN4JI45PlsvacwrzwgTe7NErJHbm9oovnoUgNThvcTVmTc7Yb"
@@ -242,13 +242,13 @@
 			sd.end="12/1922";
 			sd.muteSound=false;
 			
-			sd.timeSegments=[ 	{start:tln.DateToTime("1/1860"), end:tln.DateToTime("1886"), title:"Winchester", col:"#ccc", click:"geo:-78.16,39.19,3"},
-								{start:tln.DateToTime("1886"), end:tln.DateToTime("1889"), title:"New York", col:"#ccc", click:"geo:-74.0,40.71,300"},
-								{start:tln.DateToTime("1889"), end:tln.DateToTime("1898"), title:"Charlottesville", col:"#ccc", click:"geo:-78.47,38.03,300"},
-								{start:tln.DateToTime("1898"), end:tln.DateToTime("1902"), title:"Boston", col:"#ccc", click:"geo:-80.00,38.41,1500"},
-								{start:tln.DateToTime("1902"), end:tln.DateToTime("1906"), title:"Connecticut", col:"#ccc", click:"geo:-80.00,38.41,1500"}, 
-								{start:tln.DateToTime("1906"), end:tln.DateToTime("1910"), title:"Indiana", col:"#ccc", click:"geo:-86.15,39.76,300"},
-								{start:tln.DateToTime("1910"), end:tln.DateToTime("12/1922"), title:"Traveling", col:"#ccc", click:"geo:-80.00,38.41,1500"}];
+			sd.timeSegments=[ 	{start:tln.DateToTime("1/1860"), end:tln.DateToTime("1886"), title:"Winchester", col:"#ccc", click:"where:-78.16,39.19,3"},
+								{start:tln.DateToTime("1886"), end:tln.DateToTime("1889"), title:"New York", col:"#ccc", click:"where:-74.0,40.71,300"},
+								{start:tln.DateToTime("1889"), end:tln.DateToTime("1898"), title:"Charlottesville", col:"#ccc", click:"where:-78.47,38.03,300"},
+								{start:tln.DateToTime("1898"), end:tln.DateToTime("1902"), title:"Boston", col:"#ccc", click:"where:-80.00,38.41,1500"},
+								{start:tln.DateToTime("1902"), end:tln.DateToTime("1906"), title:"Connecticut", col:"#ccc", click:"where:-80.00,38.41,1500"}, 
+								{start:tln.DateToTime("1906"), end:tln.DateToTime("1910"), title:"Indiana", col:"#ccc", click:"where:-86.15,39.76,300"},
+								{start:tln.DateToTime("1910"), end:tln.DateToTime("12/1922"), title:"Traveling", col:"#ccc", click:"where:-80.00,38.41,1500"}];
 			}
 
 		
@@ -273,11 +273,11 @@
 					o.type="kml";											// Set type
 					o.id=mps.AddKMLLayer(marker);							// Add KML layer								 
 					}
-				else if (marker.match(/\.png|.gif|\.jpg|\.jpeg/i) && o.geoRef) { // An image file
+				else if (marker.match(/\.png|.gif|\.jpg|\.jpeg/i) && o.where) { // An image file
 					o.type="image";											// Set type
-					o.id=mps.AddImageLayer(marker,o.geoRef, o.opacity);		// Add image layer								 
+					o.id=mps.AddImageLayer(marker,o.where, o.opacity);		// Add image layer								 
 					}
-				else if (o.geoRef) { 										// Must be an icon
+				else if (o.where) { 										// Must be an icon
 					o.type="icon";											// Set type
 					var s={};												// Not style
 					o.spaceMarker ?	s.m=o.spaceMarker : s.m=o.marker;		// Use space marker first, then time marker
@@ -289,7 +289,7 @@
 					o.spaceTextCol  ? s.tc=o.spaceTextCol  : s.tc=sd.spaceTextCol;				
 					o.spaceTextFont ? s.tf=o.spaceTextFont : s.tf=sd.spaceTextFont;				
 					o.spaceOpacity  ? s.a=o.spaceOpacity   : s.a=o.opacity;				
-					mps.AddMarkerLayer(o.geoRef,s,i);						// Add marker to overlays
+					mps.AddMarkerLayer(o.where,s,i);						// Add marker to overlays
 					}
 				}
 			}
@@ -435,7 +435,7 @@ mps.ShowLayers([0,1],true);
 			}
 		else if (e.data && e.data.match(/Time=/)) {								// If a time event
 			v=e.data.split("|");												// Split into parts
-			if (e.data.match(/=geo/))											// Set position
+			if (e.data.match(/=where/))											// Set position
 				mps.Goto(v[1])													// Move map
 			if (e.data.match(/=time/))											// New time
 				Draw(v[1])														// Redraw
@@ -446,7 +446,7 @@ mps.ShowLayers([0,1],true);
 		pop.Sound("click",sd.muteSound);										// Click sound							
 		var str="<table><tr height='18'>";
 		str+="<tr><td>Mute clicks?</td><td><input id='setmute' type='checkbox'></td></tr>";
-		str+="<tr><td>Location</td><td><input id='setgeo' style='width:220px' type='input'></td></tr>";
+		str+="<tr><td>Location</td><td><input id='setwhere' style='width:220px' type='input'></td></tr>";
 		str+="</table>";
 		pop.Dialog("VisualEyes settings",str);		
 		
