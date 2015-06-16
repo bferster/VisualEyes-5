@@ -97,30 +97,6 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 
 }
  
-Popup.prototype.FormatTime=function(time, format) 						// FORMAT TIME TO DATE
-{
-/* 	
-	Format time int human readable format
- 	@param {number} time number of ms += 1/1/1970
-	@param {string} format type of format. If not set, this.timeFormat is used.
-	@return {string} time formatted at date.
-*/
-	var str;
-	var mos=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-	d=new Date(time*36000000);												// Convert minutes to ms
-	if (format == "Mo/Year") 												// 1/1900
-		str=(d.getMonth()+1)+"/"+d.getFullYear();							// Set it
-	else if (format == "Mo/Day/Year") 										// 1/1/1900
-		str=(d.getMonth()+1)+"/"+(d.getDay()+1)+"/"+d.getFullYear();		// Set it
-	else if (format == "Mon Year") 											// Jan 1900
-		str=mos[d.getMonth()]+" "+d.getFullYear();							// Set it
-	else if (format == "Mon Day, Year") 									// Jan 1, 1900
-		str=mos[d.getMonth()]+" "+(d.getDay()+1)+", "+d.getFullYear();		// Set it
-	else																	// Default to only year
-		str=d.getFullYear();												// Set it
- 	return str;																// Return formatted date
-}
-	
 	
 Popup.prototype.GetTextBox=function (title, content, def, callback)		// GET TEXT LINE BOX
 {
@@ -281,4 +257,28 @@ Popup.prototype.Sound=function(sound, mute)					// PLAY SOUND
 		snd.play();												// Play sound
 	}
 
-			
+
+Popup.prototype.FormatTime=function(time, format) 						// FORMAT TIME TO DATE
+{
+/* 	
+	Format time int human readable format
+ 	@param {number} time number of ms += 1/1/1970
+	@param {string} format type of format. If not set, this.timeFormat is used.
+	@return {string} time formatted at date.
+*/
+	var str;
+	var mos=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+	d=new Date(time*36000000);												// Convert minutes to ms
+	if (format == "Mo/Year") 												// 1/1900
+		str=(d.getMonth()+1)+"/"+d.getFullYear();							// Set it
+	else if (format == "Mo/Day/Year") 										// 1/1/1900
+		str=(d.getMonth()+1)+"/"+(d.getDay()+1)+"/"+d.getFullYear();		// Set it
+	else if (format == "Mon Year") 											// Jan 1900
+		str=mos[d.getMonth()]+" "+d.getFullYear();							// Set it
+	else if (format == "Mon Day, Year") 									// Jan 1, 1900
+		str=mos[d.getMonth()]+" "+(d.getDay()+1)+", "+d.getFullYear();		// Set it
+	else																	// Default to only year
+		str=d.getFullYear();												// Set it
+ 	return str;																// Return formatted date
+}
+				

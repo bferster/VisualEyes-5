@@ -22,11 +22,13 @@ function Space(div, pop)														// CONSTRUCTOR
 }
 
 
-Space.prototype.SetDateFormat=function(timeFormat)						// SET DATE FORMAT
-{
-	this.timeFormat=timeFormat;												// Set it
-}
 
+Space.prototype.UpdateMap=function(time, timeFormat)					// UPDATE MAP
+{
+	this.timeFormat=timeFormat;												// Set format
+	this.curTime=time-0;													// Set current timet
+	this.DrawMapLayers();													// Redraw map
+}
 
 Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 {
@@ -108,7 +110,7 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 		var c=ol.proj.transform(o.getCenter(),_this.curProjection,'EPSG:4326');	// Get center
 		var pos=Math.floor(c[1]*10000)/10000+"|"+Math.floor(c[0]*10000)/10000+"|"+o.getResolution()+"|";	
 		pos+=Math.floor((o.getRotation()*180/Math.PI)*1000)/-1000;			// Rotation
-		$("#setwhere").val(Math.floor(c[1]*10000)/10000+","+Math.floor(c[0]*10000)/10000+","+o.getResolution());
+		$("#setwhere").val(Math.floor(c[0]*10000)/10000+","+Math.floor(c[1]*10000)/10000+","+Math.round(o.getResolution()));
 		_this.SendMessage("move",pos+"|scroll");							// Send that view has changed
 		});
 	}	
@@ -226,29 +228,7 @@ Space.prototype.CreateOverlayLayer=function()							// CREATE CANVAS/VECTOR OVER
 }
 
 
-Space.prototype.ShowLayers=function(indices, mode)						// HIDE/SHOW LAYER(s)				
-{ 
-	
-/* 
-  	@param {array} 		indices An array of indices specifying the layer(s) to hide or show.
- 	@param {boolean}	mode true to show, false to hide.
-*/
-
-	var i;
-	for (i=0;i<indices.length;++i) { 										// For each index
-		if ((indices[i] >= 0) && (indices[i] < this.overlays.length)) {		// If in range
-			a=this.overlays[indices[i]].alpha;								// Get alpha
-			if (mode)														// If showing
-				this.overlays[indices[i]].vis=a ? a : 1;					// Set vis
-			else
-				this.overlays[indices[i]].vis=0;							// Set vis
-			}       
-		}
-	this.DrawMapLayers();													// Do it
-}
-
-
-Space.prototype.AddMarkerLayer=function(pos, style, id) 				// ADD MARKER LAYER TO MAP						
+Space.prototype.AddMarkerLayer=function(pos, style, id, start, end) 	// ADD MARKER LAYER TO MAP						
 {
 
 /* 	
@@ -269,14 +249,14 @@ Space.prototype.AddMarkerLayer=function(pos, style, id) 				// ADD MARKER LAYER 
 
 	var o={};
 	o.type="icon";															// Icon
- 	o.vis=0;																// Invisible
+  	o.start=start;	o.end=end;												// Save start, end
 	this.overlays.push(o);													// Add to overlay
   	var v=pos.split(",");													// Split into parts
 	var c=ol.proj.transform([v[0]-0,""+v[1]-0],'EPSG:4326',this.curProjection);	// Transform
-	var mark=new ol.Feature({ geometry: new ol.geom.Point(c) });			// Create feature at coord
+	o.src=new ol.Feature({ geometry: new ol.geom.Point(c) });				// Create feature at coord
  	var index=this.markerLayer.getSource().getFeatures().length;			// Index of feature
- 	mark.setId("Mob-"+id);													// Set id of mob
- 	this.markerLayer.getSource().addFeature(mark);							// Add it
+ 	o.src.setId("Mob-"+id);													// Set id of mob
+ 	this.markerLayer.getSource().addFeature(o.src);							// Add it
  	this.StyleMarker([index],style);										// Style marker
 }
 
@@ -378,7 +358,7 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 		this.markerLayer.getSource().getFeatures()[indices[i]].setStyle(s);	// Set style
 }
 
-Space.prototype.AddKMLLayer=function(url) 								// ADD KML LAYER TO MAP						
+Space.prototype.AddKMLLayer=function(url, opacity, start, end) 			// ADD KML LAYER TO MAP						
 {
 
 /* 	ADD KML LAYER TO MAP
@@ -393,7 +373,8 @@ Space.prototype.AddKMLLayer=function(url) 								// ADD KML LAYER TO MAP
 
 	var index=this.overlays.length;											// Get index
  	o.type="kml";															// KML
- 	o.vis=0;																// Visible
+  	o.start=start;	o.end=end;												// Save start, end
+	o.opacity=opacity;														// Initial opacity
 	
 	o.src=new ol.layer.Vector({  source: new ol.source.Vector({				// New layer
 							title: "LAYER-"+this.overlays.length,			// Set name
@@ -479,7 +460,7 @@ Space.prototype.StyleKMLFeatures=function(num, styles)					// STYLE KML FEATURE(
 }
 
 
-Space.prototype.AddImageLayer=function(url, geoRef, alpha) 				// ADD MAP IMAGE TO PROJECT
+Space.prototype.AddImageLayer=function(url, geoRef, alpha, start, end) 	// ADD MAP IMAGE TO PROJECT
 {    
 
 /* 
@@ -492,7 +473,7 @@ Space.prototype.AddImageLayer=function(url, geoRef, alpha) 				// ADD MAP IMAGE 
 	var o={};
 	var index=this.overlays.length;											// Get index
  	o.type="image";															// Image
- 	o.vis=0;																// Visible
+ 	o.start=start;	o.end=end;												// Save start, end
     o.src=new MapImage(url,geoRef,this);									// Alloc mapimage obj
 	o.alpha=alpha;															// Save alpha
 	this.overlays.push(o);													// Add layer
@@ -561,24 +542,36 @@ Space.prototype.AddImageLayer=function(url, geoRef, alpha) 				// ADD MAP IMAGE 
 	return index;															// Return layer ID
 }
 
-Space.prototype.DrawMapLayers=function(time)								// DRAW OVERLAY LAYERS							
+Space.prototype.DrawMapLayers=function()								// DRAW OVERLAY LAYERS							
 {
 
 /* 
- 	Draws or shows overlay elements based on the .vis element.
+ 	Draws or shows overlay elements based on the time.
  	@param {number} time mumber of mins += 1/1/1970
 */
 
-	var i,o;
+	var i,o,a,vis;
 	if (this.canvasContext) {  												// If a canvas up      
 		this.canvasContext.clearRect(0,0,this.canvasWidth,this.canvasHeight); // Clear canvas
    		for (i=0;i<this.overlays.length;i++) {								// For each overlay layer
-           o=this.overlays[i];												// Get ptr  to layer
-            if (o.vis && (o.type == "image"))								// If a visible image 
-           		o.src.drawMapImage(o.vis,this);   							// Draw it   
-        	else if (o.type == "kml")										// If a kml 
-       			o.src.set('visible',o.vis > 0);								// Show/hide it
-            }
+            o=this.overlays[i];												// Get ptr  to layer
+     		vis=(o.start) ? false : true;									// Assume always on unless start spec'd
+     		if (o.start && (this.curTime >= o.start)) 						// If past start and start defined
+            	vis=true;													// Show it
+ 	     	if (o.end && (this.curTime > o.end-0 ))							// If past end and end define
+        		vis=false;													// Hide it
+            a=(o.opacity != undefined) ? o.opacity : 1						// Use defined opacity or 1
+            if (vis && (o.type == "image"))									// If a visible image 
+           		o.src.drawMapImage(vis,this);   							// Draw it   
+        	else if (o.type == "kml") {										// If a kml 
+       			o.src.set('visible',vis);									// Show/hide it
+            	o.src.set("opacity",a);										// Set opacity								
+             	}
+        	else if (o.type == "icon") {									// If an icon 
+   	  			o.src.set('visible',vis);									// Show/hide it
+            	o.src.set("opacity",a);										// Set opacity								
+             	}
+           }
         }
 }
 

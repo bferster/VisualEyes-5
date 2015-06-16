@@ -260,7 +260,7 @@ Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
 			}
 		});
  
- 	$("#timeStart").click( function() {										// ON START DATE CLICK
+	$("#timeEnd").click( function() {										// ON END DATE CLICK
 		var i,v=[];
 		for (i=0;i<_this.sd.mobs.length;++i) {								// For each mob
 			if (_this.sd.mobs[i].marker)									// No marker set
@@ -278,8 +278,8 @@ Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
 			_this.pop.Sound("delete",_this.muteSound);						// Delete sound							
 		});
 			
- 	$("#timeEnd").click( function() {										// ON END DATE CLICK
-		var i,v=[];
+ 	$("#timeStart").click( function() {										// ON START DATE CLICK
+ 		var i,v=[];
 		for (i=0;i<_this.sd.mobs.length;++i) {								// For each mob
 			if (_this.sd.mobs[i].marker)									// No marker set
 				v.push(_this.sd.mobs[i].start);								// Add to array
@@ -373,7 +373,7 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 	for (i=0;i<ts.length+1;++i) { 											// For each segment
 
 		$("#timeseg"+i).hover(												// ON SEG HOVER
-			function(){ $(this).css("color","#009900")},						// Highlight
+			function(){ $(this).css("color","#009900")},					// Highlight
 			function(){ $(this).css("color",_this.segmentTextColor)} 		// Hide
 			);
 		
@@ -388,7 +388,7 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 			if (id < ts.length)	{											// If a seg
 				_this.curSeg=id;											// Its current
 				s=ts[id].start;												// Start at segment start
-				if (ts[id].click && ts[id].click.match(/where:/))			// If a geo set
+				if (ts[id].click && ts[id].click.match(/where:/))			// If a where set
 					_this.SendMessage("where",ts[id].click.substr(6));		// Move map
 				}
 			else															// All button
@@ -502,7 +502,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 			    _this.pop.ShowPopup(_this.div,_this.timeFormat,e.pageX+8,e.pageY-70,o.title,o.desc,o.pic,o.start,o.end);	// Show popup
 				_this.SendMessage("time",o.start);							// Send new time
 					if (o.goto)												// If a goto defined
-					_this.SendMessage("geo",o.goto);						// Move map
+					_this.SendMessage("where",o.goto);						// Move map
 				});
 		}
 	
