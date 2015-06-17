@@ -166,7 +166,8 @@
 			o.start="4/12/1861";
 			o.end="6/22/1865";
 			o.show="se";
-			o.opacity=.25;
+			o.opacity=.15;
+			o.id="NS-map"
 			sd.mobs.push(o);
 
 			o={};
@@ -191,7 +192,6 @@
 			o.pic="http://www.artvalue.com/photos/auction/0/50/50908/mcnulty-william-c-1889-1963-us-towers-in-the-sky-new-york-3005289.jpg";
 			o.color="#ff9900";
 			o.edge="#666";
-			o.show="s"
 			o.row=2;
 			sd.mobs.push(o);
 
@@ -199,11 +199,12 @@
 			o.marker="Line";
 			o.start="4/12/1861";
 			o.end="6/22/1865";
-			o.desc="<b>The American Civil War</b>, widely known in the United States as simply the Civil War as well as other sectional names, was a civil war fought from 1861 to 1865 to determine the survival of the Union or independence for the Confederacy. Among the 34 states in January 1861, seven Southern slave states individually declared their secession from the United States and formed the Confederate States of America. The Confederacy, often simply called the South, grew to include eleven states, and although they claimed thirteen states and additional western territories, the Confederacy was never diplomatically recognized by a foreign country. The states that remained loyal and did not declare secession were known as the Union or the North. The war had its origin in the fractious issue of slavery, especially the extension of slavery into the western territories.[N 1] After four years of combat, which left over 600,000 Union and Confederate soldiers dead and destroyed much of the South's infrastructure, the Confederacy collapsed and slavery was abolished. Then began the Reconstruction and the processes of restoring national unity and guaranteeing civil rights to the freed slaves.";
-			o.pic="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/US_Secession_map_1861.svg/787px-US_Secession_map_1861.svg.png"
+			o.desc="<b>The American Civil War</b>, widely known in the United States as simply the Civil War as well as other sectional names, was a civil war fought from 1861 to 1865 to determine the survival of the Union or independence for the Confederacy.<br><br>Among the 34 states in January 1861, seven Southern slave states individually declared their secession from the United States and formed the Confederate States of America. The Confederacy, often simply called the South, grew to include eleven states, and although they claimed thirteen states and additional western territories, the Confederacy was never diplomatically recognized by a foreign country. The states that remained loyal and did not declare secession were known as the Union or the North.<br><br>The war had its origin in the fractious issue of slavery, especially the extension of slavery into the western territories.[N 1] After four years of combat, which left over 600,000 Union and Confederate soldiers dead and destroyed much of the South's infrastructure, the Confederacy collapsed and slavery was abolished. Then began the Reconstruction and the processes of restoring national unity and guaranteeing civil rights to the freed slaves.";
+			o.pic="http://www.suvcw.org/wp-content/uploads/2013/12/cannon.jpg";
 			o.goto="-89.0751,33.147,5000";
 			o.title="Civil War";
 			o.color="#d63333";
+			o.click="show:NS-map";
 			o.row=5;
 			sd.mobs.push(o);
 
@@ -239,6 +240,7 @@
 			sd.end="12/1922";
 			sd.muteSound=false;
 			
+			
 			sd.timeSegments=[ 	{start:tln.DateToTime("1/1860"), end:tln.DateToTime("1886"), title:"Winchester", col:"#ccc", click:"where:-78.16,39.19,3"},
 								{start:tln.DateToTime("1886"), end:tln.DateToTime("1889"), title:"New York", col:"#ccc", click:"where:-74.0,40.71,300"},
 								{start:tln.DateToTime("1889"), end:tln.DateToTime("1898"), title:"Charlottesville", col:"#ccc", click:"where:-78.47,38.03,300"},
@@ -254,9 +256,10 @@
 			if (o.start)	o.start=tln.DateToTime(o.start);				// Convert date to time
 			if (o.end)		o.end=tln.DateToTime(o.end);					// Convert date to time
 			s=e=0;															// Assume not timed
-			if (o.show) {													// Idf show mode spec'd
+			if (o.show) {													// If show mode spec'd
 				if (o.show.match(/s/i)) 	s=o.start;						// Start timed
 				if (o.show.match(/e/i)) 	e=o.end;						// End timed
+				if (o.show.match(/off/i)) 	s=e=-1;							// Hide it
 				}
 			if (o.marker || o.spaceMarker) {								// If a marker spec'd 
 				var marker=o.spaceMarker ? o.spaceMarker : o.marker;		// Use spaceMarker first, then marker
@@ -264,25 +267,25 @@
 					var id=marker.match(/id=(.+)&/);						// Extract id
 					if (id)	{												// An id found
 						var s="//drive.google.com/uc?export=view&id="+id[1];// Construct 'direct' link
-						o.id=mps.AddKMLLayer(s,o.opacity,s,e);				// Add KML layer								 
+						o.lid=mps.AddKMLLayer(s,o.opacity,s,e);				// Add KML layer								 
 						}
 					}
 				else if (marker.match(/\.kml/i)) 							// A KML file
-					o.id=mps.AddKMLLayer(marker,o.opacity,s,e);				// Add KML layer								 
+					o.lid=mps.AddKMLLayer(marker,o.opacity,s,e);			// Add KML layer								 
 				else if (marker.match(/\.png|.gif|\.jpg|\.jpeg/i) && o.where) // An image file
-					o.id=mps.AddImageLayer(marker,o.where, o.opacity,s,e);	// Add image layer								 
+					o.lid=mps.AddImageLayer(marker,o.where, o.opacity,s,e);	// Add image layer								 
 					else if (o.where) { 									// Must be an icon
-					var s={};												// Not style
-					o.spaceMarker ?	s.m=o.spaceMarker : s.m=o.marker;		// Use space marker first, then time marker
-					o.spaceTitle  ?	s.t=o.spaceTitle  : s.t=o.title;			
-					o.spaceDesc   ?	s.d=o.spaceDesc   : s.d=o.desc;				
-					o.spaceColor  ?	s.f=o.spaceColor  : s.f=o.color;			
-					o.spaceEdge   ?	s.s=o.spaceEdge   : s.s=o.edge;				
-					o.spaceSize   ?	s.w=o.spaceSize   : s.w=o.size;				
-					o.spaceTextCol  ? s.tc=o.spaceTextCol  : s.tc=sd.spaceTextCol;				
-					o.spaceTextFont ? s.tf=o.spaceTextFont : s.tf=sd.spaceTextFont;				
-					o.spaceOpacity  ? s.a=o.spaceOpacity   : s.a=o.opacity;				
-					mps.AddMarkerLayer(o.where,s,i,s,e);				// Add marker to overlays
+					var sty={};												// Not style
+					o.spaceMarker ?	sty.m=o.spaceMarker : sty.m=o.marker;	// Use space marker first, then time marker
+					o.spaceTitle  ?	sty.t=o.spaceTitle  : sty.t=o.title;			
+					o.spaceDesc   ?	sty.d=o.spaceDesc   : sty.d=o.desc;				
+					o.spaceColor  ?	sty.f=o.spaceColor  : sty.f=o.color;			
+					o.spaceEdge   ?	sty.s=o.spaceEdge   : sty.s=o.edge;				
+					o.spaceSize   ?	sty.w=o.spaceSize   : sty.w=o.size;				
+					o.spaceTextCol  ? sty.tc=o.spaceTextCol  : sty.tc=sd.spaceTextCol;				
+					o.spaceTextFont ? sty.tf=o.spaceTextFont : sty.tf=sd.spaceTextFont;				
+					o.spaceOpacity  ? sty.a=o.spaceOpacity   : sty.a=o.opacity;				
+					mps.AddMarkerLayer(o.where,sty,i,s,e);				// Add marker to overlays
 					}
 				}
 			}
@@ -415,19 +418,26 @@ mps.Goto("-80.00,38.41,1500")
 
 	function shivaEventHandler(e)											// ON SHIVA EVENT
 	{
-		var v;
 //		trace(e.data);
 		if (e.data && e.data.match(/Space=/)) {									// If a space event
-			v=e.data.split("|");												// Split into parts
+			var v=e.data.split("|");											// Split into parts
 			if (e.data.match(/=time/))											// Set time
 				tln.Goto(v[1]);													// Move timeline
 			}
 		else if (e.data && e.data.match(/Time=/)) {								// If a time event
-			v=e.data.split("|");												// Split into parts
+			var v=e.data.split("|");											// Split into parts
 			if (e.data.match(/=where/))											// Set position
 				mps.Goto(v[1])													// Move map
-			if (e.data.match(/=time/))											// New time
+			else if (e.data.match(/=time/))										// New time
 				Draw(v[1])														// Redraw
+			else if (e.data.match(/=show/))	{									// Set position
+				var i;
+				var mode=v[2];													// Get mode
+				v=v[1].split(",");												// Get array of ids
+				for (i=0;i<v.length;++i)										// For each one spec'd
+					v[i]=FindMobByID(v[i]);										// Convert to mob index
+				mps.DrawMapLayers(v,mode)										// Show markers(s)
+				}
 		}	
 	}
 
@@ -465,6 +475,19 @@ mps.Goto("-80.00,38.41,1500")
 			console.log(msg,p1);
 		else
 			console.log(msg);
+	}
+
+
+	function FindMobByID(id)												// FIND MOB BY ITS ID
+	{
+		var i,o;
+		var n=sd.mobs.length;													// Get length
+		for (i=0;i<n;++i) {														// For each mob
+			o=sd.mobs[i].id;													// Get id												
+			if (o && o.indexOf(id) != -1)										// If it matches
+				return i;														// Return index of mob
+			}
+		return -1;																// Return nothing found
 	}
 
 	function MakeSelect(id, multi, items, sel, extra, values)				// CREATE HTML SELECT

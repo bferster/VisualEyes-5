@@ -260,7 +260,7 @@ Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
 			}
 		});
  
-	$("#timeEnd").click( function() {										// ON END DATE CLICK
+	$("#timeEnd").click( function() {										// ON END DATE CLICK - ADVANCE
 		var i,v=[];
 		for (i=0;i<_this.sd.mobs.length;++i) {								// For each mob
 			if (_this.sd.mobs[i].marker)									// No marker set
@@ -268,17 +268,15 @@ Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
 			}
 		v.sort(function(a, b){return a-b});									// Descending sort															)
 		for (i=0;i<v.length;++i) {											// For each sorted time
-			if (v[i] > _this.curTime) {										// If past now
-				_this.Goto(v[i]);											// Go to time
-				_this.pop.Sound("click",_this.muteSound);					// Click sound							
-				break;														// Quit looking
-				}
+			if (v[i] > _this.curTime) 										// If past now
+					break;													// Quit looking
 			}
-		if (i == v.length) 													// If nothing found
-			_this.pop.Sound("delete",_this.muteSound);						// Delete sound							
+		if (i == v.length) 	i=0;											// If nothing found, wrap
+		_this.pop.Sound("click",_this.muteSound);							// Click sound							
+		_this.Goto(v[i]);													// Go to time
 		});
 			
- 	$("#timeStart").click( function() {										// ON START DATE CLICK
+ 	$("#timeStart").click( function() {										// ON START DATE CLICK - GO BACK
  		var i,v=[];
 		for (i=0;i<_this.sd.mobs.length;++i) {								// For each mob
 			if (_this.sd.mobs[i].marker)									// No marker set
@@ -286,16 +284,16 @@ Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
 			}
 		v.sort(function(a, b){return a-b});									// Ascending sort															)
 		for (i=0;i<v.length;++i) {											// For each sorted time
-			if (v[i] >= _this.curTime) {									// If past now
-				if (i == 0)													// If nothing found
-					_this.pop.Sound("delete",_this.muteSound);					// Delete sound							
-				else {
-					_this.pop.Sound("click",_this.muteSound);				// Click sound							
-					_this.Goto(v[i-1]);										// Go to time
-					}
+			if (v[i] >= _this.curTime) 										// If past now
 				break;														// Quit looking
 				}
-			}
+		if (!i) 	i=v.length;												// If nothing found, wrap
+		_this.pop.Sound("click",_this.muteSound);							// Click sound							
+		_this.Goto(v[i-1]);													// Go to time
+		});
+
+	$("#timeBar").on('click', function(e) {									// TIMEBAR CLICK
+  		_this.pop.ShowPopup();												// Clear any open popup
 		});
 
  }
@@ -501,8 +499,13 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 				o=_this.sd.mobs[id];										// Point at mob
 			    _this.pop.ShowPopup(_this.div,_this.timeFormat,e.pageX+8,e.pageY-70,o.title,o.desc,o.pic,o.start,o.end);	// Show popup
 				_this.SendMessage("time",o.start);							// Send new time
-					if (o.goto)												// If a goto defined
+				if (o.goto)													// If a goto defined
 					_this.SendMessage("where",o.goto);						// Move map
+				if (o.click) {												// If a click defined
+					if (o.click.match(/show:/))								// A show command
+						_this.SendMessage("show",o.click.substr(5));		// Show item on map
+					_this.SendMessage("where",o.goto);						// Move map
+					}	
 				});
 		}
 	
