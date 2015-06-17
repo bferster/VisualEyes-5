@@ -1,5 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SPACE.JS 
+//
 // Provides mapping component
 // Requires: popup.js
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -8,7 +9,9 @@ function Space(div, pop)														// CONSTRUCTOR
 {
 
 /* 
-  	@constructor
+ 	@param {string} div	Div ro attach map to.
+ 	@param {object} pop	Points to popup library in popup.js.
+ 	@constructor
 */
 
 	this.div="#"+div;														// Current div selector
@@ -23,18 +26,24 @@ function Space(div, pop)														// CONSTRUCTOR
 
 
 
-Space.prototype.UpdateMap=function(time, timeFormat)					// UPDATE MAP
+Space.prototype.UpdateMap=function(curTime, timeFormat)					// UPDATE MAP
 {
+
+/*
+	Update the current time and set layer visibilities accordingly.
+	@param {number} curTime 	Current project time in mumber of mins += 1/1/1970
+	@param {string} timeFormat	Format to use when making time human readable	
+*/
+
 	this.timeFormat=timeFormat;												// Set format
-	this.curTime=time-0;													// Set current timet
+	this.curTime=curTime-0;													// Set current timet
 	this.DrawMapLayers();													// Redraw map
 }
 
 Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 {
 /* 
-  	Init library and connect opnelayers to div
-  	@param {string} div div to draw map into
+  	Init map library.
  
 */
 	this.controlKey=this.shiftKey=false;									// Shift/control key flags
@@ -120,7 +129,7 @@ Space.prototype.UpdateMapSize=function() 								// UPDATE MAP SIZE
 {
 
 /* 
-  	Update Openlayers map to match container div.
+  	Update Openlayers map to match container div's size.
   
 */
 	if (this.map)															// If OL initted
@@ -136,6 +145,7 @@ Space.prototype.SetBaseMap=function(newMap) 							// SET BASE MAP
   	@param {string} 	newMap	Name of map layer to show
   
 */
+
 	if (this.map)															// If OL initted
    		for (i=0;i<this.layers.length;++i) 									// For each layer
 	    	this.layers[i].set('visible',this.layers[i].get("title") == newMap); // Set visibility
@@ -146,6 +156,13 @@ Space.prototype.SetBaseMap=function(newMap) 							// SET BASE MAP
 
 Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 {
+
+/* 
+  	Set map center, resolution, and rotation
+  	@param {string} pos	Position to got to in this format:
+  						longitude,latitude[,resolution,rotation]
+  
+*/
 	var speed=1;															// Default speed
 	if ((!pos) || (pos.length < 5))											// No where to go
 		return;																// Quit
@@ -219,12 +236,25 @@ Space.prototype.CreateOverlayLayer=function()							// CREATE CANVAS/VECTOR OVER
 	        projection: this.curProjection									// Projection
 	        })
 	    }); 
+   	this.map.addLayer(this.canvasLayer);									// Add image layer to map
     this.markerLayer=new ol.layer.Vector( {									// Make new vector layer
         source: new ol.source.Vector({}),									// Add source
 	    projection: this.curProjection										// Projection
 	   })
-    this.map.addLayer(this.canvasLayer);									// Add layer to map
     this.map.addLayer(this.markerLayer);									// Add layer to map
+}
+
+
+Space.prototype.MarkerLayerToTop=function()								// MOVE MARKER LAYER ON TOP OF OTHER LAYERS
+{
+	
+ /* 
+  	Moves the marker layer on top of all other layer
+ */
+
+	var layer=this.map.getLayers().remove(this.markerLayer);				// Remove marker layer
+	var n=this.map.getLayers().getArray().length;							// Last index
+	this.map.getLayers().insertAt(n,layer);									// Place on top
 }
 
 
@@ -232,9 +262,10 @@ Space.prototype.AddMarkerLayer=function(pos, style, id, start, end) 	// ADD MARK
 {
 
 /* 	
- 	@param {string} pos Contains bounds for the image "latitude,longitude".
-  					    rotation is optional and defaults to 0 degrees.				
-	@param {object} style Consists of a style object :
+ 	Add marker to marker layer.
+ 	@param {string} pos 	Contains bounds for the image "latitude,longitude".
+  					    	Rotation is optional and defaults to 0 degrees.				
+	@param {object} style 	Consists of a style object :
 						a: {number} opacity (0-1)
 						f: {string} fill color "#rrggbb"
 						s: {string} stroke color "#rrggbb"
@@ -245,6 +276,9 @@ Space.prototype.AddMarkerLayer=function(pos, style, id, start, end) 	// ADD MARK
 						t: {string} label
 						tc: {string} text color
 						ts: {string} text format
+	@param {number} start 	Starting time of marker in number of mins += 1/1/1970
+	@param {number} end 	Ending time of marker in number of mins += 1/1/1970
+
 */
 
 	var o={};
@@ -266,7 +300,7 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 	
 /* 
  	@param {array} 	indices An array of indices specifying the marker(s) to hide or show.
-	@param {object} style Consists of a style object :
+	@param {object} style 	Consists of a style object :
 						a: {number} opacity (0-1)
 						f: {string} fill color "#rrggbb"
 						s: {string} stroke color "#rrggbb"
@@ -361,9 +395,12 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 Space.prototype.AddKMLLayer=function(url, opacity, start, end) 			// ADD KML LAYER TO MAP						
 {
 
-/* 	ADD KML LAYER TO MAP
-  	@param {string} 	url URL of kml file
-  	@return {number}	index of new layer added to overlays array.
+/* 	
+ 	Add kml file to map as a new layer
+   	@param {string} 		url URL of kml file
+ 	@param {number} start 	Starting time of marker in number of mins += 1/1/1970
+	@param {number} end 	Ending time of marker in number of mins += 1/1/1970
+ 	@return {number}		index of new layer added to overlays array.
 */
 
 	var o={};
@@ -464,10 +501,12 @@ Space.prototype.AddImageLayer=function(url, geoRef, alpha, start, end) 	// ADD M
 {    
 
 /* 
-  	@param {string} url URL of image file (jpeg, png or gif)
- 	@param {string} geoReg Contains bounds for the image "north,south,east,west,rotation".
-  					rotation is optional and defaults to 0 degrees.				
-  	@return {number}index of new layer added to overlays array.
+  	@param {string} url 	URL of image file (jpeg, png or gif)
+ 	@param {string} geoRef 	Contains bounds for the image "north,south,east,west,rotation".
+  							Rotation is optional and defaults to 0 degrees.				
+ 	@param {number} start 	Starting time of marker in number of mins += 1/1/1970
+	@param {number} end 	Ending time of marker in number of mins += 1/1/1970
+ 	@return {number}index of new layer added to overlays array.
 */
 
 	var o={};
@@ -655,6 +694,11 @@ Space.prototype.ShowProgress=function()									// SHOW RESORCE LOAD PROGRESS
 				
 Space.prototype.SendMessage=function(cmd, msg) 							// SEND MESSAGE
 {
+	
+/* 
+ 	Semd HTML5 message to parent.
+*/
+	
 	var str="Space="+cmd;													// Add src and window						
 	if (msg)																// If more to it
 		str+="|"+msg;														// Add it
