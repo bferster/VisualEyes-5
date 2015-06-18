@@ -180,7 +180,7 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 		for (i=0;i<9;++i) {													// For each grid line
 			x+=w;															// Advance
 			$("#svgGrid"+i).attr("transform","translate("+x+", 0)");		// Move grid
-			$("#svgGridDate"+i).html(this.pop.FormatTime(s+(e-s)*((i+1)/10),this.timeFormat));
+			$("#svgGridDate"+i).text(this.pop.FormatTime(s+(e-s)*((i+1)/10),this.timeFormat));	// Set date
 			}	
 		}
 		
