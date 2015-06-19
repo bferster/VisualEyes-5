@@ -75,9 +75,10 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 		});
 	$("#st-popup").click( function(e) {										// ON CLICK OF TEXT
 		$("#popdesc").css("cursor","auto");									// Normal cursor
+		var r=($("#poppic").width()/$("#poppic").height() < 1) ? .8 : 1;	// Make smaller if portait mode
 		$("#st-popup").css("max-width",$(_this.div).width()*.66);			// Make it wider
-		$("#st-popup").css("max-height",$("body").height()-100);			// Make it taller
-		$("#poppic").width($(_this.div).width()*(desc ? .33 : .66))			// Make pic bigger
+		$("#st-popup").css("max-height",$("#showDiv").height()-200);		// Make it taller
+		$("#poppic").width($(_this.div).width()*(desc ? .33*r : .66*r))		// Make pic bigger
 		x=$(_this.div).width()/2-$("#st-popup").width()/2;					// Center it
 		$("#st-popup").css({left:(x+8)+"px",top:"70px"});					// Position
 		});	
@@ -86,10 +87,11 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 		if ($("#st-popup").width() < 301)									// If not enlarged
 			return;															// Do nothing							
 		$("#st-popup").css("cursor","auto");								// Normal cursor
+		var r=($("#poppic").width()/$("#poppic").height() < 1) ? .33 : .66;	// Make smaller if portait mode
 		$("#poppic").css("cursor","auto");									// Normal cursor
-		$("#st-popup").css("max-height","none");							// Any height
-		$("#st-popup").css("max-width",$(_this.div).width()*.66);			// Make it wider
-		$("#poppic").width($(_this.div).width()*.66)						// Make pic bigger
+		$("#st-popup").css("max-height",$("#showDiv").height()-100);		// Make it taller
+		$("#st-popup").css("max-width",$(_this.div).width()*r);				// Make it wider
+		$("#poppic").width($(_this.div).width()*r)							// Make pic bigger
 		x=$(_this.div).width()/2-$("#st-popup").width()/2;					// Center it
 		$("#st-popup").css({left:(x+8)+"px",top:"70px"});					// Position
 		e.stopPropagation()
