@@ -283,4 +283,26 @@ Popup.prototype.FormatTime=function(time, format) 						// FORMAT TIME TO DATE
 		str=d.getFullYear();												// Set it
  	return str;																// Return formatted date
 }
+
+Popup.prototype.DateToTime=function(dateString) 						// CONVERT DATE TO MINS +/- 1960
+{
+/* 	
+	Format date  from human readable format to mins +/- 1970
+ 	@param {number} 
+	@return {string} number of mins += 1/1/1970
+*/
+	if (!dateString)														// No date
+		return 0;															// Quit
+	var d=new Date();														// Make new date
+	var v=(dateString+"").split("/");										// Split date into parts
+	if (v.length == 3)														// Mon/Day/Year
+		d.setFullYear(v[2],v[0]-1,v[1]);									// Set it to time
+	else if (v.length == 2)													// Mon/Year
+		d.setFullYear(v[1],v[0]-1);											// Set it to time
+	else																	// Year
+		d.setFullYear(v[0]);												// Set it to time
+ 	var time=d.getTime()/36000000;											// Conver ms to minutes
+  	return time;															// Return minutes +/- 1970
+
+}
 				

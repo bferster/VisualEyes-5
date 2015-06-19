@@ -31,8 +31,8 @@ Timeline.prototype.InitTimeline=function(div, data)						// INIT TIMELINE
 	this.div="#"+div;														// Current div selector
 
 	this.timeFormat=sd.timeFormat;											// Set date format
-	this.start=this.DateToTime(sd.start);									// Start date
-	this.end=this.DateToTime(sd.end);										// End date
+	this.start=pop.DateToTime(sd.start);									// Start date
+	this.end=pop.DateToTime(sd.end);										// End date
 	this.timeColor=sd.timeColor ? sd.timeColor : "#009900"; 				// Time slider color
 	this.hasTimeBar=sd.hasTimeBar ? sd.hasTimeBar : true; 					// Time bar?
 	this.showStartEnd=sd.showStartEnd ? sd.showStartEnd : true; 			// Show start/end dates?
@@ -105,7 +105,7 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 
 	var ts=this.sd.timeSegments;											// Point at time segments
 	if (ts) {																// If segments
-		w=$($("#timeSlider")).width();											// Width of slider
+		w=$($("#timeSlider")).width();										// Width of slider
 		var w1=w-(ts.length-1)*2;											// Remove spaces between segs
 		x=(this.hasTimeBar) ? $("#timeSlider").offset().left : m;			// Starting point
 		for (i=0;i<ts.length;++i) { 										// For each seg
@@ -157,7 +157,7 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 			
 		for (i=0;i<this.sd.mobs.length;++i) {								// For each mob
 			o=this.sd.mobs[i];												// Point at mob
-			if (!o.marker)													// No marker set
+			if (!o.marker || (o.type != "icon"))							// No marker set, or not a type shown on timeline
 				continue;													// Skip
 			x=(o.start-s)/dur;												// Percent in timeline
 			x=(x*w)+ew+m-offx;												// Percent in div
@@ -426,7 +426,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 	str+="<g id='svgMarkers'>";												// Markers group head
 	for (i=0;i<this.sd.mobs.length;++i) {									// For each mob
 		o=this.sd.mobs[i];													// Point at mob
-		if (!o.marker)														// No marker set
+		if (!o.marker || (o.type != "icon"))								// No marker set, or not an icon
 			continue;														// Skip
 		w2=o.size ? o.size/2 : 6;											// Set size
 		str+="<g id='svgMarker"+i+"'style='cursor:pointer'>";				// Individual marker group head
@@ -572,28 +572,6 @@ Timeline.prototype.Play=function(start) 								// PLAY TIMELINE
 // HELPERS 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-Timeline.prototype.DateToTime=function(dateString) 						// CONVERT DATE TO MINS +/- 1960
-{
-/* 	
-	Format time int human readable format
- 	@param {number} 
-	@return {string} number of mins += 1/1/1970
-*/
-	if (!dateString)														// No date
-		return 0;															// Quit
-	var d=new Date();														// Make new date
-	var v=(dateString+"").split("/");										// Split date into parts
-	if (v.length == 3)														// Mon/Day/Year
-		d.setFullYear(v[2],v[0]-1,v[1]);									// Set it to time
-	else if (v.length == 2)													// Mon/Year
-		d.setFullYear(v[1],v[0]-1);											// Set it to time
-	else																	// Year
-		d.setFullYear(v[0]);												// Set it to time
- 	var time=d.getTime()/36000000;											// Conver ms to minutes
-  	return time;															// Return minutes +/- 1970
-
-}
 
 Timeline.prototype.SendMessage=function(cmd, msg) 						// SEND MESSAGE
 {

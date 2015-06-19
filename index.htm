@@ -148,7 +148,7 @@
 
 	function InitProject(data)
 	{
-		var i,s,e;
+		var i,s,e,v,t,id;
 		sd.lrRatio=.66;
 		sd.bRatio=.75;
 		sd.mobs=[];
@@ -171,6 +171,16 @@
 			sd.mobs.push(o);
 
 			o={};
+			o.marker="path";
+			o.desc="born,ny,preach,sermon";
+			o.color="#990000";
+			o.id="journey";
+			o.size=4;
+			o.opacity=.6;
+			o.end="1915";
+			sd.mobs.push(o);
+
+			o={};
 			o.marker="Star";
 			o.start="1/12/1862";
 			o.where="-78.16,39.19,20,0";
@@ -180,6 +190,7 @@
 			o.goto="-78.16,39.19,3";
 			o.color="#ff9900";
 			o.edge="#666";
+			o.id="born";
 			o.row=1;
 			sd.mobs.push(o);
 	
@@ -192,6 +203,7 @@
 			o.pic="http://www.artvalue.com/photos/auction/0/50/50908/mcnulty-william-c-1889-1963-us-towers-in-the-sky-new-york-3005289.jpg";
 			o.color="#ff9900";
 			o.edge="#666";
+			o.id="ny";
 			o.row=2;
 			sd.mobs.push(o);
 
@@ -217,6 +229,7 @@
 			o.pic="http://i234.photobucket.com/albums/ee268/solomon_042/SLAVRELIGION.jpg";
 			o.color="#ff9900";
 			o.edge="#666";
+			o.id="preach";
 			o.row=3;
 			sd.mobs.push(o);
 
@@ -229,6 +242,7 @@
 			o.pic="http://www.mtholyoke.com/pcsite/books/images10/Sermon01.jpeg";
 			o.color="#ff9900";
 			o.edge="#666";
+			o.id="sermon";
 			o.row=4;
 			sd.mobs.push(o);
 
@@ -241,20 +255,20 @@
 			sd.muteSound=false;
 			
 			
-			sd.timeSegments=[ 	{start:tln.DateToTime("1/1860"), end:tln.DateToTime("1886"), title:"Winchester", col:"#ccc", click:"where:-78.16,39.19,3"},
-								{start:tln.DateToTime("1886"), end:tln.DateToTime("1889"), title:"New York", col:"#ccc", click:"where:-74.0,40.71,300"},
-								{start:tln.DateToTime("1889"), end:tln.DateToTime("1898"), title:"Charlottesville", col:"#ccc", click:"where:-78.47,38.03,300"},
-								{start:tln.DateToTime("1898"), end:tln.DateToTime("1902"), title:"Boston", col:"#ccc", click:"where:-80.00,38.41,1500"},
-								{start:tln.DateToTime("1902"), end:tln.DateToTime("1906"), title:"Connecticut", col:"#ccc", click:"where:-80.00,38.41,1500"}, 
-								{start:tln.DateToTime("1906"), end:tln.DateToTime("1910"), title:"Indiana", col:"#ccc", click:"where:-86.15,39.76,300"},
-								{start:tln.DateToTime("1910"), end:tln.DateToTime("12/1922"), title:"Traveling", col:"#ccc", click:"where:-80.00,38.41,1500"}];
+			sd.timeSegments=[ 	{start:pop.DateToTime("1/1860"), end:pop.DateToTime("1886"), title:"Winchester", col:"#ccc", click:"where:-78.16,39.19,3"},
+								{start:pop.DateToTime("1886"), end:pop.DateToTime("1889"), title:"New York", col:"#ccc", click:"where:-74.0,40.71,300"},
+								{start:pop.DateToTime("1889"), end:pop.DateToTime("1898"), title:"Charlottesville", col:"#ccc", click:"where:-78.47,38.03,300"},
+								{start:pop.DateToTime("1898"), end:pop.DateToTime("1902"), title:"Boston", col:"#ccc", click:"where:-80.00,38.41,1500"},
+								{start:pop.DateToTime("1902"), end:pop.DateToTime("1906"), title:"Connecticut", col:"#ccc", click:"where:-80.00,38.41,1500"}, 
+								{start:pop.DateToTime("1906"), end:pop.DateToTime("1910"), title:"Indiana", col:"#ccc", click:"where:-86.15,39.76,300"},
+								{start:pop.DateToTime("1910"), end:pop.DateToTime("12/1922"), title:"Traveling", col:"#ccc", click:"where:-80.00,38.41,1500"}];
 			}
 
 			
 		for (i=0;i<sd.mobs.length;++i) {									// For each mob	
 			o=sd.mobs[i];													// Point at mob
-			if (o.start)	o.start=tln.DateToTime(o.start);				// Convert date to time
-			if (o.end)		o.end=tln.DateToTime(o.end);					// Convert date to time
+			if (o.start)	o.start=pop.DateToTime(o.start);				// Convert date to time
+			if (o.end)		o.end=pop.DateToTime(o.end);					// Convert date to time
 			s=e=0;															// Assume not timed
 			if (o.show) {													// If show mode spec'd
 				if (o.show.match(/s/i)) 	s=o.start;						// Start timed
@@ -263,19 +277,53 @@
 				}
 			if (o.marker || o.spaceMarker) {								// If a marker spec'd 
 				var marker=o.spaceMarker ? o.spaceMarker : o.marker;		// Use spaceMarker first, then marker
+				o.type="icon";												// Assume icon
 				if (marker.match(/drive\.google/i)) {						// An drive file
-					var id=marker.match(/id=(.+)&/);						// Extract id
+					o.type="kml";											// Set type
+					id=marker.match(/id=(.+)&/);							// Extract id
 					if (id)	{												// An id found
 						var s="//drive.google.com/uc?export=view&id="+id[1];// Construct 'direct' link
 						o.lid=mps.AddKMLLayer(s,o.opacity,s,e);				// Add KML layer								 
 						}
 					}
-				else if (marker.match(/\.kml/i)) 							// A KML file
+				else if (marker.match(/\.kml/i)) {							// A KML file
+					o.type="kml";											// Set type
 					o.lid=mps.AddKMLLayer(marker,o.opacity,s,e);			// Add KML layer								 
-				else if (marker.match(/\.png|.gif|\.jpg|\.jpeg/i) && o.where) // An image file
+					}
+				else if (marker.match(/path/i)) {							// A path
+					var dots=[];
+					o.type="path";											// Set type
+					v=o.desc.split(",");									// Split by comma
+						for (j=0;j<v.length;++j) {							// For each one spec'd
+ 						id=sd.mobs[FindMobByID(v[j])];						// Point at mob
+ 						t=id.start;											// Get time
+  						if (isNaN(t) || (t > -2500) && (t < 2500))			// If not tured into minutes yet
+							t=pop.DateToTime(t);							// +/- min past 1970
+						if (!j)		s=e=t;									// Init to 1st mob
+						vv=id.where.split(",");								// Split into parts
+						vv=ol.proj.transform([vv[0]-0,""+vv[1]-0],'EPSG:4326',mps.curProjection);	// Transform 
+						vv.push(t); 										// Add time
+						dots.push(vv);										// Add dot
+						s=Math.min(s,t);									// Earliest
+						e=Math.max(e,t);									// Latest
+						}
+					var ew=o.size ? o.size  : 2;							// Setb size with 2 pixel default
+					var eo=o.opacity ? o.opacity  : 1;						// Set opacity with 1.0 default
+					mps.AddPathLayer(dots,o.color,ew,eo,s,o.end ? o.end: e);// Add path to overlays
+					}
+				else if (marker.match(/\.png|.gif|\.jpg|\.jpeg/i) && o.where) { // An image file
+					o.type="image";											// Set type
 					o.lid=mps.AddImageLayer(marker,o.where, o.opacity,s,e);	// Add image layer								 
-					else if (o.where) { 									// Must be an icon
+					}
+				else if (marker.match(/segment/i)) {						// A segment
+					o.type="segment";										// Set type
+					}
+				else if (marker.match(/init/i)) {							// An init
+					o.type="init";											// Set type
+					}
+				else if (o.where) { 										// Must be an icon
 					var sty={};												// Not style
+					o.type="icon";											// Set type
 					o.spaceMarker ?	sty.m=o.spaceMarker : sty.m=o.marker;	// Use space marker first, then time marker
 					o.spaceTitle  ?	sty.t=o.spaceTitle  : sty.t=o.title;			
 					o.spaceDesc   ?	sty.d=o.spaceDesc   : sty.d=o.desc;				
@@ -285,10 +333,10 @@
 					o.spaceTextCol  ? sty.tc=o.spaceTextCol  : sty.tc=sd.spaceTextCol;				
 					o.spaceTextFont ? sty.tf=o.spaceTextFont : sty.tf=sd.spaceTextFont;				
 					o.spaceOpacity  ? sty.a=o.spaceOpacity   : sty.a=o.opacity;				
-					mps.AddMarkerLayer(o.where,sty,i,s,e);				// Add marker to overlays
+					mps.AddMarkerLayer(o.where,sty,i,s,e);					// Add marker to overlays
 					}
-				}
 			}
+		}
 
 		mps.SetBaseMap(sd.baseMap);											// Set basemap layer
 		tln.InitTimeline("bottomDiv",sd);									// Initialize timeline

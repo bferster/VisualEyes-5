@@ -25,7 +25,6 @@ function Space(div, pop)														// CONSTRUCTOR
 }
 
 
-
 Space.prototype.UpdateMap=function(curTime, timeFormat)					// UPDATE MAP
 {
 
@@ -39,6 +38,57 @@ Space.prototype.UpdateMap=function(curTime, timeFormat)					// UPDATE MAP
 	this.curTime=curTime-0;													// Set current timet
 	this.DrawMapLayers();													// Redraw map
 }
+
+
+Space.prototype.DrawMapLayers=function(indices, mode)							// DRAW OVERLAY LAYERS							
+{
+
+/* 
+ 	Draws or shows overlay elements based on the current time.
+  	if .start != 0 marker is turned on at the .start time
+	if .start != 0 marker is turned off at the .end time
+ 	If indices is set, the layers spec'd are turned on/off regardless of time
+ 	@param {array} 		indices An array of indices specifying the marker(s) how.
+	@param {boolean} 	Whether.
+*/
+
+	var i,j,o,a,vis,sty;
+	if (this.canvasContext) {  												// If a canvas up      
+		this.canvasContext.clearRect(0,0,this.canvasWidth,this.canvasHeight); // Clear canvas
+   		for (i=0;i<this.overlays.length;i++) {								// For each overlay layer
+            o=this.overlays[i];												// Get ptr  to layer
+    		
+    		if (!o.start && !o.end)	vis=true;								// Both start/end 0, make it visible
+    		else if (o.start) 		vis=false;								// If only a start set, hide until it comes up
+    		else if (o.end) 		vis=true;								// If only an end set, show until until it comes down
+    		else 					vis=false;								// Both set, hide until it comes up
+ 
+	      	if (o.start && (this.curTime >= o.start))	vis=true;			// If past start and start defined, show it
+	      	if (o.end && (this.curTime > o.end))		vis=false;			// If past end and end defined, hide it
+	        a=(o.opacity != undefined) ? o.opacity : 1						// Use defined opacity or 1
+            if (indices) {													// If indices spec'd
+            	if (mode == undefined)	mode=true;							// Default to showing marker
+            	for (j=0;j<indices.length;++j) 								// For each index					
+            		if (i == indices[j])									// This is one to set
+            			vis=mode;											// Hide or show it
+           		}
+            if (vis && (o.type == "image"))									// If a visible image 
+           		o.src.drawMapImage(vis,this);   							// Draw it   
+        	else if (o.type == "kml") {										// If a kml 
+       			o.src.set('visible',vis);									// Show/hide it
+            	o.src.set("opacity",a);										// Set opacity								
+             	}
+        	else if (o.type == "icon") {									// If an icon 
+				sty=o.src.getStyle();  										// Point at style
+				sty.getImage().setOpacity(vis ? 1: 0);						// Set icon opacity
+				sty.getText().setScale(vis ? 1 : 0);						// Set text opacity
+              	}
+	       	else if (o.type == "path") 										// If a path
+         		this.DrawPath(o.src, o.dots, this.curTime, o.end)			// Show it
+          }
+        }
+}
+
 
 Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 {
@@ -179,7 +229,7 @@ Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 			&& (Math.abs(fr-r) < 1) && (Math.abs(fr-r) < 1)					// Rotation  match
 			)																// Already there
 		return;																// Quit
-	var duration=2000;														// Duration
+var duration=0;														// Duration
 	var start=+new Date();													// Start time
 start=0;	
 	var pan=ol.animation.pan({												// Pan
@@ -255,6 +305,65 @@ Space.prototype.MarkerLayerToTop=function()								// MOVE MARKER LAYER ON TOP O
 	var layer=this.map.getLayers().remove(this.markerLayer);				// Remove marker layer
 	var n=this.map.getLayers().getArray().length;							// Last index
 	this.map.getLayers().insertAt(n,layer);									// Place on top
+}
+
+Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end) 	// ADD PATH LAYER TO MAP						
+{
+
+/* 	
+ 	Add path to marker layer.
+ 	@param {array} 	dots 	Array of lat/long,time triplets separated by commas ie. [[-77,40,-4526267], ...]
+ 	@param {string} col 	Color of path
+ 	@param {number} wid 	Width of path in pixels
+ 	@param {number} opacity Opacity of path 0-1
+ 	@param {number} start 	Starting time of marker in number of mins += 1/1/1970
+	@param {number} end 	Ending time of marker in number of mins += 1/1/1970
+*/
+
+	var i,v,o={};
+	o.type="path";															// Path
+  	o.start=start;	o.end=end;												// Save start, end
+	this.overlays.push(o);													// Add to overlay
+  	o.src=new ol.Feature({ geometry: new ol.geom.LineString(dots)});		// Create line
+  	o.id="Path-"+this.markerLayer.getSource().getFeatures().length;			// Make path id
+   	o.src.setId(o.id);														// Set id of path
+  	o.dots=dots;															// Save dots
+   	if (!col)				col="#990000";									// Default color
+   	if (!wid)				wid=2;											// Default wid
+  	if (!opacity)			opacity=1;										// Default opacity
+  	if (col.length == 4) 	col+col.substr(1,3);							// Turn #555 into #55555
+  	var r=parseInt("0x"+col.substr(1,2),16);								// R
+	var g=parseInt("0x"+col.substr(3,2),16);								// G
+	var b=parseInt("0x"+col.substr(5,2),16);								// B
+   	var sty=new ol.style.Style({											// Make style
+   			stroke: new ol.style.Stroke({ color: [r,g,b,opacity], width: wid
+			})
+		});
+	o.src.setStyle(sty);													// Set style
+	this.markerLayer.getSource().addFeature(o.src);							// Add it
+}
+
+Space.prototype.DrawPath=function(feature, dots, time, end) 			// DRAW PATH						
+{
+
+/* 	
+ 	Add path to marker layer.
+  	@param {object} id 		Pointer to feature
+ 	@param {array} 	dots 	Array of lat, long, & time triplets separated by commas. i.e. [[-77,40,-4526267], ...]
+  	@param {number} time 	Current time in number of mins += 1/1/1970
+
+*/
+	
+	var i,pct,now,v=[];
+	for (i=0;i<dots.length;++i)
+		if ((time >= dots[i][2]) && (time < end)) {						// This one's active
+			pct=(time-dots[i][2]);			// Get pct
+			trace(pct)
+			v.push(dots[i]);											// Add point
+			now=dots[i][2];
+			
+			}
+	feature.setGeometry(new ol.geom.LineString(v));						// Set new dots
 }
 
 
@@ -581,52 +690,6 @@ Space.prototype.AddImageLayer=function(url, geoRef, alpha, start, end) 	// ADD M
 	return index;															// Return layer ID
 }
 
-Space.prototype.DrawMapLayers=function(indices, mode)							// DRAW OVERLAY LAYERS							
-{
-
-/* 
- 	Draws or shows overlay elements based on the current time.
-  	if .start != 0 marker is turned on at the .start time
-	if .start != 0 marker is turned off at the .end time
- 	If indices is set, the layers spec'd are turned on/off regardless of time
- 	@param {array} 		indices An array of indices specifying the marker(s) how.
-	@param {boolean} 	Whether.
-*/
-
-	var i,j,o,a,vis,sty;
-	if (this.canvasContext) {  												// If a canvas up      
-		this.canvasContext.clearRect(0,0,this.canvasWidth,this.canvasHeight); // Clear canvas
-   		for (i=0;i<this.overlays.length;i++) {								// For each overlay layer
-            o=this.overlays[i];												// Get ptr  to layer
-    		
-    		if (!o.start && !o.end)	vis=true;								// Both start/end 0, make it visible
-    		else if (o.start) 		vis=false;								// If only a start set, hide until it comes up
-    		else if (o.end) 		vis=true;								// If only an end set, show until until it comes down
-    		else 					vis=false;								// Both set, hide until it comes up
- 
-	      	if (o.start && (this.curTime >= o.start))	vis=true;			// If past start and start defined, show it
-	      	if (o.end && (this.curTime > o.end))		vis=false;			// If past end and end defined, hide it
-	        a=(o.opacity != undefined) ? o.opacity : 1						// Use defined opacity or 1
-            if (indices) {													// If indices spec'd
-            	if (mode == undefined)	mode=true;							// Default to showing marker
-            	for (j=0;j<indices.length;++j) 								// For each index					
-            		if (i == indices[j])									// This is one to set
-            			vis=mode;											// Hide or show it
-           		}
-            if (vis && (o.type == "image"))									// If a visible image 
-           		o.src.drawMapImage(vis,this);   							// Draw it   
-        	else if (o.type == "kml") {										// If a kml 
-       			o.src.set('visible',vis);									// Show/hide it
-            	o.src.set("opacity",a);										// Set opacity								
-             	}
-        	else if (o.type == "icon") {									// If an icon 
-				sty=o.src.getStyle();  										// Point at style
-				sty.getImage().setOpacity(vis ? 1: 0);						// Set icon opacity
-				sty.getText().setScale(vis ? 1 : 0);						// Set text opacity
-              	}
-           }
-        }
-}
 
 
 Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES						
