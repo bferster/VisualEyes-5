@@ -353,8 +353,7 @@
 						for (j=0;j<v.length;++j) {							// For each one spec'd
  						id=sd.mobs[FindMobByID(v[j])];						// Point at mob
  						t=id.start;											// Get time
-  						if (isNaN(t) || (t > -2500) && (t < 2500))			// If not tured into minutes yet
-							t=pop.DateToTime(t);							// +/- min past 1970
+  						t=pop.DateToTime(t);							// +/- min past 1970
 						if (!j)		s=e=t;									// Init to 1st mob
 						vv=id.where.split(",");								// Split into parts
 						vv=ol.proj.transform([vv[0]-0,""+vv[1]-0],'EPSG:4326',mps.curProjection);	// Transform 
@@ -555,16 +554,47 @@ mps.Goto("-80.00,38.41,1500")
 		pop.Sound("click",sd.muteSound);										// Click sound							
 		var str="<table><tr height='18'>";
 		str+="<tr><td>Mute clicks?</td><td><input id='setmute' type='checkbox'></td></tr>";
-		str+="<tr><td>Location</td><td><input id='setwhere' style='width:220px' type='input'></td></tr>";
+		str+="<tr><td>Base Layer </td><td>";
+		str+=MakeSelect("setbase",false,["Satellite","Terrain","Earth","Watercolor","B&W","Roadmap"],sd.baseMap);
+		str+="<tr><td>Label color</td><td><input id='setstcol' class='ve-is' style='width:50px' value='"+sd.spaceTextCol+"' type='input'></td></tr>";
+		str+="<tr><td>Label font</td><td><input id='setstfont' class='ve-is' style='width:160px' value='"+sd.spaceTextFont+"' type='input'></td></tr>";
+		str+="<tr><td>Start/end </td><td>";
+		str+="<input id='setstart' class='ve-is' style='width:70px' value='"+sd.start+"' type='input'> to ";
+		str+="<input id='setend' class='ve-is' style='width:70px' value='"+sd.end+"' type='input'></td></tr>";
+		str+="<tr><td>Date format </td><td>";
+		str+=MakeSelect("settime",false,["Year","Mo/Year","Mon Year","Mo/Day/Year","Mon Day, Year"],sd.timeFormat);
+		str+="</td></tr>";														// End
+
+		str+="<tr><td>Location</td><td><input id='setwhere' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="</table>";
-		pop.Dialog("VisualEyes settings",str);		
+		pop.Dialog("VisualEyes settings",str, function() {
+				sd.spaceTextCol=$("#setstcol").val();							// Set space label color
+				sd.spaceTextFont=$("#setstfont").val();							// Set space label font
+				sd.start=$("#setstart").val();									// Set start
+				sd.end=$("#setend").val();										// Set end
+				mps.SetMarkerTexStyle(sd.spaceTextCol,sd.spaceTextFont);		// Re-color
+				tln.timeFormat=sd.timeFormat=$("#settime").val();				// Get timeformat
+				sd.baseMap=$("#setbase").val();									// Get base
+				mps.SetBaseMap(sd.baseMap);										// Set basemap layer
+				sd.muteSound=$("#setmute").prop("checked");						// Set mute
+				tln.timeFormat=mps.muteSound=sd.muteSound;						// Set all modules for mute
+				tln.UpdateTimeline(sd.start,sd.end);							// Update timeline
+				}
+			);		
 		
-		$("#setmute").prop("checked",sd.mute);									// Set mute box
-		$("#setmute").on("click", function(e) {									// MUTE HANDLER
-			sd.muteSounds=$("#setmute").prop("checked");						// Set
+		$("#setmute").prop("checked",sd.muteSound);								// Set mute box
+		$("#setbase").val(sd.baseMap);											// Set base
+		$("#settime").val(sd.timeFormat);										// Set timeformat
+		$("#setstart").val(sd.start);											// Set start
+		$("#setend").val(sd.end);												// Set end
+		pop.ColorPicker("setstcol","",true);									// Init color
+	
+		$("#setbase").on("change", function(e) {								// BASE HANDLER
+			mps.SetBaseMap($("#setbase").val());								// Set basemap layer
 			}); 
-		$("#setmute").on("click", function(e) {									// MUTE HANDLER
-			sd.muteSounds=$("#setmute").prop("checked");						// Set
+
+		$("#setstcol").on("click", function(e) {								// LAB COLOR HANDLER
+			pop.ColorPicker("setstcol");										// Set label text color
 			}); 
 		});																		// End settings
 

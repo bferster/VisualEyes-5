@@ -121,7 +121,7 @@ Popup.prototype.GetTextBox=function (title, content, def, callback)		// GET TEXT
 }
 
 
-Popup.prototype.Dialog=function (title, content)			// DIALOG BOX
+Popup.prototype.Dialog=function (title, content, callback)				// DIALOG BOX
 {
 	this.Sound("click");													// Ding sound
 	$("#alertBoxDiv").remove();												// Remove any old ones
@@ -131,7 +131,8 @@ Popup.prototype.Dialog=function (title, content)			// DIALOG BOX
 	str+="<div style='font-size:14px;margin:14px'>"+content+"</div>";
 	$("#alertBoxDiv").append(str);	
 	$("#alertBoxDiv").dialog({ width:400, buttons: {
-				            	"OK": 		function() { $(this).remove(); },
+				            	"OK": 		function() { callback(); $(this).remove();  },
+				            	"Cancel":  	function() { $(this).remove(); }
 								}});	
 	$(".ui-dialog-titlebar").hide();
 	$(".ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix").css("border","none");
@@ -164,18 +165,27 @@ Popup.prototype.ShowLightBox=function(title, content)				// LIGHTBOX
 
 
 
-Popup.prototype.ColorPicker=function (name, transCol) 					//	DRAW COLORPICKER
+Popup.prototype.ColorPicker=function (name, transCol, init) 			//	DRAW COLORPICKER
 {
 	if (!transCol)															// If no transparent color set
 		transCol="";														// Use null
 	$("#colorPickerDiv").remove();											// Remove old one
+	if (init) {																// If initting
+		col=$("#"+name).val();												// Get current color
+		if (col == transCol)												// No color 
+			$("#"+name).css({ "border":"1px dashed #999","background-color":"#fff" }); 	// Set dot
+		else				
+			$("#"+name).css({ "border":"1px solid #999","background-color":col }); 		// Set dot
+		return;																// Quit
+	}
+	
 	var x=$("#"+name).offset().left+10;										// Get left
 	var y=$("#"+name).offset().top+10;										// Top
 	var	str="<div id='colorPickerDiv' style='position:absolute;left:"+x+"px;top:"+y+"px;width:160px;height:225px;z-index:100;border-radius:12px;background-color:#eee'>";
 	$("body").append("</div>"+str);											// Add palette to dialog
 	$("#colorPickerDiv").draggable();										// Make it draggable
 	str="<p style='text-shadow:1px 1px white' align='center'><b>Choose a new color</b></p>";
-	str+="<img src='colorpicker.gif' style='position:absolute;left:5px;top:28px' />";
+	str+="<img src='img/colorpicker.gif' style='position:absolute;left:5px;top:28px' />";
 	str+="<input id='shivaDrawColorInput' type='text' style='position:absolute;left:22px;top:29px;width:96px;background:transparent;border:none;'>";
 	$("#colorPickerDiv").html(str);											// Fill div
 	$("#colorPickerDiv").on("click",onColorPicker);							// Mouseup listener
@@ -183,15 +193,16 @@ Popup.prototype.ColorPicker=function (name, transCol) 					//	DRAW COLORPICKER
 	function onColorPicker(e) {
 		
 		var col;
-		var cols=["000000","444444","666666","999999","CCCCCC","EEEEEE","E7E7E7","FFFFFF",
-				  "FF0000","FF9900","FFFF00","00FF00","00FFFF","0000FF","9900FF","FF00FF",	
-				  "F4CCCC","FCE5CD","FFF2CC","D9EAD3","D0E0E3","CFE2F3","D9D2E9","EDD1DC",
-				  "EA9999","F9CB9C","FFE599","BED7A8","A2C4C9","9FC5E8","B4A7D6","D5A6BD",
-				  "E06666","F6B26B","FFD966","9C347D","76A5AF","6FA8DC","8E7CC3","C27BA0",
-				  "CC0000","E69138","F1C232","6AA84F","45818E","3D85C6","674EA7","A64D79",
-				  "990000","B45F06","BF9000","38761D","134F5C","0B5394","351C75","741B47",
-				  "660000","783F04","7F6000","274E13","0C343D","073763","20124D","4C1130"
+		var cols=["000000","444444","666666","999999","cccccc","eeeeee","e7e7e7","ffffff",
+				  "ff0000","ff9900","ffff00","00ff00","00ffff","0000ff","9900ff","ff00ff",	
+				  "f4cccc","fce5cd","fff2cc","d9ead3","d0e0e3","cfe2f3","d9d2e9","edd1dc",
+				  "ea9999","f9cb9c","ffe599","bed7a8","a2c4c9","9fc5e8","b4a7d6","d5a6bd",
+				  "e06666","f6b26b","ffd966","9c347d","76a5af","6fa8dc","8e7cc3","c27ba0",
+				  "cc0000","e69138","f1c232","6aa84f","45818e","3d85c6","674ea7","a64d79",
+				  "990000","b45f06","bf9000","38761d","134f5c","0b5394","351c75","741b47",
+				  "660000","783f04","7f6000","274e13","0c343d","073763","20124d","4c1130"
 				 ];
+
 		var x=e.pageX-this.offsetLeft;										// Offset X from page
 		var y=e.pageY-this.offsetTop;										// Y
 		if ((x < 102) && (y < 45))											// In text area
@@ -214,10 +225,10 @@ Popup.prototype.ColorPicker=function (name, transCol) 					//	DRAW COLORPICKER
 			col="#"+cols[x+(y*8)];											// Get color
 			}
 		if (col == transCol)												// No color 
-			$("#"+name).css({ "border":"1px dashed #000","background-color":"#fff" }); 	// Set dot
+			$("#"+name).css({ "border":"1px dashed #999","background-color":"#fff" }); 	// Set dot
 		else				
-			$("#"+name).css({ "border":"1px solid #000","background-color":col }); 		// Set dot
-		$("#"+name).data(name,col);											// Set color
+			$("#"+name).css({ "border":"1px solid #999","background-color":col }); 		// Set dot
+		$("#"+name).val(col);												// Set color value
 	}
 
 }
@@ -293,6 +304,8 @@ Popup.prototype.DateToTime=function(dateString) 						// CONVERT DATE TO MINS +/
 */
 	if (!dateString)														// No date
 		return 0;															// Quit
+	if (!isNaN(dateString) && (dateString < -2500) || (dateString > 2500))	// Already in minutea
+		return dateString;													// Retun original
 	var d=new Date();														// Make new date
 	var v=(dateString+"").split("/");										// Split date into parts
 	if (v.length == 3)														// Mon/Day/Year

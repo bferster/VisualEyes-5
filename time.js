@@ -26,10 +26,9 @@ Timeline.prototype.InitTimeline=function(div, data)						// INIT TIMELINE
   	@param {string} div div to draw timeline into
  */
 	this.margin=18;
-	this.sd=data;															// Point at setting and data
 	this.curSeg=-1;															// Assume all segs
-	this.div="#"+div;														// Current div selector
-
+	if (data)	this.sd=data;												// Point at setting and data
+	if (div)	this.div="#"+div;											// Current div selector
 	this.timeFormat=sd.timeFormat;											// Set date format
 	this.start=pop.DateToTime(sd.start);									// Start date
 	this.end=pop.DateToTime(sd.end);										// End date
@@ -50,7 +49,7 @@ Timeline.prototype.InitTimeline=function(div, data)						// INIT TIMELINE
 	this.hasBackBut=sd.hasBackBut ? sd.hasBackBut : true; 					// Has forward/back buttons?
 	this.muteSound=sd.muteSound ? sd.muteSound : false; 					// Sound  muted?
 	this.timeViewTextColor=sd.timeViewTextColor ? sd.timeViewTextColor : "#666"; //Timeview text color
-	
+
 	if (this.hasTimeBar) 													// If a timebar
 		this.AddTimeBar();													// Add it
 	if (this.playerSpeed) 													// If it has player
@@ -63,20 +62,27 @@ Timeline.prototype.InitTimeline=function(div, data)						// INIT TIMELINE
 }	
 
 
-Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
+Timeline.prototype.UpdateTimeline=function(start, end) 					// UPDATE TIMELINE PANES
 {
 /* 
 	Resize timeline to fit container div
 */
+
+
 	var s,e,x,y,dur;
 	var i,w2,m=this.margin;
 	var w=$(this.div).width()-m-m;											// Width of time area
 	var t=$(this.div).height()-$("#timeBar").height()-20-m;					// Top position
 	var dur=this.end-this.start;											// Timeline 
+	if (start)	this.start=pop.DateToTime(start);							// Start date
+	if (end)	this.end=pop.DateToTime(sd.end);							// End date
 	this.timeFormat=sd.timeFormat;											// Set date format
 	if (this.segmentPos == "Bottom")										// If putting segments below timebar
 		t-=30;																// Shift it higher
 	$("#timeBar").css({top:t+"px",left:m+"px", width:w+"px"});				// Position div
+	$("#timeStart").html(this.pop.FormatTime(this.start,this.timeFormat)+"&nbsp;&nbsp;&nbsp;");	// Set start to set spacing
+	$("#timeEnd").html("&nbsp;&nbsp;&nbsp;"+this.pop.FormatTime(this.end,this.timeFormat)); 	// Set end
+
 	var sw=$("#timeStart").width();											// Start date width
 	var ew=$("#timeEnd").width();											// End date width
 	var pw=$("#timePlayer").width();										// Player width
@@ -92,9 +98,9 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 	if (this.hasTicks && this.hasTimeBar) {									// If ticks
 		var x=$("#timeSlider").offset().left-m;								// Starting point
 		var tw=w/8;															// Space between ticks
-		for (i=0;i<9;++i) {												// For each tick
+		for (i=0;i<9;++i) {													// For each tick
 			x+=tw;															// Move over
-			$("#tick"+i).css( {top:"11px",left:x+"px"} );				// Position
+			$("#tick"+i).css( {top:"11px",left:x+"px"} );					// Position
 			if ((i == 1) || (i == 3) || (i == 5)) {							// A shorter tick
 				$("#tick"+i).height(14);									// Size
 				if (this.hasTickLabels) 									// If showing labels

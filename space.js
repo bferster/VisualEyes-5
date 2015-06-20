@@ -372,6 +372,24 @@ Space.prototype.DrawPath=function(feature, dots, time, end, show) 		// DRAW PATH
 	feature.setGeometry(new ol.geom.LineString(v));						// Set new dots
 }
 
+Space.prototype.SetMarkerTexStyle=function(color, font ) 			// CHANGE LABEL TEXT STYLE					
+{
+/*
+ *	@param {array} 	indices An array of indices specifying the marker(s) to style
+
+ */
+	var i,o;
+	o=this.markerLayer.getSource().getFeatures();						// Poiht at marker features
+	for (i=0;i<o.length;++i) {											// For each layer
+		sty=o[i].getStyle();											// Get style
+		if (sty.getText()) {											// If a text element
+			if (color)	sty.getText().getFill().setColor(color);		// Set color
+			if (font)	sty.getText().setFont(font);					// Set font
+			}
+		sty=o[i].setStyle(sty);											// Set style
+	}
+}
+
 
 Space.prototype.AddMarkerLayer=function(pos, style, id, start, end) 	// ADD MARKER LAYER TO MAP						
 {
