@@ -84,7 +84,7 @@ Space.prototype.DrawMapLayers=function(indices, mode)							// DRAW OVERLAY LAYE
 				sty.getText().setScale(vis ? 1 : 0);						// Set text opacity
               	}
 	       	else if (o.type == "path") 										// If a path
-         		this.DrawPath(o.src, o.dots, this.curTime, o.end)			// Show it
+         		this.DrawPath(o.src, o.dots, this.curTime, o.end, o.show)	// Show it
           }
         }
 }
@@ -307,7 +307,7 @@ Space.prototype.MarkerLayerToTop=function()								// MOVE MARKER LAYER ON TOP O
 	this.map.getLayers().insertAt(n,layer);									// Place on top
 }
 
-Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end) 	// ADD PATH LAYER TO MAP						
+Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show) 	// ADD PATH LAYER TO MAP						
 {
 
 /* 	
@@ -322,7 +322,7 @@ Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end) 	// A
 
 	var i,v,o={};
 	o.type="path";															// Path
-  	o.start=start;	o.end=end;												// Save start, end
+  	o.start=start;	o.end=end;	o.show=show;								// Save start, end, show
 	this.overlays.push(o);													// Add to overlay
   	o.src=new ol.Feature({ geometry: new ol.geom.LineString(dots)});		// Create line
   	o.id="Path-"+this.markerLayer.getSource().getFeatures().length;			// Make path id
@@ -343,26 +343,32 @@ Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end) 	// A
 	this.markerLayer.getSource().addFeature(o.src);							// Add it
 }
 
-Space.prototype.DrawPath=function(feature, dots, time, end) 			// DRAW PATH						
+Space.prototype.DrawPath=function(feature, dots, time, end, show) 		// DRAW PATH						
 {
 
 /* 	
  	Add path to marker layer.
-  	@param {object} id 		Pointer to feature
- 	@param {array} 	dots 	Array of lat, long, & time triplets separated by commas. i.e. [[-77,40,-4526267], ...]
-  	@param {number} time 	Current time in number of mins += 1/1/1970
-
+  	@param {object} id 		Pointer to feature.
+ 	@param {array} 	dots 	Array of lat, long, & time triplets separated by commas. i.e. [[-77,40,-4526267], ...].
+  	@param {number} time 	Current time in number of mins += 1/1/1970.
+ 	@param {string} show 	Display modes: a == animate.
+ 
 */
 	
-	var i,pct,now,v=[];
-	for (i=0;i<dots.length;++i)
-		if ((time >= dots[i][2]) && (time < end)) {						// This one's active
-			pct=(time-dots[i][2]);			// Get pct
-			trace(pct)
-			v.push(dots[i]);											// Add point
-			now=dots[i][2];
-			
+	var s,e,pct,v=[],animate=false;
+	if (show && show.match(/a/i))	animate=true;						// Set animation mode
+	v.push([dots[0][0],dots[0][1]]);									// Add moveto dot
+	for (e=1;e<dots.length;++e) {										// For each lineto dot
+		s=e-1;															// Point at start of line
+		if ((time >= dots[s][2]) && (time < end)) {						// This one's active
+			v.push([dots[e][0],dots[e][1]]);							// Add end dot
+			if ((time < dots[e][2]) && animate){						// If before end of end dot and animating
+				pct=(time-dots[s][2])/(dots[e][2]-dots[s][2]);			// Get pct
+				v[e][0]=dots[s][0]+((dots[e][0]-dots[s][0])*pct);		// Interpolate x
+				v[e][1]=dots[s][1]+((dots[e][1]-dots[s][1])*pct);		// Interpolate y
+				}
 			}
+		}
 	feature.setGeometry(new ol.geom.LineString(v));						// Set new dots
 }
 

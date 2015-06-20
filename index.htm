@@ -175,9 +175,10 @@
 			o.desc="born,ny,preach,sermon";
 			o.color="#990000";
 			o.id="journey";
-			o.size=4;
-			o.opacity=.6;
-			o.end="1915";
+			o.size=5;
+			o.opacity=.5;
+			o.end="1922";
+			o.show="a";
 			sd.mobs.push(o);
 
 			o={};
@@ -246,6 +247,70 @@
 			o.row=4;
 			sd.mobs.push(o);
 
+			o={};
+			o.marker="Segment";
+			o.start="1/1860";
+			o.end="1886";
+			o.title="Winchester";
+			o.click="where:-78.16,39.19,3";
+			o.color="#ccc";
+			sd.mobs.push(o);
+			o={};
+			
+			o={};
+			o.marker="Segment";
+			o.start="1886";
+			o.end="1889";
+			o.title="New York";
+			o.click="where:-74.0,40.71,300";
+			o.color="#ccc";
+			sd.mobs.push(o);
+			
+			o={};
+			o.marker="Segment";
+			o.start="1889";
+			o.end="1898";
+			o.title="Charlottesville";
+			o.click="where:-78.47,38.03,300";
+			o.color="#ccc";
+			sd.mobs.push(o);
+			
+			o={};
+			o.marker="Segment";
+			o.start="1898";
+			o.end="1902";
+			o.title="Boston";
+			o.click="where:-80.00,38.41,1500";
+			o.color="#ccc";
+			sd.mobs.push(o);
+	
+			o={};
+			o.marker="Segment";
+			o.start="1902";
+			o.end="1906";
+			o.title="Connecticut";
+			o.click="where:-80.00,38.41,1500";
+			o.color="#ccc";
+			sd.mobs.push(o);
+			
+			o={};
+			o.marker="Segment";
+			o.start="1906";
+			o.end="1910";
+			o.title="Indiana";
+			o.click="where:-86.15,39.76,300";
+			o.color="#ccc";
+			sd.mobs.push(o);
+		
+			o={};
+			o.marker="Segment";
+			o.start="1910";
+			o.end="12/1922";
+			o.title="Traveling";
+			o.click="where:-80.00,38.41,1500";
+			o.color="#ccc";
+			sd.mobs.push(o);
+
 			sd.spaceTextCol="#ffffff";
 			sd.spaceTextFont="bold 12px sans-serif ";
 			sd.baseMap="Roadmap";
@@ -253,15 +318,6 @@
 			sd.start="1/1860";
 			sd.end="12/1922";
 			sd.muteSound=false;
-			
-			
-			sd.timeSegments=[ 	{start:pop.DateToTime("1/1860"), end:pop.DateToTime("1886"), title:"Winchester", col:"#ccc", click:"where:-78.16,39.19,3"},
-								{start:pop.DateToTime("1886"), end:pop.DateToTime("1889"), title:"New York", col:"#ccc", click:"where:-74.0,40.71,300"},
-								{start:pop.DateToTime("1889"), end:pop.DateToTime("1898"), title:"Charlottesville", col:"#ccc", click:"where:-78.47,38.03,300"},
-								{start:pop.DateToTime("1898"), end:pop.DateToTime("1902"), title:"Boston", col:"#ccc", click:"where:-80.00,38.41,1500"},
-								{start:pop.DateToTime("1902"), end:pop.DateToTime("1906"), title:"Connecticut", col:"#ccc", click:"where:-80.00,38.41,1500"}, 
-								{start:pop.DateToTime("1906"), end:pop.DateToTime("1910"), title:"Indiana", col:"#ccc", click:"where:-86.15,39.76,300"},
-								{start:pop.DateToTime("1910"), end:pop.DateToTime("12/1922"), title:"Traveling", col:"#ccc", click:"where:-80.00,38.41,1500"}];
 			}
 
 			
@@ -309,14 +365,20 @@
 						}
 					var ew=o.size ? o.size  : 2;							// Setb size with 2 pixel default
 					var eo=o.opacity ? o.opacity  : 1;						// Set opacity with 1.0 default
-					mps.AddPathLayer(dots,o.color,ew,eo,s,o.end ? o.end: e);// Add path to overlays
+					mps.AddPathLayer(dots,o.color,ew,eo,s,o.end ? o.end: e, o.show);// Add path to overlays
 					}
 				else if (marker.match(/\.png|.gif|\.jpg|\.jpeg/i) && o.where) { // An image file
 					o.type="image";											// Set type
 					o.lid=mps.AddImageLayer(marker,o.where, o.opacity,s,e);	// Add image layer								 
 					}
 				else if (marker.match(/segment/i)) {						// A segment
+					var oo={};												
 					o.type="segment";										// Set type
+					if (!sd.timeSegments)	sd.timeSegments=[];				// Alloc new array if not already there
+					oo.start=o.start;		oo.end=o.end;					// Start, end
+					oo.title=o.title;		oo.col=o.color;					// Title, color
+					oo.click=o.click;										// Click
+					sd.timeSegments.push(oo);								// Add seg
 					}
 				else if (marker.match(/init/i)) {							// An init
 					o.type="init";											// Set type
