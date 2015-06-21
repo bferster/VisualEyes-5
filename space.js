@@ -40,7 +40,7 @@ Space.prototype.UpdateMap=function(curTime, timeFormat)					// UPDATE MAP
 }
 
 
-Space.prototype.DrawMapLayers=function(indices, mode)							// DRAW OVERLAY LAYERS							
+Space.prototype.DrawMapLayers=function(indices, mode)					// DRAW OVERLAY LAYERS							
 {
 
 /* 
@@ -320,6 +320,9 @@ Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show)
 	@param {number} end 	Ending time of marker in number of mins += 1/1/1970
 */
 
+	trace( col, wid, opacity)
+	trace( start, end, show)
+	
 	var i,v,o={};
 	o.type="path";															// Path
   	o.start=start;	o.end=end;	o.show=show;								// Save start, end, show
@@ -336,7 +339,7 @@ Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show)
 	var g=parseInt("0x"+col.substr(3,2),16);								// G
 	var b=parseInt("0x"+col.substr(5,2),16);								// B
    	var sty=new ol.style.Style({											// Make style
-   			stroke: new ol.style.Stroke({ color: [r,g,b,opacity], width: wid
+   			stroke: new ol.style.Stroke({ color: [r,g,b,opacity], width: wid-0
 			})
 		});
 	o.src.setStyle(sty);													// Set style
@@ -372,22 +375,20 @@ Space.prototype.DrawPath=function(feature, dots, time, end, show) 		// DRAW PATH
 	feature.setGeometry(new ol.geom.LineString(v));						// Set new dots
 }
 
-Space.prototype.SetMarkerTexStyle=function(color, font ) 			// CHANGE LABEL TEXT STYLE					
+Space.prototype.ClearLayers=function( ) 							// CLEAR MAP LAYERS					
 {
-/*
- *	@param {array} 	indices An array of indices specifying the marker(s) to style
 
- */
+/*
+ 
+*/
 	var i,o;
-	o=this.markerLayer.getSource().getFeatures();						// Poiht at marker features
-	for (i=0;i<o.length;++i) {											// For each layer
-		sty=o[i].getStyle();											// Get style
-		if (sty.getText()) {											// If a text element
-			if (color)	sty.getText().getFill().setColor(color);		// Set color
-			if (font)	sty.getText().setFont(font);					// Set font
-			}
-		sty=o[i].setStyle(sty);											// Set style
-	}
+	for (i=0;i<this.overlays.length;++i) {								// For each overlay
+		o=this.overlays[i];												// Point at it
+		if (o.type == "kml") 											// KML 
+			this.map.getLayers().remove(o.src);							// Remove layer
+		} 
+	this.markerLayer.getSource().clear(true);							// Clear all markers
+	this.overlays=[];													// All gone
 }
 
 

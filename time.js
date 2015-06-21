@@ -50,6 +50,11 @@ Timeline.prototype.InitTimeline=function(div, data)						// INIT TIMELINE
 	this.muteSound=sd.muteSound ? sd.muteSound : false; 					// Sound  muted?
 	this.timeViewTextColor=sd.timeViewTextColor ? sd.timeViewTextColor : "#666"; //Timeview text color
 
+	$("#timeBar").remove();													// Remove old
+	$("#segmentBar").remove();												// Remove old
+	$("#timePlayer").remove();												// Remove old
+	$("#timeViewBar").remove();												// Remove old
+
 	if (this.hasTimeBar) 													// If a timebar
 		this.AddTimeBar();													// Add it
 	if (this.playerSpeed) 													// If it has player
@@ -62,7 +67,7 @@ Timeline.prototype.InitTimeline=function(div, data)						// INIT TIMELINE
 }	
 
 
-Timeline.prototype.UpdateTimeline=function(start, end) 					// UPDATE TIMELINE PANES
+Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 {
 /* 
 	Resize timeline to fit container div
@@ -74,8 +79,6 @@ Timeline.prototype.UpdateTimeline=function(start, end) 					// UPDATE TIMELINE P
 	var w=$(this.div).width()-m-m;											// Width of time area
 	var t=$(this.div).height()-$("#timeBar").height()-20-m;					// Top position
 	var dur=this.end-this.start;											// Timeline 
-	if (start)	this.start=pop.DateToTime(start);							// Start date
-	if (end)	this.end=pop.DateToTime(sd.end);							// End date
 	this.timeFormat=sd.timeFormat;											// Set date format
 	if (this.segmentPos == "Bottom")										// If putting segments below timebar
 		t-=30;																// Shift it higher
