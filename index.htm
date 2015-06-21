@@ -593,17 +593,17 @@ mps.Goto("-80.00,38.41,1500")
 				sd.baseMap=$("#setbase").val();									// Get base
 				mps.SetBaseMap(sd.baseMap);										// Set basemap layer
 				sd.muteSound=$("#setmute").prop("checked");						// Set mute
-				tln.timeFormat=mps.muteSound=sd.muteSound;						// Set all modules for mute
- 				tln.InitTimeline();												// Update timeline
- 				ResizePanes();													// Re draw panes
   				if (sd.sheet) {
    					sd.sheet="https://docs.google.com/spreadsheets/d/1m5N--o7W0ifmyzVm_M6F73SfFiPfvo3Prit1SWR9cb8/edit?usp=sharing";
 	  			 	dtl.GetSpreadsheet(sd.sheet,true,null,function(data) {		// Get spreadsheet data
 						sd.mobs=data;											// Set mobs
-						InitProject(sd);										// Update timeline
+						InitProject(sd);										// Re-init project
 						},true);
 	 				}
-				});		
+	 			else															// No sheet spec'd
+					InitProject(sd);											// Re-init project
+			});
+						
 		$("#setbase").val(sd.baseMap);											// Set base
 		$("#settime").val(sd.timeFormat);										// Set timeformat
 		$("#setstart").val(sd.start);											// Set start
