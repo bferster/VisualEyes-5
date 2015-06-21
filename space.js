@@ -484,22 +484,22 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 	    		radius: w2, fill: fill, stroke:stroke, points: 4
 	  			});
 	  		break;
-		case "triu":
+		case "triup":
 			var image=new ol.style.RegularShape({								
 	    		radius: w2, fill: fill, stroke:stroke, points: 3
 	   			});
 	  		break;
-		case "trid":
+		case "tridown":
 			var image=new ol.style.RegularShape({								
 	    		radius: w2, fill: fill, stroke:stroke, points: 3,angle: Math.PI
 	 			});
 	  		break;
-		case "trir":
+		case "triright":
 			var image=new ol.style.RegularShape({								
 	    		radius: w2, fill: fill, stroke:stroke, points: 3,angle: Math.PI/2
 	 			});
 	  		break;
-		case "tril":
+		case "trileft":
 			var image=new ol.style.RegularShape({								
 	    		radius: w2, fill: fill, stroke:stroke, points: 3,angle: -Math.PI/2
 	 			});
