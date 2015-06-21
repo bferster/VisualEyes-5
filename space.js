@@ -320,9 +320,6 @@ Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show)
 	@param {number} end 	Ending time of marker in number of mins += 1/1/1970
 */
 
-	trace( col, wid, opacity)
-	trace( start, end, show)
-	
 	var i,v,o={};
 	o.type="path";															// Path
   	o.start=start;	o.end=end;	o.show=show;								// Save start, end, show
