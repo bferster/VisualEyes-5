@@ -370,6 +370,7 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 		str+="<div class='time-seg' id='timeseg"+i+"' ";					// Add div
 		str+="style='color:"+this.segmentTextColor+";background-color:"+ts[i].col+"'>";
 		str+=ts[i].title+"</div>";											// Add title
+		trace(ts[i].start,i)
 		if (!ts[i].start)													// No start time
 			ts[i].all=true;													// Flag it as show all button
 		}	
@@ -409,7 +410,7 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 					for (j=0;j<v.length;++j) {								// For each action
 						a=v[j].split(":");									// Opcode, payload split
 						if (a[0])											// At least a command
-							_this.SendMessage(a[0].trim(),a[1].trim());		// Show item on map
+							_this.SendMessage(a[0].trim(),v[j].substr(a[0].length+1));	// Show item on map
 						}
 					}	
 				}
@@ -530,7 +531,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 					for (j=0;j<v.length;++j) {								// For each action
 						a=v[j].split(":");									// Opcode, payload split
 						if (a[0])											// At least a command
-							_this.SendMessage(a[0].trim(),a[1].trim());		// Show item on map
+							_this.SendMessage(a[0].trim(),v[j].substr(a[0].length+1));	// Show item on map
 						}
 					}	
 				});

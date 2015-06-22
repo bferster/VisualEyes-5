@@ -163,6 +163,11 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
   	this.InitPopups();														// Init popup layer
   	var _this=this;															// Save context for callback
    	
+	this.map.on('click', function(e) {										// ON CLICK
+		var c=ol.proj.transform(e.coordinate,_this.curProjection,'EPSG:4326');	// Get center
+		$("#setpoint").val(Math.floor(c[0]*10000)/10000+","+Math.floor(c[1]*10000)/10000);
+		});
+
 	this.map.on('moveend', function(e) {									// On end of move
       	_this.DrawMapLayers();												// Redraw maps in new extent, if moved
 		var o=_this.map.getView();											// Point at view
@@ -747,7 +752,7 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
 						for (j=0;j<v.length;++j) {							// For each action
 							a=v[j].split(":");								// Opcode, payload split
 							if (a[0])										// At least a command
-								_this.SendMessage(a[0].trim(),a[1].trim());	// Show item on map
+							_this.SendMessage(a[0].trim(),v[j].substr(a[0].length+1));	// Show item on map
 							}
 						}	
 					}

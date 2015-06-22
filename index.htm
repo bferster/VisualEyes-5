@@ -179,12 +179,12 @@
 
 			o={};
 			o.marker="Path";
-			o.desc="born,ny,preach,sermon";
+			o.desc="born,ny,preach,sermon,dc";
 			o.color="#990000";
 			o.id="journey";
 			o.size=5;
 			o.opacity=.5;
-			o.end="1922";
+			o.end="1930";
 			o.show="a";
 			sd.mobs.push(o);
 
@@ -212,7 +212,7 @@
 			o.color="#ff9900";
 			o.edge="#666";
 			o.id="ny";
-			o.click="show://www.viseyes.org";
+			o.click="show:https://en.wikipedia.org/wiki/History_of_New_York_City_(1855%E2%80%9397)";
 			o.row=2;
 			sd.mobs.push(o);
 
@@ -252,6 +252,18 @@
 			o.edge="#666";
 			o.id="sermon";
 			o.row=4;
+			sd.mobs.push(o);
+
+			o={};
+			o.marker="TriUp";
+			o.start="5/6/1922";
+			o.where="-77.0425,38.9079";
+			o.title="National Race Conference";
+			o.desc="Robinson attends meeting of National Race Congress; elected chaplain";
+			o.pic="https://upload.wikimedia.org/wikipedia/commons/b/b8/1922_Negro_National_League_annual_meeting.jpg";
+			o.color="#ff9900";
+			o.edge="#666";
+			o.id="dc";
 			sd.mobs.push(o);
 
 			o={};
@@ -312,7 +324,7 @@
 			o={};
 			o.marker="Segment";
 			o.start="1910";
-			o.end="12/1922";
+			o.end="12/1930";
 			o.title="Traveling";
 			o.click="where:-80.00,38.41,1500";
 			o.color="#ccc";
@@ -330,7 +342,7 @@
 			sd.baseMap="Roadmap";
 			sd.timeFormat="Mon Year";
 			sd.start="1/1860";
-			sd.end="12/1922";
+			sd.end="12/1930";
 			sd.muteSound=false;
 			}
 
@@ -592,6 +604,7 @@ mps.Goto("-80.00,38.41,1500")
 		str+=MakeSelect("settime",false,["Year","Mo/Year","Mon Year","Mo/Day/Year","Mon Day, Year"],sd.timeFormat)+"</td></tr>";
 
 		str+="<tr><td>Location</td><td><input id='setwhere' class='ve-is' style='width:220px' type='input'></td></tr>";
+		str+="<tr><td>Map&nbsp;point</td><td><input id='setpoint' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td></td><td><br><button id='setsave' class='ve-bs' title='Save project'>Save</button>&nbsp;&nbsp;&nbsp;&nbsp;<button title='Load project' id='setload' class='ve-bs'>Load</button>";
 		str+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 		str+="<a href='https://docs.google.com/document/d/161td5ZuqKqT5R5r9z1P8AxBA6l9LaP-eYl_RvCyvw2g/edit?usp=sharing' target='_blank'>"
