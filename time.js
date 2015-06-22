@@ -370,7 +370,6 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 		str+="<div class='time-seg' id='timeseg"+i+"' ";					// Add div
 		str+="style='color:"+this.segmentTextColor+";background-color:"+ts[i].col+"'>";
 		str+=ts[i].title+"</div>";											// Add title
-		trace(ts[i].start,i)
 		if (!ts[i].start)													// No start time
 			ts[i].all=true;													// Flag it as show all button
 		}	
