@@ -730,9 +730,10 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
         			return feature;											// Return feature
       			});
 			if (feature) {													// If one found
+  				var j,v,a;
   				var id=feature.getId()+"";
-    				if (id.match(/Mob-/)) {
-  					o=sd.mobs[id.substr(4)];
+    			if (id.match(/Mob-/)) {										// If a mob
+  					o=sd.mobs[id.substr(4)];								// Point at mob data
  					if (o.title) 		var title=o.title;					// Lead with title
   					if (o.spaceTitle) 	var title=o.spaceTitle;				// Space over-rides
  					if (o.desc) 		var desc=o.desc;					// Lead with desc
@@ -741,8 +742,14 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
   					if (o.spacePic) 	var title=o.spacePic;				// Space over-rides
        				_this.pop.ShowPopup(_this.div,_this.timeFormat,evt.pixel[0],evt.pixel[1],title,desc,pic,o.start,o.end);
 					_this.SendMessage("time",o.start);						// Send new time
-					if (o.goto)												// If a goto defined
-						_this.Goto(o.goto);									// Go there
+					if (o.click) {											// If a click defined
+						v=o.click.split("|");								// Divide into individual actions
+						for (j=0;j<v.length;++j) {							// For each action
+							a=v[j].split(":");								// Opcode, payload split
+							if (a[0])										// At least a command
+								_this.SendMessage(a[0].trim(),a[1].trim());	// Show item on map
+							}
+						}	
 					}
 			  	} 
 			else 															// No feature found

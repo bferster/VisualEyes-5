@@ -17,6 +17,34 @@ function Popup()														// CONSTRUCTOR
 
 }
 
+
+Popup.prototype.ShowWebPage=function(div, url, title)						// SHOW WEB PAGE
+{
+
+/* 
+ 	Draws iframe in popup  
+ 	@param {string} div 	Container div (already has #).
+	@param {string} url 	URL of web page.
+	@param {string} title 	Title to show in popup in bold. Can be HTML formatted.
+	
+*/	
+	
+	$("#st-webpage").remove();												// Remove any pre-existing popup
+	if (!url)																// If no url defined
+		return;																// We're just removing
+	var str="<div id='st-webpage' class='popup-webpage' style='";			// Add div
+  	str+="width:"+($(div).width()*.64);										// Width
+  	str+="px;height:"+$(div).height();										// Height
+  	str+="px;top:70px;left:"+($(div).width()*.16)+"px'>";					// Finish div
+ 	str+="<div class='popup-title' style='text-align:center'><b>"+(title ? title : '')+"</b></div>";	// Add title if set
+	str+="<img id='st-close' src='img/closedot.gif' style='position:absolute;top:1px;cursor:pointer'>"	// Add close button
+	str+="<iframe id='popupIF' frameborder='0' height='100%' width='100%' style='opacity:0,border:1px solid #666' src='"+url+"'></iframe>";	// Add iframe
+	$("body").append(str+"</div>");											// Add popup
+	$("#st-close").css("left",$("#st-webpage").width()-4+"px");				// Far right
+	$("#st-webpage").fadeIn(1000);											// Fade in
+	$("#st-close").click(function() { $("#st-webpage").remove(); });		// Remove on click of close but
+}
+
 Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, date, end)	// SHOW POPUP
 {
 
@@ -27,7 +55,8 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
  	Click on pic shown only the pic. 
  	Click on box makes larger, centered.
  	title, desc, pic, and date are all optional.
- 	@param {number} x horizontal placement
+	@param {string} div Container div.
+	@param {number} x horizontal placement
  	@param {number} y vertical placement
  	@param {string} desc text to show in popup. Can be HTML formatted.
  	@param {string} title to show in popup in bold. Can be HTML formatted.
@@ -77,7 +106,7 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 		$("#popdesc").css("cursor","auto");									// Normal cursor
 		var r=($("#poppic").width()/$("#poppic").height() < 1) ? .8 : 1;	// Make smaller if portait mode
 		$("#st-popup").css("max-width",$(_this.div).width()*.66);			// Make it wider
-		$("#st-popup").css("max-height",$("#showDiv").height()-200);		// Make it taller
+		$("#st-popup").css("max-height",$(window).height()-200);			// Make it taller
 		$("#poppic").width($(_this.div).width()*(desc ? .33*r : .66*r))		// Make pic bigger
 		x=$(_this.div).width()/2-$("#st-popup").width()/2;					// Center it
 		$("#st-popup").css({left:(x+8)+"px",top:"70px"});					// Position
@@ -89,7 +118,7 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 		$("#st-popup").css("cursor","auto");								// Normal cursor
 		var r=($("#poppic").width()/$("#poppic").height() < 1) ? .33 : .66;	// Make smaller if portait mode
 		$("#poppic").css("cursor","auto");									// Normal cursor
-		$("#st-popup").css("max-height",$("#showDiv").height()-100);		// Make it taller
+		$("#st-popup").css("max-height",$(window).height()-100);			// Make it taller
 		$("#st-popup").css("max-width",$(_this.div).width()*r);				// Make it wider
 		$("#poppic").width($(_this.div).width()*r)							// Make pic bigger
 		x=$(_this.div).width()/2-$("#st-popup").width()/2;					// Center it

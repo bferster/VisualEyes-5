@@ -24,6 +24,9 @@
 							border:1px solid #999;background-color:#fff;font-size:11px;
 							overflow-x:hidden;max-height:100px;max-width:300px;
 							}
+		.popup-webpage	{ 	position:absolute;padding:12px;border-radius:6px;display:none; 
+							border:1px solid #999;background-color:#fff;font-size:11px;
+							}
 		.popup-pic { 		margin-right:8px;vertical-align:top;cursor:zoom-in;
 							border:1px solid #999;width:80px;
 							}				
@@ -83,7 +86,7 @@
 							border:1px solid #999;font-size:12px;height;20px;width:200px;
 							}
 		.ve-bs {			border-radius:10px;padding-left:8px;padding-right:8px;padding-top:1px;
-							border:1px solid #999;font-size:12px;height;20px;color:#666;
+							border:1px solid #999;font-size:12px;height;20px;color:#666;cursor:pointer;
 							}
 
  	</style>
@@ -192,7 +195,7 @@
 			o.title="Robinson born";
 			o.desc="JW Robinson is born in Winchester, VA";
 			o.pic="//www.viseyes.org/visualeyes/projects/Robinson.jpg";
-			o.goto="-78.16,39.19,3";
+			o.click="where:-78.16,39.19,3";
 			o.color="#ff9900";
 			o.edge="#666";
 			o.id="born";
@@ -209,6 +212,7 @@
 			o.color="#ff9900";
 			o.edge="#666";
 			o.id="ny";
+			o.click="show://www.viseyes.org";
 			o.row=2;
 			sd.mobs.push(o);
 
@@ -218,10 +222,9 @@
 			o.end="6/22/1865";
 			o.desc="<b>The American Civil War</b>, widely known in the United States as simply the Civil War as well as other sectional names, was a civil war fought from 1861 to 1865 to determine the survival of the Union or independence for the Confederacy.<br><br>Among the 34 states in January 1861, seven Southern slave states individually declared their secession from the United States and formed the Confederate States of America. The Confederacy, often simply called the South, grew to include eleven states, and although they claimed thirteen states and additional western territories, the Confederacy was never diplomatically recognized by a foreign country. The states that remained loyal and did not declare secession were known as the Union or the North.<br><br>The war had its origin in the fractious issue of slavery, especially the extension of slavery into the western territories.[N 1] After four years of combat, which left over 600,000 Union and Confederate soldiers dead and destroyed much of the South's infrastructure, the Confederacy collapsed and slavery was abolished. Then began the Reconstruction and the processes of restoring national unity and guaranteeing civil rights to the freed slaves.";
 			o.pic="http://www.suvcw.org/wp-content/uploads/2013/12/cannon.jpg";
-			o.goto="-89.0751,33.147,5000";
+			o.click="where:-89.0751,33.147,5000|show:NS-map";
 			o.title="Civil War";
 			o.color="#d63333";
-			o.click="show:NS-map";
 			o.row=5;
 			sd.mobs.push(o);
 
@@ -312,6 +315,13 @@
 			o.end="12/1922";
 			o.title="Traveling";
 			o.click="where:-80.00,38.41,1500";
+			o.color="#ccc";
+			sd.mobs.push(o);
+
+			o={};
+			o.marker="Segment";
+			o.title="Show all";
+			o.click="where:-91.1552,35.2706,4892";
 			o.color="#ccc";
 			sd.mobs.push(o);
 
@@ -539,6 +549,8 @@ mps.Goto("-80.00,38.41,1500")
 			var v=e.data.split("|");											// Split into parts
 			if (e.data.match(/=time/))											// Set time
 				tln.Goto(v[1]);													// Move timeline
+			if (e.data.match(/=where/))											// Set position
+				mps.Goto(v[1])													// Move map
 			}
 		else if (e.data && e.data.match(/Time=/)) {								// If a time event
 			var v=e.data.split("|");											// Split into parts
@@ -548,11 +560,15 @@ mps.Goto("-80.00,38.41,1500")
 				Draw(v[1])														// Redraw
 			else if (e.data.match(/=show/))	{									// Set position
 				var i;
-				var mode=v[2];													// Get mode
-				v=v[1].split(",");												// Get array of ids
-				for (i=0;i<v.length;++i)										// For each one spec'd
-					v[i]=FindMobByID(v[i]);										// Convert to mob index
-				mps.DrawMapLayers(v,mode)										// Show markers(s)
+				var vv=v[1].split(",");											// Get array of ids
+				for (i=0;i<vv.length;++i)										// For each one spec'd
+					if (vv[i] && (vv[i].match(/\/\//)))							// A url
+						pop.ShowWebPage("#leftDiv",vv[i])						// Show webpage
+					else
+						vv[i]=FindMobByID(vv[i]);								// Convert to mob index
+				
+				
+				mps.DrawMapLayers(vv,v[2])										// Show markers(s)
 				}
 		}	
 	}

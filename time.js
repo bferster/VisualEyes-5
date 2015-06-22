@@ -119,7 +119,10 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 		x=(this.hasTimeBar) ? $("#timeSlider").offset().left : m;			// Starting point
 		for (i=0;i<ts.length;++i) { 										// For each seg
 			w2=ts[i].pct*w1;												// Width
-			$("#timeseg"+i).css({ left:x+"px",width:w2+"px" });				// Position and size
+			if (ts[i].all)													// If the all button
+				$("#timeseg"+i).css({ left:x+"px" });						// Position 
+			else															// Regular segment button
+				$("#timeseg"+i).css({ left:x+"px",width:w2+"px" });			// Position and size
 			x+=w2+2;														// Advance
 			}
 		$("#timeseg"+i).css({ left:x+10+"px" });							// Position
@@ -365,19 +368,25 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 	for (i=0;i<ts.length;++i) { 											// For each tick
 		ts[i].pct=(ts[i].end-ts[i].start)/dur;								// Calc percentage
 		str+="<div class='time-seg' id='timeseg"+i+"' ";					// Add div
-		str+="style='color:"+this.segmentTextColor+";background-color:"+this.segmentColor+"'>";
+		str+="style='color:"+this.segmentTextColor+";background-color:"+ts[i].col+"'>";
 		str+=ts[i].title+"</div>";											// Add title
+		if (!ts[i].start)													// No start time
+			ts[i].all=true;													// Flag it as show all button
 		}	
-	str+="<div class='time-seg' id='timeseg"+i+"' ";						// Add div
-	str+="style='color:"+this.segmentTextColor+";background-color:#acc3db'>";
-	str+="&nbsp;&nbsp;&nbsp;Show all&nbsp;&nbsp;&nbsp;</div>";				// Add All
 	$(this.div).append(str+"</div>");										// Add segment bar				
+
 	$("#timeseg0").css({"border-top-left-radius":"10px","border-bottom-left-radius":"10px"});
-	$("#timeseg"+(ts.length-1)).css({"border-top-right-radius":"10px","border-bottom-right-radius":"10px"});
-	$("#timeseg"+(ts.length)).css({"border-top-left-radius":"10px","border-bottom-left-radius":"10px"});
-	$("#timeseg"+(ts.length)).css({"border-top-right-radius":"10px","border-bottom-right-radius":"10px"});
+	if (ts[i-1].all) {														// Has show all button
+		$("#timeseg"+(ts.length-2)).css({"border-top-right-radius":"10px","border-bottom-right-radius":"10px"});
+		$("#timeseg"+(ts.length-1)).css({"border-top-left-radius":"10px","border-bottom-left-radius":"10px"});
+		$("#timeseg"+(ts.length-1)).css({"border-top-right-radius":"10px","border-bottom-right-radius":"10px"});
+		$("#timeseg"+(ts.length-1)).css({"margin-left":"12px","padding-left":"10px","padding-right":"10px"});
+
+		}
+	else
+		$("#timeseg"+(ts.length-1)).css({"border-top-right-radius":"10px","border-bottom-right-radius":"10px"});
 	
-	for (i=0;i<ts.length+1;++i) { 											// For each segment
+	for (i=0;i<ts.length;++i) { 											// For each segment
 
 		$("#timeseg"+i).hover(												// ON SEG HOVER
 			function(){ $(this).css("color","#009900")},					// Highlight
@@ -388,11 +397,11 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 			var i;
 			var id=e.target.id.substr(7);									// Get ID
 			_this.pop.Sound("click",_this.muteSound);						// Click sound
-			for (i=0;i<ts.length+1;++i)  									// For each segment
-				$("#timeseg"+i).css({"background-color":"#ccc"});			// Clear it
+			for (i=0;i<ts.length;++i)  										// For each segment
+				$("#timeseg"+i).css({"background-color":ts[i].col});		// Clear it
 			$(this).css({"background-color":"#acc3db" });					// Highlight picked one
 			var s=_this.start;												// Assume timeline start
-			if (id < ts.length)	{											// If a seg
+			if (!ts[id].all)	{											// If a regular seg
 				_this.curSeg=id;											// Its current
 				s=ts[id].start;												// Start at segment start
 				if (ts[id].click && ts[id].click.match(/where:/))			// If a where set
@@ -400,6 +409,7 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 				}
 			else															// All button
 				_this.curSeg=-1;											// Flag all
+			
 			_this.curTime=s;
 			_this.UpdateTimeline();											// Redraw timeline
 			});
@@ -504,16 +514,18 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 	for (i=0;i<this.sd.mobs.length;++i) {									// For each mob
 		
 		$("#svgMarker"+i).on('click', function(e) {							// ON MARKER CLICK
+				var v,j,a;
 				var id=e.currentTarget.id.substr(9);						// Get ID
 				o=_this.sd.mobs[id];										// Point at mob
 			    _this.pop.ShowPopup(_this.div,_this.timeFormat,e.pageX+8,e.pageY-70,o.title,o.desc,o.pic,o.start,o.end);	// Show popup
 				_this.SendMessage("time",o.start);							// Send new time
-				if (o.goto)													// If a goto defined
-					_this.SendMessage("where",o.goto);						// Move map
 				if (o.click) {												// If a click defined
-					if (o.click.match(/show:/))								// A show command
-						_this.SendMessage("show",o.click.substr(5));		// Show item on map
-					_this.SendMessage("where",o.goto);						// Move map
+					v=o.click.split("+");									// Divide into individual actions
+					for (j=0;j<v.length;++j) {								// For each action
+						a=v[j].split(":");									// Opcode, payload split
+						if (a[0])											// At least a command
+							_this.SendMessage(a[0].trim(),a[1].trim());		// Show item on map
+						}
 					}	
 				});
 		}
