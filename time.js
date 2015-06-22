@@ -394,7 +394,7 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 			);
 		
 		$("#timeseg"+i).click( function(e) {								// ON SEG CLICK
-			var i;
+			var i,v,j;
 			var id=e.target.id.substr(7);									// Get ID
 			_this.pop.Sound("click",_this.muteSound);						// Click sound
 			for (i=0;i<ts.length;++i)  										// For each segment
@@ -404,8 +404,14 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 			if (!ts[id].all)	{											// If a regular seg
 				_this.curSeg=id;											// Its current
 				s=ts[id].start;												// Start at segment start
-				if (ts[id].click && ts[id].click.match(/where:/))			// If a where set
-					_this.SendMessage("where",ts[id].click.substr(6));		// Move map
+				if (ts[id].click) {											// If a click defined
+					v=ts[id].click.split("+");								// Divide into individual actions
+					for (j=0;j<v.length;++j) {								// For each action
+						a=v[j].split(":");									// Opcode, payload split
+						if (a[0])											// At least a command
+							_this.SendMessage(a[0].trim(),a[1].trim());		// Show item on map
+						}
+					}	
 				}
 			else															// All button
 				_this.curSeg=-1;											// Flag all
