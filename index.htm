@@ -605,11 +605,11 @@ mps.Goto("-80.00,38.41,1500")
 
 		str+="<tr><td>Location</td><td><input id='setwhere' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td>Map&nbsp;point</td><td><input id='setpoint' class='ve-is' style='width:220px' type='input'></td></tr>";
-		str+="<tr><td></td><td><br><button id='setsave' class='ve-bs' title='Save project'>Save</button>&nbsp;&nbsp;&nbsp;&nbsp;<button title='Load project' id='setload' class='ve-bs'>Load</button>";
-		str+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-		str+="<a href='https://docs.google.com/document/d/161td5ZuqKqT5R5r9z1P8AxBA6l9LaP-eYl_RvCyvw2g/edit?usp=sharing' target='_blank'>"
-		str+="<img src='img/helpicon.gif' style='vertical-align:bottom' title='Show help'></a></td></tr>";
-		str+="</table>";
+		str+="<tr><td colspan=2><br></td> <tr>";
+		str+="<tr><td>Help <a href='https://docs.google.com/document/d/161td5ZuqKqT5R5r9z1P8AxBA6l9LaP-eYl_RvCyvw2g/edit?usp=sharing' target='_blank'>";
+		str+="<img src='img/helpicon.gif' style='vertical-align:bottom' title='Show help'></a>";
+		str+="</td><td><button id='setsave' class='ve-bs' title='Save project'>Save</button>&nbsp;&nbsp;&nbsp;&nbsp;<button title='Load project' id='setload' class='ve-bs'>Load</button>";
+		str+="</td></tr></table>";
 		pop.Dialog("VisualEyes settings",str, function() {
 				sd.mapTextCol=$("#setstcol").val();								// Set map label color
 				sd.mapTextFont=$("#setstfont").val();							// Set map label font
