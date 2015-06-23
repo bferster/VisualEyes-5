@@ -18,33 +18,6 @@ function Popup()														// CONSTRUCTOR
 }
 
 
-Popup.prototype.ShowWebPage=function(div, url, title)						// SHOW WEB PAGE
-{
-
-/* 
- 	Draws iframe in popup  
- 	@param {string} div 	Container div (already has #).
-	@param {string} url 	URL of web page.
-	@param {string} title 	Title to show in popup in bold. Can be HTML formatted.
-	
-*/	
-	
-	$("#st-webpage").remove();												// Remove any pre-existing popup
-	if (!url)																// If no url defined
-		return;																// We're just removing
-	var str="<div id='st-webpage' class='popup-webpage' style='";			// Add div
-  	str+="width:"+($(div).width()*.64);										// Width
-  	str+="px;height:"+$(div).height();										// Height
-  	str+="px;top:70px;left:"+($(div).width()*.16)+"px'>";					// Finish div
- 	str+="<div class='popup-title' style='text-align:center'><b>"+(title ? title : '')+"</b></div>";	// Add title if set
-	str+="<img id='st-close' src='img/closedot.gif' style='position:absolute;top:1px;cursor:pointer'>"	// Add close button
-	str+="<iframe id='popupIF' frameborder='0' height='100%' width='100%' style='opacity:0,border:1px solid #666' src='"+url+"'></iframe>";	// Add iframe
-	$("body").append(str+"</div>");											// Add popup
-	$("#st-close").css("left",$("#st-webpage").width()-4+"px");				// Far right
-	$("#st-webpage").fadeIn(1000);											// Fade in
-	$("#st-close").click(function() { $("#st-webpage").remove(); });		// Remove on click of close but
-}
-
 Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, date, end)	// SHOW POPUP
 {
 
@@ -262,13 +235,49 @@ Popup.prototype.ColorPicker=function (name, transCol, init) 			//	DRAW COLORPICK
 
 }
 
+Popup.prototype.ShowWebPage=function(div, url, title)						// SHOW WEB PAGE
+{
+
+/* 
+ 	Draws iframe in popup  
+ 	@param {string} div 	Container div (already has #).
+	@param {string} url 	URL of web page.
+	@param {string} title 	Title to show in popup in bold. Can be HTML formatted.
+	
+*/	
+	
+	var pan=false;
+	$("#st-webpage").remove();												// Remove any pre-existing popup
+	if (!url)																// If no url defined
+		return;																// We're just removing
+	var str="<div id='st-webpage' class='popup-webpage' style='";			// Add div
+  	if (title == "zoomer") title="Pan and Zoom",pan=true					// If doing a zoomer
+
+  	str+="width:"+($(div).width()*.64);										// Width
+  	str+="px;height:"+$(div).height();										// Height
+  	str+="px;top:70px;left:"+($(div).width()*.16)+"px'>";					// Finish div
+ 	str+="<div class='popup-title' style='text-align:center'><b>"+(title ? title : '')+"</b></div>";	// Add title if set
+	str+="<img id='st-close' src='img/closedot.gif' style='position:absolute;top:1px;cursor:pointer'>"	// Add close button
+	if (pan) {																// If doing a zoomer
+		$("body").append(str+"</div>");										// Add popup
+		$("#st-close").css("top","9px");									// Shift close dot down
+		this.DrawZoomer("st-webpage",url,2,6);								// Add it
+		}
+	else{																	// Web page
+		str+="<iframe id='popupIF' frameborder='0' height='100%' width='100%' style='opacity:0,border:1px solid #666' src='"+url+"'></iframe>";	// Add iframe
+		$("body").append(str+"</div>");										// Add popup
+		}
+	$("#st-close").css("left",$("#st-webpage").width()-4+"px");				// Far right
+	$("#st-webpage").fadeIn(1000);											// Fade in
+	$("#st-close").click(function() { $("#st-webpage").remove(); });		// Remove on click of close but
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //  HELPERS
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 
-Popup.prototype.SetCookie=function(cname, cvalue, exdays)			// SET COOKIE
+Popup.prototype.SetCookie=function(cname, cvalue, exdays)				// SET COOKIE
 {
 	var d=new Date();
 	d.setTime(d.getTime()+(exdays*24*60*60*1000));
@@ -277,7 +286,7 @@ Popup.prototype.SetCookie=function(cname, cvalue, exdays)			// SET COOKIE
 }
 
 
-Popup.prototype.GetCookie=function(cname) {							// GET COOKIE
+Popup.prototype.GetCookie=function(cname) {								// GET COOKIE
 	var name=cname+"=",c;
 	var ca=document.cookie.split(';');
 	for (var i=0;i<ca.length;i++)  {
@@ -288,15 +297,15 @@ Popup.prototype.GetCookie=function(cname) {							// GET COOKIE
 	return "";
 }
 
-Popup.prototype.Sound=function(sound, mute)					// PLAY SOUND
+Popup.prototype.Sound=function(sound, mute)								// PLAY SOUND
 {
-	var snd=new Audio();										// Init audio object
+	var snd=new Audio();													// Init audio object
 	if (!snd.canPlayType("audio/mpeg") || (snd.canPlayType("audio/mpeg") == "maybe")) 
-		snd=new Audio("img/"+sound+".ogg");						// Use ogg
+		snd=new Audio("img/"+sound+".ogg");									// Use ogg
 	else	
-		snd=new Audio("img/"+sound+".mp3");						// Use mp3
-	if (!mute)													// If not initing or muting	
-		snd.play();												// Play sound
+		snd=new Audio("img/"+sound+".mp3");									// Use mp3
+	if (!mute)																// If not initing or muting	
+		snd.play();															// Play sound
 	}
 
 
@@ -347,4 +356,140 @@ Popup.prototype.DateToTime=function(dateString) 						// CONVERT DATE TO MINS +/
   	return time;															// Return minutes +/- 1970
 
 }
+
 				
+/////////////////////////////////////////////////////////////////////////////////////////////////////// 
+// ZOOMER
+/////////////////////////////////////////////////////////////////////////////////////////////////////// 
+
+
+Popup.prototype.DrawZoomer=function(div, url, StartZoom, overviewSize) 	//	DRAW ZOOMER
+{
+	var str,i,j,k,o,v,vv;
+ 	this.div="#"+div;														// Current div selector
+ 	var _this=this;															// Context for callbacks
+	var str="<div id='zoomerOuterDiv' style='border:1px solid #666;overflow:hidden'>";	// Make outer div
+ 	str+="<div id='zoomerDiv' </div></div>";								// Make Zoomer div
+	$(this.div).height("auto");												// Height is auto
+	$(this.div).append(str);												// Add div
+  	this.zoomerScale=StartZoom;												// Init scale
+	this.zoomerOverviewSize=overviewSize;									// Set size
+	str="<img id='zoomerImg' src='"+url+"' ";								// Add image
+	str+="height='100%' width='100%'>";										// Size
+	$("#zoomerDiv").append(str);											// Add image to zoomer
+	
+	$("#zoomerImg").load(function(e) {										// WHEN IMAGE IS LOADED
+		_this.zoomerWidth=$(this).width();									// Get true width
+		_this.zoomerHeight=$(this).height();								// Get true height
+		_this.zoomerAsp=_this.zoomerHeight/_this.zoomerWidth;				// Get aspect ratio
+		_this.zoomerX=_this.zoomerY=.5; 									// Default center
+		$("#zoomerOuterDiv").height($("#zoomerOuterDiv").width()*_this.zoomerAsp);
+		_this.DrawZoomerOverview(url);										// Reflect pos in overview
+		_this.PositionZoomer();												// Position it
+		});
+
+	$("#zoomerDiv").draggable({ drag:function(event,ui) {					// Make it draggable
+		var w=$("#zoomerDiv").width();										// Get image width
+		var h=$("#zoomerDiv").height();										// Get image height
+		var s=this.zoomerScale;												// Current scale
+		_this.DrawZoomerOverview(url);										// Reflect pos in overview
+		}});	 
+	}
+
+Popup.prototype.PositionZoomer=function() 								// POSITION ZOOMER
+{
+	var s=this.zoomerScale;													// Point at scale
+	var w=this.zoomerWidth*s;												// Get image width scaled
+	var h=this.zoomerHeight*s;												// Get image height
+	$("#zoomerDiv").width(w);												// Size it
+	$("#zoomerDiv").height(h);												// Size it
+	var l=w*this.zoomerX-(w/s/2);											// Get left
+	var t=h*this.zoomerY-(h/s/2);											// Get top
+	$("#zoomerDiv").css({"left":-l+"px","top":-t+"px"});					// Position zoomer	
+	var l=$(this.div).position().left;										// Left boundary
+	var r=l-0+(w/s-w+14);													// Right boundary
+	var t=$(this.div).position().top;										// Top boundary
+	var b=t-0+(h/s-h+36);													// Bottom boundary
+	$("#zoomerDiv").draggable("option",{ containment: [r,b,l,t] } );		// Reset containment
+}
+
+Popup.prototype.DrawZoomerOverview=function(url) 						// DRAW ZOOMER OVERVIEW
+{
+	var str;
+	var s=this.zoomerScale;													// Scale
+	if (!this.zoomerOverviewSize)
+		return;
+ 	var _this=this;															// Context for callbacks
+	var w=$("#zoomerOuterDiv").width()/this.zoomerOverviewSize;				// Width of frame
+	var h=$("#zoomerOuterDiv").height()/this.zoomerOverviewSize;			// Height of frame
+	var h=w*h/w;															// Height based on aspect
+	var p=$("#zoomerOuterDiv").position();									// Offset in frame
+	
+	if ($("#zoomerOverDiv").length == 0)  {									// If not initted yet 
+		var css = { position:"absolute",									// Frame factors
+					left:w*this.zoomerOverviewSize-w+p.left+"px",
+					width:w+"px",
+					height:h+"px",
+					top:h*this.zoomerOverviewSize-h+p.top+"px",
+					"border-left":"1px solid #ccc",
+					"border-top":"1px solid #eee"
+					};
+		
+		str="<div id='zoomerOverDiv'></div>";								// Frame box div
+		$("#zoomerOuterDiv").append(str);									// Add to div
+		$("#zoomerOverDiv").css(css);										// Set overview frame
+		str="<img src='"+url+"' ";											// Name
+		str+="height='"+h+"' ";												// Height
+		str+="width='"+w+"' >";												// Width
+		$("#zoomerOverDiv").append(str);									// Add image to zoomer
+		if (typeof(DrawZoomerOverviewGrid) == "function")					// If not embedded
+			DrawZoomerOverviewGrid();										// Draw grid in overview if enabled
+			var css = { position:"absolute",								// Box factors
+						border:"1px solid #eee",
+						"z-index":3,
+						"background-color":"rgba(220,220,220,0.4)"
+						};
+		str="<div id='zoomerOverBox'></div>";								// Control box div
+		$("#zoomerOverDiv").append(str);									// Add control box to overview frame
+		$("#zoomerOverBox").css(css);										// Set overview frame
+		$("#zoomerOverBox").draggable({ containment:"parent", 				// Make it draggable 
+							drag:function(event,ui) {						// Handle drag						
+								var w=$("#zoomerOverDiv").width();			// Overview width
+								var pw=$("#zoomerDiv").width();				// Zoomer width
+								var h=$("#zoomerOverDiv").height();			// Overview hgt
+								var ph=$("#zoomerDiv").height();			// Zoomer hgt
+								var s=_this.zoomerScale;					// Current scale
+								var x=Math.max(0,ui.position.left/w*pw);	// Calc left
+								var y=Math.max(0,ui.position.top/h*ph);		// Calc top
+								_this.zoomerX=(x+(pw/s/2))/pw; 				// Get center X%
+								_this.zoomerY=(y+(ph/s/2))/ph;  			// Get center Y%
+								$("#zoomerDiv").css({"left":-x+"px","top":-y+"px"});	// Position zoomer	
+								}
+							 });		
+		$("#zoomerOverBox").resizable({ containment:"parent",				// Resizable
+								aspectRatio:true,
+								minHeight:12,
+								resize:function(event,ui) {					// On resize
+									var w=$("#zoomerOverDiv").width();		// Overview width
+									var pw=$("#zoomerDiv").width();			// zoomer width
+									var h=$("#zoomerOverDiv").height();		// Overview hgt
+									var ph=$("#zoomerDiv").height();		// zoomer hgt
+									_this.zoomerScale=Math.max(w/ui.size.width,1); 	// Get new scale, cap at 100%					
+									var s=_this.zoomerScale;				// Current scale
+									var x=Math.max(0,ui.position.left/w*pw);// Calc left
+									var y=Math.max(0,ui.position.top/h*ph);	// Calc top
+									_this.zoomerX=(x+(pw/s/2))/pw; 			// Get center X%
+									_this.zoomerY=(y+(ph/s/2))/ph;  		// Get center Y%
+									_this.PositionZoomer();					// Redraw
+									}
+								}); 
+			}
+		var x=$("#zoomerDiv").css("left").replace(/px/,"");					// Get x pos
+		if (x == "auto")	x=-$("#zoomerOuterDiv").width()/2;				// Center it
+		x=-x/w/this.zoomerOverviewSize*w/this.zoomerScale;					// Scale to fit
+		var y=$("#zoomerDiv").css("top").replace(/px/,"");					// Get y pos
+		if (y == "auto")	y=-$("#zoomerOuterDiv").height()/2;				// Center it
+		y=-y/h/this.zoomerOverviewSize*h/this.zoomerScale;					// Scale to fit
+		$("#zoomerOverBox").width(w/this.zoomerScale).height(h/this.zoomerScale);	// Set size
+		$("#zoomerOverBox").css({"left":x+"px","top":y+"px"});				// Position control box		
+}

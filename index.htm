@@ -221,7 +221,7 @@
 			o.start="4/12/1861";
 			o.end="6/22/1865";
 			o.desc="<b>The American Civil War</b>, widely known in the United States as simply the Civil War as well as other sectional names, was a civil war fought from 1861 to 1865 to determine the survival of the Union or independence for the Confederacy.<br><br>Among the 34 states in January 1861, seven Southern slave states individually declared their secession from the United States and formed the Confederate States of America. The Confederacy, often simply called the South, grew to include eleven states, and although they claimed thirteen states and additional western territories, the Confederacy was never diplomatically recognized by a foreign country. The states that remained loyal and did not declare secession were known as the Union or the North.<br><br>The war had its origin in the fractious issue of slavery, especially the extension of slavery into the western territories.[N 1] After four years of combat, which left over 600,000 Union and Confederate soldiers dead and destroyed much of the South's infrastructure, the Confederacy collapsed and slavery was abolished. Then began the Reconstruction and the processes of restoring national unity and guaranteeing civil rights to the freed slaves.";
-			o.pic="http://www.suvcw.org/wp-content/uploads/2013/12/cannon.jpg";
+			o.pic="//www.suvcw.org/wp-content/uploads/2013/12/cannon.jpg";
 			o.click="where:-89.0751,33.147,5000|show:NS-map";
 			o.title="Civil War";
 			o.color="#d63333";
@@ -234,7 +234,7 @@
 			o.where="-78.47,38.03,20,0";
 			o.title="Preaches";
 			o.desc="Robinson preaches on \"The Sin of the Modern Dance.\" Makes flying visit to Warm Sulphur & Hot Springs; preaches to white and colored";
-			o.pic="http://i234.photobucket.com/albums/ee268/solomon_042/SLAVRELIGION.jpg";
+			o.pic="//i234.photobucket.com/albums/ee268/solomon_042/SLAVRELIGION.jpg";
 			o.color="#ff9900";
 			o.edge="#666";
 			o.id="preach";
@@ -247,7 +247,7 @@
 			o.where="-86.15,39.76,20,0";
 			o.title="Publishes sermon";
 			o.desc="Robinson publishes sermon synopsis, \"Peacocks and Apes,\" with antilynching commentary";
-			o.pic="http://www.mtholyoke.com/pcsite/books/images10/Sermon01.jpeg";
+			o.pic="//www.mtholyoke.com/pcsite/books/images10/Sermon01.jpeg";
 			o.color="#ff9900";
 			o.edge="#666";
 			o.id="sermon";
@@ -260,10 +260,11 @@
 			o.where="-77.0425,38.9079";
 			o.title="National Race Conference";
 			o.desc="Robinson attends meeting of National Race Congress; elected chaplain";
-			o.pic="https://upload.wikimedia.org/wikipedia/commons/b/b8/1922_Negro_National_League_annual_meeting.jpg";
+			o.pic="//upload.wikimedia.org/wikipedia/commons/b/b8/1922_Negro_National_League_annual_meeting.jpg";
 			o.color="#ff9900";
 			o.edge="#666";
 			o.id="dc";
+			o.click="zoom://images.huffingtonpost.com/2013-05-17-oldwashington.jpg";
 			sd.mobs.push(o);
 
 			o={};
@@ -559,18 +560,31 @@ mps.Goto("-80.00,38.41,1500")
 //		trace(e.data);
 		if (e.data && e.data.match(/Space=/)) {									// If a space event
 			var v=e.data.split("|");											// Split into parts
-			if (e.data.match(/=time/))											// Set time
+			if (e.data.match(/=time/i))											// Set time
 				tln.Goto(v[1]);													// Move timeline
-			if (e.data.match(/=where/))											// Set position
+			if (e.data.match(/=where/i))										// Set position
 				mps.Goto(v[1])													// Move map
+			if (e.data.match(/=zoom/i))											// Set position
+				pop.ShowWebPage("#leftDiv",v[1],"zoomer")						// Show zoomer
+			else if (e.data.match(/=show/i))	{								// Set position
+				var i;
+				var vv=v[1].split(",");											// Get array of ids
+				for (i=0;i<vv.length;++i)										// For each one spec'd
+					if (vv[i] && (vv[i].match(/\/\//)))							// A url
+						pop.ShowWebPage("#leftDiv",vv[i])						// Show webpage
+					else
+						vv[i]=FindMobByID(vv[i]);								// Convert to mob index
+				}
 			}
 		else if (e.data && e.data.match(/Time=/)) {								// If a time event
 			var v=e.data.split("|");											// Split into parts
-			if (e.data.match(/=where/))											// Set position
+			if (e.data.match(/=where/i))										// Set position
 				mps.Goto(v[1])													// Move map
-			else if (e.data.match(/=time/))										// New time
+			else if (e.data.match(/=time/i))									// New time
 				Draw(v[1])														// Redraw
-			else if (e.data.match(/=show/))	{									// Set position
+			if (e.data.match(/=zoom/i))											// Set position
+				pop.ShowWebPage("#leftDiv",v[1],"zoomer")						// Show zoomer
+			else if (e.data.match(/=show/i))	{								// Set position
 				var i;
 				var vv=v[1].split(",");											// Get array of ids
 				for (i=0;i<vv.length;++i)										// For each one spec'd
