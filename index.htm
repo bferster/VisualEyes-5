@@ -334,7 +334,7 @@
 			o={};
 			o.marker="Segment";
 			o.title="Show all";
-			o.click="where:-91.1552,35.2706,4892";
+			o.click="where:-80.0405,38.4099,1500";
 			o.color="#ccc";
 			sd.mobs.push(o);
 
@@ -345,6 +345,9 @@
 			sd.start="1/1860";
 			sd.end="12/1930";
 			sd.muteSound=false;
+			sd.mapStartPos="-80.00,38.41,1500";
+
+
 			}
 
 		for (i=0;i<sd.mobs.length;++i) {									// For each mob	
@@ -394,7 +397,7 @@
 					var eo=o.opacity ? o.opacity  : 1;						// Set opacity with 1.0 default
 					mps.AddPathLayer(dots,o.color,ew,eo,s,o.end ? o.end: e, o.show);// Add path to overlays
 					}
-				else if (marker.match(/\.png|.gif|\.jpg|\.jpeg/i) && o.where) { // An image file
+				else if ((marker.match(/\.png|.gif|\.jpg|\.jpeg/i) && (o.where.split(",").length > 3)) { // An image file with a full georef
 					o.type="image";											// Set type
 					o.lid=mps.AddImageLayer(marker,o.where, o.opacity,s,e);	// Add image layer								 
 					}
@@ -430,6 +433,7 @@
 		mps.SetBaseMap(sd.baseMap);											// Set basemap layer
 		tln.InitTimeline("bottomDiv",sd);									// Initialize timeline
 		mps.MarkerLayerToTop();												// Make marker layer the top-most layer
+		if (sd.mapStartPos)		mps.Goto(sd.mapStartPos);					// Position map
 
 var str="<img src='http://www.viseyes.org/efolio/declaration.JPG' width='100%'> &nbsp; ";
 str+=MakeSelect("testing",false,["0","1","2","3","4"]);
@@ -526,10 +530,6 @@ $(this).val(0)
 		$("#splashDiv").delay(1000).animate({ opacity:0},500);					// Hide logo
 		$("#showDiv").animate({ opacity:1},5000, function() {					// Show interface
 				ResizePanes();													// Resize panes
-
-
-mps.Goto("-80.00,38.41,1500")
-
 				});				
 		$(window).resize(ResizePanes);											// Dynamic resizing
 		pop=new Popup("leftDiv");												// Alloc popup module
@@ -604,21 +604,20 @@ mps.Goto("-80.00,38.41,1500")
 		var str="<table><tr height='18'>";
 		str+="<tr><td>Mute clicks?</td><td><input id='setmute' type='checkbox'></td></tr>";
 		str+="<tr><td>Spreadsheet</td><td><input id='setsheet' class='ve-is' style='width:220px' type='input'></td></tr>";
-		str+="<tr><td>Base&nbsp;Layer </td><td>";
-		str+=MakeSelect("setbase",false,["Satellite","Terrain","Earth","Watercolor","B&W","Roadmap"],sd.baseMap);
 		str+="<tr><td>L-R split&nbsp;% </td><td>";
 		str+="<input id='setlr' class='ve-is' style='width:30px' type='input'>&nbsp;&nbsp;&nbsp;U-D&nbsp;split&nbsp;%  ";
 		str+="<input id='setud' class='ve-is' style='width:30px' type='input'></td></tr>";
-		str+="<tr><td>Label&nbsp;color</td><td><input id='setstcol' class='ve-is' style='width:50px' type='input'></td></tr>";
-		str+="<tr><td>Label&nbsp;font</td><td><input id='setstfont' class='ve-is' style='width:160px' type='input'></td></tr>";
 		str+="<tr><td>Start/end </td><td>";
 		str+="<input id='setstart' class='ve-is' style='width:70px' value='"+sd.start+"' type='input'>&nbsp;to&nbsp;";
 		str+="<input id='setend' class='ve-is' style='width:70px' value='"+sd.end+"' type='input'></td></tr>";
 		str+="<tr><td>Date format </td><td>";
 		str+=MakeSelect("settime",false,["Year","Mo/Year","Mon Year","Mo/Day/Year","Mon Day, Year"],sd.timeFormat)+"</td></tr>";
-
-		str+="<tr><td>Location</td><td><input id='setwhere' class='ve-is' style='width:220px' type='input'></td></tr>";
-		str+="<tr><td>Map&nbsp;point</td><td><input id='setpoint' class='ve-is' style='width:220px' type='input'></td></tr>";
+		str+="<tr><td>Map&nbsp;label&nbsp;color</td><td><input id='setstcol' class='ve-is' style='width:50px' type='input'></td></tr>";
+		str+="<tr><td>Map&nbsp;Label&nbsp;font</td><td><input id='setstfont' class='ve-is' style='width:160px' type='input'></td></tr>";
+		str+="<tr><td>Map start</td><td><input id='setstartpos' class='ve-is' style='width:220px' type='input'></td></tr>";
+		str+="<tr><td>Map&nbsp;base </td><td>"+MakeSelect("setbase",false,["Satellite","Terrain","Earth","Watercolor","B&W","Roadmap"],sd.baseMap);
+		str+="<tr><td>Current&nbsp;location</td><td><input id='setwhere' class='ve-is' style='width:220px' type='input'></td></tr>";
+		str+="<tr><td>Current&nbsp;point</td><td><input id='setpoint' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td colspan=2><br></td> <tr>";
 		str+="<tr><td>Help <a href='https://docs.google.com/document/d/161td5ZuqKqT5R5r9z1P8AxBA6l9LaP-eYl_RvCyvw2g/edit?usp=sharing' target='_blank'>";
 		str+="<img src='img/helpicon.gif' style='vertical-align:bottom' title='Show help'></a>";
@@ -631,6 +630,7 @@ mps.Goto("-80.00,38.41,1500")
 				sd.leftRightSplit=$("#setlr").val()/100;						// Set lr split
 				sd.upDownSplit=$("#setud").val()/100;							// Set ud split
 				sd.end=$("#setend").val();										// Set end
+				sd.mapStartPos=$("#setstartpos").val();							// Set end
 				sd.sheet=$("#setsheet").val();									// Set sheet
 				tln.timeFormat=sd.timeFormat=$("#settime").val();				// Get timeformat
 				sd.baseMap=$("#setbase").val();									// Get base
@@ -653,8 +653,9 @@ mps.Goto("-80.00,38.41,1500")
 		$("#setstart").val(sd.start);											// Set start
 		$("#setend").val(sd.end);												// Set end
 		$("#setstcol").val(sd.mapTextCol);										// Set map label color
-		$("#setstfont").val(sd.mapTextFont);									// Set map label dont
+		$("#setstfont").val(sd.mapTextFont);									// Set map label font
 		$("#setsheet").val(sd.sheet);											// Set spreadsheet
+		$("#setstartpos").val(sd.mapStartPos);									// Set map starting position
 		$("#setlr").val(Math.floor(sd.leftRightSplit*100));						// Set lr split
 		$("#setud").val(Math.floor(sd.upDownSplit*100));						// Set ud split
 		pop.ColorPicker("setstcol",-1,true);									// Init color

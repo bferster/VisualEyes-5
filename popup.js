@@ -126,13 +126,13 @@ Popup.prototype.GetTextBox=function (title, content, def, callback)		// GET TEXT
 Popup.prototype.Dialog=function (title, content, callback)				// DIALOG BOX
 {
 	this.Sound("click");													// Ding sound
-	$("#alertBoxDiv").remove();												// Remove any old ones
-	$("body").append("<div class='ve-unselectable' id='alertBoxDiv'></div>");														
+	$("#dialogDiv").remove();												// Remove any old ones
+	$("body").append("<div class='ve-unselectable' id='dialogDiv'></div>");														
 	var str="<p><img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
 	str+="<span id='gtBoxTi'style='font-size:18px;text-shadow:1px 1px #ccc;color:#666'><b>"+title+"</b></span><p>";
 	str+="<div style='font-size:14px;margin:14px'>"+content+"</div>";
-	$("#alertBoxDiv").append(str);	
-	$("#alertBoxDiv").dialog({ width:400, buttons: {
+	$("#dialogDiv").append(str);	
+	$("#dialogDiv").dialog({ width:450, buttons: {
 				            	"OK": 		function() { callback(); $(this).remove();  },
 				            	"Cancel":  	function() { $(this).remove(); }
 								}});	
@@ -164,7 +164,6 @@ Popup.prototype.ShowLightBox=function(title, content)				// LIGHTBOX
 	$("#lightBoxDiv").append(str);	
 	$("#lightBoxDiv").css("z-index",2500);						
 }
-
 
 
 Popup.prototype.ColorPicker=function (name, transCol, init) 			//	DRAW COLORPICKER
@@ -235,6 +234,18 @@ Popup.prototype.ColorPicker=function (name, transCol, init) 			//	DRAW COLORPICK
 
 }
 
+
+Popup.prototype.ClearPopUps=function()									// CLOSE ALL OPEN POPUPS
+{
+/* 
+ 	Close any open popups zoomers, webpages, or alerts.  
+*/
+	$("#st-webpage").remove();												// Remove old page popup
+	$("#alertBoxDiv").remove();												// Remove oldalert boxe
+	$("#st-popup").remove();												// Remove old popup
+	$("#colorPickerDiv").remove();											// Remove old colorpicker
+}
+
 Popup.prototype.ShowWebPage=function(div, url, title)						// SHOW WEB PAGE
 {
 
@@ -261,7 +272,7 @@ Popup.prototype.ShowWebPage=function(div, url, title)						// SHOW WEB PAGE
 	if (pan) {																// If doing a zoomer
 		$("body").append(str+"</div>");										// Add popup
 		$("#st-close").css("top","9px");									// Shift close dot down
-		this.DrawZoomer("st-webpage",url,2,6);								// Add it
+		this.DrawZoomer("st-webpage",url,2,4);								// Add it
 		}
 	else{																	// Web page
 		str+="<iframe id='popupIF' frameborder='0' height='100%' width='100%' style='opacity:0,border:1px solid #666' src='"+url+"'></iframe>";	// Add iframe
@@ -363,8 +374,17 @@ Popup.prototype.DateToTime=function(dateString) 						// CONVERT DATE TO MINS +/
 /////////////////////////////////////////////////////////////////////////////////////////////////////// 
 
 
-Popup.prototype.DrawZoomer=function(div, url, StartZoom, overviewSize) 	//	DRAW ZOOMER
+Popup.prototype.DrawZoomer=function(div, url, startZoom, overviewSize) 	//	DRAW ZOOMER
 {
+
+/* 
+ 	Draws iframe in popup  
+ 	@param {string} div 		Container div
+	@param {string} url 		URL of image.
+	@param {number} startZoom 	Starting zoom amount.
+	@param {number} startZoom 	Overview size as a divisor.
+	
+*/	
 	var str,i,j,k,o,v,vv;
  	this.div="#"+div;														// Current div selector
  	var _this=this;															// Context for callbacks
@@ -372,7 +392,7 @@ Popup.prototype.DrawZoomer=function(div, url, StartZoom, overviewSize) 	//	DRAW 
  	str+="<div id='zoomerDiv' </div></div>";								// Make Zoomer div
 	$(this.div).height("auto");												// Height is auto
 	$(this.div).append(str);												// Add div
-  	this.zoomerScale=StartZoom;												// Init scale
+  	this.zoomerScale=startZoom;												// Init scale
 	this.zoomerOverviewSize=overviewSize;									// Set size
 	str="<img id='zoomerImg' src='"+url+"' ";								// Add image
 	str+="height='100%' width='100%'>";										// Size

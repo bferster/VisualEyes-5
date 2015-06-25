@@ -305,7 +305,7 @@ Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
 		});
 
 	$("#timeBar").on('click', function(e) {									// TIMEBAR CLICK
-  		_this.pop.ShowPopup();												// Clear any open popup
+  		_this.pop.ClearPopUps();											// Clear any open popup
 		});
 
  }
@@ -401,21 +401,20 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 				$("#timeseg"+i).css({"background-color":ts[i].col});		// Clear it
 			$(this).css({"background-color":"#acc3db" });					// Highlight picked one
 			var s=_this.start;												// Assume timeline start
-			if (!ts[id].all)	{											// If a regular seg
+			if (!ts[id].all) {												// If a regular seg
 				_this.curSeg=id;											// Its current
 				s=ts[id].start;												// Start at segment start
-				if (ts[id].click) {											// If a click defined
-					v=ts[id].click.split("+");								// Divide into individual actions
-					for (j=0;j<v.length;++j) {								// For each action
-						a=v[j].split(":");									// Opcode, payload split
-						if (a[0])											// At least a command
-							_this.SendMessage(a[0].trim(),v[j].substr(a[0].length+1));	// Show item on map
-						}
-					}	
 				}
 			else															// All button
 				_this.curSeg=-1;											// Flag all
-			
+			if (ts[id].click) {												// If a click defined
+				v=ts[id].click.split("+");									// Divide into individual actions
+				for (j=0;j<v.length;++j) {									// For each action
+					a=v[j].split(":");										// Opcode, payload split
+					if (a[0])												// At least a command
+						_this.SendMessage(a[0].trim(),v[j].substr(a[0].length+1));	// Show item on map
+					}
+				}	
 			_this.curTime=s;
 			_this.UpdateTimeline();											// Redraw timeline
 			});
@@ -538,7 +537,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 	
 	$("#timeViewSVG").on('click', function(e) {								// TIMESEG CLICK
 		if (e.target.tagName == "svg")										// Not on a marker
-   			_this.pop.ShowPopup();											// Clear any open popup
+   			_this.pop.ClearPopUps();										// Clear any open popup
 		});
 }
 
