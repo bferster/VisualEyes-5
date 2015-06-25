@@ -377,7 +377,7 @@ Popup.prototype.DrawZoomer=function(div, url, startZoom, overviewSize) 	//	DRAW 
 	var str,i,j,k,o,v,vv;
  	this.div="#"+div;														// Current div selector
  	var _this=this;															// Context for callbacks
-	var str="<div id='zoomerOuterDiv' style='border:1px solid #666;overflow:hidden;margin-right:1px;;margin-bottom:1px;'>";	// Make outer div
+	var str="<div id='zoomerOuterDiv' style='border:1px solid #666;overflow:hidden;margin-right:3px;margin-bottom:3px;'>";	// Make outer div
  	str+="<div id='zoomerDiv' </div></div>";								// Make Zoomer div
 	$(this.div).height("auto");												// Height is auto
 	$(this.div).append(str);												// Add div
