@@ -433,7 +433,7 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 						tf: {string} text format
  */
 
-	var i;
+	var i,image;
 	var w2=sty.w ? sty.w*.6667 : 8;											// Set size
 	if (sty.f) {															// If fill spec'd
 	  	if (sty.f.length == 4) sty.f+=sty.f.substr(1,3);					// Turn #555 into #55555
@@ -453,50 +453,51 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
  	if (sty.w)	w2=sty.w/2;													// If spec'd use it																
 
 	switch(sty.m.toLowerCase()) {											// Route on marker style
- 		case "dot":
-			var image=new ol.style.Circle({									
-	    		radius: w2*3/4, fill: fill, stroke:stroke
-	  			});
-	  		break;
 		case "square":
-			var image=new ol.style.RegularShape({								
+			image=new ol.style.RegularShape({								
 		    	radius: w2, fill: fill, stroke:stroke, points: 4, angle: Math.PI/4
 	  			});
 	  		break;
 		case "star":
-			var image=new ol.style.RegularShape({								
+			image=new ol.style.RegularShape({								
   	  			radius: w2, fill: fill, stroke:stroke, points: 5, radius2: w2/2
   				});
  	  		break;
 		case "diamond":
-			var image=new ol.style.RegularShape({								
+			image=new ol.style.RegularShape({								
 	    		radius: w2, fill: fill, stroke:stroke, points: 4
 	  			});
 	  		break;
 		case "triup":
-			var image=new ol.style.RegularShape({								
+			image=new ol.style.RegularShape({								
 	    		radius: w2, fill: fill, stroke:stroke, points: 3
 	   			});
 	  		break;
 		case "tridown":
-			var image=new ol.style.RegularShape({								
+			image=new ol.style.RegularShape({								
 	    		radius: w2, fill: fill, stroke:stroke, points: 3,angle: Math.PI
 	 			});
 	  		break;
 		case "triright":
-			var image=new ol.style.RegularShape({								
+			image=new ol.style.RegularShape({								
 	    		radius: w2, fill: fill, stroke:stroke, points: 3,angle: Math.PI/2
 	 			});
 	  		break;
 		case "trileft":
-			var image=new ol.style.RegularShape({								
+			image=new ol.style.RegularShape({								
 	    		radius: w2, fill: fill, stroke:stroke, points: 3,angle: -Math.PI/2
 	 			});
 	  		break;
-	  		}
-	if (sty.m && sty.m.match(/\//))	 										// Must be an image file
-		var image=new ol.style.Icon({ src: sty.m });						// Add icon
-	
+ 		default:
+			if (sty.m && sty.m.match(/\/\//)) 	 							// Must be an image file
+				image=new ol.style.Icon({ src: sty.m });					// Add icon
+			else{															// Default to dot
+				image=new ol.style.Circle({									// Add circle							
+		    		radius: w2*3/4, fill: fill, stroke:stroke
+		  			});
+			  	}
+	  	break;
+	}
 	var text=new ol.style.Text( {											// Text style
 		textAlign: "center", textBaseline: "top",							// Set alignment
 		font: sty.tf,														// Set font

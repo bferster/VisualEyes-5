@@ -191,7 +191,7 @@
 			o={};
 			o.marker="Star";
 			o.start="1/12/1862";
-			o.where="-78.16,39.19,20,0";
+			o.where="-78.16,39.19";
 			o.title="Robinson born";
 			o.desc="JW Robinson is born in Winchester, VA";
 			o.pic="//www.viseyes.org/visualeyes/projects/Robinson.jpg";
@@ -205,7 +205,7 @@
 			o={};
 			o.marker="Square";
 			o.start="6/8/1886";
-			o.where="-74.0,40.71,20,0";
+			o.where="-74.0,40.71";
 			o.title="Moves to New York";
 			o.desc="Robinson moves to New York";
 			o.pic="http://www.artvalue.com/photos/auction/0/50/50908/mcnulty-william-c-1889-1963-us-towers-in-the-sky-new-york-3005289.jpg";
@@ -229,9 +229,9 @@
 			sd.mobs.push(o);
 
 			o={};
-			o.marker="Dot";
+			o.marker="Diamond";
 			o.start="6/1891";
-			o.where="-78.47,38.03,20,0";
+			o.where="-78.47,38.03";
 			o.title="Preaches";
 			o.desc="Robinson preaches on \"The Sin of the Modern Dance.\" Makes flying visit to Warm Sulphur & Hot Springs; preaches to white and colored";
 			o.pic="//i234.photobucket.com/albums/ee268/solomon_042/SLAVRELIGION.jpg";
@@ -244,7 +244,7 @@
 			o={};
 			o.marker="Dot";
 			o.start="5/16/1907";
-			o.where="-86.15,39.76,20,0";
+			o.where="-86.15,39.76";
 			o.title="Publishes sermon";
 			o.desc="Robinson publishes sermon synopsis, \"Peacocks and Apes,\" with antilynching commentary";
 			o.pic="//www.mtholyoke.com/pcsite/books/images10/Sermon01.jpeg";
@@ -397,7 +397,7 @@
 					var eo=o.opacity ? o.opacity  : 1;						// Set opacity with 1.0 default
 					mps.AddPathLayer(dots,o.color,ew,eo,s,o.end ? o.end: e, o.show);// Add path to overlays
 					}
-				else if ((marker.match(/\.png|.gif|\.jpg|\.jpeg/i) && (o.where.split(",").length > 3)) { // An image file with a full georef
+				else if (marker.match(/\.png|.gif|\.jpg|\.jpeg/i) && (o.where.split(",").length > 3)) { // An image file with a full georef
 					o.type="image";											// Set type
 					o.lid=mps.AddImageLayer(marker,o.where, o.opacity,s,e);	// Add image layer								 
 					}

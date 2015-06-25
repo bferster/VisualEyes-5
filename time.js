@@ -426,7 +426,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 /* 	
 	Add time segments to div
 */
-	var i,j,o,str,w2,r;
+	var i,j,o,str,w2,r,m;
 	var _this=this;															// Save context for callback
 	str="<div id='timeViewBar' class='time-timeview'>"						// Enclosing div
 	str+="<div id='timeViewSVG' style='position:absolute'>";				// SVG div
@@ -452,15 +452,16 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 		o=this.sd.mobs[i];													// Point at mob
 		if (!o.marker || (o.type != "icon"))								// No marker set, or not an icon
 			continue;														// Skip
+		m=o.marker.toLowerCase();											// Force lowercase
 		w2=o.size ? o.size/2 : 6;											// Set size
 		str+="<g id='svgMarker"+i+"'style='cursor:pointer'>";				// Individual marker group head
-		if (o.marker == "dot") {											// A dot
+		if (m == "dot") {													// A dot
 			str+="<circle r="+w2+" fill='"+o.color+"' />";					// Add dot
 			}
-		else if (o.marker == "square") {									// A square
+		else if (m == "square") {											// A square
 			str+="<rect x="+(-w2)+" y="+(-w2)+" height="+(w2+w2)+" width="+(w2+w2)+" fill='"+o.color+"'/>"; 	// Add rect
 			}
-		else if (o.marker == "Star") {										// A star
+		else if (m == "star") {												// A star
 			var xx,yy,angle;
 			str+="<polygon fill='"+o.color+"' points='";					// Add polygon
  			angle=Math.PI/5;												// 1/5th angle
@@ -474,35 +475,35 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 			str+="'/>";														// End polygon
 			--w2;
 			}
-		else if (o.marker == "TriUp") {										// An up triangle
+		else if (m == "triup") {											// An up triangle
 			str+="<polygon fill='"+o.color+"' points='";					// Add polygon
 			str+="0,"+(-w2)+" "+w2+","+(w2)+" "+(-w2)+","+(w2)+"'/>";		// Points
 			}
-		else if (o.marker == "TriDown") {									// A down triangle
+		else if (m == "tridown") {											// A down triangle
 			str+="<polygon fill='"+o.color+"' points='";					// Add polygon
 			str+=(-w2)+","+(w2)+" "+w2+","+(w2)+" "+(0)+","+(w2)+"'/>";		// Points
 			}
-		else if (o.marker == "TriLeft") {									// A left triangle
+		else if (m == "trileft") {											// A left triangle
 			str+="<polygon fill='"+o.color+"' points='";					// Add polygon
 			str+=(-w2)+","+(0)+" "+w2+","+(-w2)+" "+(w2)+","+(w2)+"'/>";	// Points
 			}
-		else if (o.marker == "TriRight") {									// A right triangle
+		else if (m == "triright") {											// A right triangle
 			str+="<polygon fill='"+o.color+"' points='";					// Add polygon
-			str+=(-w2)+","+(y-w2)+" "+w2+","+(y)+" "+(-w2)+","+(y+w2)+"'/>";	// Points
+			str+=(-w2)+","+(y-w2)+" "+w2+","+(y)+" "+(-w2)+","+(y+w2)+"'/>";// Points
 			}
-		else if (o.marker == "Diamond") {									// A diamond
+		else if (m == "diamond") {											// A diamond
 			str+="<polygon fill='"+o.color+"' points='";					// Add polygon
 			str+=(-w2)+","+(0)+" "+(0)+","+(-w2)+" "+(w2)+","+(0)+" "+(0)+","+(w2)+"'/>";	// Points
 			}
-		else if (o.marker == "Line") {										// A line
+		else if (m == "line") {												// A line
 			str+="<line stroke='"+o.color+"' ";								// Line start
 			str+="x1=0 y1="+(-w2-2)+" x2=0 y2=0/>";							// Points
 			str+="<line id='svgMarkerMid"+i+"' stroke='"+o.color+"' ";		// Line end
-			str+="x1=0 y1="+(-w2-2)+" x2=100 y2="+(-w2-2)+"/>";					// Points
+			str+="x1=0 y1="+(-w2-2)+" x2=100 y2="+(-w2-2)+"/>";				// Points
 			str+="<line id='svgMarkerEnd"+i+"' stroke='"+o.color+"' ";		// Line middle
 			str+="x1=100 y1="+(-w2-2)+" x2=100 y2=0/>";						// Points
 			}
-		else if (o.marker == "Bar") {										// A bar
+		else if (m == "bar") {												// A bar
 			str+="<rect id='svgMarkerBar"+i+"' y="+(-w2)+" height="+(w2+w2)+" fill='"+o.color+"'/>"; 	// Add bar
 			}
 		else
