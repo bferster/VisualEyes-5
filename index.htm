@@ -564,16 +564,16 @@ $(this).val(0)
 				tln.Goto(v[1]);													// Move timeline
 			if (e.data.match(/=where/i))										// Set position
 				mps.Goto(v[1])													// Move map
-			if (e.data.match(/=zoom/i))											// Set position
-				pop.ShowWebPage("#leftDiv",v[1],"zoomer")						// Show zoomer
+			if (e.data.match(/=zoom/i))	{										// Set position
+				$("#rightDiv").html("");										// Clear div
+				pop.DrawZoomer("rightDiv",v[1],2,4);							// Show zoomer
+				}
 			else if (e.data.match(/=show/i))	{								// Set position
 				var i;
 				var vv=v[1].split(",");											// Get array of ids
 				for (i=0;i<vv.length;++i)										// For each one spec'd
-					if (vv[i] && (vv[i].match(/\/\//)))							// A url
-						pop.ShowWebPage("#leftDiv",vv[i])						// Show webpage
-					else
-						vv[i]=FindMobByID(vv[i]);								// Convert to mob index
+				if (vv[i] && (vv[i].match(/\/\//))) 							// A url
+					$("#rightDiv").html("<iframe id='popupIF' frameborder='0' height='"+($(window).height()-2)+"' width='100%' style='opacity:0,border:1px solid #666' src='"+vv[i]+"'></iframe>");	// Add iframe
 				}
 			}
 		else if (e.data && e.data.match(/Time=/)) {								// If a time event
@@ -582,18 +582,18 @@ $(this).val(0)
 				mps.Goto(v[1])													// Move map
 			else if (e.data.match(/=time/i))									// New time
 				Draw(v[1])														// Redraw
-			if (e.data.match(/=zoom/i))											// Set position
-				pop.ShowWebPage("#leftDiv",v[1],"zoomer")						// Show zoomer
+			if (e.data.match(/=zoom/i)) {										// Set position
+				$("#rightDiv").html("");										// Clear div
+				pop.DrawZoomer("rightDiv",v[1],2,4);							// Show zoomer
+				}
 			else if (e.data.match(/=show/i))	{								// Set position
 				var i;
 				var vv=v[1].split(",");											// Get array of ids
 				for (i=0;i<vv.length;++i)										// For each one spec'd
 					if (vv[i] && (vv[i].match(/\/\//)))							// A url
-						pop.ShowWebPage("#leftDiv",vv[i])						// Show webpage
+						$("#rightDiv").html("<iframe id='popupIF' frameborder='0' height='"+($(window).height()-2)+"' width='100%' style='opacity:0,border:1px solid #666' src='"+vv[i]+"'></iframe>");	// Add iframe
 					else
 						vv[i]=FindMobByID(vv[i]);								// Convert to mob index
-				
-				
 				mps.DrawMapLayers(vv,v[2])										// Show markers(s)
 				}
 		}	
@@ -723,6 +723,18 @@ $(this).val(0)
 	function tim(time)
 	{
 		return pop.FormatTime(time,"Mo/Day/Year");
+	}
+	
+	function ClearPopUps()													// CLOSE ALL OPEN POPUPS
+	{
+	/* 
+	 	Close any open popups zoomers, webpages, or alerts.  
+	*/
+		$("#st-webpage").remove();												// Remove old page popup
+		$("#alertBoxDiv").remove();												// Remove oldalert boxe
+		$("#st-popup").remove();												// Remove old popup
+		$("#colorPickerDiv").remove();											// Remove old colorpicker
+	$("#rightDiv").html("<img src='http://www.viseyes.org/efolio/declaration.JPG' width='100%'>");
 	}
 
 </script>

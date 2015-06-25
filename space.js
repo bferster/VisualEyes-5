@@ -3,6 +3,7 @@
 //
 // Provides mapping component
 // Requires: popup.js
+// Calls global functions: Draw(), ClearPopUps()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function Space(div, pop)														// CONSTRUCTOR
@@ -742,12 +743,12 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
 					}
 			  	} 
 			else 															// No feature found
-				_this.pop.ClearPopUps();									// Clear any existing pop
+				ClearPopUps();												// Clear any existing pop
 			});
 
 	this.map.on('pointermove', function(e) {								// ON MOUSE MOVE
 		if (e.dragging) {													// If dragging
-			_this.pop.ClearPopUps();										// Clear any existing pop
+			ClearPopUps();													// Clear any existing pop
 	    	return;															// Quit
 	  		}
 	  	var pixel=_this.map.getEventPixel(e.originalEvent);					// Get pos

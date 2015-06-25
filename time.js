@@ -2,6 +2,7 @@
 // TIME.JS 
 // Provides timeline component
 // Requires: Popup.js()
+// Calls global functions: Draw(), ClearPopUps()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function Timeline(pop)														// CONSTRUCTOR
@@ -305,7 +306,7 @@ Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
 		});
 
 	$("#timeBar").on('click', function(e) {									// TIMEBAR CLICK
-  		_this.pop.ClearPopUps();											// Clear any open popup
+  		ClearPopUps();														// Clear any open popup
 		});
 
  }
@@ -538,7 +539,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 	
 	$("#timeViewSVG").on('click', function(e) {								// TIMESEG CLICK
 		if (e.target.tagName == "svg")										// Not on a marker
-   			_this.pop.ClearPopUps();										// Clear any open popup
+   			ClearPopUps();													// Clear any open popup
 		});
 }
 

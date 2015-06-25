@@ -235,17 +235,6 @@ Popup.prototype.ColorPicker=function (name, transCol, init) 			//	DRAW COLORPICK
 }
 
 
-Popup.prototype.ClearPopUps=function()									// CLOSE ALL OPEN POPUPS
-{
-/* 
- 	Close any open popups zoomers, webpages, or alerts.  
-*/
-	$("#st-webpage").remove();												// Remove old page popup
-	$("#alertBoxDiv").remove();												// Remove oldalert boxe
-	$("#st-popup").remove();												// Remove old popup
-	$("#colorPickerDiv").remove();											// Remove old colorpicker
-}
-
 Popup.prototype.ShowWebPage=function(div, url, title)						// SHOW WEB PAGE
 {
 
@@ -388,7 +377,7 @@ Popup.prototype.DrawZoomer=function(div, url, startZoom, overviewSize) 	//	DRAW 
 	var str,i,j,k,o,v,vv;
  	this.div="#"+div;														// Current div selector
  	var _this=this;															// Context for callbacks
-	var str="<div id='zoomerOuterDiv' style='border:1px solid #666;overflow:hidden'>";	// Make outer div
+	var str="<div id='zoomerOuterDiv' style='border:1px solid #666;overflow:hidden;margin-right:1px;;margin-bottom:1px;'>";	// Make outer div
  	str+="<div id='zoomerDiv' </div></div>";								// Make Zoomer div
 	$(this.div).height("auto");												// Height is auto
 	$(this.div).append(str);												// Add div
