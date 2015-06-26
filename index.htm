@@ -11,6 +11,7 @@
   	<link rel="stylesheet" href="http://openlayers.org/en/v3.5.0/css/ol.css" type="text/css">
    	<script src="http://openlayers.org/en/v3.5.0/build/ol-debug.js" type="text/javascript"></script>
   	<script type="text/javascript" src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
+	<script src="//www.qmediaplayer.com/qfile.js"></script>
 	<script src="space.js" type="text/javascript"></script>
   	<script src="time.js" type="text/javascript"></script>
   	<script src="popup.js" type="text/javascript"></script>
@@ -28,7 +29,7 @@
 							border:1px solid #999;background-color:#fff;font-size:11px;
 							}
 		.popup-pic { 		margin-right:8px;vertical-align:top;cursor:zoom-in;
-							border:1px solid #999;width:80px;
+							border:1px solid #999;width:80px;max-height:60px;
 							}				
 		.popup-desc { 		vertical-align:top;color:#555;cursor:zoom-in;
 							}				
@@ -113,7 +114,7 @@
 // DISPLAY
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	var sd={},mps={},tln={},pop={},dtl={};
+	var curJson={},mps={},tln={},pop={},dtl={};
 	var paneAnimationTimer=null;												// Times pane animations
 	var imageAnimationTimer=[];													// Times image animations
 	var isMobile=false;															// Flag for mobile devices
@@ -121,14 +122,17 @@
 	var userName="",password="",curShow=0;										// Login info
 	var lastClickTime=0;														// Store last click time
 	var drupalMan=false;														// Flag for drupal manager	
-	var curSpanStart,curSpanEnd,curTime;
+	var curSpanStart,curSpanEnd,curTime;										// Current timings
+	var qmf=null;																// File system
+	var curShow="";																// Current show
+	var _this=this;																// Save context for callbacks
 	
 	function ResizePanes()													// RESIZE PANES
 	{ 
 		var wid=$("#showDiv").width();											// Width
 		var hgt=$("#showDiv").height();											// Height
-		var cx=wid*sd.leftRightSplit;											// Center
-		var cy=hgt*sd.upDownSplit;												// Center
+		var cx=wid*curJson.leftRightSplit;										// Center
+		var cy=hgt*curJson.upDownSplit;											// Center
 		$("#leftDiv").width(cx);												// Set left width
 		$("#rightDiv").width(wid-cx);											// Set right width
 		$("#rightDiv").css("left",cx+"px");										// Set right pos
@@ -145,295 +149,111 @@
 		mps.UpdateMapSize();													// Update map size to div size
 		tln.UpdateTimeline();													// Update timeline to div size
 		Draw();																	// Redraw
-}		
+	}		
 
+	function LoadShow(data)													// LOAD A SHOW
+	{
+   		if (data.qmfmsg == "private") {											// If a private file		
+			AlertBox("Private project","Sorry, but this project is marked <i>private</i>. You will need to supply the password to load it");
+			return;																// Quit
+			}
+		else if (data.qmfmsg == "error") {										// If an error
+			AlertBox("Sorry, but there was an error loading this project");		// Show
+			return;																// Quit
+			}
+   		if (qmf.curFile)														// If a good file
+   			curShow=qmf.curFile;												// Set curshow
+  		curJson.mobs=[];														// Clear existing mobs					
+  		InitProject(data);														// Init project
+     	}
 
 	function InitProject(data)												// INIT PROJECT
 	{
 		var i,s,e,v,t,id;
-		sd.timeSegments=null;													// Assume no segments
-		if (data)		sd=data;												// If data, set it
-		if (!sd.mobs)	sd.mobs=[];												// Alloc if empty
+		if (data)			curJson=data;										// If data, set it
+		if (!curJson.mobs)	curJson.mobs=[];									// Alloc if empty
 		mps.ClearLayers();														// Clar all layera
 		if (!data) {			
-			
-			sd.sheet="";
-			sd.upDownSplit=.75;
-			sd.leftRightSplit=.66;													
-			
-			var o={};
-			o.mapMarker="//www.viseyes.org/visualeyes/projects/WinchesterMap.jpg";
-			o.start="1862";
-			o.end="1889";
-			o.where="39.228788398479615,39.149512265542775,-78.09690370109803,-78.19686447861471,0";
-			sd.mobs.push(o);
-
-			o={};
-			o.mapMarker="projects/ConfederateStates.kml";
-			o.start="4/12/1861";
-			o.end="6/22/1865";
-			o.show="se";
-			o.opacity=.15;
-			o.id="NS-map"
-			sd.mobs.push(o);
-
-			o={};
-			o.marker="Path";
-			o.desc="born,ny,preach,sermon,dc";
-			o.color="#990000";
-			o.id="journey";
-			o.size=5;
-			o.opacity=.5;
-			o.end="1930";
-			o.show="a";
-			sd.mobs.push(o);
-
-			o={};
-			o.marker="Star";
-			o.start="1/12/1862";
-			o.where="-78.16,39.19";
-			o.title="Robinson born";
-			o.desc="JW Robinson is born in Winchester, VA";
-			o.pic="//www.viseyes.org/visualeyes/projects/Robinson.jpg";
-			o.click="where:-78.16,39.19,3";
-			o.color="#ff9900";
-			o.edge="#666";
-			o.id="born";
-			o.row=1;
-			sd.mobs.push(o);
-	
-			o={};
-			o.marker="Square";
-			o.start="6/8/1886";
-			o.where="-74.0,40.71";
-			o.title="Moves to New York";
-			o.desc="Robinson moves to New York";
-			o.pic="http://www.artvalue.com/photos/auction/0/50/50908/mcnulty-william-c-1889-1963-us-towers-in-the-sky-new-york-3005289.jpg";
-			o.color="#ff9900";
-			o.edge="#666";
-			o.id="ny";
-			o.click="show:https://en.wikipedia.org/wiki/History_of_New_York_City_(1855%E2%80%9397)";
-			o.row=2;
-			sd.mobs.push(o);
-
-			o={};
-			o.marker="Line";
-			o.start="4/12/1861";
-			o.end="6/22/1865";
-			o.desc="<b>The American Civil War</b>, widely known in the United States as simply the Civil War as well as other sectional names, was a civil war fought from 1861 to 1865 to determine the survival of the Union or independence for the Confederacy.<br><br>Among the 34 states in January 1861, seven Southern slave states individually declared their secession from the United States and formed the Confederate States of America. The Confederacy, often simply called the South, grew to include eleven states, and although they claimed thirteen states and additional western territories, the Confederacy was never diplomatically recognized by a foreign country. The states that remained loyal and did not declare secession were known as the Union or the North.<br><br>The war had its origin in the fractious issue of slavery, especially the extension of slavery into the western territories.[N 1] After four years of combat, which left over 600,000 Union and Confederate soldiers dead and destroyed much of the South's infrastructure, the Confederacy collapsed and slavery was abolished. Then began the Reconstruction and the processes of restoring national unity and guaranteeing civil rights to the freed slaves.";
-			o.pic="//www.suvcw.org/wp-content/uploads/2013/12/cannon.jpg";
-			o.click="where:-89.0751,33.147,5000|show:NS-map";
-			o.title="Civil War";
-			o.color="#d63333";
-			o.row=5;
-			sd.mobs.push(o);
-
-			o={};
-			o.marker="Diamond";
-			o.start="6/1891";
-			o.where="-78.47,38.03";
-			o.title="Preaches";
-			o.desc="Robinson preaches on \"The Sin of the Modern Dance.\" Makes flying visit to Warm Sulphur & Hot Springs; preaches to white and colored";
-			o.pic="//i234.photobucket.com/albums/ee268/solomon_042/SLAVRELIGION.jpg";
-			o.color="#ff9900";
-			o.edge="#666";
-			o.id="preach";
-			o.row=3;
-			sd.mobs.push(o);
-
-			o={};
-			o.marker="Dot";
-			o.start="5/16/1907";
-			o.where="-86.15,39.76";
-			o.title="Publishes sermon";
-			o.desc="Robinson publishes sermon synopsis, \"Peacocks and Apes,\" with antilynching commentary";
-			o.pic="//www.mtholyoke.com/pcsite/books/images10/Sermon01.jpeg";
-			o.color="#ff9900";
-			o.edge="#666";
-			o.id="sermon";
-			o.row=4;
-			sd.mobs.push(o);
-
-			o={};
-			o.marker="TriUp";
-			o.start="5/6/1922";
-			o.where="-77.0425,38.9079";
-			o.title="National Race Conference";
-			o.desc="Robinson attends meeting of National Race Congress; elected chaplain";
-			o.pic="//upload.wikimedia.org/wikipedia/commons/b/b8/1922_Negro_National_League_annual_meeting.jpg";
-			o.color="#ff9900";
-			o.edge="#666";
-			o.id="dc";
-			o.click="zoomer://images.huffingtonpost.com/2013-05-17-oldwashington.jpg";
-			sd.mobs.push(o);
-
-			o={};
-			o.marker="Segment";
-			o.start="1/1860";
-			o.end="1886";
-			o.title="Winchester";
-			o.click="where:-78.16,39.19,3";
-			o.color="#ccc";
-			sd.mobs.push(o);
-			o={};
-			
-			o={};
-			o.marker="Segment";
-			o.start="1886";
-			o.end="1889";
-			o.title="New York";
-			o.click="where:-74.0,40.71,300";
-			o.color="#ccc";
-			sd.mobs.push(o);
-			
-			o={};
-			o.marker="Segment";
-			o.start="1889";
-			o.end="1898";
-			o.title="Charlottesville";
-			o.click="where:-78.47,38.03,300";
-			o.color="#ccc";
-			sd.mobs.push(o);
-			
-			o={};
-			o.marker="Segment";
-			o.start="1898";
-			o.end="1902";
-			o.title="Boston";
-			o.click="where:-80.00,38.41,1500";
-			o.color="#ccc";
-			sd.mobs.push(o);
-	
-			o={};
-			o.marker="Segment";
-			o.start="1902";
-			o.end="1906";
-			o.title="Connecticut";
-			o.click="where:-80.00,38.41,1500";
-			o.color="#ccc";
-			sd.mobs.push(o);
-			
-			o={};
-			o.marker="Segment";
-			o.start="1906";
-			o.end="1910";
-			o.title="Indiana";
-			o.click="where:-86.15,39.76,300";
-			o.color="#ccc";
-			sd.mobs.push(o);
-		
-			o={};
-			o.marker="Segment";
-			o.start="1910";
-			o.end="12/1930";
-			o.title="Traveling";
-			o.click="where:-80.00,38.41,1500";
-			o.color="#ccc";
-			sd.mobs.push(o);
-
-			o={};
-			o.marker="Segment";
-			o.title="Show all";
-			o.click="where:-80.0405,38.4099,1500";
-			o.color="#ccc";
-			sd.mobs.push(o);
-
-			sd.mapTextCol="#ffffff";
-			sd.mapTextFont="bold 12px sans-serif ";
-			sd.baseMap="Roadmap";
-			sd.timeFormat="Mon Year";
-			sd.start="1/1860";
-			sd.end="12/1930";
-			sd.muteSound=false;
-			sd.mapStartPos="-80.00,38.41,1500";
-
-
+			curJson.sheet="";
+			curJson.upDownSplit=.75;
+			curJson.leftRightSplit=.66;													
 			}
-
-		for (i=0;i<sd.mobs.length;++i) {									// For each mob	
-			o=sd.mobs[i];													// Point at mob
-			if (o.start)	o.start=pop.DateToTime(o.start);				// Convert date to time
-			if (o.end)		o.end=pop.DateToTime(o.end);					// Convert date to time
-			s=e=0;															// Assume not timed
-			if (o.show) {													// If show mode spec'd
-				if (o.show.match(/s/i)) 	s=o.start;						// Start timed
-				if (o.show.match(/e/i)) 	e=o.end;						// End timed
-				if (o.show.match(/off/i)) 	s=e=-1;							// Hide it
+		for (i=0;i<curJson.mobs.length;++i) {									// For each mob	
+			o=curJson.mobs[i];													// Point at mob
+			if (o.start)	o.start=pop.DateToTime(o.start);					// Convert date to time
+			if (o.end)		o.end=pop.DateToTime(o.end);						// Convert date to time
+			s=e=0;																// Assume not timed
+			if (o.show) {														// If show mode spec'd
+				if (o.show.match(/s/i)) 	s=o.start;							// Start timed
+				if (o.show.match(/e/i)) 	e=o.end;							// End timed
+				if (o.show.match(/off/i)) 	s=e=-1;								// Hide it
 				}
-			if (o.marker || o.mapMarker) {									// If a marker spec'd 
-				var marker=o.mapMarker ? o.mapMarker : o.marker;			// Use mapMarker first, then marker
-				o.type="icon";												// Assume icon
-				if (marker.match(/drive\.google/i)) {						// An drive file
-					o.type="kml";											// Set type
-					id=marker.match(/id=(.+)&/);							// Extract id
-					if (id)	{												// An id found
-						var s="//drive.google.com/uc?export=view&id="+id[1];// Construct 'direct' link
-						o.lid=mps.AddKMLLayer(s,o.opacity,s,e);				// Add KML layer								 
+			if (o.marker || o.mapMarker) {										// If a marker spec'd 
+				var marker=o.mapMarker ? o.mapMarker : o.marker;				// Use mapMarker first, then marker
+				o.type="icon";													// Assume icon
+				if (marker.match(/drive\.google/i)) {							// An drive file
+					o.type="kml";												// Set type
+					id=marker.match(/id=(.+)&/);								// Extract id
+					if (id)	{													// An id found
+						var s="//drive.google.com/uc?export=view&id="+id[1];	// Construct 'direct' link
+						o.lid=mps.AddKMLLayer(s,o.opacity,s,e);					// Add KML layer								 
 						}
 					}
-				else if (marker.match(/\.kml/i)) {							// A KML file
-					o.type="kml";											// Set type
-					o.lid=mps.AddKMLLayer(marker,o.opacity,s,e);			// Add KML layer								 
+				else if (marker.match(/\.kml/i)) {								// A KML file
+					o.type="kml";												// Set type
+					o.lid=mps.AddKMLLayer(marker,o.opacity,s,e);				// Add KML layer								 
 					}
-				else if (marker.match(/path/i)) {							// A path
+				else if (marker.match(/path/i)) {								// A path
 					var dots=[];
-					o.type="path";											// Set type
-					v=o.desc.split(",");									// Split by comma
-					for (j=0;j<v.length;++j) {								// For each one spec'd
- 						id=sd.mobs[FindMobByID(v[j])];						// Point at mob
- 						if ((id == undefined) || (id < 0))					// Mob not found
- 							continue;										// Skip it
- 						t=id.start;											// Get time
-  						t=pop.DateToTime(t);								// +/- min past 1970
-						if (!j)		s=e=t;									// Init to 1st mob
-						vv=id.where.split(",");								// Split into parts
+					o.type="path";												// Set type
+					v=o.desc.split(",");										// Split by comma
+					for (j=0;j<v.length;++j) {									// For each one spec'd
+ 						id=curJson.mobs[FindMobByID(v[j])];						// Point at mob
+ 						if ((id == undefined) || (id < 0))						// Mob not found
+ 							continue;											// Skip it
+ 						t=id.start;												// Get time
+  						t=pop.DateToTime(t);									// +/- min past 1970
+						if (!j)		s=e=t;										// Init to 1st mob
+						vv=id.where.split(",");									// Split into parts
 						vv=ol.proj.transform([vv[0]-0,""+vv[1]-0],'EPSG:4326',mps.curProjection);	// Transform 
-						vv.push(t); 										// Add time
-						dots.push(vv);										// Add dot
-						s=Math.min(s,t);									// Earliest
-						e=Math.max(e,t);									// Latest
+						vv.push(t); 											// Add time
+						dots.push(vv);											// Add dot
+						s=Math.min(s,t);										// Earliest
+						e=Math.max(e,t);										// Latest
 						}
-					var ew=o.size ? o.size  : 2;							// Set size with 2 pixel default
-					var eo=o.opacity ? o.opacity  : 1;						// Set opacity with 1.0 default
+					var ew=o.size ? o.size  : 2;								// Set size with 2 pixel default
+					var eo=o.opacity ? o.opacity  : 1;							// Set opacity with 1.0 default
 					mps.AddPathLayer(dots,o.color,ew,eo,s,o.end ? o.end: e, o.show);// Add path to overlays
 					}
 				else if (marker.match(/\.png|.gif|\.jpg|\.jpeg/i) && (o.where.split(",").length > 3)) { // An image file with a full georef
-					o.type="image";											// Set type
-					o.lid=mps.AddImageLayer(marker,o.where, o.opacity,s,e);	// Add image layer								 
+					o.type="image";												// Set type
+					o.lid=mps.AddImageLayer(marker,o.where, o.opacity,s,e);		// Add image layer								 
 					}
-				else if (marker.match(/segment/i)) {						// A segment
-					var oo={};												
-					o.type="segment";										// Set type
-					if (!sd.timeSegments)	sd.timeSegments=[];				// Alloc new array if not already there
-					oo.start=o.start;		oo.end=o.end;					// Start, end
-					oo.title=o.title;		oo.col=o.color;					// Title, color
-					oo.click=o.click;										// Click
-					sd.timeSegments.push(oo);								// Add seg
-					}
-				else if (marker.match(/init/i)) {							// An init
-					o.type="init";											// Set type
-					}
-				else if (o.where) { 										// Must be an icon
-					var sty={};												// Not style
-					o.type="icon";											// Set type
-					o.mapMarker ?	sty.m=o.mapMarker : sty.m=o.marker;		// Use map marker first, then time marker
+				else if (marker.match(/segment/i)) 								// A segment
+					o.type="segment";											// Set type
+				else if (marker.match(/init/i)) 								// An init
+					o.type="init";												// Set type
+				else if (o.where) { 											// Must be an icon
+					var sty={};													// Not style
+					o.type="icon";												// Set type
+					o.mapMarker ?	sty.m=o.mapMarker : sty.m=o.marker;			// Use map marker first, then time marker
 					o.mapTitle  ?	sty.t=o.mapTitle  : sty.t=o.title;			
 					o.mapDesc   ?	sty.d=o.mapDesc   : sty.d=o.desc;				
 					o.mapColor  ?	sty.f=o.mapColor  : sty.f=o.color;			
 					o.mapEdge   ?	sty.s=o.mapEdge   : sty.s=o.edge;				
 					o.mapSize   ?	sty.w=o.mapSize   : sty.w=o.size;				
-					o.mapTextCol  ? sty.tc=o.mapTextCol  : sty.tc=sd.mapTextCol;				
-					o.mapTextFont ? sty.tf=o.mapTextFont : sty.tf=sd.mapTextFont;				
+					o.mapTextCol  ? sty.tc=o.mapTextCol  : sty.tc=curJson.mapTextCol;				
+					o.mapTextFont ? sty.tf=o.mapTextFont : sty.tf=curJson.mapTextFont;				
 					o.mapOpacity  ? sty.a=o.mapOpacity   : sty.a=o.opacity;				
-					mps.AddMarkerLayer(o.where,sty,i,s,e);					// Add marker to overlays
+					mps.AddMarkerLayer(o.where,sty,i,s,e);						// Add marker to overlays
 					}
 			}
 		}
 
-		mps.SetBaseMap(sd.baseMap);											// Set basemap layer
-		tln.InitTimeline("bottomDiv",sd);									// Initialize timeline
-		mps.MarkerLayerToTop();												// Make marker layer the top-most layer
-		if (sd.mapStartPos)		mps.Goto(sd.mapStartPos);					// Position map
+		mps.SetBaseMap(curJson.baseMap);										// Set basemap layer
+		tln.InitTimeline("bottomDiv",curJson);									// Initialize timeline
+		mps.MarkerLayerToTop();													// Make marker layer the top-most layer
+		if (curJson.mapStartPos)		mps.Goto(curJson.mapStartPos);			// Position map
 
 var str="<img src='http://www.viseyes.org/efolio/declaration.JPG' width='100%'> &nbsp; ";
 str+=MakeSelect("testing",false,["0","1","2","3","4"]);
@@ -457,7 +277,7 @@ $(this).val(0)
 
 	function Draw(time)														// DRAW PROJECT
 	{
-		mps.UpdateMap(time,sd.timeFormat);										// Update map layers
+		mps.UpdateMap(time,curJson.timeFormat);									// Update map layers
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -473,9 +293,11 @@ $(this).val(0)
 		
 		isMobile=navigator.userAgent.match(/(ipad|iphone|ipod|android)/i) ? true : false; // Set mobile flag
 		var url=window.location.search.substring(1);							// Get query string
+		qmf=new QmediaFile("//qmediaplayer.com/",4);							// Alloc file system
+
 		drupalMan=(""+url).match(/pr=d/);										// If called from Drupal manager
 		if (!url)																// Nothing on command line
-			url=1;																// Use default
+			url=456;															// Use default
 		if (drupalMan)	url="";													// If drupal, kill url
 		if (url && !isNaN(url)) {												// If a number
 			curShow=url;														// Save show number											
@@ -483,9 +305,9 @@ $(this).val(0)
 			}	
 		else if ((url) && (!url.match(/\./)))									// No file extension
 			url+=".json";														// Add txt
-//		$.ajax({ url: url, dataType:'jsonp' });									// Get jsonp and call LoadShow() from it
+		$.ajax({ url: url, dataType:'jsonp' });									// Get jsonp and call LoadShow() from it
 
-		$("#lrSiz").draggable({												// DRAG L-R WIDTH HANDLER
+		$("#lrSiz").draggable({													// DRAG L-R WIDTH HANDLER
 			cursorAt:{left:16},	iframeFix:true,									// Cursor offset
 			cursor: "col-resize", axis:"x",										// X-only
 			start: function(event, ui) {										// On drag start
@@ -493,9 +315,9 @@ $(this).val(0)
 				},
 			drag: function(event, ui) {											// On drag
 				var wid=$("#showDiv").width();									// Max width
-			 	sd.leftRightSplit=Math.max(0,Math.min(1,(event.clientX-8)/wid));// Set ratio between windows
-				if (Math.abs(sd.leftRightSplit-.66) < .015) 					// If close to center
-					sd.leftRightSplit=.66;										// Snap it there
+			 	curJson.leftRightSplit=Math.max(0,Math.min(1,(event.clientX-8)/wid));// Set ratio between windows
+				if (Math.abs(curJson.leftRightSplit-.66) < .015) 				// If close to center
+					curJson.leftRightSplit=.66;									// Snap it there
 				ResizePanes();													// Resize panes
 				},
 			stop: function(event, ui) {											// On drag end
@@ -504,16 +326,16 @@ $(this).val(0)
 				}
 			});
 			
-		$("#bSiz").draggable({												// DRAG TRANSCRIPT HEIGHT HANDLER		
+		$("#bSiz").draggable({													// DRAG TRANSCRIPT HEIGHT HANDLER		
 			cursor: "row-resize", axis:"y",										// Y-only
 			stop: function(event, ui) {											// When done
 				ResizePanes;													// Resize panes when done
 				},
 			drag: function(event, ui) {											// On drag
 				var hgt=$("#showDiv").height();									// Max height
-			 	sd.upDownSplit=Math.max(0,Math.min(1,(event.clientY-8)/hgt));	// Set ratio between windows
-				if (Math.abs(sd.upDownSplit-.75) < .015) 						// If close to center
-					sd.upDownSplit=.75;											// Snap it there
+			 	curJson.upDownSplit=Math.max(0,Math.min(1,(event.clientY-8)/hgt));	// Set ratio between windows
+				if (Math.abs(curJson.upDownSplit-.75) < .015) 						// If close to center
+					curJson.upDownSplit=.75;											// Snap it there
 				ResizePanes();													// Resize panes
 				}
 			});
@@ -600,72 +422,95 @@ $(this).val(0)
 	}
 
 	$("#settingsBut").click(function(e) {										// SETTINGS BUTTON CLICK
-		pop.Sound("click",sd.muteSound);										// Click sound							
+		pop.Sound("click",curJson.muteSound);									// Click sound							
 		var str="<table><tr height='18'>";
 		str+="<tr><td>Mute clicks?</td><td><input id='setmute' type='checkbox'></td></tr>";
+		str+="<tr><td>Title</td><td><input id='settitle' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td>Spreadsheet</td><td><input id='setsheet' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td>L-R split&nbsp;% </td><td>";
 		str+="<input id='setlr' class='ve-is' style='width:30px' type='input'>&nbsp;&nbsp;&nbsp;U-D&nbsp;split&nbsp;%  ";
 		str+="<input id='setud' class='ve-is' style='width:30px' type='input'></td></tr>";
 		str+="<tr><td>Start/end </td><td>";
-		str+="<input id='setstart' class='ve-is' style='width:70px' value='"+sd.start+"' type='input'>&nbsp;to&nbsp;";
-		str+="<input id='setend' class='ve-is' style='width:70px' value='"+sd.end+"' type='input'></td></tr>";
+		str+="<input id='setstart' class='ve-is' style='width:70px' value='"+curJson.start+"' type='input'>&nbsp;to&nbsp;";
+		str+="<input id='setend' class='ve-is' style='width:70px' value='"+curJson.end+"' type='input'></td></tr>";
 		str+="<tr><td>Date format </td><td>";
-		str+=MakeSelect("settime",false,["Year","Mo/Year","Mon Year","Mo/Day/Year","Mon Day, Year"],sd.timeFormat)+"</td></tr>";
+		str+=MakeSelect("settime",false,["Year","Mo/Year","Mon Year","Mo/Day/Year","Mon Day, Year"],curJson.timeFormat)+"</td></tr>";
 		str+="<tr><td>Map&nbsp;label&nbsp;color</td><td><input id='setstcol' class='ve-is' style='width:50px' type='input'></td></tr>";
 		str+="<tr><td>Map&nbsp;Label&nbsp;font</td><td><input id='setstfont' class='ve-is' style='width:160px' type='input'></td></tr>";
 		str+="<tr><td>Map start</td><td><input id='setstartpos' class='ve-is' style='width:220px' type='input'></td></tr>";
-		str+="<tr><td>Map&nbsp;base </td><td>"+MakeSelect("setbase",false,["Satellite","Terrain","Earth","Watercolor","B&W","Roadmap"],sd.baseMap);
+		str+="<tr><td>Map&nbsp;base </td><td>"+MakeSelect("setbase",false,["Satellite","Terrain","Earth","Watercolor","B&W","Roadmap"],curJson.baseMap);
 		str+="<tr><td>Current&nbsp;location</td><td><input id='setwhere' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td>Current&nbsp;point</td><td><input id='setpoint' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td colspan=2><br></td> <tr>";
-		str+="<tr><td>Help <a href='https://docs.google.com/document/d/161td5ZuqKqT5R5r9z1P8AxBA6l9LaP-eYl_RvCyvw2g/edit?usp=sharing' target='_blank'>";
-		str+="<img src='img/helpicon.gif' style='vertical-align:bottom' title='Show help'></a>";
-		str+="</td><td><button id='setsave' class='ve-bs' title='Save project'>Save</button>&nbsp;&nbsp;&nbsp;&nbsp;<button title='Load project' id='setload' class='ve-bs'>Load</button>";
-		str+="</td></tr></table>";
+		str+="<tr><td>Options</td><td>"+MakeSelect("setfile",false,["Save/Load","Load","Save","Save as...","Delete","Undelete"],"Save/Load");
+		str+="&nbsp;&nbsp;&nbsp<i>"+(_this.curShow ? "#"+_this.curShow : '')+"</i>&nbsp;&nbsp;&nbsp;"
+		str+="Help <a href='https://docs.google.com/document/d/161td5ZuqKqT5R5r9z1P8AxBA6l9LaP-eYl_RvCyvw2g/edit?usp=sharing' target='_blank'>";
+		str+="<img src='img/helpicon.gif' style='vertical-align:bottom' title='Show help'></a></td>";
+		str+="</tr></table>";
 		pop.Dialog("VisualEyes settings",str, function() {
-				sd.mapTextCol=$("#setstcol").val();								// Set map label color
-				sd.mapTextFont=$("#setstfont").val();							// Set map label font
-				sd.start=$("#setstart").val();									// Set start
-				sd.leftRightSplit=$("#setlr").val()/100;						// Set lr split
-				sd.upDownSplit=$("#setud").val()/100;							// Set ud split
-				sd.end=$("#setend").val();										// Set end
-				sd.mapStartPos=$("#setstartpos").val();							// Set end
-				sd.sheet=$("#setsheet").val();									// Set sheet
-				tln.timeFormat=sd.timeFormat=$("#settime").val();				// Get timeformat
-				sd.baseMap=$("#setbase").val();									// Get base
-				mps.SetBaseMap(sd.baseMap);										// Set basemap layer
-				sd.muteSound=$("#setmute").prop("checked");						// Set mute
-  				if (sd.sheet) {													// If a sett spec'd
-   					if (sd.sheet.length < 10)
-   						sd.sheet="https://docs.google.com/spreadsheets/d/1m5N--o7W0ifmyzVm_M6F73SfFiPfvo3Prit1SWR9cb8/edit?usp=sharing";
-	  			 	dtl.GetSpreadsheet(sd.sheet,true,null,function(data) {		// Get spreadsheet data
-						sd.mobs=data;											// Set mobs
-						InitProject(sd);										// Re-init project
+				getDataFromInputs();											// Get data from inputs										
+				if (curJson.sheet) {											// If a sheet spec'd
+   	  			 	dtl.GetSpreadsheet(curJson.sheet,true,null,function(data) {	// Get spreadsheet data
+						curJson.mobs=data;										// Set mobs
+						InitProject(curJson);									// Re-init project
 						},true);
 	 				}
 	 			else															// No sheet spec'd
-					InitProject(sd);											// Re-init project
+					InitProject(curJson);										// Re-init project
 			});
 						
-		$("#setbase").val(sd.baseMap);											// Set base
-		$("#settime").val(sd.timeFormat);										// Set timeformat
-		$("#setstart").val(sd.start);											// Set start
-		$("#setend").val(sd.end);												// Set end
-		$("#setstcol").val(sd.mapTextCol);										// Set map label color
-		$("#setstfont").val(sd.mapTextFont);									// Set map label font
-		$("#setsheet").val(sd.sheet);											// Set spreadsheet
-		$("#setstartpos").val(sd.mapStartPos);									// Set map starting position
-		$("#setlr").val(Math.floor(sd.leftRightSplit*100));						// Set lr split
-		$("#setud").val(Math.floor(sd.upDownSplit*100));						// Set ud split
+ 		$("#setbase").val(curJson.baseMap);										// Set base
+		$("#settime").val(curJson.timeFormat);									// Set timeformat
+		$("#setstart").val(curJson.start);										// Set start
+		$("#setend").val(curJson.end);											// Set end
+		$("#setstcol").val(curJson.mapTextCol);									// Set map label color
+		$("#setstfont").val(curJson.mapTextFont);								// Set map label font
+		$("#setsheet").val(curJson.sheet);										// Set spreadsheet
+		$("#settitle").val(curJson.title);										// Set title
+		$("#setstartpos").val(curJson.mapStartPos);								// Set map starting position
+		$("#setlr").val(Math.floor(curJson.leftRightSplit*100));				// Set lr split
+		$("#setud").val(Math.floor(curJson.upDownSplit*100));					// Set ud split
 		pop.ColorPicker("setstcol",-1,true);									// Init color
 	
+		function getDataFromInputs() {											// GET DATA FROM DIALOG ELEMENTS
+			curJson.mapTextCol=$("#setstcol").val();							// Set map label color
+			curJson.mapTextFont=$("#setstfont").val();							// Set map label font
+			curJson.start=$("#setstart").val();									// Set start
+			curJson.leftRightSplit=$("#setlr").val()/100;						// Set lr split
+			curJson.upDownSplit=$("#setud").val()/100;							// Set ud split
+			curJson.end=$("#setend").val();										// Set end
+			curJson.mapStartPos=$("#setstartpos").val();						// Set end
+			curJson.title=$("#settitle").val();									// Set sheet
+			curJson.sheet=$("#setsheet").val();									// Set sheet
+			tln.timeFormat=curJson.timeFormat=$("#settime").val();				// Get timeformat
+			curJson.baseMap=$("#setbase").val();								// Get base
+			mps.SetBaseMap(curJson.baseMap);									// Set basemap layer
+			curJson.muteSound=$("#setmute").prop("checked");					// Set mute
+  		}
+		
 		$("#setbase").on("change", function(e) {								// BASE HANDLER
 			mps.SetBaseMap($("#setbase").val());								// Set basemap layer
 			}); 
 
 		$("#setstcol").on("click", function(e) {								// LAB COLOR HANDLER
 			pop.ColorPicker("setstcol",-1);										// Set label text color
+			}); 
+
+		$("#setfile").on("change", function(e) {								// BASE HANDLER
+			switch($(this).val()) {												// Route on choice
+				case "Load" : 													// Load
+					$("#dialogDiv").remove();									// Close dialog
+					qmf.Load();													// Get data
+					break;						
+				case "Save" : 													// Save
+					getDataFromInputs();										// Get data from inputs										
+					qmf.Save(0);												// Save data
+					break;						
+				case "Save as..." : qmf.Save(1);	break;						// Save as..
+				case "Delete" : 	qmf.Delete(0);	break;						// Delete
+				case "Undelete" : 	qmf.Delete(1);	break;						// UndDelete
+				}
+			$(this).val("Save/Load");											// Reset select
 			}); 
 		});																		// End settings
 
@@ -692,9 +537,9 @@ $(this).val(0)
 	function FindMobByID(id)												// FIND MOB BY ITS ID
 	{
 		var i,o;
-		var n=sd.mobs.length;													// Get length
+		var n=curJson.mobs.length;													// Get length
 		for (i=0;i<n;++i) {														// For each mob
-			o=sd.mobs[i].id;													// Get id												
+			o=curJson.mobs[i].id;													// Get id												
 			if (o && o.indexOf(id) != -1)										// If it matches
 				return i;														// Return index of mob
 			}

@@ -25,31 +25,33 @@ Timeline.prototype.InitTimeline=function(div, data)						// INIT TIMELINE
 /* 
   	Init library and connect to div
   	@param {string} div div to draw timeline into
- */
+*/
+
 	this.margin=18;
 	this.curSeg=-1;															// Assume all segs
 	if (data)	this.sd=data;												// Point at setting and data
 	if (div)	this.div="#"+div;											// Current div selector
-	this.timeFormat=sd.timeFormat;											// Set date format
-	this.start=pop.DateToTime(sd.start);									// Start date
-	this.end=pop.DateToTime(sd.end);										// End date
-	this.timeColor=sd.timeColor ? sd.timeColor : "#009900"; 				// Time slider color
-	this.hasTimeBar=sd.hasTimeBar ? sd.hasTimeBar : true; 					// Time bar?
-	this.showStartEnd=sd.showStartEnd ? sd.showStartEnd : true; 			// Show start/end dates?
-	this.sliderTime=sd.sliderTime ? sd.sliderTime : "Bottom"; 				// Slider time pos
-	this.hasTicks=sd.hasTicks ? sd.hasTicks : true; 						// Has tick marks?
-	this.hasTickLabels=sd.hasTickLabels ? sd.hasTickLabels : true; 			// Has tick labels?
-	this.segmentPos=sd.segmentPos ? sd.segmentPos : "Top"; 					// Segment bar pos
-	this.hasTimeView=sd.hasTimeView ? sd.hasTimeView : true; 				// Has timeview?
-	this.timeGridDate=sd.timeGridDate ? sd.timeGridDate : true; 			// Has timeview grid?
-	this.segmentTextColor=sd.segmentTextColor ? sd.segmentTextColor : "#000";// Segment text color
-	this.segmentColor=sd.segmentColor ? sd.segmentColor : "#ccc"; 			// Segment color
-	this.playerSpeed=sd.playerSpeed ? sd.playerSpeed : 5000; 				// Time to cross timeline / 2
-	this.timeGridColor=sd.timeGridColor ? sd.timeGridColor : "#ccc"; 		// Timeview grid color (undefined for none)
-	this.timeViewTextSize=sd.timeViewTextSize ? sd.timeViewTextSize : "11"; // Timeview text size
-	this.hasBackBut=sd.hasBackBut ? sd.hasBackBut : true; 					// Has forward/back buttons?
-	this.muteSound=sd.muteSound ? sd.muteSound : false; 					// Sound  muted?
-	this.timeViewTextColor=sd.timeViewTextColor ? sd.timeViewTextColor : "#666"; //Timeview text color
+
+	this.timeFormat=this.sd.timeFormat;										// Set date format
+	this.start=pop.DateToTime(this.sd.start);								// Start date
+	this.end=pop.DateToTime(this.sd.end);									// End date
+	this.timeColor=this.sd.timeColor ? this.sd.timeColor : "#009900"; 		// Time slider color
+	this.hasTimeBar=this.sd.hasTimeBar ? this.sd.hasTimeBar : true; 		// Time bar?
+	this.showStartEnd=this.sd.showStartEnd ? this.sd.showStartEnd : true; 	// Show start/end dates?
+	this.sliderTime=this.sd.sliderTime ? this.sd.sliderTime : "Bottom"; 	// Slider time pos
+	this.hasTicks=this.sd.hasTicks ? this.sd.hasTicks : true; 				// Has tick marks?
+	this.hasTickLabels=this.sd.hasTickLabels ? this.sd.hasTickLabels : true; // Has tick labels?
+	this.segmentPos=this.sd.segmentPos ? this.sd.segmentPos : "Top"; 		// Segment bar pos
+	this.hasTimeView=this.sd.hasTimeView ? this.sd.hasTimeView : true; 		// Has timeview?
+	this.timeGridDate=this.sd.timeGridDate ? this.sd.timeGridDate : true; 	// Has timeview grid?
+	this.segmentTextColor=this.sd.segmentTextColor ? this.sd.segmentTextColor : "#000";	// Segment text color
+	this.segmentColor=this.sd.segmentColor ? this.sd.segmentColor : "#ccc"; // Segment color
+	this.playerSpeed=this.sd.playerSpeed ? this.sd.playerSpeed : 5000; 		// Time to cross timeline / 2
+	this.timeGridColor=this.sd.timeGridColor ? this.sd.timeGridColor : "#ccc"; 	// Timeview grid color (undefined for none)
+	this.timeViewTextSize=this.sd.timeViewTextSize ? this.sd.timeViewTextSize : "11"; // Timeview text size
+	this.hasBackBut=this.sd.hasBackBut ? this.sd.hasBackBut : true; 		// Has forward/back buttons?
+	this.muteSound=this.sd.muteSound ? this.sd.muteSound : false; 			// Sound  muted?
+	this.timeViewTextColor=this.sd.timeViewTextColor ? this.sd.timeViewTextColor : "#666"; 	//Timeview text color
 
 	$("#timeBar").remove();													// Remove old
 	$("#segmentBar").remove();												// Remove old
@@ -60,8 +62,7 @@ Timeline.prototype.InitTimeline=function(div, data)						// INIT TIMELINE
 		this.AddTimeBar();													// Add it
 	if (this.playerSpeed) 													// If it has player
 		this.AddPlayer();													// Add it
-	if (this.sd.timeSegments) 												// If it has time segments
-		this.AddTimeSegments();												// Add them
+	this.AddTimeSegments();													// Add time segments, if any
 	if (this.hasTimeView) 													// If it has time view
 		this.AddTimeView();													// Add it
 	this.UpdateTimeline();													// Resize 
@@ -70,17 +71,17 @@ Timeline.prototype.InitTimeline=function(div, data)						// INIT TIMELINE
 
 Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 {
+	
 /* 
 	Resize timeline to fit container div
 */
-
 
 	var s,e,x,y,dur;
 	var i,w2,m=this.margin;
 	var w=$(this.div).width()-m-m;											// Width of time area
 	var t=$(this.div).height()-$("#timeBar").height()-20-m;					// Top position
 	var dur=this.end-this.start;											// Timeline 
-	this.timeFormat=sd.timeFormat;											// Set date format
+	this.timeFormat=this.sd.timeFormat;										// Set date format
 	if (this.segmentPos == "Bottom")										// If putting segments below timebar
 		t-=30;																// Shift it higher
 	$("#timeBar").css({top:t+"px",left:m+"px", width:w+"px"});				// Position div
@@ -113,7 +114,7 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 			}		
 		}	
 
-	var ts=this.sd.timeSegments;											// Point at time segments
+	var ts=this.timeSegments;											// Point at time segments
 	if (ts) {																// If segments
 		w=$($("#timeSlider")).width();										// Width of slider
 		var w1=w-(ts.length-1)*2;											// Remove spaces between segs
@@ -165,8 +166,8 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 		$("#timeViewBar").css("top",8+"px");								// Set top
 		var rowHgt=12;														// Set row height
 		var rowPad=4;														// Space between rows
-		var offx=(s-this.start)/(this.end-this.start)*-w;					// Offset from full timeline start
-			$("#svgMarkers").attr("transform","translate("+offx+",0)");		// Move markers group
+		var offx=(s-this.start)/Math.max(1,(this.end-this.start))*-w;		// Offset from full timeline start (avoid / 0)
+		$("#svgMarkers").attr("transform","translate("+offx+",0)");			// Move markers group
 			
 		for (i=0;i<this.sd.mobs.length;++i) {								// For each mob
 			o=this.sd.mobs[i];												// Point at mob
@@ -358,13 +359,29 @@ Timeline.prototype.AddPlayer=function() 								// ADD TIME PLAYER
 
 Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 {
+	
 /* 	
-	Add time segments to div
+	Add time segments to div.
+	Looks through sd.mobs for segments and adds them if there.
 */
-	var i,str;
+
+	var i,o,oo,str;
 	var _this=this;															// Save context for callback
-	var dur=this.end-this.start;
-	var ts=this.sd.timeSegments;											// Point at segments
+	var dur=this.end-this.start;											// Calc duration
+	var ts=this.timeSegments=[];											// Point at segments and reset
+	
+	for (i=0;i<this.sd.mobs.length;++i) {									// For each mob
+		o=this.sd.mobs[i];													// Point at mob
+		if (o.type != "segment")											// If not a segment
+			continue;														// Skip it
+		oo={};																// New obj
+		oo.start=o.start;			oo.end=o.end;							// Start, end
+		oo.title=o.title;			oo.col=o.color;							// Title, color
+		oo.click=o.click;													// Click
+		ts.push(oo);														// Add seg
+		}
+	if (!ts.length)															// No segmenta
+		return;																// Quit
 	str="<div id='segmentBar' style='position:absolute;height:16px;'>"		// Enclosing div
 	for (i=0;i<ts.length;++i) { 											// For each tick
 		ts[i].pct=(ts[i].end-ts[i].start)/dur;								// Calc percentage
@@ -375,14 +392,12 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 			ts[i].all=true;													// Flag it as show all button
 		}	
 	$(this.div).append(str+"</div>");										// Add segment bar				
-
 	$("#timeseg0").css({"border-top-left-radius":"10px","border-bottom-left-radius":"10px"});
 	if (ts[i-1].all) {														// Has show all button
 		$("#timeseg"+(ts.length-2)).css({"border-top-right-radius":"10px","border-bottom-right-radius":"10px"});
 		$("#timeseg"+(ts.length-1)).css({"border-top-left-radius":"10px","border-bottom-left-radius":"10px"});
 		$("#timeseg"+(ts.length-1)).css({"border-top-right-radius":"10px","border-bottom-right-radius":"10px"});
 		$("#timeseg"+(ts.length-1)).css({"margin-left":"12px","padding-left":"10px","padding-right":"10px"});
-
 		}
 	else
 		$("#timeseg"+(ts.length-1)).css({"border-top-right-radius":"10px","border-bottom-right-radius":"10px"});
@@ -424,9 +439,11 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 
 Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 {
+	
 /* 	
 	Add time segments to div
 */
+
 	var i,j,o,str,w2,r,m;
 	var _this=this;															// Save context for callback
 	str="<div id='timeViewBar' class='time-timeview'>"						// Enclosing div
@@ -551,13 +568,15 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 
 Timeline.prototype.Goto=function(time, segment)							// SET TIME AND [SEGMENT]
 {
+	
 /* 	
 	Got to time and maybe change segment
  	@param {number} time time to goto mumber of mins += 1/1/1970
 */
-	if (segment != undefined && this.sd.timeSegments) {						// If setting a segment
+	
+	if (segment != undefined && this.timeSegments) {						// If setting a segment
 		if (segment < 0)													// If all button
-			segment=this.sd.timeSegments.length+1;							// Set to last
+			segment=this.timeSegments.length+1;								// Set to last
 		$("#timeseg"+segment).trigger();									// Trigger click
 		}
 	if (!this.hasTimeBar)													// No time bar

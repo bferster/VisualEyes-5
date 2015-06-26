@@ -37,8 +37,7 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 	@param {string} date date to show
 */
 
-  	this.div=div;															// Set div
-  	var _this=this;															// Save context for callbacks
+   	var _this=this;															// Save context for callbacks
 	$("#st-popup").remove();												// Remove any pre-existing popup
 	if (x == undefined)														// If no x defined
 		return;																// We're just removing
@@ -62,26 +61,27 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 	$("body").append("</tr></table>"+str);									// Add popup
 	if (x < 0) {															// Bigger 
 		$("#poppic").css("cursor","");										// Normal cursor
-		$("#st-popup").css("max-width",$(this.div).width()*.75);			// Make it wider
-		$("#st-popup").css("max-height",$(this.div).height()*.75);			// Make it taller
-		$("#poppic").width($(this.div).width()*(desc ? .5 : .75))			// Make pic bigger
-		x=$(this.div).width()/2-$("#st-popup").width()/2;					// Center it
+		$("#st-popup").css("max-width",$(div).width()*.75);					// Make it wider
+		$("#st-popup").css("max-height",$(div).height()*.75);				// Make it taller
+		$("#poppic").width($(div).width()*(desc ? .5 : .75))				// Make pic bigger
+		x=$(div).width()/2-$("#st-popup").width()/2;						// Center it
 		y=50;																// Near top			
 		}
 	$("#st-popup").css({left:(x+8)+"px",top:(y+20)+"px"});					// Position
 	$("#st-popup").fadeIn(300, function() {									// Fade in
-				if ((y+50+$("#st-popup").height() > $(_this.div).offset().top+$(_this.div).height()) && (y!= 50)) { // Overflows bottom
-					y=$(_this.div).offset().top+$(_this.div).height()-50-$("#st-popup").height();	// Cap at bottom
-					$("#st-popup").css({top:(y+20)+"px"});											// Re-position
-				}
+		if ((y+50+$("#st-popup").height() > $(div).offset().top+$(div).height()) && (y != 50)) { // Overflows bottom
+			y=$(div).offset().top+$(div).height()-50-$("#st-popup").height();	// Cap at bottom
+			$("#st-popup").css({top:(y+20)+"px"});							// Re-position
+			}
 		});
 	$("#st-popup").click( function(e) {										// ON CLICK OF TEXT
 		$("#popdesc").css("cursor","auto");									// Normal cursor
 		var r=($("#poppic").width()/$("#poppic").height() < 1) ? .8 : 1;	// Make smaller if portait mode
-		$("#st-popup").css("max-width",$(_this.div).width()*.66);			// Make it wider
+		$("#st-popup").css("max-width",$(div).width()*.66);					// Make it wider
 		$("#st-popup").css("max-height",$(window).height()-200);			// Make it taller
-		$("#poppic").width($(_this.div).width()*(desc ? .33*r : .66*r))		// Make pic bigger
-		x=$(_this.div).width()/2-$("#st-popup").width()/2;					// Center it
+		$("#poppic").css("max-height",$(window).height()-100);				// Make pic taller
+		$("#poppic").width($(div).width()*(desc ? .33*r : .66*r))			// Make pic bigger
+		x=$(div).width()/2-$("#st-popup").width()/2;						// Center it
 		$("#st-popup").css({left:(x+8)+"px",top:"70px"});					// Position
 		});	
 
@@ -92,9 +92,10 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 		var r=($("#poppic").width()/$("#poppic").height() < 1) ? .33 : .66;	// Make smaller if portait mode
 		$("#poppic").css("cursor","auto");									// Normal cursor
 		$("#st-popup").css("max-height",$(window).height()-100);			// Make it taller
-		$("#st-popup").css("max-width",$(_this.div).width()*r);				// Make it wider
-		$("#poppic").width($(_this.div).width()*r)							// Make pic bigger
-		x=$(_this.div).width()/2-$("#st-popup").width()/2;					// Center it
+		$("#st-popup").css("max-width",$(div).width()*r);					// Make it wider
+		$("#poppic").css("max-height",$(window).height()-100);				// Make pic taller
+		$("#poppic").width($(div).width()*r)								// Make pic bigger
+		x=$(div).width()/2-$("#st-popup").width()/2;						// Center it
 		$("#st-popup").css({left:(x+8)+"px",top:"70px"});					// Position
 		e.stopPropagation()
 		});

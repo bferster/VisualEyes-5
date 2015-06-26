@@ -4,6 +4,7 @@
 // Provides mapping component
 // Requires: popup.js
 // Calls global functions: Draw(), ClearPopUps()
+// Depends on global curJson for access to mob data
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function Space(div, pop)														// CONSTRUCTOR
@@ -723,7 +724,7 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
   				var j,v,a;
   				var id=feature.getId()+"";
     			if (id.match(/Mob-/)) {										// If a mob
-  					o=sd.mobs[id.substr(4)];								// Point at mob data
+  					o=curJson.mobs[id.substr(4)];							// Point at mob data
  					if (o.title) 		var title=o.title;					// Lead with title
   					if (o.spaceTitle) 	var title=o.spaceTitle;				// Space over-rides
  					if (o.desc) 		var desc=o.desc;					// Lead with desc
