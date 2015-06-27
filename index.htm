@@ -29,7 +29,7 @@
 							border:1px solid #999;background-color:#fff;font-size:11px;
 							}
 		.popup-pic { 		margin-right:8px;vertical-align:top;cursor:zoom-in;
-							border:1px solid #999;width:80px;max-height:60px;
+							border:1px solid #999;max-width:80px;max-height:60px;overflow:hidden;
 							}				
 		.popup-desc { 		vertical-align:top;color:#555;cursor:zoom-in;
 							}				
@@ -163,8 +163,14 @@
 			}
    		if (qmf.curFile)														// If a good file
    			curShow=qmf.curFile;												// Set curshow
-  		curJson.mobs=[];														// Clear existing mobs					
-  		InitProject(data);														// Init project
+   		if (data.sheet) {														// If a spreadsheet spec'd
+		 	dtl.GetSpreadsheet(data.sheet,true,null,function(mobs) {			// Get spreadsheet data
+				data.mobs=mobs;													// Set mobs
+				InitProject(data);												// Re-init project
+				},true);
+			}
+		else
+			InitProject(data);													// Init project
      	}
 
 	function InitProject(data)												// INIT PROJECT

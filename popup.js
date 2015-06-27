@@ -61,9 +61,9 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 	$("body").append("</tr></table>"+str);									// Add popup
 	if (x < 0) {															// Bigger 
 		$("#poppic").css("cursor","");										// Normal cursor
-		$("#st-popup").css("max-width",$(div).width()*.75);					// Make it wider
-		$("#st-popup").css("max-height",$(div).height()*.75);				// Make it taller
-		$("#poppic").width($(div).width()*(desc ? .5 : .75))				// Make pic bigger
+		$("#st-popup").css("max-width",$(div).width()*.75+"px");			// Make it wider
+		$("#st-popup").css("max-height",$(div).height()*.75+"px");			// Make it taller
+		$("#poppic").width($(div).width()*(desc ? .5 : .75)+"px")			// Make pic bigger
 		x=$(div).width()/2-$("#st-popup").width()/2;						// Center it
 		y=50;																// Near top			
 		}
@@ -78,9 +78,9 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 		$("#popdesc").css("cursor","auto");									// Normal cursor
 		var r=($("#poppic").width()/$("#poppic").height() < 1) ? .8 : 1;	// Make smaller if portait mode
 		$("#st-popup").css("max-width",$(div).width()*.66);					// Make it wider
-		$("#st-popup").css("max-height",$(window).height()-200);			// Make it taller
+		$("#st-popup").css("max-height",$(window).height()-200+"px");		// Make it taller
 		$("#poppic").css("max-height",$(window).height()-100);				// Make pic taller
-		$("#poppic").width($(div).width()*(desc ? .33*r : .66*r))			// Make pic bigger
+		$("#poppic").css("max-width",$(div).width()*(desc ? .33*r : .66*r)+"px");	// Make pic bigger
 		x=$(div).width()/2-$("#st-popup").width()/2;						// Center it
 		$("#st-popup").css({left:(x+8)+"px",top:"70px"});					// Position
 		});	
@@ -91,10 +91,11 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 		$("#st-popup").css("cursor","auto");								// Normal cursor
 		var r=($("#poppic").width()/$("#poppic").height() < 1) ? .33 : .66;	// Make smaller if portait mode
 		$("#poppic").css("cursor","auto");									// Normal cursor
-		$("#st-popup").css("max-height",$(window).height()-100);			// Make it taller
-		$("#st-popup").css("max-width",$(div).width()*r);					// Make it wider
+		$("#st-popup").css("max-height",$(window).height()-100+"px");		// Make it taller
+		$("#st-popup").css("max-width",$(div).width()*r+"px");				// Make it wider
 		$("#poppic").css("max-height",$(window).height()-100);				// Make pic taller
-		$("#poppic").width($(div).width()*r)								// Make pic bigger
+		$("#poppic").css("max-width",$(div).width()*r+"px");				// Make pic bigger
+		$("#poppic").width($(div).width()*r);								// Make pic bigger
 		x=$(div).width()/2-$("#st-popup").width()/2;						// Center it
 		$("#st-popup").css({left:(x+8)+"px",top:"70px"});					// Position
 		e.stopPropagation()
