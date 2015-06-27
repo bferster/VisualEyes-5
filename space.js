@@ -217,50 +217,38 @@ Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 {
 
 /* 
-  	Set map center, resolution, and rotation
+  	Set map center, resolution, and time
   	@param {string} pos	Position to got to in this format:
-  						longitude,latitude[,resolution,rotation]
+  						longitude,latitude[,resolution,time]
   
 */
-	var speed=1;															// Default speed
+	
 	if ((!pos) || (pos.length < 5))											// No where to go
 		return;																// Quit
+	var duration;
 	pos=pos.replace(/"/g,"");												// Remove quotes
 	var v=pos.split(",");													// Split up
 	var o=this.map.getView();												// Point at view
 	var c=ol.proj.transform([v[0]-0,""+v[1].replace(/\*/,"")-0],'EPSG:4326',this.curProjection);	// Get center
 	var fc=o.getCenter();													// Get from center
-	var fr=o.getRotation();													// Get from rotation		
 	var fs=o.getResolution();												// Get from resolution
-	var r=-v[4]*Math.PI/180;												// Get to rotation	
-	if ((Math.abs(fc[0]-c[0]) < 2) && (Math.abs(fc[1]-c[1]) < 2)			// Center match
-			&& (Math.abs(fs-v[2]) < 2) && (Math.abs(fs-v[2]) < 2)			// Resolution  match
-			&& (Math.abs(fr-r) < 1) && (Math.abs(fr-r) < 1)					// Rotation  match
-			)																// Already there
+	if ((Math.abs(fc[0]-c[0]) < 2) && (Math.abs(fc[1]-c[1]) < 2) &&			// Center match
+		(Math.abs(fs-v[2]) < 2) && (Math.abs(fs-v[2]) < 2))					// Resolution  match
 		return;																// Quit
-	var duration=this.panTime*1000;											// Duration
-	var start=+new Date();													// Start time
+	
+	if (v[3])  	duration=v[3]*1000;											// Set duration from pos
+	else		duration=this.panTime*1000;									// Use global duration
+
 	var pan=ol.animation.pan({												// Pan
 	    duration: duration,													// Duration
 	    source: fc,															// Start value
-	    start: start														// Starting time
+	    start: +new Date()													// Starting time
 	  	});
-	var rotate=ol.animation.rotate({										// Rotate
-	    duration: duration,													// Duration
-	    rotation: fr,														// Start value
-	    start: start														// Starting time
-	  	});
-	 var bounce=ol.animation.bounce({										// Fly bounce
-	    duration: duration,													// Duration
-	    resolution: 2*o.getResolution(),									// End value
-	    start: start														// Starting time
-	  });
-  	this.map.beforeRender(pan,rotate);										// Pan, rotate
+
+  	this.map.beforeRender(pan);												// Pan
 	o.setResolution(v[2]);													// Set resolution								
 	o.setCenter(c);															// Set center
-	if (v[3] != undefined)													// If set
-		o.setRotation(v[3]);												// Set rotation								
-	}
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
