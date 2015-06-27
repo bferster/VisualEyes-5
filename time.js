@@ -114,7 +114,7 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 			}		
 		}	
 
-	var ts=this.timeSegments;											// Point at time segments
+	var ts=this.timeSegments;												// Point at time segments
 	if (ts) {																// If segments
 		w=$($("#timeSlider")).width();										// Width of slider
 		var w1=w-(ts.length-1)*2;											// Remove spaces between segs
@@ -168,7 +168,7 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 		var rowPad=4;														// Space between rows
 		var offx=(s-this.start)/Math.max(1,(this.end-this.start))*-w;		// Offset from full timeline start (avoid / 0)
 		$("#svgMarkers").attr("transform","translate("+offx+",0)");			// Move markers group
-			
+		
 		for (i=0;i<this.sd.mobs.length;++i) {								// For each mob
 			o=this.sd.mobs[i];												// Point at mob
 			if (!o.marker || (o.type != "icon"))							// No marker set, or not a type shown on timeline
@@ -176,8 +176,8 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 			x=(o.start-s)/dur;												// Percent in timeline
 			x=(x*w)+ew+m-offx;												// Percent in div
 			y=h-rowHgt;														// Default to 1st row
-			if (o.row)														// If a row spec'd
-				y=h-(o.row*rowHgt+(o.row-1)*rowPad);						// Position it
+			if (o.pos)														// If a row spec'd
+				y=h-(o.pos*rowHgt+(o.pos-1)*rowPad);						// Position it
 			$("#svgMarker"+i).attr("transform","translate("+x+","+y+")");	// Move marker
 			if (o.end)	 {													// If a spanned event
 				x=(o.end-o.start)/dur*w;									// Calc end
@@ -536,7 +536,11 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 	$(this.div).append(str+"</div>");										// Add timeview bar				
 
 	for (i=0;i<this.sd.mobs.length;++i) {									// For each mob
-		
+		o=this.sd.mobs[i];													// Point at mob
+		if (!o.marker || (o.type != "icon"))								// No marker set, or not an icon
+			continue;														// Skip
+		o.markerWidth=$("#svgMarker"+i)[0].getBBox().width;					// Save marker width
+
 		$("#svgMarker"+i).on('click', function(e) {							// ON MARKER CLICK
 				var v,j,a;
 				var id=e.currentTarget.id.substr(9);						// Get ID

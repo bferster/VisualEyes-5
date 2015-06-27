@@ -176,8 +176,9 @@
 	function InitProject(data)												// INIT PROJECT
 	{
 		var i,s,e,v,t,id;
-		if (data)			curJson=data;										// If data, set it
-		if (!curJson.mobs)	curJson.mobs=[];									// Alloc if empty
+		if (data)							curJson=data;						// If data, set it
+		if (!curJson.mobs)					curJson.mobs=[];					// Alloc if empty
+		if (curJson.panTime == undefined)	curJson.panTime=.5;					// Default to 500ms
 		mps.ClearLayers();														// Clar all layera
 		if (!data) {			
 			curJson.sheet="";
@@ -283,7 +284,7 @@ $(this).val(0)
 
 	function Draw(time)														// DRAW PROJECT
 	{
-		mps.UpdateMap(time,curJson.timeFormat);									// Update map layers
+		mps.UpdateMap(time,curJson.timeFormat,curJson.panTime);					// Update map layers
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -445,8 +446,9 @@ $(this).val(0)
 		str+="<tr><td>Map&nbsp;Label&nbsp;font</td><td><input id='setstfont' class='ve-is' style='width:160px' type='input'></td></tr>";
 		str+="<tr><td>Map start</td><td><input id='setstartpos' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td>Map&nbsp;base </td><td>"+MakeSelect("setbase",false,["Satellite","Terrain","Earth","Watercolor","B&W","Roadmap"],curJson.baseMap);
-		str+="<tr><td>Current&nbsp;location</td><td><input id='setwhere' class='ve-is' style='width:220px' type='input'></td></tr>";
-		str+="<tr><td>Current&nbsp;point</td><td><input id='setpoint' class='ve-is' style='width:220px' type='input'></td></tr>";
+		str+="<tr><td>Map&nbsp;pan&nbsp;time</td><td><input id='setpan' class='ve-is' style='width:80px' type='input'>&nbsp;seconds</td></tr>";
+		str+="<tr><td>Map&nbsp;location</td><td><input id='setwhere' class='ve-is' style='width:220px' type='input'></td></tr>";
+		str+="<tr><td>Map&nbsp;point</td><td><input id='setpoint' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td colspan=2><br></td> <tr>";
 		str+="<tr><td>Options</td><td>"+MakeSelect("setfile",false,["Save/Load","Load","Save","Save as...","Delete","Undelete"],"Save/Load");
 		str+="&nbsp;&nbsp;&nbsp<i>"+(_this.curShow ? "#"+_this.curShow : '')+"</i>&nbsp;&nbsp;&nbsp;"
@@ -465,6 +467,7 @@ $(this).val(0)
 					InitProject(curJson);										// Re-init project
 			});
 						
+ 		$("#setpan").val(curJson.panTime);										// Set pan time
  		$("#setbase").val(curJson.baseMap);										// Set base
 		$("#settime").val(curJson.timeFormat);									// Set timeformat
 		$("#setstart").val(curJson.start);										// Set start
@@ -479,6 +482,7 @@ $(this).val(0)
 		pop.ColorPicker("setstcol",-1,true);									// Init color
 	
 		function getDataFromInputs() {											// GET DATA FROM DIALOG ELEMENTS
+			curJson.panTime=$("#setpan").val();									// Set map pan time
 			curJson.mapTextCol=$("#setstcol").val();							// Set map label color
 			curJson.mapTextFont=$("#setstfont").val();							// Set map label font
 			curJson.start=$("#setstart").val();									// Set start

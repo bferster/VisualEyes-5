@@ -23,11 +23,12 @@ function Space(div, pop)														// CONSTRUCTOR
 	this.showRoads=false;													// Hide Roads/borders
 	this.showScale=true;													// Show scale
 	this.timeFormat="Mon Day, Year";										// Default time format
+	this.panTime=.5;														// Time to pan to position
 	this.overlays=[];														// Holds overlay layers
 }
 
 
-Space.prototype.UpdateMap=function(curTime, timeFormat)					// UPDATE MAP
+Space.prototype.UpdateMap=function(curTime, timeFormat, panTime)		// UPDATE MAP
 {
 
 /*
@@ -39,6 +40,7 @@ Space.prototype.UpdateMap=function(curTime, timeFormat)					// UPDATE MAP
 	this.timeFormat=timeFormat;												// Set format
 	this.curTime=curTime-0;													// Set current timet
 	this.DrawMapLayers();													// Redraw map
+	this.panTime=panTime;													// Time to pan to position
 }
 
 
@@ -236,9 +238,8 @@ Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 			&& (Math.abs(fr-r) < 1) && (Math.abs(fr-r) < 1)					// Rotation  match
 			)																// Already there
 		return;																// Quit
-var duration=0;														// Duration
+	var duration=this.panTime*1000;											// Duration
 	var start=+new Date();													// Start time
-start=0;	
 	var pan=ol.animation.pan({												// Pan
 	    duration: duration,													// Duration
 	    source: fc,															// Start value
