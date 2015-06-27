@@ -545,7 +545,10 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 				var v,j,a;
 				var id=e.currentTarget.id.substr(9);						// Get ID
 				o=_this.sd.mobs[id];										// Point at mob
-			    _this.pop.ShowPopup(_this.div,_this.timeFormat,e.pageX+8,e.pageY-70,o.title,o.desc,o.pic,o.start,o.end);	// Show popup
+			    str=o.desc;
+			    if (o.citation)												// If a cite
+			    	str+="<br><br><div id='popcite' class='popup-cite'>__________________<br><br>"+o.citation+"</div>"; // Add cite
+			    _this.pop.ShowPopup(_this.div,_this.timeFormat,e.pageX+8,e.pageY-70,o.title,str,o.pic,o.start,o.end);	// Show popup
 				_this.SendMessage("time",o.start);							// Send new time
 				if (o.click) {												// If a click defined
 					v=o.click.split("+");									// Divide into individual actions

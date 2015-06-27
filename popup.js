@@ -83,6 +83,7 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 		$("#poppic").css("max-width",$(div).width()*(desc ? .33*r : .66*r)+"px");	// Make pic bigger
 		x=$(div).width()/2-$("#st-popup").width()/2;						// Center it
 		$("#st-popup").css({left:(x+8)+"px",top:"70px"});					// Position
+		$("#popcite").fadeIn();												// Show citation, if any
 		});	
 
 	$("#poppic").click( function(e) {										// ON CLICK OF PIC
