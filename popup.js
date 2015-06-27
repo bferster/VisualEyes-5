@@ -88,6 +88,7 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 	$("#poppic").click( function(e) {										// ON CLICK OF PIC
 		if ($("#st-popup").width() < 301)									// If not enlarged
 			return;															// Do nothing							
+		$("#popdesc").html("");												// Clear description
 		$("#st-popup").css("cursor","auto");								// Normal cursor
 		var r=($("#poppic").width()/$("#poppic").height() < 1) ? .33 : .66;	// Make smaller if portait mode
 		$("#poppic").css("cursor","auto");									// Normal cursor
