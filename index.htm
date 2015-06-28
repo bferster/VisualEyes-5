@@ -541,7 +541,7 @@ $(this).val(0)
 			dat["title"]=title;													// Add title
 			dat["type"]=type;													// Add type
 			dat["data"]=data;													// Add data
-			$.ajax({ url:url,dataType:'text',type:"POST",crossDomain:true,data:dat,  	// Post data
+			$.ajax({ url:url,dataType:'text',type:"POST",crossDomain:true,data:dat,  // Post data
 					success: function(d) { 										// On success		
 					 	if (d.match(/new:/i)) 									// Success				
 							_this.pop.Sound("ding");							// Ding
@@ -551,8 +551,7 @@ $(this).val(0)
 					error: function(xhr,status,error) {							// Error
 						_this.pop.Sound("delete") 								// Error sound
 						}								
-				});
-	
+					});
 			});
 	}	
 
