@@ -120,7 +120,7 @@
 	var paneAnimationTimer=null;												// Times pane animations
 	var imageAnimationTimer=[];													// Times image animations
 	var isMobile=false;															// Flag for mobile devices
-	var host="//viseyes.org/";													// Set host
+	var host="//qmediaplayer.com/";												// Set host for database saves
 	var userName="",password="",curShow=0;										// Login info
 	var lastClickTime=0;														// Store last click time
 	var drupalMan=false;														// Flag for drupal manager	
@@ -452,7 +452,7 @@ $(this).val(0)
 		str+="<tr><td>Map&nbsp;location</td><td><input id='setwhere' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td>Map&nbsp;point</td><td><input id='setpoint' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td colspan=2><br></td> <tr>";
-		str+="<tr><td>Options</td><td>"+MakeSelect("setfile",false,["Save/Load","Load","Save","Save as...","Delete","Undelete"],"Save/Load");
+		str+="<tr><td>Options</td><td>"+MakeSelect("setfile",false,["Save/Load","Load","Save","Save as...","Delete","Undelete","xxx"],"Save/Load");
 		str+="&nbsp;&nbsp;&nbsp<i>"+(_this.curShow ? "#"+_this.curShow : '')+"</i>&nbsp;&nbsp;&nbsp;"
 		str+="Help <a href='https://docs.google.com/document/d/161td5ZuqKqT5R5r9z1P8AxBA6l9LaP-eYl_RvCyvw2g/edit?usp=sharing' target='_blank'>";
 		str+="<img src='img/helpicon.gif' style='vertical-align:bottom' title='Show help'></a></td>";
@@ -521,10 +521,44 @@ $(this).val(0)
 				case "Save as..." : qmf.Save(1);	break;						// Save as..
 				case "Delete" : 	qmf.Delete(0);	break;						// Delete
 				case "Undelete" : 	qmf.Delete(1);	break;						// UndDelete
+				
+				case "xxx" : 	pop.LogIn(function(un, pw) {
+										 trace(un,pw);
+										 });
+				
+					break;						
 				}
 			$(this).val("Save/Load");											// Reset select
 			}); 
 		});																		// End settings
+
+
+		
+	function SaveUserData(userName, password, title, data)					// SAVE DATA TO USERDATA
+	{		
+		var url=host+"saveuserdata.php";										// Base file
+		dat["email"]=userName;													// Add email
+		dat["password"]=password;												// Add password
+		dat["title"]=title;														// Add title
+		dat["data"]=data														// Add data
+		$.ajax({ url:url,dataType:'text',type:"POST",crossDomain:true,data:dat});  	// Post data
+	}
+
+	function GetUserData(callback)											// LOAD DATA TO USERDATA
+	{		
+		var url=host+"loaduserdata.php";										// Base file
+		dat["email"]=userName;													// Add email
+		dat["password"]=password;												// Add password
+		dat["title"]=title;														// Add title
+		dat["data"]=data														// Add data
+		$.ajax({ url:url,dataType:'jsonp',data:dat});  							// Get data
+	}
+	
+
+	function LoadUserData(data)											// HANDLE INCOMING DATA LOAD
+	{
+		trace(data)
+	}
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
