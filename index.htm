@@ -520,13 +520,10 @@ $(this).val(0)
 					break;						
 				case "Save as..." : qmf.Save(1);	break;						// Save as..
 				case "Delete" : 	qmf.Delete(0);	break;						// Delete
-				case "Undelete" : 	qmf.Delete(1);	break;						// UndDelete
+				case "Undelete" : 	qmf.Delete(1);	break;						// Undelete
 				
-				case "xxx" : 	pop.LogIn(function(un, pw) {
-										 trace(un,pw);
-										 });
-				
-					break;						
+				case "xxx" : 	SaveUserData("Some data", "data set", "KML");
+								break;						
 				}
 			$(this).val("Save/Load");											// Reset select
 			}); 
@@ -534,19 +531,35 @@ $(this).val(0)
 
 
 		
-	function SaveUserData(userName, password, title, data)					// SAVE DATA TO USERDATA
+	function SaveUserData(title, data, type)								// SAVE DATA TO USERDATA
 	{		
-		var url=host+"saveuserdata.php";										// Base file
-		dat["email"]=userName;													// Add email
-		dat["password"]=password;												// Add password
-		dat["title"]=title;														// Add title
-		dat["data"]=data														// Add data
-		$.ajax({ url:url,dataType:'text',type:"POST",crossDomain:true,data:dat});  	// Post data
-	}
+		pop.LogIn( function(userName, password) {								// Log in
+			var dat={};
+			var url="savedata.php";												// Base file
+			dat["email"]=userName;												// Add email
+			dat["password"]=password;											// Add password
+			dat["title"]=title;													// Add title
+			dat["type"]=type;													// Add type
+			dat["data"]=data;													// Add data
+			$.ajax({ url:url,dataType:'text',type:"POST",crossDomain:true,data:dat,  	// Post data
+					success: function(d) { 										// On success		
+					 	if (d.match(/new:/i)) 									// Success				
+							_this.pop.Sound("ding");							// Ding
+					 	else 													// Failure			
+							_this.pop.Sound("delete");							// Error sound
+						},
+					error: function(xhr,status,error) {							// Error
+						_this.pop.Sound("delete") 								// Error sound
+						}								
+				});
+	
+			});
+	}	
 
 	function GetUserData(callback)											// LOAD DATA TO USERDATA
 	{		
-		var url=host+"loaduserdata.php";										// Base file
+		var dat={};
+		var url="loaddata.php";													// Base file
 		dat["email"]=userName;													// Add email
 		dat["password"]=password;												// Add password
 		dat["title"]=title;														// Add title
