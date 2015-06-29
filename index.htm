@@ -205,12 +205,12 @@
 					id=marker.match(/id=(.+)&/);								// Extract id
 					if (id)	{													// An id found
 						var s="//drive.google.com/uc?export=view&id="+id[1];	// Construct 'direct' link
-						o.lid=mps.AddKMLLayer(s,o.opacity,s,e);					// Add KML layer								 
+						o.lid=mps.AddKMLLayer(s,o.opacity,o.id,s,e);			// Add KML layer								 
 						}
 					}
 				else if (marker.match(/\.kml/i)) {								// A KML file
 					o.type="kml";												// Set type
-					o.lid=mps.AddKMLLayer(marker,o.opacity,s,e);				// Add KML layer								 
+					o.lid=mps.AddKMLLayer(marker,o.opacity,o.id,s,e);			// Add KML layer								 
 					}
 				else if (marker.match(/path/i)) {								// A path
 					var dots=[];
@@ -242,6 +242,8 @@
 					o.type="segment";											// Set type
 				else if (marker.match(/init/i)) 								// An init
 					o.type="init";												// Set type
+				else if (marker.match(/:/)) 									// A feature click
+					o.type="feature";											// Set type
 				else if (o.where) { 											// Must be an icon
 					var sty={};													// Not style
 					o.type="icon";												// Set type

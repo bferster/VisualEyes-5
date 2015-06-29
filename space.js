@@ -170,6 +170,20 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 	this.map.on('click', function(e) {										// ON CLICK
 		var c=ol.proj.transform(e.coordinate,_this.curProjection,'EPSG:4326');	// Get center
 		$("#setpoint").val(Math.floor(c[0]*10000)/10000+","+Math.floor(c[1]*10000)/10000);
+		if (e.browserEvent.shiftKey) {										// If shift key presssed
+  			var lay;
+  			var feature=_this.map.forEachFeatureAtPixel(e.pixel,			// Look through features
+      			function(feature, layer) {									// On match to location
+         			lay=layer;												// Save layer
+         			return feature;											// Return feature
+      				});
+			if (feature) {													// If one found
+  				var j,v,a;
+  				var id=feature.getId()+"";									// Get feature id
+    			if (lay.get("kmlId")) 										// If a KML id
+ 					$("#setpoint").val(lay.get('kmlId')+":"+id);			// Show full id
+				}
+			}
 		});
 
 	this.map.on('moveend', function(e) {									// On end of move
@@ -504,12 +518,14 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 		this.markerLayer.getSource().getFeatures()[indices[i]].setStyle(s);	// Set style
 }
 
-Space.prototype.AddKMLLayer=function(url, opacity, start, end) 			// ADD KML LAYER TO MAP						
+Space.prototype.AddKMLLayer=function(url, opacity, id, start, end) 		// ADD KML LAYER TO MAP						
 {
 
 /* 	
  	Add kml file to map as a new layer
-   	@param {string} 		url URL of kml file
+   	@param {string} url 	URL of kml file
+   	@param {number} opacity	Initial opacity of layer
+  	@param {string} id 		ID if layer
  	@param {number} start 	Starting time of marker in number of mins += 1/1/1970
 	@param {number} end 	Ending time of marker in number of mins += 1/1/1970
  	@return {number}		index of new layer added to overlays array.
@@ -533,6 +549,7 @@ Space.prototype.AddKMLLayer=function(url, opacity, start, end) 			// ADD KML LAY
 				  			})
 						});
 	
+	o.src.set('kmlId',id)													// Set idt
 	o.src.set('visible',false)												// Hide it
 	this.overlays.push(o);													// Add to overlay
 	this.loadCounter++;														// Add to count
@@ -705,14 +722,26 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
   	var _this=this;															// Save context for callbacks
 
  	this.map.on('click', function(evt) {									// ON MAP CLICK
+  			var lay;
   			var feature=_this.map.forEachFeatureAtPixel(evt.pixel,			// Look through features
       			function(feature, layer) {									// On match to location
-        			return feature;											// Return feature
+         			lay=layer;												// Save layer
+         			return feature;											// Return feature
       			});
 			if (feature) {													// If one found
   				var j,v,a;
   				var id=feature.getId()+"";
-    			if (id.match(/Mob-/)) {										// If a mob
+    			if (lay.get("kmlId")) {										// If a KML id
+ 					var rx=new RegExp(lay.get('kmlId')+":"+id);				// Make patt
+       				for (j=0;j<curJson.mobs.length;++j) {					// For each mob				
+     					o=curJson.mobs[j];									// Point at mob data
+ 	 					if (o.marker && o.marker.match(rx)) {				// If a feature kml:feature match
+ 	 						id="Mob-"+j;									// Point at mov with info
+ 	 						break;
+ 	 						}
+ 	 					}
+ 	 				}
+     			if (id.match(/Mob-/)) {										// If a mob
   					o=curJson.mobs[id.substr(4)];							// Point at mob data
  					if (o.title) 		var title=o.title;					// Lead with title
   					if (o.spaceTitle) 	var title=o.spaceTitle;				// Space over-rides
@@ -723,7 +752,8 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
        				if (o.citation)											// If a cite
 			    	desc+="<br><br><div id='popcite' class='popup-cite'>__________________<br><br>"+o.citation+"</div>"; // Add cite
      				_this.pop.ShowPopup(_this.div,_this.timeFormat,evt.pixel[0],evt.pixel[1],title,desc,pic,o.start,o.end);
-					_this.SendMessage("time",o.start);						// Send new time
+					if (o.start)											// If a time defined
+						_this.SendMessage("time",o.start);					// Send new time
 					if (o.click) {											// If a click defined
 						v=o.click.split("|");								// Divide into individual actions
 						for (j=0;j<v.length;++j) {							// For each action
