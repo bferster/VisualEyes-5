@@ -127,6 +127,39 @@ Popup.prototype.GetTextBox=function (title, content, def, callback)		// GET TEXT
 }
 
 
+Popup.prototype.FileSelect=function (files, callback)					// SELECT FILE FROM LIST
+{
+	var i;
+	var trsty=" style='height:20px;cursor:pointer' onMouseOver='this.style.backgroundColor=\"#dee7f1\"' ";
+	trsty+="onMouseOut='this.style.backgroundColor=\"#f8f8f8\"'";
+	$("#lightBoxDiv").remove();												// Close old one
+	str="<br>Choose file from the list below.<br>"
+	str+="<br><div style='width:100%;max-height:300px;overflow-y:auto'>";
+	str+="<table style='font-size:12px;width:100%;padding:0px;border-collapse:collapse;'>";
+	str+="<tr></td><td><b>Title </b></td><td><b>Date&nbsp;&&nbsp;time</b></td><td><b>&nbsp;&nbsp;&nbspId</b></tr>";
+	str+="<tr><td colspan='3'><hr></td></tr>";
+	for (i=0;i<files.length;++i) 										// For each item
+		str+="<tr id='pop"+i+"' "+trsty+"><td>"+files[i].title+"</td><td>"+files[i].date.substr(5,11)+"</td><td align=right>"+files[i].id+"</td></tr>";
+	str+="</table></div><div style='font-size:12px;text-align:right'><br>";	
+	str+=" <button class='ve-bs' id='fsCancel'>Cancel</button></div>";	
+	pop.ShowLightBox("Load a file",str);								// Show lightbox
+
+	for (i=0;i<files.length;++i) {										// For each item
+		
+		$("#pop"+i).click(function(e) {									// CLICK ON ITEM
+			var id=e.currentTarget.id.substr(3);						// Extract id
+			callback(files[id].id,files[id].title);						// Run callback with id, title
+			$("#lightBoxDiv").remove();									// Close
+			});
+		}
+
+	$("#fsCancel").click(function() {									// CANCEL BUTTON
+		$("#lightBoxDiv").remove();										// Close
+		});
+
+}
+
+
 Popup.prototype.Dialog=function (title, content, callback)				// DIALOG BOX
 {
 	this.Sound("click");													// Ding sound
@@ -195,7 +228,7 @@ Popup.prototype.ShowLightBox=function(title, content)				// LIGHTBOX
 	str="<div id='lightBoxIntDiv' class='unselectable' style='position:absolute;padding:16px;width:400px;font-size:12px";
 	str+=";border-radius:12px;z-index:2003;"
 	str+="border:1px solid; left:"+x+"px;top:"+y+"px;background-color:#f8f8f8'>";
-	str+="<img src='imgshantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
+	str+="<img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
 	str+="<span id='lightBoxTitle' style='font-size:18px;text-shadow:1px 1px #ccc'><b>"+title+"</b></span>";
 	str+="<div id='lightContentDiv'>"+content+"</div>";					
 	$("#lightBoxDiv").append(str);	

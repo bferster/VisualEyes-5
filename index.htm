@@ -120,7 +120,7 @@
 	var paneAnimationTimer=null;												// Times pane animations
 	var imageAnimationTimer=[];													// Times image animations
 	var isMobile=false;															// Flag for mobile devices
-	var host="//qmediaplayer.com/";												// Set host for database saves
+	var host="//viseyes.org/visualeyes/";										// Set host for database save/load
 	var userName="",password="",curShow=0;										// Login info
 	var lastClickTime=0;														// Store last click time
 	var drupalMan=false;														// Flag for drupal manager	
@@ -524,7 +524,7 @@ $(this).val(0)
 				case "Delete" : 	qmf.Delete(0);	break;						// Delete
 				case "Undelete" : 	qmf.Delete(1);	break;						// Undelete
 				
-				case "xxx" : 	SaveUserData("Some data", "data set", "KML");
+				case "xxx" : 	GetUserData("KML",  function() {});
 								break;						
 				}
 			$(this).val("Save/Load");											// Reset select
@@ -537,7 +537,7 @@ $(this).val(0)
 	{		
 		pop.LogIn( function(userName, password) {								// Log in
 			var dat={};
-			var url="savedata.php";												// Base file
+			var url=host+"savedata.php";										// Base file
 			dat["email"]=userName;												// Add email
 			dat["password"]=password;											// Add password
 			dat["title"]=title;													// Add title
@@ -557,17 +557,23 @@ $(this).val(0)
 			});
 	}	
 
-	function GetUserData(callback)											// LOAD DATA TO USERDATA
+	function GetUserData(type, callback)									// LOAD DATA TO USERDATA
 	{		
-		var dat={};
-		var url="loaddata.php";													// Base file
-		dat["email"]=userName;													// Add email
-		dat["password"]=password;												// Add password
-		dat["title"]=title;														// Add title
-		dat["data"]=data														// Add data
-		$.ajax({ url:url,dataType:'jsonp',data:dat});  							// Get data
+		pop.LogIn( function(userName, password) {								// Log in
+			var url=host+"getdata.php?type="+type;								// Base file
+			if (userName)	url+="&email="+userName;							// If email, add to query line
+			$.ajax({ url:url, dataType:'jsonp'});								// Get data and pass to popListFiles()
+			});
+
 	}
 	
+	function popListFiles(files)											// CALLBACK TO List()
+	{
+		pop.FileSelect(files,function(id) {										// Select fiels
+			var url=host+"loaddata.php?id="+id;									// Base file
+			$.ajax({ url:url,dataType:'jsonp'});  								// Get data
+			});
+	}
 
 	function LoadUserData(data)											// HANDLE INCOMING DATA LOAD
 	{
