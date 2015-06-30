@@ -987,11 +987,15 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 
 	function CloseGeoRef()												// CLOSE UP GEOREFERENCING
 	{	
-		_this.map.removeInteraction(_this.geoRef.modify);					// Remove int
-		_this.drawLayer.getFeatures().clear();								// Clear existing points
-		_this.map.unByKey(_this.geoRef.pDrag)								// Remove drag handler
-		_this.map.unByKey(_this.geoRef.pUp)									// Remove mouse up handler
-		delete _this.geoRef.img;											// Remove added pic
+		if (_this.drawLayer) {												// If drawlayer set
+			_this.drawLayer.getFeatures().clear();							// Clear existing points
+			_this.map.unByKey(_this.geoRef.pDrag)							// Remove drag handler
+			_this.map.unByKey(_this.geoRef.pUp)								// Remove mouse up handler
+			}
+		if (_this.geoRef && _this.geoRef.modify)							// If modify set
+			_this.map.removeInteraction(_this.geoRef.modify);				// Remove int
+		if (_this.geoRef)													// If set
+			delete _this.geoRef.img;										// Remove added pic
 		_this.geoRef=null;													// Kill georef
 		_this.DrawMapLayers();												// Redraw map
 	}
