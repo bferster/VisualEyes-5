@@ -972,7 +972,7 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 					}
 				else if (id == "georef4") {									// SW
 					w=p[0];													// Set W
-					s=n((e-w)*asp);											// Set S
+					s=n-((e-w)*asp);										// Set S
 					if (shift)												// If shift key											
 						s=p[1];												// Distort aspect
 					}
@@ -983,7 +983,6 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 		
 	};
 });
-
 
 	function CloseGeoRef()												// CLOSE UP GEOREFERENCING
 	{	
@@ -1062,7 +1061,7 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 				o.pts[i].f.getGeometry().setCoordinates(p);					// Set geometry
 			}
 		}
-}
+}																			// End georef
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // DRAWING
