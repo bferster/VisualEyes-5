@@ -155,9 +155,12 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 				}),
 		];
 
+	this.featureSelect=new ol.interaction.Select();							// Create select interaction
+
     this.map=new ol.Map( { target: this.div.substr(1),						// Alloc OL
         layers:this.layers,													// Layers array									
-        controls: ol.control.defaults({										// Controls
+		interactions: ol.interaction.defaults().extend([this.featureSelect]),	// Add feature select interaction
+       controls: ol.control.defaults({										// Controls
 				}).extend([ new ol.control.ScaleLine() ]),					// Add scale
         view: new ol.View({													// Views
           		center: ol.proj.transform( [-77,34],'EPSG:4326',this.curProjection),
@@ -857,14 +860,11 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 	str+="<tr><td></td><td><button id='grstart' class='ve-bs'>Geo-reference</button><td></td><tr>";
 	str+="</tr></table>";
 	this.pop.Dialog("Geo-reference image",str, function() {					// On OK
-		delete _this.geoRef.img;											// Remove added pic
-		_this.geoRef=null;													// Kill georef
-		_this.DrawMapLayers();												// Redraw map
-		}, function() {														// On cancel
-		delete _this.geoRef.img;											// Remove added pic
-		_this.geoRef=null;													// Kill georef
-		_this.DrawMapLayers();												// Redraw map
-		});
+				CloseGeoRef();												// Close out
+				}, 
+				function() {												// On cancel
+				CloseGeoRef();												// Close out
+				});
 	$("#dialogDiv").dialog("option","position", { at: "center center", of: "#rightDiv" })
 
 	if (where) {															// If a where defined
@@ -925,17 +925,9 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 			_this.geoRef.img=new MapImage(url,$("#grc").val(),_this);		// Replace image with new MapImage obj
 			_this.DrawMapLayers();											// Redraw map
 
-	if (_this.drawingLayer)													// If already there
-		_this.map.removeLayer(_this.drawingLayer);							// Remove layer
-	_this.drawingLayer=new ol.layer.Vector({source: new ol.source.Vector()});// Create box layer
-	_this.map.addLayer(_this.drawingLayer);									// Add to map	
-
-	if (_this.geoRef) {														// If geo referencing left open
-		if (_this.geoRef.modify)											// If interaction initted													
-			_this.map.removeInteraction(_this.geoRef.modify);				// Remove it
-		_this.drawingLayer.getFeatures().clear();							// Clear existing points
-		_this.map.unByKey(_this.geoRef.pDrag)								// Remove drag handler
-		_this.map.unByKey(_this.geoRef.pUp)									// Remove mouse up handler
+	if (!_this.drawLayer) {													// If not already there
+		_this.drawLayer=new ol.FeatureOverlay({ source: new ol.source.Vector() } );	// Feature overlay for georef
+		_this.drawLayer.setMap(_this.map);									// Add to map
 		}
 	asp=(n-s)/(e-w);														// Calc image asp
 	SetControlDots(true);													// Starter dots
@@ -945,45 +937,46 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 			ReDrawImage();													// Redraw image
 			});															 
 
-	_this.geoRef.pDrag=_this.map.on('pointerdrag',function(e) {				// ON MOUSE DRAG
+	_this.geoRef.pDrag=_this.map.on('pointerdrag',function(evt) {			// ON MOUSE DRAG
 		if (_this.geoRef) {													// If geo referencing
 			var id;
-			var shift=ol.events.condition.shiftKeyOnly(e);					// Shift key status
-			var p=ol.proj.transform(e.coordinate,_this.curProjection,"EPSG:4326"); // Project cur coord
-			map.forEachFeatureAtPixel(e.pixel,function(f) {					// Look at features
+			var shift=ol.events.condition.shiftKeyOnly(evt);				// Shift key status
+			var p=ol.proj.transform(evt.coordinate,_this.curProjection,"EPSG:4326"); // Project cur coord
+			_this.map.forEachFeatureAtPixel(evt.pixel,function(f) {			// Look at features
 				id=f.getId();												// Get id of feature
 				if (id == "georef0") {										// Move all dots
-					var w=Math.abs(e-w)/2;									// Get width
-					var h=Math.abs(n-s)/2;									// Get height
-					w=p[0]-w;												// Set W
-					e=p[0]+w;												// Set E
-					n=p[1]+h;												// Set N
-					s=p[1]-h;												// Set S
+					var w2=Math.abs(e-w)/2;									// Get width
+					var h2=Math.abs(n-s)/2;									// Get height
+					w=p[0]-w2;												// Set W
+					e=p[0]+w2;												// Set E
+					n=p[1]+h2;												// Set N
+					s=p[1]-h2;												// Set S
 					}
 				else if (id == "georef1") {									// NW
 					w=p[0];													// Set W
-					n=((e-w)*o.asp)+(s-0);									// Set N
+					n=((e-w)*asp)+(s-0);									// Set N
 					if (shift)												// If shift key											
 						n=p[1];												// Distort aspect
 					}
 				else if (id == "georef2") {									// NE
 					e=p[0];													// Set E
-					n=((e-w)*o.asp)+(s-0);									// Set N
+					n=((e-w)*asp)+(s-0);									// Set N
 					if (shift)												// If shift key											
 						n=p[1];												// Distort aspect
 					}
 				else if (id == "georef3") {									// SE
 					e=p[0];													// Set E
-					s=n-((e-w)*o.asp);										// Set S
+					s=n-((e-w)*asp);										// Set S
 					if (shift)												// If shift key											
 						s=p[1];												// Distort aspect
 					}
 				else if (id == "georef4") {									// SW
 					w=p[0];													// Set W
-					s=n((e-w)*o.asp);										// Set S
+					s=n((e-w)*asp);											// Set S
 					if (shift)												// If shift key											
 						s=p[1];												// Distort aspect
 					}
+				ReDrawImage(true);											// Redraw image only, not the dots
 				});															// Each feature
 			}
 		});															 
@@ -992,25 +985,37 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 });
 
 
-	function ReDrawImage()													// REDRAW MAP
-	{
-		_this.MapImage(url,where,_this);									// Reset map image
-		SetControlDots(true);												// Reset control dots
-		var str=n+","+s+","+e+","+w+","+r;									// Make where
-		}
-	
+	function CloseGeoRef()												// CLOSE UP GEOREFERENCING
+	{	
+		_this.map.removeInteraction(_this.geoRef.modify);					// Remove int
+		_this.drawLayer.getFeatures().clear();								// Clear existing points
+		_this.map.unByKey(_this.geoRef.pDrag)								// Remove drag handler
+		_this.map.unByKey(_this.geoRef.pUp)									// Remove mouse up handler
+		delete _this.geoRef.img;											// Remove added pic
+		_this.geoRef=null;													// Kill georef
+		_this.DrawMapLayers();												// Redraw map
 	}
-
+	
+	function ReDrawImage(noDots)										// REDRAW MAP
+	{
+		var pos=n+","+s+","+e+","+w+","+r;									// Make where
+		_this.geoRef.img=new MapImage(url,pos,_this);						// Reset map image
+		_this.DrawMapLayers();												// Redraw map
+		$("#grn").val(n);		$("#grs").val(s);	$("#grc").val(pos);		// N/S/C
+		$("#gre").val(e);		$("#grw").val(w); 	$("#grr").val(r);		// E/W/R
+		if (!noDots)														// If moving dots too
+			SetControlDots();												// Reset control dots
+		}
 	
 	function SetControlDots(init)										// SET GEO REFERENCE CONTROL DOTS
 	{
 		var i,p=[];
 		var o=_this.geoRef;													// Point at georef data
 		if (o.modify)														// If interaction initted													
-			map.removeInteraction(o.modify);								// Remove it
-			this.map.addInteraction( o.modify=new ol.interaction.Modify({	// Add modify interaction
- 						features: _this.drawLayer.getFeatures()				// Point at features
-						})
+			_this.map.removeInteraction(o.modify);							// Remove it
+			_this.map.addInteraction( o.modify=new ol.interaction.Modify({	// Add modify interaction
+				features: _this.drawLayer.getFeatures()						// Point at features
+				})
 			);
 
 		if (init) {															// If initting
@@ -1025,7 +1030,7 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 			   		})
 				})
 			}
-		
+	
 		o.pts[0].x=w+Math.abs(e-w)/2;										// CX
 		o.pts[0].y=s+Math.abs(n-s)/2;										// CY
 		o.pts[1].x=w-0;	o.pts[1].y=n-0;										// NW
@@ -1052,8 +1057,8 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 			else															// Just moving them
 				o.pts[i].f.getGeometry().setCoordinates(p);					// Set geometry
 			}
-	}
-
+		}
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // DRAWING
