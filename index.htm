@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="UTF-8" />
-	<link REL="SHORTCUT ICON" HREF="img/UVALogo.ico">
+	<link REL="SHORTCUT ICON" HREF="img/shanti.ico">
 	<title>VisualEyes</title>
  	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>	
 	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css" />
@@ -454,7 +454,7 @@ $(this).val(0)
 		str+="<tr><td>Map&nbsp;location</td><td><input id='setwhere' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td>Map&nbsp;point</td><td><input id='setpoint' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td colspan=2><br></td> <tr>";
-		str+="<tr><td>Options</td><td>"+MakeSelect("setfile",false,["Save/Load","Load","Save","Save as...","Delete","Undelete","xxx"],"Save/Load");
+		str+="<tr><td>Options</td><td>"+MakeSelect("setfile",false,["Save/Load","Load","Save","Save as...","Delete","Undelete","Drawing","Geo-reference"],"Save/Load");
 		str+="&nbsp;&nbsp;&nbsp<i>"+(_this.curShow ? "#"+_this.curShow : '')+"</i>&nbsp;&nbsp;&nbsp;"
 		str+="Help <a href='https://docs.google.com/document/d/161td5ZuqKqT5R5r9z1P8AxBA6l9LaP-eYl_RvCyvw2g/edit?usp=sharing' target='_blank'>";
 		str+="<img src='img/helpicon.gif' style='vertical-align:bottom' title='Show help'></a></td>";
@@ -523,9 +523,11 @@ $(this).val(0)
 				case "Save as..." : qmf.Save(1);	break;						// Save as..
 				case "Delete" : 	qmf.Delete(0);	break;						// Delete
 				case "Undelete" : 	qmf.Delete(1);	break;						// Undelete
-				
-				case "xxx" : 	GetUserData("KML",  function() {});
-								break;						
+				case "Drawing" : 												// Drawing
+					$("#dialogDiv").remove();									// Close dialog
+					mps.DrawingTool();											// Run KML drawing tool
+					break;											
+				case "Geo-reference" : 	mps.GeoReference("//farm9.staticflickr.com/8019/7310697988_18eb47c466_z.jpg");	break;		// Georef
 				}
 			$(this).val("Save/Load");											// Reset select
 			}); 
@@ -577,7 +579,7 @@ $(this).val(0)
 
 	function LoadUserData(data)											// HANDLE INCOMING DATA LOAD
 	{
-		trace(data)
+		trace(data.data)
 	}
 
 

@@ -91,6 +91,8 @@ Space.prototype.DrawMapLayers=function(indices, mode)					// DRAW OVERLAY LAYERS
          		this.DrawPath(o.src, o.dots, this.curTime, o.end, o.show)	// Show it
           }
         }
+	if (this.geoRef)														// If georeferencing
+		this.geoRef.img.drawMapImage(this.geoRef.a,this);					// Show pic we're referencing
 }
 
 
@@ -830,93 +832,120 @@ Space.prototype.SendMessage=function(cmd, msg) 							// SEND MESSAGE
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-// GEO REFERENCE
+// GEO-REFERENCE
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-Space.prototype.GeoReferenceMap=function(url, where)					// GEO REFERENCE IMAGE
+Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 {
-	if (this.drawingLayer)													// If already there
-		this.map.removeLayer(this.drawingLayer);							// Remove layer
-	this.drawingLayer=new ol.layer.Vector({source: new ol.source.Vector()});// Create box layer
-	this.map.addLayer(this.drawingLayer);									// Add to map	
-	this.drawLayer.setMap(this.map);										// Add to map
-
-	var _this=this;															// This for callbacks
+	var n,s,e,w,r,asp;
+	var _this=this;															// Context for callbacks
 	var mapWid=$(this.div).width();											// Map width
 	var mapHgt=$(this.div).height();										// Map height
-	if (this.geoRef) {														// If geo referencing left open
-		if (this.geoRef.modify)												// If interaction initted													
-			this.map.removeInteraction(this.geoRef.modify);					// Remove it
-		this.drawLayer.getFeatures().clear();								// Clear existing points
-		this.map.unByKey(this.geoRef.pDrag)									// Remove drag handler
-		this.map.unByKey(this.geoRef.pUp)									// Remove mouse up handler
-		}
-	var o=this.geoRef={};													// Holds params												
-	if (!where) {															// If no coords yet
-		var asp=0;
-		if (img && img.img && img.img.naturalWidth)							// If image is loaded		
-			asp=img.img.naturalHeight/img.img.naturalWidth;					// Calc image aspect
-		if (!asp)															// If no aspect
-			asp=.75;														// Assume 4/3
-		var bot=(mapHgt*.25)+(mapWid*.5*asp);
-		var nw=this.map.getCoordinateFromPixel([mapWid*.25,mapHgt*.25]);	// NW corner
-		var se=this.map.getCoordinateFromPixel([mapWid*.75,bot]);			// SE corner
-		nw=ol.proj.transform(nw,this.curProjection,"EPSG:4326"); 			// Project coord
-		se=ol.proj.transform(se,this.curProjection,"EPSG:4326"); 			// Project 
-		where=nw[1]+","+se[1]+","+se[0]+","+nw[0]+",0";						// Construct new where
-		this.MapImage(url,where,this);										// Reset map image
-		this.DrawMapImages();												// Draw map images
-		}
-	v=where.split(",");														// Dicide where
-	this.geoRef.n=v[0];		this.geoRef.s=v[1];								// North, south
-	this.geoRef.e=v[2];		this.geoRefw=v[3];								// East, west
-	this.geoRef.r=v[4] ? v[4] : 0;											// Rotation
-	o.asp=(this.geoRef.n-this.geoRef.s)/(this.geoRef.e-this.geoRef.w);		// Calc image asp
-	SetControlDots(true);													// Starter dots
-	var str="<br> &nbsp; &nbsp; Rotation &nbsp;&nbsp; <span id='geoRot1' style='width:360px;display:inline-block'></span>&nbsp;&nbsp;";
-	str+="Fine rotation &nbsp;&nbsp; <span id='geoRot2' style='width:200px;display:inline-block'></span>";
-	str+=" &nbsp; &nbsp; Value &nbsp; <input type='text' class='is' id='geoRot3' style='font-size:10px;width:60px;display:inline-block;border-radius:10px;text-align:center'>";
-	$("#bottomDiv").html(str)										// Add to DOM
-
-	var ops={ min:0, max:360, value:Math.floor(this.geoRef.r), slide:function(event,ui) {	// Gross slider options
-		_this.geoRef.r=ui.value;										// Set degrees
-		$("#geoRot2").slider("value",0);								// Reset fine
-		$("#geoRot3").val(_this.geoRef.r);								// Init text input
-		ReDrawImage();													// Redraw image
-		}};
-	$("#geoRot1").slider(ops);											// Init gross slider
-
-	var ops={ min:0, max:1, step:0.001, value:this.geoRef.r-Math.floor(this.geoRef.r), slide:function(event,ui) {	// Gross slider options
-		_this.geoRef.r=$("#geoRot1").slider("value")+ui.value;			// Set degrees
-		$("#geoRot3").val(_this.geoRef.r);								// Init text input
-		ReDrawImage();													// Redraw image
-		}};
-
-	$("#geoRot2").slider(ops);											// Init fine slider
-	$("#geoRot3").val(this.geoRef.r);									// Init text input
-	$("#geoRot3").on("change", function(e) {							// On typed value
-		this.geoRef.r=Math.min($("#geoRot3").val(),360);					// Set degrees		
-		$("#geoRot1").slider("value",Math.floor(_this.geoRef.r));		// Set gross
-		$("#geoRot2").slider("value",this.geoRef.r-Math.floor(_this.geoRef.r)); 	// Set fine
-		ReDrawImage();													// Redraw image
+	$("#dialogDiv").remove();												// Close dialog
+	pop.Sound("click",curJson.muteSound);									// Click sound							
+	var str="<table><tr height='18'>";
+	str+="<tr><td>Image&nbsp;URL&nbsp;</td><td><input id='grurl' class='ve-is' style='width:220px' type='input'></td></tr>";
+	str+="<tr><td>North</td><td><input id='grn' class='ve-is' style='width:80px' type='input'></td></tr>";
+	str+="<tr><td>South</td><td><input id='grs' class='ve-is' style='width:80px' type='input'></td></tr>";
+	str+="<tr><td>East</td><td><input id='gre' class='ve-is' style='width:80px' type='input'></td></tr>";
+	str+="<tr><td>West</td><td><input id='grw' class='ve-is' style='width:80px' type='input'></td></tr>";
+	str+="<tr><td>Rotation</td><td><input id='grr' class='ve-is' style='width:80px' type='input'></td></tr>";
+	str+="<tr><td>Combined</td><td><input id='grc' class='ve-is' style='width:220px' type='input'></td></tr>";
+	str+="<tr><td>Opacity</td><td><div id='gra'></div></td></tr>";
+	str+="<tr><td colspan=2><br></td><tr>";
+	str+="<tr><td></td><td><button id='grstart' class='ve-bs'>Geo-reference</button><td></td><tr>";
+	str+="</tr></table>";
+	this.pop.Dialog("Geo-reference image",str, function() {					// On OK
+		delete _this.geoRef.img;											// Remove added pic
+		_this.geoRef=null;													// Kill georef
+		_this.DrawMapLayers();												// Redraw map
+		}, function() {														// On cancel
+		delete _this.geoRef.img;											// Remove added pic
+		_this.geoRef=null;													// Kill georef
+		_this.DrawMapLayers();												// Redraw map
 		});
+	$("#dialogDiv").dialog("option","position", { at: "center center", of: "#rightDiv" })
 
-	function ReDrawImage()									// REDRAW MAP
-	{
-		_this.MapImage(url,where,_this);								// Reset map image
-		_this.DrawMapImages();											// Draw map images
-		SetControlDots(true);											// Reset control dots
-		var str=_this.geoRef.n+"|"+_this.geoRef.s+"|"+_this.geoRef.e+"|"+_this.geoRef.w+"|"+_this.geoRef.r;	// Make where
-		SendShivaMessage("Space=rectify",str);							// Send rectify position 
-	}
+	if (where) {															// If a where defined
+		v=where.split(",");													// Get parts
+		n=v[0];	s=v[1];	e=v[2];	w=v[3];	r=v[4];								// Set
+		}
+	$("#grn").val(n);	$("#grs").val(s); 	$("#grr").val(r);				// Init n/s/r
+	$("#gre").val(e);	$("#grw").val(w);	$("#grurl").val(url);			// e/w/url
+	$("#gra").slider({ value:100, slide: function(e,ui) { 					// Init alpha slider
+		if (_this.geoRef)	_this.geoRef.a=ui.value/100; 					// If georef up. set val
+			_this.DrawMapLayers();											// Redraw map
+		 }});									
+	if (n)																	// If north set
+		$("#grc").val(n+","+s+","+e+","+w+","+r);							// Combined
 
-	o.pUp=shivaLib.map.on('pointerup',function(e) {						// ON MOUSE UP
-		if (_this.geoRef) 												// If geo referencing
-			ReDrawImage();												// Redraw image
+	$("#grn").on("change",function() {										// NORTH CHANGED
+		n=$(this).val();													// Get value
+		$("#grc").val(n+","+s+","+e+","+w+","+r);							// Combined
+		});		
+	
+	$("#grs").on("change",function() {										// SOUTH CHANGED
+		s=$(this).val();													// Get value
+		$("#grc").val(n+","+s+","+e+","+w+","+r);							// Combined
+		});		
+	$
+	("#gre").on("change",function() {										// EAST CHANGED
+		e=$(this).val();													// Get value
+		$("#grc").val(n+","+s+","+e+","+w+","+r);							// Combined
+		});		
+	
+	$("#grw").on("change",function() {										// WEST CHANGED
+		w=$(this).val();													// Get value
+		$("#grc").val(n+","+s+","+e+","+w+","+r);							// Combined
+		});		
+	
+	$("#grr").on("change",function() {										// ROTATION CHANGED
+		r=$(this).val();													// Get value
+		$("#grc").val(n+","+s+","+e+","+w+","+r);							// Combined
+		});		
+
+	$("#grstart").click( function() {										// START CLICK
+		_this.geoRef={ a:1 };												// Create georef obj
+		_this.geoRef.img=new Image();										// Make new img
+		_this.geoRef.img.src=url;											// Set  url
+		_this.geoRef.img.onload=function() {								// Whwn loaded
+			if (!$("#grn").val()) {											// If no north. start from fresh
+				asp=_this.geoRef.img.height/_this.geoRef.img.width;			// Get aspect ratio													
+				var bot=(mapHgt*.25)+(mapWid*.5*asp);						// Calc bottom
+				var nw=_this.map.getCoordinateFromPixel([mapWid*.25,mapHgt*.25]);// NW corner
+				var se=_this.map.getCoordinateFromPixel([mapWid*.75,bot]);	// SE corner
+				nw=ol.proj.transform(nw,_this.curProjection,"EPSG:4326"); 	// Project coord
+				se=ol.proj.transform(se,_this.curProjection,"EPSG:4326"); 	// Project 
+				n=nw[1];	s=se[1];	e=se[0];	w=nw[0];	r=0;		// New points
+				$("#grc").val(n+","+s+","+e+","+w+","+r);					// Combined
+				$("#grn").val(n);	$("#grs").val(s); 	$("#grr").val(r);	// Init n/s/r
+				$("#gre").val(e);	$("#grw").val(w);						// e/w
+				}
+			_this.geoRef.img=new MapImage(url,$("#grc").val(),_this);		// Replace image with new MapImage obj
+			_this.DrawMapLayers();											// Redraw map
+
+	if (_this.drawingLayer)													// If already there
+		_this.map.removeLayer(_this.drawingLayer);							// Remove layer
+	_this.drawingLayer=new ol.layer.Vector({source: new ol.source.Vector()});// Create box layer
+	_this.map.addLayer(_this.drawingLayer);									// Add to map	
+
+	if (_this.geoRef) {														// If geo referencing left open
+		if (_this.geoRef.modify)											// If interaction initted													
+			_this.map.removeInteraction(_this.geoRef.modify);				// Remove it
+		_this.drawingLayer.getFeatures().clear();							// Clear existing points
+		_this.map.unByKey(_this.geoRef.pDrag)								// Remove drag handler
+		_this.map.unByKey(_this.geoRef.pUp)									// Remove mouse up handler
+		}
+	asp=(n-s)/(e-w);														// Calc image asp
+	SetControlDots(true);													// Starter dots
+
+	_this.geoRef.pUp=_this.map.on('pointerup',function(e) {					// ON MOUSE UP
+		if (_this.geoRef) 													// If geo referencing
+			ReDrawImage();													// Redraw image
 			});															 
 
-	o.pDrag=shivaLib.map.on('pointerdrag',function(e) {					// ON MOUSE DRAG
+	_this.geoRef.pDrag=_this.map.on('pointerdrag',function(e) {				// ON MOUSE DRAG
 		if (_this.geoRef) {													// If geo referencing
 			var id;
 			var shift=ol.events.condition.shiftKeyOnly(e);					// Shift key status
@@ -926,42 +955,54 @@ Space.prototype.GeoReferenceMap=function(url, where)					// GEO REFERENCE IMAGE
 				if (id == "georef0") {										// Move all dots
 					var w=Math.abs(e-w)/2;									// Get width
 					var h=Math.abs(n-s)/2;									// Get height
-					_this.geoRef.w=p[0]-w;									// Set W
-					_this.geoRef.e=p[0]+w;									// Set E
-					_this.geoRef.n=p[1]+h;									// Set N
-					_this.geoRef.s=p[1]-h;									// Set S
+					w=p[0]-w;												// Set W
+					e=p[0]+w;												// Set E
+					n=p[1]+h;												// Set N
+					s=p[1]-h;												// Set S
 					}
 				else if (id == "georef1") {									// NW
-					_this.geoRef.w=p[0];									// Set W
-					_this.geoRef.n=((_this.geoRef.e-_this.geoRef.w)*o.asp)+(_this.geoRef.s-0);	// Set N
+					w=p[0];													// Set W
+					n=((e-w)*o.asp)+(s-0);									// Set N
 					if (shift)												// If shift key											
-						_this.geoRef.n=p[1];								// Distort aspect
+						n=p[1];												// Distort aspect
 					}
 				else if (id == "georef2") {									// NE
-					_this.geoRef.e=p[0];									// Set E
-					_this.geoRef.n=((_this.geoRef.e-_this.geoRef.w)*o.asp)+(_this.geoRef.s-0);	// Set N
+					e=p[0];													// Set E
+					n=((e-w)*o.asp)+(s-0);									// Set N
 					if (shift)												// If shift key											
-						_this.geoRef.n=p[1];										// Distort aspect
+						n=p[1];												// Distort aspect
 					}
 				else if (id == "georef3") {									// SE
-					_this.geoRef.e=p[0];									// Set E
-					_this.geoRef.s=_this.geoRef.n-((_this.geoRef.e-_this.geoRef.w)*o.asp);		// Set E
+					e=p[0];													// Set E
+					s=n-((e-w)*o.asp);										// Set S
 					if (shift)												// If shift key											
-						_this.geoRef.s=p[1];								// Distort aspect
+						s=p[1];												// Distort aspect
 					}
 				else if (id == "georef4") {									// SW
-					_this.geoRef.w=p[0];									// Set W
-					_this.geoRef.s=_this.geoRef.n((_this.geoRef.e-_this.geoRef.w)*o.asp);		// Set W
+					w=p[0];													// Set W
+					s=n((e-w)*o.asp);										// Set S
 					if (shift)												// If shift key											
-						_this.geoRef.s=p[1];								// Distort aspect
+						s=p[1];												// Distort aspect
 					}
 				});															// Each feature
 			}
 		});															 
+		
+	};
+});
+
+
+	function ReDrawImage()													// REDRAW MAP
+	{
+		_this.MapImage(url,where,_this);									// Reset map image
+		SetControlDots(true);												// Reset control dots
+		var str=n+","+s+","+e+","+w+","+r;									// Make where
+		}
 	
 	}
+
 	
-	function SetControlDots(init)										// SET GEO REFEENCE CONTROL DOTS
+	function SetControlDots(init)										// SET GEO REFERENCE CONTROL DOTS
 	{
 		var i,p=[];
 		var o=_this.geoRef;													// Point at georef data
@@ -985,14 +1026,14 @@ Space.prototype.GeoReferenceMap=function(url, where)					// GEO REFERENCE IMAGE
 				})
 			}
 		
-		o.pts[0].x=_this.geoRef.w+Math.abs(_this.geoRef.e-_this.geoRef.w)/2;// CX
-		o.pts[0].y=_this.geoRef.s+Math.abs(_this.geoRef.n-_this.geoRef.s)/2; // CY
-		o.pts[1].x=_this.geoRef.w-0;	o.pts[1].y=_this.geoRef.n-0;		// NW
-		o.pts[2].x=_this.geoRef.e-0;	o.pts[2].y=_this.geoRef.n-0;		// NE
-		o.pts[3].x=_this.geoRef.e-0;	o.pts[3].y=_this.geoRef.s-0;		// SE
-		o.pts[4].x=_this.geoRef.w-0;	o.pts[4].y=_this.geoRef.s-0;		// SW
+		o.pts[0].x=w+Math.abs(e-w)/2;										// CX
+		o.pts[0].y=s+Math.abs(n-s)/2;										// CY
+		o.pts[1].x=w-0;	o.pts[1].y=n-0;										// NW
+		o.pts[2].x=e-0;	o.pts[2].y=n-0;										// NE
+		o.pts[3].x=e-0;	o.pts[3].y=s-0;										// SE
+		o.pts[4].x=w-0;	o.pts[4].y=s-0;										// SW
 				
-		var ar=_this.geoRef.r*Math.PI/180.0;								// Angle to radians
+		var ar=r*Math.PI/180.0;												// Angle to radians
 		var sin=Math.sin(ar);												// Get sine
 		var cos=Math.cos(ar);												// Get cosine
 		var cx=o.pts[0].x;													// Center x
@@ -1012,3 +1053,13 @@ Space.prototype.GeoReferenceMap=function(url, where)					// GEO REFERENCE IMAGE
 				o.pts[i].f.getGeometry().setCoordinates(p);					// Set geometry
 			}
 	}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// DRAWING
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+Space.prototype.DrawingTool=function()									// DRAWING TOOL
+{
+}

@@ -136,7 +136,7 @@ Popup.prototype.FileSelect=function (files, callback)					// SELECT FILE FROM LI
 	str="<br>Choose file from the list below.<br>"
 	str+="<br><div style='width:100%;max-height:300px;overflow-y:auto'>";
 	str+="<table style='font-size:12px;width:100%;padding:0px;border-collapse:collapse;'>";
-	str+="<tr></td><td><b>Title </b></td><td><b>Date&nbsp;&&nbsp;time</b></td><td><b>&nbsp;&nbsp;&nbspId</b></tr>";
+	str+="<tr></td><td><b>Title </b></td><td><b>Date&nbsp;&&nbsp;time</b></td><td align=right><b>&nbsp;&nbsp;&nbspId</b></tr>";
 	str+="<tr><td colspan='3'><hr></td></tr>";
 	for (i=0;i<files.length;++i) 										// For each item
 		str+="<tr id='pop"+i+"' "+trsty+"><td>"+files[i].title+"</td><td>"+files[i].date.substr(5,11)+"</td><td align=right>"+files[i].id+"</td></tr>";
@@ -160,18 +160,23 @@ Popup.prototype.FileSelect=function (files, callback)					// SELECT FILE FROM LI
 }
 
 
-Popup.prototype.Dialog=function (title, content, callback)				// DIALOG BOX
+Popup.prototype.Dialog=function (title, content, callback, callback2) // DIALOG BOX
 {
-	this.Sound("click");													// Ding sound
-	$("#dialogDiv").remove();												// Remove any old ones
+	this.Sound("click");												// Ding sound
+	$("#dialogDiv").remove();											// Remove any old ones
 	$("body").append("<div class='ve-unselectable' id='dialogDiv'></div>");														
 	var str="<p><img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
 	str+="<span id='gtBoxTi'style='font-size:18px;text-shadow:1px 1px #ccc;color:#666'><b>"+title+"</b></span><p>";
 	str+="<div style='font-size:14px;margin:14px'>"+content+"</div>";
 	$("#dialogDiv").append(str);	
 	$("#dialogDiv").dialog({ width:450, buttons: {
-				            	"OK": 		function() { callback(); $(this).remove();  },
-				            	"Cancel":  	function() { $(this).remove(); }
+				            	"OK": 		function() { if (callback)
+				            								callback(); 
+				            								$(this).remove();  
+				            								},
+				            	"Cancel":  	function() { if (callback2)	            		
+				            								callback2();
+				            								$(this).remove(); }
 								}});	
 	$(".ui-dialog-titlebar").hide();
 	$(".ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix").css("border","none");
