@@ -158,9 +158,9 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 	this.featureSelect=new ol.interaction.Select();							// Create select interaction
 
     this.map=new ol.Map( { target: this.div.substr(1),						// Alloc OL
-        layers:this.layers,													// Layers array									
+    	layers:this.layers,													// Layers array									
 		interactions: ol.interaction.defaults().extend([this.featureSelect]),	// Add feature select interaction
-       controls: ol.control.defaults({										// Controls
+       	controls: ol.control.defaults({										// Controls
 				}).extend([ new ol.control.ScaleLine() ]),					// Add scale
         view: new ol.View({													// Views
           		center: ol.proj.transform( [-77,34],'EPSG:4326',this.curProjection),
@@ -185,7 +185,7 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 			if (feature) {													// If one found
   				var j,v,a;
   				var id=feature.getId()+"";									// Get feature id
-    			if (lay.get("kmlId")) 										// If a KML id
+    			if (lay && (lay.get("kmlId"))) 								// If a KML id
  					$("#setpoint").val(lay.get('kmlId')+":"+id);			// Show full id
 				}
 			}
@@ -731,12 +731,12 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
   			var feature=_this.map.forEachFeatureAtPixel(evt.pixel,			// Look through features
       			function(feature, layer) {									// On match to location
          			lay=layer;												// Save layer
-         			return feature;											// Return feature
+          			return feature;											// Return feature
       			});
 			if (feature) {													// If one found
   				var j,v,a;
   				var id=feature.getId()+"";
-    			if (lay.get("kmlId")) {										// If a KML id
+    			if (lay && (lay.get("kmlId"))) {							// If a KML id
  					var rx=new RegExp(lay.get('kmlId')+":"+id);				// Make patt
        				for (j=0;j<curJson.mobs.length;++j) {					// For each mob				
      					o=curJson.mobs[j];									// Point at mob data
@@ -1072,12 +1072,11 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 {
 	var _this=this;															// Context for callbacks
 	$("#dialogDiv").remove();												// Close dialog
-	pop.Sound("click",curJson.muteSound);									// Click sound							
 	if (!this.drawData) 													// If 1st time
 		this.drawData={ col:"#ff9900",ecol:"",a:1.0,						// Init it
-						ewid:2,id:"",lab:"",type:"Shape" 
+						ewid:2,id:"",lab:"",type:"Choose" 
 						};	
-	var str="<table><tr><td>Type</td><td>"+MakeSelect("drtype",false,["Shape","Line", "Marker","Arrow"],"Shape");
+	var str="<table><tr><td>Type</td><td>"+MakeSelect("drtype",false,["Choose", "Shape","Line", "Marker","Arrow"],"Choose");
 	str+="<tr><td>Color</td><td><input id='drcol' class='ve-is' style='width:60px' type='input'></td></tr>";
 	str+="<tr><td>Edge&nbsp;color&nbsp;</td><td><input id='drecol' class='ve-is' style='width:60px' type='input'>";
 	str+="&nbsp;&nbsp;&nbsp;Width&nbsp;&nbsp;<input id='drewid' class='ve-is' style='width:30px' type='input'></td></tr>";
@@ -1103,54 +1102,239 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 	$("#drid").val(this.drawData.id);										
 	$("#drlab").val(this.drawData.lab);										
 	$("#drtype").val(this.drawData.type);										
-	pop.ColorPicker("drcol","",true);										// Init color
-	pop.ColorPicker("drecol","",true);										// Init edge color
+	this.pop.ColorPicker("drcol","",true);									// Init color
+	this.pop.ColorPicker("drecol","",true);									// Init edge color
 	$("#dralpha").slider({ value:_this.drawData.a*100,						// Init alpha slider
 								slide: function(e,ui) { 				
 									_this.drawData.a=ui.value/100;
 									}
 							});
+
+	if (this.drawData.modifyInter)											// If defined
+		 this.map.removeInteraction(this.drawData.modifyInter); 			// Remove it
+	if (this.drawData.drawInter)											// If defined
+		this.map.removeInteraction(this.drawData.drawInter); 				// Remove it
+	if (this.drawingLayer)
+		this.map.getLayers().remove(this.drawingLayer);						// Remove layer
+	this.drawingLayer=new ol.layer.Vector({source: new ol.source.Vector()}); // Create box layer
+	this.map.addLayer(this.drawingLayer);									// Add to map	
+	DrawEditFeature();														// Assume we're drawing
+
+	function DrawEditFeature()
+	{
+		if (_this.drawData.modifyInter)										// If modify defined
+			_this.map.removeInteraction(_this.drawData.modifyInter); 		// Remove it
+		if (_this.drawData.drawInter) 										// If draw defined
+			_this.map.removeInteraction(_this.drawData.drawInter); 			// Remove old one
+		
+		if (_this.drawData.type == "Choose") {								// If editing
+			_this.map.addInteraction(_this.drawData.modifyInter=new ol.interaction.Modify({		// Add modify
+			 		features: _this.featureSelect.getFeatures(),			// Point at features
+				  	deleteCondition: function(e) {							// On delete
+						var id;
+						if (ol.events.condition.altKeyOnly(e) && ol.events.condition.singleClick(e)) {	// If alt-click
+							map.forEachFeatureAtPixel(e.pixel,function(f) {	// Look at features
+								id=f.getId();								// Get id
+								if (id && id.match(/SEG-/)) {				// If a drawn seg
+									Sound("delete");						// Delete sound
+									_this.drawingLayer.getSource().removeFeature(f);// Remove it
+									}
+								});
+							}
+						var state=(ol.events.condition.shiftKeyOnly(e) && ol.events.condition.singleClick(e));	// Shift-click
+						if (state)											// Deleting
+							_this.pop.Sound("delete");						// Delete sound
+		  	    		return state;										// Return state
+			  			}	
+					})
+				);
+	      	return;
+			}
+						
+		var col,ecol,vis,evis,type;
+		if (_this.drawData.type == "Line")			type="LineString";		// Line
+		else if (_this.drawData.type == "Marker")	type="Point";			// Marker
+		else if (_this.drawData.type == "Shape")	type="Polygon";			// Shape
+		_this.map.addInteraction(_this.drawData.drawInter=new ol.interaction.Draw({	// Add draw tool
+					source: _this.drawingLayer.getSource(),					// Set source
+					type: type })											// Set type of drawing
+					);
+		_this.drawData.drawInter.on('drawstart', function(e) {				// ON START
+	  			if (type != "Point")										// Not on points
+	  				_this.drawData.inOpenDraw=e;							// Set flag
+	  			});
+		_this.drawData.drawInter.on('drawend', function(e) {				// ON END								
+		 		col=$("#drcol").val();										// Get col
+		 		ecol=$("#drecol").val();									// Get ecol
+		 		vis=evis=_this.drawData.a;									// Get a
+		 		e.feature.setId("SEG-"+Math.floor(Math.random()*999999));	// Set unique id
+				if (col == "") 		vis=0,col=0;							// Hide fill
+				if (ecol == "") 	evis=0,ecol=0;							// Hide edge
+	
+				if (type == "Point") sty=new ol.style.Style({				// Alloc text style
+					      image: new ol.style.Circle( {						// Draw circle
+					      		radius: $("#drewid").val(),					// Ewid controls size
+					      		fill: new ol.style.Fill({
+					      			color: Hex2RGBAString(col,_this.drawData.a)
+					      			})
+					      		}),
+					      text:	new ol.style.Text( {						// Text style
+						    	textAlign: "left", textBaseline: "middle",	// Set alignment
+						    	font: "bold 14px Arial",					// Set font
+						    	text: $("#drlab").val(),					// Set label
+						   	 	fill: new ol.style.Fill({color: "#fff" }),	// Set color
+						    	stroke: new ol.style.Stroke( { color: "#000",width: 1 }),	// Set edge		   
+								offsetX: 16									// Set offset
+						 		})
+							});
+				else sty=new ol.style.Style( {								// Alloc style								
+						fill: 	new ol.style.Fill(	 { color: Hex2RGBAString(col,vis) } ),									// Fill
+						stroke: new ol.style.Stroke( { color: Hex2RGBAString(ecol,evis), width:_this.drawData.ewid-0 } )	// Edge
+						});
+	 			e.feature.setStyle(sty);									// Add style to last one added
+	 			_this.drawData.inOpenDraw=null;								// Kill flag
+	 			if (type != "Point") {										// Not for points
+		 			_this.drawData.type="Choose";							// Choose mode
+		 			$("#drtype").val(_this.drawData.type);					// Reset selector
+					DrawEditFeature();										// Reset interaction
+					}
+	 		});	
+ 	 	}
+
+	$("#dialogDiv").click(function(e) {										// CLICK ON DIALOG TO END DRAWING
+		if (_this.drawData.inOpenDraw) 										// If sketching
+ 			_this.drawData.drawInter.finishDrawing();						// Close drawing
+		});
+
 	function CloseDrawing() {												// CLOSE DRAWING DIALOG
 		_this.DrawMapLayers();												// Redraw map to clear
 		_this.drawData.col=$("#drcol").val();								// Set draw data
 		_this.drawData.ecol=$("#drecol").val();								// Set draw data
+		if (_this.drawData.modifyInter)										// If defined
+			 _this.map.removeInteraction(_this.drawData.modifyInter); 		// Remove it
+		if (_this.drawData.drawInter)										// If defined
+			 _this.map.removeInteraction(_this.drawData.drawInter); 		// Remove it
+		if (_this.drawingLayer)												// If defined
+			_this.map.getLayers().remove(_this.drawingLayer);				// Remove layer
 		}
+	
+	this.featureSelect.getFeatures().on("change:length", function(e) {		// ON FEATURE SELECT
+		var col,ecol,ewid,lab="",a=1,v,s;
+		var f=e.target.item(0);
+		if (f)	s=f.getStyle();
+		else	$("#drtype").val("Choose");									// Set type to choose
+	
+		if (s) {
+			if (s.getFill()) {												// Has fill
+				col=rgb2hex(s.getFill().getColor());						// Get color
+				a1=s.getFill().getColor().split(",")[3];					// Get alpha
+				a1=("")+a1.substr(0,a1.length-1)-0;							// Strip paren
+				}
+			if (s.getStroke()) {											// Has stroke
+				ecol=rgb2hex(s.getStroke().getColor())
+				a2=s.getStroke().getColor().split(",")[3];
+				a2=("")+a2.substr(0,a2.length-1)-0;							// Strip paren
+				ewid=s.getStroke().getWidth();								// Set width
+				}
+			if (s.getText()) {												// If has text
+				lab=s.getText().getText();									// Get marker
+				col=rgb2hex(s.getImage().getFill().getColor());				// Get circle color
+				a3=s.getImage().getFill().getColor().split(",")[3];			// Get alpha
+				a3=("")+a3.substr(0,a3.length-1)-0;							// Strip paren
+				ewid=s.getImage().getRadius();								// Get marker width
+				}
+			if (f.getGeometry().getType() == "LineString") {				// Line
+				$("#drtype").val("Line");									// Set type
+				$("#drecol").val(_this.drawData.ecol=ecol);					// Ecol
+				_this.pop.ColorPicker("drecol","",true);					// Init edge color
+				$("#drewid").val(_this.drawData.ewid=ewid);					// Set wid
+				a=a2;														// Use alpha from stroke
+				}
+			else if (f.getGeometry().getType() == "Polygon") {
+				$("#drtype").val("Shape");									// Set type
+				$("#drcol").val(_this.drawData.col=col);					// Col
+				_this.pop.ColorPicker("drcol","",true);						// Init color
+				if (a2) 													// If a visible edge
+					$("#drecol").val(_this.drawData.ecol=ecol);				// Use ecol
+				else														// No edge
+					$("#drecol").val(_this.drawData.ecol="");				// Use null
+				_this.pop.ColorPicker("drecol","",true);					// Init edge color
+				$("#drewid").val(_this.drawData.ewid=ewid);					// Set wid
+				a=a1;														// Use alpha from fill
+				}
+			else if (f.getGeometry().getType() == "Point") {				// A marker
+				$("#drtype").val("Marker");									// Set type
+				$("#drcol").val(_this.drawData.col=col);					// Col
+				_this.pop.ColorPicker("drcol","",true);						// Init color
+				$("#drlab").val(_this.drawData.lab=lab);					// Set label
+				$("#drewid").val(_this.drawData.ewid=ewid);					// Set wid
+				a=a3;														// Alpha from circle
+				}
+			_this.drawData.col=a;											// Set alpha
+			$("#dralpha").slider("option","value",a*100);					// Set slider
+			}
+		});
 
 	function LoadDrawing(data) {											// LOAD DRAWING
 		}
 
-	function ClearDrawing() {												// CLEAR DRAWING
-		}
+	function Hex2RGBAString(col, alpha)	{									// 0XRRGGBB -> rgb() STRING	
+		var r=0,g=0,b=0;
+		if (col) {															// If a col
+			if (col.length == 4) col+=col.substr(1,3);						// Turn #555 into #55555
+			r=parseInt(col.substr(1,2),16);
+			g=parseInt(col.substr(3,2),16);
+			b=parseInt(col.substr(5,2),16);
+			}
+		return("rgba("+r+","+g+","+b+","+alpha+")");						// Make rgb()
+	}
+
+	function rgb2hex(rgb){
+	 	rgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
+	 	return (rgb && rgb.length === 4) ? "#" +
+	 	 ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
+		 ("0" + parseInt(rgb[2],10).toString(16)).slice(-2) +
+	 	 ("0" + parseInt(rgb[3],10).toString(16)).slice(-2) : '';
+	}
 
 	$("#drcol").on("click", function() {									// COLOR HANDLER
 		pop.ColorPicker("drcol");											// Set color
 		}); 
+	
 	$("#drecol").on("click", function() {									// EDGE COLOR HANDLER
 		pop.ColorPicker("drecol");											// Set edge color
 		}); 
+	
 	$("#drewid").on("change", function() {									// EDGE WIDTH HANDLER
 		_this.drawData.ewid=$(this).val();									// Set draw data
 		}); 
+	
 	$("#drid").on("change", function() {									// ID HANDLER
 		_this.drawData.id=$(this).val();									// Set draw data
 		}); 
+	
 	$("#drlab").on("change", function() {									// LAB HANDLER
 		_this.drawData.lab=$(this).val();									// Set draw data
 		}); 
+	
 	$("#drtype").on("change", function() {									// TYPE HANDLER
 		_this.drawData.type=$(this).val();									// Set draw data
+		DrawEditFeature();													// Reset interaction
 		}); 
+ 
  	$("#drsave").on("click", function() {									// SAVE HANDLER
 		SaveUserData("title", "data","KML");								// Login and save
 		}); 
+
 	$("#drload").on("click", function() {									// LOAD HANDLER
 		GetUserData("KML", function(data) {									// Login and load
 			LoadDrawing(data);												// Load
 			});
 		}); 
+
   	$("#drclear").on("click", function() {									// CLEAR HANDLER
-			pop.ConfirmBox("This will remove all the drawing on the screen.",	// Are you sure?
-			function() { ClearDrawing(); });								// Clear
+		pop.ConfirmBox("This will remove all the drawing on the screen.",	// Are you sure?
+			function() { _this.drawingLayer.getSource().clear(); });		// Clear
 		}); 
 
 }
