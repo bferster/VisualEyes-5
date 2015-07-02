@@ -185,7 +185,7 @@ Popup.prototype.Dialog=function (title, content, callback, callback2) // DIALOG 
 }
 
 
-Popup.prototype.LogIn=function(callback)								// LOG IN DIALOG
+Popup.prototype.LogIn=function(callback, getTitle)						// LOG IN DIALOG
 {
   	var _this=this;															// Save context for callbacks
 	this.Sound("click");													// Click sound
@@ -198,13 +198,16 @@ Popup.prototype.LogIn=function(callback)								// LOG IN DIALOG
 	str+="<div style='font-size:14px;margin:14px'>Please type your username or email, and password:<br></div>";
 	str+="<table style='font-size:14px;margin:14px'>";
 	str+="<tr><td>User name </td><td><input class='ve-is' type='text' id='gtBoxUn' value='"+un+"'></td></tr>";
-	str+="<tr><td>Password</td><td><input class='ve-is' type='password' id='gtBoxPw'  value='"+pw+"'></td></tr></table>";
-	$("#alertBoxDiv").append(str);	
+	str+="<tr><td>Password</td><td><input class='ve-is' type='password' id='gtBoxPw'  value='"+pw+"'></td></tr>";
+	if (getTitle)															// If getting title
+		str+="<tr><tdTitle</td><td><input class='ve-is' type='text' id='gtBoxTitle'></td></tr>";
+	$("#alertBoxDiv").append("</table>"+str);	
 	$("#alertBoxDiv").dialog({ width:400, modal:true, buttons: {			// Run dialog
 			            	"OK": function() { 								// OK
 			            		un=$("#gtBoxUn").val();						// Get username
 			            		pw=$("#gtBoxPw").val();						// Get password
-			            		callback(un,pw); 							// Callback
+			            		var title=$("#gtBoxTitle").val();			// Get password
+			            		callback(un,pw,title); 						// Callback
 								_this.SetCookie("password",pw,7);			// Save cookie
 								_this.SetCookie("email",un,7);				// Save cookie
 			            		$(this).remove();							// Remove dialog
@@ -240,6 +243,24 @@ Popup.prototype.ShowLightBox=function(title, content)				// LIGHTBOX
 	$("#lightBoxDiv").css("z-index",2500);						
 }
 
+Popup.prototype.ConfirmBox=function(content, callback)					// CONFIRMATION BOX
+{
+	this.Sound("delete");													// Delete sound
+	$("body").append("<div class='unselectable' id='confirmBoxDiv'></div>");														
+	var str="<p><img src='images/qlogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
+	str+="<span style='font-size:18px;text-shadow:1px 1px #ccc;color:#990000'><b>Are you sure?</b></span><p>";
+	str+="<div style='font-size:14px;margin:14px'>"+content+"</div>";
+	$("#confirmBoxDiv").append(str);	
+	$("#confirmBoxDiv").dialog({ width:400, buttons: {
+				            	"Yes": function() { $(this).remove(); callback() },
+				            	"No":  function() { $(this).remove(); }
+								}});	
+	$("#confirmBoxDiv").dialog("option","position",{ my:"center", at:"center", of:window });
+	$(".ui-dialog-titlebar").hide();
+	$(".ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix").css("border","none");
+	$(".ui-dialog").css({"border-radius":"14px", "box-shadow":"4px 4px 8px #ccc"});
+	$(".ui-button").css({"border-radius":"30px","outline":"none"});
+}
 
 Popup.prototype.ColorPicker=function (name, transCol, init) 			//	DRAW COLORPICKER
 {

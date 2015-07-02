@@ -847,7 +847,7 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 	var mapHgt=$(this.div).height();										// Map height
 	$("#dialogDiv").remove();												// Close dialog
 	pop.Sound("click",curJson.muteSound);									// Click sound							
-	var str="<table><tr height='18'>";
+	var str="<table>";
 	str+="<tr><td>Image&nbsp;URL&nbsp;</td><td><input id='grurl' class='ve-is' style='width:220px' type='input'></td></tr>";
 	str+="<tr><td>North</td><td><input id='grn' class='ve-is' style='width:80px' type='input'></td></tr>";
 	str+="<tr><td>South</td><td><input id='grs' class='ve-is' style='width:80px' type='input'></td></tr>";
@@ -858,7 +858,7 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 	str+="<tr><td>Opacity</td><td><div id='gra'></div></td></tr>";
 	str+="<tr><td colspan=2><br></td><tr>";
 	str+="<tr><td></td><td><button id='grstart' class='ve-bs'>Geo-reference</button><td></td><tr>";
-	str+="</tr></table>";
+	str+="</table>";
 	this.pop.Dialog("Geo-reference image",str, function() {					// On OK
 				CloseGeoRef();												// Close out
 				}, 
@@ -1070,4 +1070,87 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 
 Space.prototype.DrawingTool=function()									// DRAWING TOOL
 {
+	var _this=this;															// Context for callbacks
+	$("#dialogDiv").remove();												// Close dialog
+	pop.Sound("click",curJson.muteSound);									// Click sound							
+	if (!this.drawData) 													// If 1st time
+		this.drawData={ col:"#ff9900",ecol:"",a:1.0,						// Init it
+						ewid:2,id:"",lab:"",type:"Shape" 
+						};	
+	var str="<table><tr><td>Type</td><td>"+MakeSelect("drtype",false,["Shape","Line", "Marker","Arrow"],"Shape");
+	str+="<tr><td>Color</td><td><input id='drcol' class='ve-is' style='width:60px' type='input'></td></tr>";
+	str+="<tr><td>Edge&nbsp;color&nbsp;</td><td><input id='drecol' class='ve-is' style='width:60px' type='input'>";
+	str+="&nbsp;&nbsp;&nbsp;Width&nbsp;&nbsp;<input id='drewid' class='ve-is' style='width:30px' type='input'></td></tr>";
+	str+="<tr><td>ID</td><td><input id='drid' class='ve-is' style='width:60px' type='input'></td></tr>";
+	str+="<tr><td>Label</td><td><input id='drlab' class='ve-is' style='width:220px' type='input'></td></tr>";
+	str+="<tr><td>Opacity</td><td><div id='dralpha'></div></td></tr>";
+	str+="<tr><td colspan=2><br></td><tr>";
+	str+="<tr><td>Options</td><td><button id='drsave' class='ve-bs'>Save</button>";
+	str+="&nbsp;&nbsp;&nbsp;<button id='drload' class='ve-bs'>Load</button>";
+	str+="&nbsp;&nbsp;&nbsp;<button id='drclear' class='ve-bs'>Clear all</button></td><tr>";
+	str+="</tr></table>";
+	this.pop.Dialog("VisualEyes drawing tool",str, function() {				// On OK
+				CloseDrawing();												// Close out
+				}, 
+				function() {												// On cancel
+				CloseDrawing();												// Close out
+				});
+	$("#dialogDiv").dialog("option","position", { at: "center center", of: "#rightDiv" })
+
+	$("#drcol").val(this.drawData.col);										// Init 
+	$("#drecol").val(this.drawData.ecol);										
+	$("#drewid").val(this.drawData.ewid);										
+	$("#drid").val(this.drawData.id);										
+	$("#drlab").val(this.drawData.lab);										
+	$("#drtype").val(this.drawData.type);										
+	pop.ColorPicker("drcol","",true);										// Init color
+	pop.ColorPicker("drecol","",true);										// Init edge color
+	$("#dralpha").slider({ value:_this.drawData.a*100,						// Init alpha slider
+								slide: function(e,ui) { 				
+									_this.drawData.a=ui.value/100;
+									}
+							});
+	function CloseDrawing() {												// CLOSE DRAWING DIALOG
+		_this.DrawMapLayers();												// Redraw map to clear
+		_this.drawData.col=$("#drcol").val();								// Set draw data
+		_this.drawData.ecol=$("#drecol").val();								// Set draw data
+		}
+
+	function LoadDrawing(data) {											// LOAD DRAWING
+		}
+
+	function ClearDrawing() {												// CLEAR DRAWING
+		}
+
+	$("#drcol").on("click", function() {									// COLOR HANDLER
+		pop.ColorPicker("drcol");											// Set color
+		}); 
+	$("#drecol").on("click", function() {									// EDGE COLOR HANDLER
+		pop.ColorPicker("drecol");											// Set edge color
+		}); 
+	$("#drewid").on("change", function() {									// EDGE WIDTH HANDLER
+		_this.drawData.ewid=$(this).val();									// Set draw data
+		}); 
+	$("#drid").on("change", function() {									// ID HANDLER
+		_this.drawData.id=$(this).val();									// Set draw data
+		}); 
+	$("#drlab").on("change", function() {									// LAB HANDLER
+		_this.drawData.lab=$(this).val();									// Set draw data
+		}); 
+	$("#drtype").on("change", function() {									// TYPE HANDLER
+		_this.drawData.type=$(this).val();									// Set draw data
+		}); 
+ 	$("#drsave").on("click", function() {									// SAVE HANDLER
+		SaveUserData("title", "data","KML");								// Login and save
+		}); 
+	$("#drload").on("click", function() {									// LOAD HANDLER
+		GetUserData("KML", function(data) {									// Login and load
+			LoadDrawing(data);												// Load
+			});
+		}); 
+  	$("#drclear").on("click", function() {									// CLEAR HANDLER
+			pop.ConfirmBox("This will remove all the drawing on the screen.",	// Are you sure?
+			function() { ClearDrawing(); });								// Clear
+		}); 
+
 }

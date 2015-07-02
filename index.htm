@@ -267,22 +267,7 @@
 		if (curJson.mapStartPos)		mps.Goto(curJson.mapStartPos);			// Position map
 
 var str="<img src='http://www.viseyes.org/efolio/declaration.JPG' width='100%'> &nbsp; ";
-str+=MakeSelect("testing",false,["0","1","2","3","4"]);
 $("#rightDiv").html(str);
-$("#testing").on("change", function() {
-	var i=$(this).val();
-	if (i == 1)	mps.StyleKMLFeatures(1,[{n:5,f:"#ff0000",a:.2,s:"#00ff00",w:50}]);
-	if (i == 2)	mps.StyleKMLFeatures(1,[{n:5,f:"#0000ff"},{n:4,f:"#ffff00"}]);
-	if (i == 3)	mps.StyleKMLFeatures(1,[{n:"*",f:"#ff00ff"}]);
-	if (i == 3)	mps.StyleKMLFeatures(1,[{n:"*",f:"#ff00ff"}]);
-	if (i == 4) pop.GetTextBox("Marker","Type shape","", function(str) {
-							mps.StyleMarker([0],{m:str,w:35,t:"OK",f:"#0000ff"});
-							}); 
-$(this).val(0)
-	});
-
-
-
 	}
 		
 
@@ -520,14 +505,11 @@ $(this).val(0)
 					getDataFromInputs();										// Get data from inputs										
 					qmf.Save(0);												// Save data
 					break;						
-				case "Save as..." : qmf.Save(1);	break;						// Save as..
-				case "Delete" : 	qmf.Delete(0);	break;						// Delete
-				case "Undelete" : 	qmf.Delete(1);	break;						// Undelete
-				case "Drawing" : 												// Drawing
-					$("#dialogDiv").remove();									// Close dialog
-					mps.DrawingTool();											// Run KML drawing tool
-					break;											
-				case "Geo-reference" : 	mps.GeoReference("//farm9.staticflickr.com/8019/7310697988_18eb47c466_z.jpg");	break;		// Georef
+				case "Save as...": 		qmf.Save(1);		break;				// Save as..
+				case "Delete": 			qmf.Delete(0);		break;				// Delete
+				case "Undelete": 		qmf.Delete(1);		break;				// Undelete
+				case "Drawing": 		mps.DrawingTool();	break;				// Run KML drawing tool
+				case "Geo-reference": 	mps.GeoReference("//farm9.staticflickr.com/8019/7310697988_18eb47c466_z.jpg");	break;		// Georef
 				}
 			$(this).val("Save/Load");											// Reset select
 			}); 
@@ -537,7 +519,7 @@ $(this).val(0)
 		
 	function SaveUserData(title, data, type)								// SAVE DATA TO USERDATA
 	{		
-		pop.LogIn( function(userName, password) {								// Log in
+		pop.LogIn( function(userName, password, title) {						// Log in
 			var dat={};
 			var url=host+"savedata.php";										// Base file
 			dat["email"]=userName;												// Add email
@@ -556,7 +538,7 @@ $(this).val(0)
 						_this.pop.Sound("delete") 								// Error sound
 						}								
 					});
-			});
+			},true);															// Ask for title too
 	}	
 
 	function GetUserData(type, callback)									// LOAD DATA TO USERDATA
