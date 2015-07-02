@@ -181,7 +181,7 @@
 		if (data)							curJson=data;						// If data, set it
 		if (!curJson.mobs)					curJson.mobs=[];					// Alloc if empty
 		if (curJson.panTime == undefined)	curJson.panTime=.5;					// Default to 500ms
-		mps.ClearLayers();														// Clar all layera
+		mps.ClearLayers();														// Clear all layera
 		if (!data) {			
 			curJson.sheet="";
 			curJson.upDownSplit=.75;
@@ -264,6 +264,7 @@
 		mps.SetBaseMap(curJson.baseMap);										// Set basemap layer
 		tln.InitTimeline("bottomDiv",curJson);									// Initialize timeline
 		mps.MarkerLayerToTop();													// Make marker layer the top-most layer
+		ResizePanes();															// Resize panes
 		if (curJson.mapStartPos)		mps.Goto(curJson.mapStartPos);			// Position map
 
 var str="<img src='http://www.viseyes.org/efolio/declaration.JPG' width='100%'> &nbsp; ";
@@ -356,7 +357,6 @@ $("#rightDiv").html(str);
 		dtl=new DataLoad();														// Alloc data module
 		mps.InitMap();															// Init map
 		InitProject();															// Init project
-		ResizePanes();															// Resize panes
 		if (drupalMan) 															// If called from Drupal manager
 			window.parent.postMessage("ShivaReady=true","*");					// Send message to parent wind		
 
