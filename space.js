@@ -1076,7 +1076,7 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 		this.drawData={ col:"#ff9900",ecol:"",a:1.0,						// Init it
 						ewid:2,id:"",lab:"",type:"Choose" 
 						};	
-	var str="<table><tr><td>Type</td><td>"+MakeSelect("drtype",false,["Choose", "Shape","Line", "Marker","Arrow"],"Choose");
+	var str="<table><tr><td>Type</td><td>"+MakeSelect("drtype",false,["Choose", "Shape","Line"],"Choose");
 	str+="<tr><td>Color</td><td><input id='drcol' class='ve-is' style='width:60px' type='input'></td></tr>";
 	str+="<tr><td>Edge&nbsp;color&nbsp;</td><td><input id='drecol' class='ve-is' style='width:60px' type='input'>";
 	str+="&nbsp;&nbsp;&nbsp;Width&nbsp;&nbsp;<input id='drewid' class='ve-is' style='width:30px' type='input'></td></tr>";
@@ -1178,13 +1178,13 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 					ecol=col;												// Use main color
 					}
 				if (type == "Point") sty=new ol.style.Style({				// Alloc text style
-					      image: new ol.style.Circle( {						// Draw circle
+					   image: new ol.style.Circle( {						// Draw circle
 					      		radius: $("#drewid").val(),					// Ewid controls size
 					      		fill: new ol.style.Fill({
 					      			color: Hex2RGBAString(col,_this.drawData.a)
 					      			})
 					      		}),
-					      text:	new ol.style.Text( {						// Text style
+				      text:	new ol.style.Text( {						// Text style
 						    	textAlign: "left", textBaseline: "middle",	// Set alignment
 						    	font: "bold 14px Arial",					// Set font
 						    	text: $("#drlab").val(),					// Set label
@@ -1295,9 +1295,6 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 			}
 		});
 
-	function LoadDrawing(data) {											// LOAD DRAWING
-		}
-
 	function Hex2RGBAString(col, alpha)	{									// 0XRRGGBB -> rgb() STRING	
 		var r=0,g=0,b=0;
 		if (col) {															// If a col
@@ -1343,13 +1340,20 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 		}); 
  
  	$("#drsave").on("click", function() {									// SAVE HANDLER
-		SaveUserData("title", "data","KML");								// Login and save
+		var i,f,features=[];													
+		var a=_this.drawingLayer.getSource().getFeatures();					// Get features drawn
+	    for (i=0;i<a.length;++i) {											// For each feature
+	        f=a[i].clone();													// Clone feature
+	        f.setId("KF-"+i);  												// Set id
+	      	f.getGeometry().transform("EPSG:3857","EPSG:4326");				// Project
+	        features.push(f);												// Add to list
+	    	}
+	    var kml=new ol.format.KML().writeFeatures(features);				// Format as KML/XML
+		SaveUserData(kml,"KML");											// Login and save
 		}); 
 
 	$("#drload").on("click", function() {									// LOAD HANDLER
-		GetUserData("KML", function(data) {									// Login and load
-			LoadDrawing(data);												// Load
-			});
+		GetUserData("KML");													// Login and load into  LoadUserData()
 		}); 
 
  	$("#drdelete").on("click", function() {									// DELETE HANDLER
@@ -1405,3 +1409,4 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 		}); 
 
 }
+

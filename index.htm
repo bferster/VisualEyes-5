@@ -438,7 +438,7 @@ $("#rightDiv").html(str);
 		str+="<tr><td>Map&nbsp;location</td><td><input id='setwhere' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td>Map&nbsp;point</td><td><input id='setpoint' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td colspan=2><br></td> <tr>";
-		str+="<tr><td>Options</td><td>"+MakeSelect("setfile",false,["Save/Load","Load","Save","Save as...","Delete","Undelete","Drawing","Geo-reference"],"Save/Load");
+		str+="<tr><td>Options</td><td>"+MakeSelect("setfile",false,["Choose","Load","Save","Save as...","Delete","Undelete","Drawing","Geo-reference"],"Save/Load");
 		str+="&nbsp;&nbsp;&nbsp<i>"+(_this.curShow ? "#"+_this.curShow : '')+"</i>&nbsp;&nbsp;&nbsp;"
 		str+="Help <a href='https://docs.google.com/document/d/161td5ZuqKqT5R5r9z1P8AxBA6l9LaP-eYl_RvCyvw2g/edit?usp=sharing' target='_blank'>";
 		str+="<img src='img/helpicon.gif' style='vertical-align:bottom' title='Show help'></a></td>";
@@ -516,7 +516,7 @@ $("#rightDiv").html(str);
 
 
 		
-	function SaveUserData(title, data, type)								// SAVE DATA TO USERDATA
+	function SaveUserData(data, type)										// SAVE DATA TO USERDATA
 	{		
 		pop.LogIn( function(userName, password, title) {						// Log in
 			var dat={};
@@ -525,7 +525,7 @@ $("#rightDiv").html(str);
 			dat["password"]=password;											// Add password
 			dat["title"]=title;													// Add title
 			dat["type"]=type;													// Add type
-			dat["data"]=data;													// Add data
+			dat["data"]=data.replace(/"/g,"\\\"");
 			$.ajax({ url:url,dataType:'text',type:"POST",crossDomain:true,data:dat,  // Post data
 					success: function(d) { 										// On success		
 					 	if (d.match(/new:/i)) 									// Success				
@@ -540,7 +540,7 @@ $("#rightDiv").html(str);
 			},true);															// Ask for title too
 	}	
 
-	function GetUserData(type, callback)									// LOAD DATA TO USERDATA
+	function GetUserData(type)												// LOAD USER DATA FILE
 	{		
 		pop.LogIn( function(userName, password) {								// Log in
 			var url=host+"getdata.php?type="+type;								// Base file
@@ -550,17 +550,53 @@ $("#rightDiv").html(str);
 
 	}
 	
+ 	function LoadUserData(data)												// HANDLE INCOMING DATA LOAD
+	{
+	    var i,f,s,os;
+	    var fs=new ol.format.KML().readFeatures(data.data);						// Read in features
+	    for (i=0;i<fs.length;++i){												// For each feature
+	        f=fs[i].clone();													// Clone feature
+		   	os=fs[i].values_.Style[0];											// Get style the hard way
+			if (f.getGeometry().getType() == "Point") 							// If a marker
+				s=new ol.style.Style({											// Alloc text style
+				   image: new ol.style.Circle( {								// Draw circle
+				      		radius: os.getStroke().getWidth(),					// Ewid controls size
+				      		fill: new ol.style.Fill({
+				      			color: RGBtoRGBA(os.getFill().getColor())
+				      			})
+				      		}),
+			      text:	new ol.style.Text( {									// Text style
+					    	textAlign: "left", textBaseline: "middle",			// Set alignment
+					    	font: "bold 14px Arial",							// Set font
+					    	text: "XXXX",										// Set label
+				   	 		fill: new ol.style.Fill({color: "#fff" }),			// Set text color
+					    	stroke: new ol.style.Stroke( { color: "#666", width: 1 }),	// Set edge		   
+							offsetX: os.getStroke().getWidth()+8				// Set offset
+					 		})
+						});
+			else
+				s=new ol.style.Style( {												// Alloc style								
+					fill: 	new ol.style.Fill(	 { color: RGBtoRGBA(os.getFill().getColor()) } ),									// Fill
+					stroke: new ol.style.Stroke( { color: RGBtoRGBA(os.getStroke().getColor()), width: os.getStroke().getWidth() })	// Edge
+					});
+   			f.setStyle(s);														// Style it
+    		f.getGeometry().transform("EPSG:4326","EPSG:3857");					// Project
+	       	f.setId("SEG-"+Math.floor(Math.random()*999999));  					// Set id
+			mps.drawingLayer.getSource().addFeature(f);							// Add to layer
+			}
+		mps.DrawMapLayers();													// Redraw map
+	
+		function RGBtoRGBA(c) {													// CONVERT ARRAY TO rgba()
+			return "rgba("+c[0]+","+c[1]+","+c[2]+","+c[3]+")";		
+		}
+	}
+
 	function popListFiles(files)											// CALLBACK TO List()
 	{
 		pop.FileSelect(files,function(id) {										// Select fiels
 			var url=host+"loaddata.php?id="+id;									// Base file
 			$.ajax({ url:url,dataType:'jsonp'});  								// Get data
 			});
-	}
-
-	function LoadUserData(data)											// HANDLE INCOMING DATA LOAD
-	{
-		trace(data.data)
 	}
 
 

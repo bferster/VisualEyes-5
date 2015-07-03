@@ -200,7 +200,7 @@ Popup.prototype.LogIn=function(callback, getTitle)						// LOG IN DIALOG
 	str+="<tr><td>User name </td><td><input class='ve-is' type='text' id='gtBoxUn' value='"+un+"'></td></tr>";
 	str+="<tr><td>Password</td><td><input class='ve-is' type='password' id='gtBoxPw'  value='"+pw+"'></td></tr>";
 	if (getTitle)															// If getting title
-		str+="<tr><tdTitle</td><td><input class='ve-is' type='text' id='gtBoxTitle'></td></tr>";
+		str+="<tr><td>Title</td><td><input class='ve-is' type='text' id='gtBoxTitle'></td></tr>";
 	$("#alertBoxDiv").append("</table>"+str);	
 	$("#alertBoxDiv").dialog({ width:400, modal:true, buttons: {			// Run dialog
 			            	"OK": function() { 								// OK
