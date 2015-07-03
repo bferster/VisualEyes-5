@@ -195,9 +195,9 @@ Popup.prototype.LogIn=function(callback, getTitle)						// LOG IN DIALOG
 	var pw=this.GetCookie("password");										// Password
 	var str="<p><img src='images/qlogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
 	str+="<span style='font-size:18px;text-shadow:1px 1px #ccc;color:#990000'><b>Login</b></span><p>";
-	str+="<div style='font-size:14px;margin:14px'>Please type your username or email, and password:<br></div>";
+	str+="<div style='font-size:14px;margin:14px'>Please type your email, and password:<br></div>";
 	str+="<table style='font-size:14px;margin:14px'>";
-	str+="<tr><td>User name </td><td><input class='ve-is' type='text' id='gtBoxUn' value='"+un+"'></td></tr>";
+	str+="<tr><td>Email </td><td><input class='ve-is' type='text' id='gtBoxUn' value='"+un+"'></td></tr>";
 	str+="<tr><td>Password</td><td><input class='ve-is' type='password' id='gtBoxPw'  value='"+pw+"'></td></tr>";
 	if (getTitle)															// If getting title
 		str+="<tr><td>Title</td><td><input class='ve-is' type='text' id='gtBoxTitle'></td></tr>";

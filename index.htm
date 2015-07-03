@@ -210,6 +210,8 @@
 					}
 				else if (marker.match(/\.kml/i)) {								// A KML file
 					o.type="kml";												// Set type
+					if (!isNaN(marker.split(".")[0]))							// If a number only
+						marker="loaddata.php?id="+marker.split(".")[0];			// Load from qdata
 					o.lid=mps.AddKMLLayer(marker,o.opacity,o.id,s,e);			// Add KML layer								 
 					}
 				else if (marker.match(/path/i)) {								// A path
