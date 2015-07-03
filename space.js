@@ -1368,7 +1368,10 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 		if (s && s.getFill())												// If a fill set
 			s.getFill().setColor(Hex2RGBAString($("#drcol").val(),_this.drawData.a));	// Set fill color
 		if (s && s.getStroke())	{											// If a stroke set
-			s.getStroke().setColor(Hex2RGBAString($("#drecol").val(),_this.drawData.a));	// Set stroke color
+			if ($("#drecol").val())
+				s.getStroke().setColor(Hex2RGBAString($("#drecol").val(),_this.drawData.a));	// Set stroke color
+			else
+				s.getStroke().setColor(Hex2RGBAString("#000000",0));		// Set stroke invisible
 			s.getStroke().setWidth($("#drewid").val()-0);					// Set stroke width
 			}
 		if (s && s.getText()) {												// If a text set
