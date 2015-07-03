@@ -1085,8 +1085,10 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 	str+="<tr><td>Opacity</td><td><div id='dralpha'></div></td></tr>";
 	str+="<tr><td colspan=2><br></td><tr>";
 	str+="<tr><td>Options</td><td><button id='drsave' class='ve-bs'>Save</button>";
-	str+="&nbsp;&nbsp;&nbsp;<button id='drload' class='ve-bs'>Load</button>";
-	str+="&nbsp;&nbsp;&nbsp;<button id='drclear' class='ve-bs'>Clear all</button></td><tr>";
+	str+="<button id='drload' style='margin-left:12px;margin-right:12px' class='ve-bs'>Load</button>";
+	str+="<button id='drclear' class='ve-bs'>Clear all</button>";
+	str+="<button id='drupdate' style='display:none' class='ve-bs'>Update seg</button>";
+	str+="<button id='drdelete' style='display:none;margin-left:12px' class='ve-bs'>Clear seg</button></td><tr>";
 	str+="</tr></table>";
 	this.pop.Dialog("VisualEyes drawing tool",str, function() {				// On OK
 				CloseDrawing();												// Close out
@@ -1122,6 +1124,7 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 
 	function DrawEditFeature()
 	{
+		_this.drawData.curFeature=null;										// No current feature
 		if (_this.drawData.modifyInter)										// If modify defined
 			_this.map.removeInteraction(_this.drawData.modifyInter); 		// Remove it
 		if (_this.drawData.drawInter) 										// If draw defined
@@ -1136,7 +1139,7 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 							map.forEachFeatureAtPixel(e.pixel,function(f) {	// Look at features
 								id=f.getId();								// Get id
 								if (id && id.match(/SEG-/)) {				// If a drawn seg
-									Sound("delete");						// Delete sound
+									_this.pop.Sound("delete");				// Delete sound
 									_this.drawingLayer.getSource().removeFeature(f);// Remove it
 									}
 								});
@@ -1170,7 +1173,10 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 		 		e.feature.setId("SEG-"+Math.floor(Math.random()*999999));	// Set unique id
 				if (col == "") 		vis=0,col=0;							// Hide fill
 				if (ecol == "") 	evis=0,ecol=0;							// Hide edge
-	
+				if ((type == "LineString") && !evis) {						// Make sure linestring has color
+			 		evis=_this.drawData.a;									// Get a
+					ecol=col;												// Use main color
+					}
 				if (type == "Point") sty=new ol.style.Style({				// Alloc text style
 					      image: new ol.style.Circle( {						// Draw circle
 					      		radius: $("#drewid").val(),					// Ewid controls size
@@ -1182,9 +1188,9 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 						    	textAlign: "left", textBaseline: "middle",	// Set alignment
 						    	font: "bold 14px Arial",					// Set font
 						    	text: $("#drlab").val(),					// Set label
-						   	 	fill: new ol.style.Fill({color: "#fff" }),	// Set color
-						    	stroke: new ol.style.Stroke( { color: "#000",width: 1 }),	// Set edge		   
-								offsetX: 16									// Set offset
+					   	 		fill: new ol.style.Fill({color: $("#drecol").val() ? $("#drecol").val() : "#fff" }),	// Set text color
+						    	stroke: new ol.style.Stroke( { color: "#666", width: 1 }),	// Set edge		   
+								offsetX: $("#drewid").val()-0+8				// Set offset
 						 		})
 							});
 				else sty=new ol.style.Style( {								// Alloc style								
@@ -1193,11 +1199,9 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 						});
 	 			e.feature.setStyle(sty);									// Add style to last one added
 	 			_this.drawData.inOpenDraw=null;								// Kill flag
-	 			if (type != "Point") {										// Not for points
-		 			_this.drawData.type="Choose";							// Choose mode
-		 			$("#drtype").val(_this.drawData.type);					// Reset selector
-					DrawEditFeature();										// Reset interaction
-					}
+	 			_this.drawData.type="Choose";								// Choose mode
+		 		$("#drtype").val(_this.drawData.type);						// Reset selector
+				DrawEditFeature();										// Reset interaction
 	 		});	
  	 	}
 
@@ -1207,7 +1211,6 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 		});
 
 	function CloseDrawing() {												// CLOSE DRAWING DIALOG
-		_this.DrawMapLayers();												// Redraw map to clear
 		_this.drawData.col=$("#drcol").val();								// Set draw data
 		_this.drawData.ecol=$("#drecol").val();								// Set draw data
 		if (_this.drawData.modifyInter)										// If defined
@@ -1216,15 +1219,32 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 			 _this.map.removeInteraction(_this.drawData.drawInter); 		// Remove it
 		if (_this.drawingLayer)												// If defined
 			_this.map.getLayers().remove(_this.drawingLayer);				// Remove layer
+		_this.DrawMapLayers();												// Redraw map to clear
 		}
 	
 	this.featureSelect.getFeatures().on("change:length", function(e) {		// ON FEATURE SELECT
 		var col,ecol,ewid,lab="",a=1,v,s;
 		var f=e.target.item(0);
 		if (f)	s=f.getStyle();
-		else	$("#drtype").val("Choose");									// Set type to choose
-	
+		else{
+			_this.drawData.curFeature=null;									// No active feature
+			$("#drtype").val("Choose");										// Set type to choose
+			$("#drsave").show();											// Show button
+			$("#drload").show();											// Show button
+			$("#drclear").show();											// Show button
+			$("#drdelete").hide();											// Hide delete button
+			$("#drupdate").hide();											// Hide update button
+			}
 		if (s) {
+			if (!_this.drawData.inOpenDraw)									// If not drawing
+				_this.pop.Sound("click");									// Click sound
+			_this.drawData.curFeature=f;									// Set current feature
+			$("#drsave").hide();											// Hide button
+			$("#drload").hide();											// Hide button
+			$("#drclear").hide();											// Hide button
+			$("#drdelete").show();											// Show delete button
+			$("#drupdate").show();											// Show update button
+	
 			if (s.getFill()) {												// Has fill
 				col=rgb2hex(s.getFill().getColor());						// Get color
 				a1=s.getFill().getColor().split(",")[3];					// Get alpha
@@ -1270,7 +1290,7 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 				$("#drewid").val(_this.drawData.ewid=ewid);					// Set wid
 				a=a3;														// Alpha from circle
 				}
-			_this.drawData.col=a;											// Set alpha
+			_this.drawData.a=a;											// Set alpha
 			$("#dralpha").slider("option","value",a*100);					// Set slider
 			}
 		});
@@ -1332,9 +1352,53 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 			});
 		}); 
 
+ 	$("#drdelete").on("click", function() {									// DELETE HANDLER
+		if (_this.drawData.curFeature) {									// If a feature
+			 _this.drawingLayer.getSource().removeFeature(_this.drawData.curFeature);	// Delete it
+			_this.pop.Sound("delete");										// Delete sound
+			_this.DrawMapLayers();											// Redraw map
+			_this.drawData.curFeature=null;									// Not there anymore
+			}
+		}); 
+		
+	$("#drupdate").on("click", function() {									// UPDATE HANDLER
+		if (!_this.drawData.curFeature) 									// If not a feature
+			return;															// Quit
+		var s=_this.drawData.curFeature.getStyle();							// Get style
+		if (s && s.getFill())												// If a fill set
+			s.getFill().setColor(Hex2RGBAString($("#drcol").val(),_this.drawData.a));	// Set fill color
+		if (s && s.getStroke())	{											// If a stroke set
+			s.getStroke().setColor(Hex2RGBAString($("#drecol").val(),_this.drawData.a));	// Set stroke color
+			s.getStroke().setWidth($("#drewid").val()-0);					// Set stroke width
+			}
+		if (s && s.getText()) {												// If a text set
+				s=new ol.style.Style({										// Alloc text style
+		      		image: new ol.style.Circle( {							// Draw circle
+		      		radius: $("#drewid").val(),								// Ewid controls size
+		      		fill: new ol.style.Fill({
+		      				color: Hex2RGBAString($("#drcol").val(),_this.drawData.a)
+		      				})
+		      			}),
+		     	 	text:	new ol.style.Text( {							// Text style
+			    	textAlign: "left", textBaseline: "middle",				// Set alignment
+			    	font: "bold 12px Arial",								// Set font
+			    	text: $("#drlab").val(),								// Set label
+			   	 	fill: new ol.style.Fill({color: $("#drecol").val() ? $("#drecol").val() : "#fff" }),	// Set text color
+			    	stroke: new ol.style.Stroke( { color: "#666", width: 1 }),	// Set edge		   
+					offsetX: $("#drewid").val()-0+8							// Set offset
+			 		})
+				});
+			}
+		_this.drawData.curFeature.setStyle(s);								// Reset style
+		_this.pop.Sound("click");											// Click sound
+		}); 
+
   	$("#drclear").on("click", function() {									// CLEAR HANDLER
 		pop.ConfirmBox("This will remove all the drawing on the screen.",	// Are you sure?
-			function() { _this.drawingLayer.getSource().clear(); });		// Clear
+			function() {													// Clear
+				_this.drawingLayer.getSource().clear(); 					// Clear all features
+				_this.DrawMapLayers();										// Redraw map
+				 });		
 		}); 
 
 }
