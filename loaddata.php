@@ -5,12 +5,16 @@ header('Pragma: no-cache');
 require_once('config.php');
 	
 	$id=addEscapes($_REQUEST['id']);							// Get id
-										
+	$kml=addEscapes($_REQUEST['kml']);							// Get id
+											
 	$query="SELECT * FROM qdata WHERE id = '".$id."'";			// Look for data
 	$result=mysql_query($query);								// Run query
 	if (mysql_numrows($result)) {								// If found,
 		$s=mysql_result($result,0,"data");						// Get data field
-		print("LoadUserData({ \"data\":\"$s\"})");				// Send JSONP
+		if ($kml)												// If just the kml data
+			print($s);											// Send JSON
+		else
+			print("LoadUserData({ \"data\":\"$s\"})");			// Send JSONP
 		}
 	mysql_close();												// Close
 	
