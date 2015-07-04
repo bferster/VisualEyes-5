@@ -1348,7 +1348,9 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 	      	f.getGeometry().transform("EPSG:3857","EPSG:4326");				// Project
 	        features.push(f);												// Add to list
 	    	}
-	    var kml=new ol.format.KML().writeFeatures(features);				// Format as KML/XML
+		var node=new ol.format.KML().writeFeaturesNode(features);			// Format as KML/XML
+    	var kml=new XMLSerializer().serializeToString((node));				// Serialize as string
+		trace(kml)
 		SaveUserData(kml,"KML");											// Login and save
 		}); 
 

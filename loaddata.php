@@ -11,8 +11,10 @@ require_once('config.php');
 	$result=mysql_query($query);								// Run query
 	if (mysql_numrows($result)) {								// If found,
 		$s=mysql_result($result,0,"data");						// Get data field
-		if ($kml)												// If just the kml data
+		if ($kml) {
+			$s=str_replace("\\\"","\"",$s);						// Unescape
 			print($s);											// Send JSON
+			}
 		else
 			print("LoadUserData({ \"data\":\"$s\"})");			// Send JSONP
 		}
