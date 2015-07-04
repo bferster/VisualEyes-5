@@ -214,7 +214,7 @@
 						marker="loaddata.php?kml=1&id="+marker.split(".")[0];	// Load from qdata
 					o.lid=mps.AddKMLLayer(marker,o.opacity,o.id,s,e);			// Add KML layer								 
 					}
-				else if (marker.match(/path/i)) {								// A path
+				else if (o.marker && o.marker.match(/path/i)) {					// A path
 					var dots=[];
 					o.type="path";												// Set type
 					v=o.desc.split(",");										// Split by comma
@@ -234,7 +234,16 @@
 						}
 					var ew=o.size ? o.size  : 2;								// Set size with 2 pixel default
 					var eo=o.opacity ? o.opacity  : 1;							// Set opacity with 1.0 default
-					mps.AddPathLayer(dots,o.color,ew,eo,s,o.end ? o.end: e, o.show);// Add path to overlays
+					if (o.mapMarker) {
+						sty={ m:o.mapMarker }									// Use mapMarker 
+ 						o.mapMarker   ? sty.m=o.mapMarker   : sty.m=o.marker;	// Use map marker first, then time marker
+						o.mapColor    ?	sty.f=o.mapColor    : sty.f=o.color;			
+						o.mapEdge     ?	sty.s=o.mapEdge     : sty.s=o.edge;				
+						o.mapSize     ?	sty.w=o.mapSize     : sty.w=o.size;				
+						o.mapOpacity  ? sty.a=o.mapOpacity  : sty.a=o.opacity;				
+						o.header=mps.AddMarkerLayer("0,0",sty,i);	
+						}	
+					mps.AddPathLayer(dots,o.color,ew,eo,s,o.end ? o.end: e, o.show, o.header);// Add path to overlays
 					}
 				else if (marker.match(/\.png|.gif|\.jpg|\.jpeg/i) && (o.where.split(",").length > 3)) { // An image file with a full georef
 					o.type="image";												// Set type

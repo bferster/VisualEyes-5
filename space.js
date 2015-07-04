@@ -88,7 +88,7 @@ Space.prototype.DrawMapLayers=function(indices, mode)					// DRAW OVERLAY LAYERS
 				sty.getText().setScale(vis ? 1 : 0);						// Set text opacity
               	}
 	       	else if (o.type == "path") 										// If a path
-         		this.DrawPath(o.src, o.dots, this.curTime, o.end, o.show)	// Show it
+         		this.DrawPath(o.src, o.dots, this.curTime, o.end, o.show, o.header)	// Show it
           }
         }
 	if (this.geoRef)														// If georeferencing
@@ -322,7 +322,7 @@ Space.prototype.MarkerLayerToTop=function()								// MOVE MARKER LAYER ON TOP O
 	this.map.getLayers().insertAt(n,layer);									// Place on top
 }
 
-Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show) 	// ADD PATH LAYER TO MAP						
+Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show, header) 	// ADD PATH LAYER TO MAP						
 {
 
 /* 	
@@ -337,7 +337,7 @@ Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show)
 
 	var i,v,o={};
 	o.type="path";															// Path
-  	o.start=start;	o.end=end;	o.show=show;								// Save start, end, show
+  	o.start=start;	o.end=end;	o.show=show; o.header=header				// Save start, end, show, and header
 	this.overlays.push(o);													// Add to overlay
   	o.src=new ol.Feature({ geometry: new ol.geom.LineString(dots)});		// Create line
   	o.id="Path-"+this.markerLayer.getSource().getFeatures().length;			// Make path id
@@ -358,7 +358,7 @@ Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show)
 	this.markerLayer.getSource().addFeature(o.src);							// Add it
 }
 
-Space.prototype.DrawPath=function(feature, dots, time, end, show) 		// DRAW PATH						
+Space.prototype.DrawPath=function(feature, dots, time, end, show, header) 	// DRAW PATH						
 {
 
 /* 	
@@ -370,21 +370,27 @@ Space.prototype.DrawPath=function(feature, dots, time, end, show) 		// DRAW PATH
  
 */
 	
-	var s,e,pct,v=[],animate=false;
+	var s,e,pct,v=[],i=0,animate=false;
 	if (show && show.match(/a/i))	animate=true;						// Set animation mode
 	v.push([dots[0][0],dots[0][1]]);									// Add moveto dot
 	for (e=1;e<dots.length;++e) {										// For each lineto dot
 		s=e-1;															// Point at start of line
+		header.setGeometry(new ol.geom.Point(0,0]));		// Move it
 		if ((time >= dots[s][2]) && (time < end)) {						// This one's active
 			v.push([dots[e][0],dots[e][1]]);							// Add end dot
 			if ((time < dots[e][2]) && animate){						// If before end of end dot and animating
 				pct=(time-dots[s][2])/(dots[e][2]-dots[s][2]);			// Get pct
 				v[e][0]=dots[s][0]+((dots[e][0]-dots[s][0])*pct);		// Interpolate x
 				v[e][1]=dots[s][1]+((dots[e][1]-dots[s][1])*pct);		// Interpolate y
+				if (header)												// If a header defined
+					header.setGeometry(new ol.geom.Point(v[e]));		// Move it
 				}
 			}
 		}
 	feature.setGeometry(new ol.geom.LineString(v));						// Set new dots
+//				sty=o.src.getStyle();  										// Point at style
+//				sty.getImage().setOpacity(vis ? 1: 0);						// Set icon opacity
+
 }
 
 
@@ -422,6 +428,7 @@ Space.prototype.AddMarkerLayer=function(pos, style, id, start, end) 	// ADD MARK
  	o.src.setId("Mob-"+id);													// Set id of mob
  	this.markerLayer.getSource().addFeature(o.src);							// Add it
  	this.StyleMarker([index],style);										// Style marker
+	return o.src;															// Return feature
 }
 
 
@@ -1350,7 +1357,6 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 	    	}
 		var node=new ol.format.KML().writeFeaturesNode(features);			// Format as KML/XML
     	var kml=new XMLSerializer().serializeToString((node));				// Serialize as string
-		trace(kml)
 		SaveUserData(kml,"KML");											// Login and save
 		}); 
 
