@@ -234,14 +234,14 @@
 						}
 					var ew=o.size ? o.size  : 2;								// Set size with 2 pixel default
 					var eo=o.opacity ? o.opacity  : 1;							// Set opacity with 1.0 default
-					if (o.mapMarker) {
-						sty={ m:o.mapMarker }									// Use mapMarker 
- 						o.mapMarker   ? sty.m=o.mapMarker   : sty.m=o.marker;	// Use map marker first, then time marker
-						o.mapColor    ?	sty.f=o.mapColor    : sty.f=o.color;			
+					if (o.mapMarker) {											// If adding a header marker
+						sty={ m:o.mapMarker };									// Use mapMarker 
+ 						o.mapColor    ?	sty.f=o.mapColor    : sty.f=o.color;	// Use map options first, then path options		
 						o.mapEdge     ?	sty.s=o.mapEdge     : sty.s=o.edge;				
 						o.mapSize     ?	sty.w=o.mapSize     : sty.w=o.size;				
 						o.mapOpacity  ? sty.a=o.mapOpacity  : sty.a=o.opacity;				
 						o.header=mps.AddMarkerLayer("0,0",sty,i);	
+						trace(sty)
 						}	
 					mps.AddPathLayer(dots,o.color,ew,eo,s,o.end ? o.end: e, o.show, o.header);// Add path to overlays
 					}

@@ -363,33 +363,36 @@ Space.prototype.DrawPath=function(feature, dots, time, end, show, header) 	// DR
 
 /* 	
  	Add path to marker layer.
-  	@param {object} id 		Pointer to feature.
+  	@param {object} id 		Pointer to feature object.
  	@param {array} 	dots 	Array of lat, long, & time triplets separated by commas. i.e. [[-77,40,-4526267], ...].
   	@param {number} time 	Current time in number of mins += 1/1/1970.
  	@param {string} show 	Display modes: a == animate.
- 
-*/
+ 	@param {object} header 	Pointer to header object, if any.
+ */
 	
 	var s,e,pct,v=[],i=0,animate=false;
 	if (show && show.match(/a/i))	animate=true;						// Set animation mode
 	v.push([dots[0][0],dots[0][1]]);									// Add moveto dot
+	if (header) {														// If a header defined
+		var sty=header.getStyle();  									// Point at style
+		sty.getImage().setOpacity(0);									// Hide
+		}			
 	for (e=1;e<dots.length;++e) {										// For each lineto dot
 		s=e-1;															// Point at start of line
-		header.setGeometry(new ol.geom.Point(0,0]));		// Move it
 		if ((time >= dots[s][2]) && (time < end)) {						// This one's active
 			v.push([dots[e][0],dots[e][1]]);							// Add end dot
 			if ((time < dots[e][2]) && animate){						// If before end of end dot and animating
 				pct=(time-dots[s][2])/(dots[e][2]-dots[s][2]);			// Get pct
 				v[e][0]=dots[s][0]+((dots[e][0]-dots[s][0])*pct);		// Interpolate x
 				v[e][1]=dots[s][1]+((dots[e][1]-dots[s][1])*pct);		// Interpolate y
-				if (header)												// If a header defined
+				if (header && (pct < 1))	{							// If a header defined
 					header.setGeometry(new ol.geom.Point(v[e]));		// Move it
+					sty.getImage().setOpacity(1);						// Show it
+					}
 				}
 			}
 		}
 	feature.setGeometry(new ol.geom.LineString(v));						// Set new dots
-//				sty=o.src.getStyle();  										// Point at style
-//				sty.getImage().setOpacity(vis ? 1: 0);						// Set icon opacity
 
 }
 
