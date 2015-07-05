@@ -88,9 +88,11 @@ Space.prototype.DrawMapLayers=function(indices, mode)					// DRAW OVERLAY LAYERS
 				sty.getText().setScale(vis ? 1 : 0);						// Set text opacity
               	}
 	       	else if (o.type == "path") 										// If a path
-         		this.DrawPath(o.src, o.dots, this.curTime, o.end, o.show, o.header)	// Show it
-          }
-        }
+         		this.DrawPath(i,this.curTime)								// Show it
+	       	else if (o.type == "choro") 									// If a shoro
+         		this.DrawChoropleth(i,this.curTime)							// Show it
+			}
+		}
 	if (this.geoRef)														// If georeferencing
 		this.geoRef.img.drawMapImage(this.geoRef.a,this);					// Show pic we're referencing
 }
@@ -156,6 +158,7 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 		];
 
 	this.featureSelect=new ol.interaction.Select();							// Create select interaction
+	this.featureSelect.setActive(false);									// Turn select off
 
     this.map=new ol.Map( { target: this.div.substr(1),						// Alloc OL
     	layers:this.layers,													// Layers array									
@@ -228,8 +231,6 @@ Space.prototype.SetBaseMap=function(newMap) 							// SET BASE MAP
    		for (i=0;i<this.layers.length;++i) 									// For each layer
 	    	this.layers[i].set('visible',this.layers[i].get("title") == newMap); // Set visibility
 }
-
-
 
 
 Space.prototype.Goto=function(pos)										// SET VIEWPOINT
@@ -322,6 +323,103 @@ Space.prototype.MarkerLayerToTop=function()								// MOVE MARKER LAYER ON TOP O
 	this.map.getLayers().insertAt(n,layer);									// Place on top
 }
 
+
+Space.prototype.AddChoroplethLayer=function(col, ecol, ewid,opacity, base, where, start, end)	// ADD CHORPLETH LAYER
+{
+		
+/* 	
+ 	Add choropleth  layer.
+ 	@param {string} col 	Color 
+	@param {string} ecol 	Edge color 
+	@param {number} ewid 	Edge width 
+ 	@param {number} opacity Opacity  0-1
+ 	@param {number} base 	Index of base vector layer to style
+ 	@param {string} where 	Conditions (id:featureId[,featureId,...]
+ 	@param {number} start 	Starting time of marker in number of mins += 1/1/1970
+	@param {number} end 	Ending time of marker in number of mins += 1/1/1970
+*/
+
+	var o={};
+	if (!opacity)	opacity=1;												// Default opacity
+	o.type="choro";															// Path
+  	o.start=start;	o.end=end;		o.col=col; 	  	o.opacity=opacity;		// Save parameters
+  	o.ecol=ecol;	o.ewid=ewid;	o.where=where; 	o.base=base;			// Save parameters
+	o.styles=[];															// Alloc orginal style array
+	this.overlays.push(o);													// Add to overlay
+}
+
+Space.prototype.DrawChoropleth=function(num, time) 						// DRAW CHOROPLETH						
+{
+
+/* 	
+ 	Draw choropleth layer.
+ 	@param {number} num 	Layer to draw 
+	@param {number} time 	Current time in number of mins += 1/1/1970
+*/
+
+	var i,v,os,sty;
+	var fr,fb,fg,fa,er,eg,eb,ea,ew;
+	var o=this.overlays[num];											// Point at overlay
+	var features=this.overlays[o.base].src.getSource().getFeatures();	// Get KML feature array
+	if (!o.styles.length) {												// No original styles yet
+		for (i=0;i<features.length;++i) {								// For each feature in KML
+			os=features[i].values_.Style[0];							// Get style the hard way
+			o.styles[i]={};												// Alloc style storage object
+			if (os.getFill()) {											// If a fill
+				c=os.getFill().getColor();								// Get color
+				o.styles[i].fr=c[0];	o.styles[i].fg=c[1];
+				o.styles[i].fb=c[2];	o.styles[i].fa=c[3];
+				}
+			if (os.getStroke())	{										// If a stroke
+				c=os.getStroke().getColor();							// Get edge color
+				o.styles[i].er=c[0];	o.styles[i].eg=c[1];
+				o.styles[i].eb=c[2];	o.styles[i].ea=c[3];
+				o.styles[i].ew=os.getStroke().getWidth();				// Get edge width		
+				}
+			sty=new ol.style.Style( {									// Alloc style								
+				fill: 	new ol.style.Fill(	 { color:[o.styles[i].fr,o.styles[i].fg,o.styles[i].fb,o.styles[i].fa] } ),							// Fill
+				stroke: new ol.style.Stroke( { color:[o.styles[i].er,o.styles[i].eg,o.styles[i].eb,o.styles[i].ea], width: o.styles[i].ew-0 })	// Edge
+				});
+ 			features[i].setStyle(sty);									// Style it
+			}
+		}
+	var v=o.where.split(":")[1].split(",");							// Get features
+   	if (o.col && (o.col.length == 4)) 	o.col+=o.col.substr(1,3);	// Turn #555 into #55555
+  	if (o.ecol && (o.ecol.length == 4)) o.ecol+=o.ecol.substr(1,3);	// Turn #555 into #55555
+
+	for (i=0;i<features.length;++i) {								// For each feature
+		s=o.styles[i];												// Point at style
+		fr=s.fr;	fg=s.fg;	fb=s.fb;	fa=s.fa;				// Get original values
+		er=s.er;	eg=s.eg;	eb=s.eb;	ea=s.ea; 	ew=s.ew;	// Get original values
+		if (!o.start || (time >= o.start) && (time < o.end)) {		// If showing
+			for (j=0;j<v.length;++j) {								// For each potential match
+				if (v[j] == i) {									// A match
+					if (o.col) {									// If a fill
+					  	fr=parseInt("0x"+o.col.substr(1,2),16);		// R
+						fg=parseInt("0x"+o.col.substr(3,2),16);		// G
+						fb=parseInt("0x"+o.col.substr(5,2),16);		// B
+						fa=o.opacity;								// A
+						}
+					if (o.ecol) {									// If an edge					
+					  	er=parseInt("0x"+o.ecol.substr(1,2),16);	// R
+						eg=parseInt("0x"+o.ecol.substr(3,2),16);	// G
+						eb=parseInt("0x"+o.ecol.substr(5,2),16);	// B
+						ea=o.opacity;								// A
+						}
+					if (o.ewid) 									// If an edge width					
+						ew=o.ewid;									// W
+					}
+				}
+			}
+		sty=new ol.style.Style( {									// Alloc style								
+			fill: 	new ol.style.Fill(	 { color:[fr,fg,fb,fa] } ),	// Fill
+			stroke: new ol.style.Stroke( { color:[er,eg,eb,ea], width:o.ewid-0 })	// Edge
+			});
+		features[i].setStyle(sty);									// Style it
+		}
+}
+
+
 Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show, header) 	// ADD PATH LAYER TO MAP						
 {
 
@@ -358,42 +456,39 @@ Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show,
 	this.markerLayer.getSource().addFeature(o.src);							// Add it
 }
 
-Space.prototype.DrawPath=function(feature, dots, time, end, show, header) 	// DRAW PATH						
+Space.prototype.DrawPath=function(num, time) 						// DRAW PATH						
 {
 
 /* 	
  	Add path to marker layer.
-  	@param {object} id 		Pointer to feature object.
- 	@param {array} 	dots 	Array of lat, long, & time triplets separated by commas. i.e. [[-77,40,-4526267], ...].
-  	@param {number} time 	Current time in number of mins += 1/1/1970.
- 	@param {string} show 	Display modes: a == animate.
- 	@param {object} header 	Pointer to header object, if any.
- */
+ 	@param {number} num 	Layer to draw 
+	@param {number} time 	Current time in number of mins += 1/1/1970
+*/
 	
 	var s,e,pct,v=[],i=0,animate=false;
-	if (show && show.match(/a/i))	animate=true;						// Set animation mode
-	v.push([dots[0][0],dots[0][1]]);									// Add moveto dot
-	if (header) {														// If a header defined
-		var sty=header.getStyle();  									// Point at style
+	var o=this.overlays[num];											// Point at overlay
+	if (o.show && o.show.match(/a/i))	animate=true;					// Set animation mode
+	v.push([o.dots[0][0],o.dots[0][1]]);								// Add moveto dot
+	if (o.header) {														// If a header defined
+		var sty=o.header.getStyle();  									// Point at style
 		sty.getImage().setOpacity(0);									// Hide
 		}			
-	for (e=1;e<dots.length;++e) {										// For each lineto dot
+	for (e=1;e<o.dots.length;++e) {										// For each lineto dot
 		s=e-1;															// Point at start of line
-		if ((time >= dots[s][2]) && (time < end)) {						// This one's active
-			v.push([dots[e][0],dots[e][1]]);							// Add end dot
-			if ((time < dots[e][2]) && animate){						// If before end of end dot and animating
-				pct=(time-dots[s][2])/(dots[e][2]-dots[s][2]);			// Get pct
-				v[e][0]=dots[s][0]+((dots[e][0]-dots[s][0])*pct);		// Interpolate x
-				v[e][1]=dots[s][1]+((dots[e][1]-dots[s][1])*pct);		// Interpolate y
-				if (header && (pct < 1))	{							// If a header defined
-					header.setGeometry(new ol.geom.Point(v[e]));		// Move it
+		if ((time >= o.dots[s][2]) && (time < o.end)) {					// This one's active
+			v.push([o.dots[e][0],o.dots[e][1]]);						// Add end dot
+			if ((time < o.dots[e][2]) && animate){						// If before end of end dot and animating
+				pct=(time-o.dots[s][2])/(o.dots[e][2]-o.dots[s][2]);	// Get pct
+				v[e][0]=o.dots[s][0]+((o.dots[e][0]-o.dots[s][0])*pct);	// Interpolate x
+				v[e][1]=o.dots[s][1]+((o.dots[e][1]-o.dots[s][1])*pct);	// Interpolate y
+				if (o.header && (pct < 1))	{							// If a header defined
+					o.header.setGeometry(new ol.geom.Point(v[e]));		// Move it
 					sty.getImage().setOpacity(1);						// Show it
 					}
 				}
 			}
 		}
-	feature.setGeometry(new ol.geom.LineString(v));						// Set new dots
-
+	o.src.setGeometry(new ol.geom.LineString(v));						// Set new dots
 }
 
 
@@ -1130,6 +1225,7 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 		this.map.getLayers().remove(this.drawingLayer);						// Remove layer
 	this.drawingLayer=new ol.layer.Vector({source: new ol.source.Vector()}); // Create box layer
 	this.map.addLayer(this.drawingLayer);									// Add to map	
+	this.featureSelect.setActive(true);										// Turn select on
 	DrawEditFeature();														// Assume we're drawing
 
 	function DrawEditFeature()
@@ -1229,6 +1325,7 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 			 _this.map.removeInteraction(_this.drawData.drawInter); 		// Remove it
 		if (_this.drawingLayer)												// If defined
 			_this.map.getLayers().remove(_this.drawingLayer);				// Remove layer
+		_this.featureSelect.setActive(false);								// Turn select off
 		_this.DrawMapLayers();												// Redraw map to clear
 		}
 	
