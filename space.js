@@ -843,11 +843,15 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
           			return feature;											// Return feature
       			});
 			if (feature) {													// If one found
-  				var j,v,a;
-  				var id=feature.getId()+"";
+  				var j;
+  				var id=feature.getId();
     			if (lay && (lay.get("kmlId"))) {							// If a KML id
- 					var rx=new RegExp(lay.get('kmlId')+":"+id);				// Make patt
-       				for (j=0;j<curJson.mobs.length;++j) {					// For each mob				
+ 	 				var fa=lay.getSource().getFeatures();					// Point at all features
+ 					for (j=0;j<fa.length;++j)								// For each one
+ 						if (fa[j].getId() == id)							// A match for id
+ 							break;											// Quit looking
+					var rx=new RegExp(lay.get('kmlId')+":"+j);				// Make patt
+        			for (j=0;j<curJson.mobs.length;++j) {					// For each mob				
      					o=curJson.mobs[j];									// Point at mob data
  	 					if (o.marker && o.marker.match(rx)) {				// If a feature kml:feature match
  	 						id="Mob-"+j;									// Point at mov with info
