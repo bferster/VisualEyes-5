@@ -186,10 +186,14 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
          			return feature;											// Return feature
       				});
 			if (feature) {													// If one found
-  				var j,v,a;
-  				var id=feature.getId()+"";									// Get feature id
-    			if (lay && (lay.get("kmlId"))) 								// If a KML id
- 					$("#setpoint").val(lay.get('kmlId')+":"+id);			// Show full id
+  				var j;
+  				var id=feature.getId();										// Get feature id
+    			if (lay && (lay.get("kmlId"))) 	{							// If a KML id
+ 					var fa=lay.getSource().getFeatures();					// Point at all features
+ 					for (j=0;j<fa.length;++j)								// For each one
+ 						if (fa[j].getId() == id)							// A match for id
+	 	 					$("#setpoint").val(lay.get('kmlId')+":"+j);		// Show id index
+						}
 				}
 			}
 		});
