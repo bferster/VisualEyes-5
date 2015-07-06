@@ -16,6 +16,7 @@
   	<script src="time.js" type="text/javascript"></script>
   	<script src="popup.js" type="text/javascript"></script>
   	<script src="data.js" type="text/javascript"></script>
+  	<script src="story.js" type="text/javascript"></script>
  
  	<style type="text/css">
 		body { 				font-family:Verdana,Geneva,sans-serif; font-size:9px; 
@@ -116,7 +117,7 @@
 // DISPLAY
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	var curJson={},mps={},tln={},pop={},dtl={};
+	var curJson={},mps={},tln={},pop={},dtl={},sto={};
 	var paneAnimationTimer=null;												// Times pane animations
 	var imageAnimationTimer=[];													// Times image animations
 	var isMobile=false;															// Flag for mobile devices
@@ -197,7 +198,6 @@
 				if (o.show.match(/e/i)) 	e=o.end;							// End timed
 				if (o.show.match(/off/i)) 	s=e=-1;								// Hide it
 				}
-			trace(marker)
 			if (o.marker || o.mapMarker) {										// If a marker spec'd 
 				var marker=o.mapMarker ? o.mapMarker : o.marker;				// Use mapMarker first, then marker
 				o.type="icon";													// Assume icon
@@ -289,6 +289,7 @@
 		mps.SetBaseMap(curJson.baseMap);										// Set basemap layer
 		tln.InitTimeline("bottomDiv",curJson);									// Initialize timeline
 		mps.MarkerLayerToTop();													// Make marker layer the top-most layer
+		sto.InitStory(curJson);													// Initialize story
 		ResizePanes();															// Resize panes
 		if (curJson.mapStartPos)		mps.Goto(curJson.mapStartPos);			// Position map
 
@@ -380,6 +381,7 @@ $("#rightDiv").html(str);
 		mps=new Space("leftDiv",pop);											// Alloc map module
 		tln=new Timeline(pop);													// Alloc time module
 		dtl=new DataLoad();														// Alloc data module
+		sto=new Story("rightDiv",pop);											// Alloc story module
 		mps.InitMap();															// Init map
 		InitProject();															// Init project
 		if (drupalMan) 															// If called from Drupal manager
