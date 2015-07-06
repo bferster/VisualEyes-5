@@ -17,7 +17,7 @@
   	<script src="popup.js" type="text/javascript"></script>
   	<script src="data.js" type="text/javascript"></script>
   	<script src="story.js" type="text/javascript"></script>
- 
+
  	<style type="text/css">
 		body { 				font-family:Verdana,Geneva,sans-serif; font-size:9px; 
 							padding:0px;margin:0px;
@@ -287,7 +287,7 @@
 		}
 
 		mps.SetBaseMap(curJson.baseMap);										// Set basemap layer
-		tln.InitTimeline("bottomDiv",curJson);									// Initialize timeline
+		tln.InitTimeline(curJson);												// Initialize timeline
 		mps.MarkerLayerToTop();													// Make marker layer the top-most layer
 		sto.InitStory(curJson);													// Initialize story
 		ResizePanes();															// Resize panes
@@ -301,6 +301,8 @@ $("#rightDiv").html(str);
 	function Draw(time)														// DRAW PROJECT
 	{
 		mps.UpdateMap(time,curJson.timeFormat,curJson.panTime);					// Update map layers
+		sto.UpdateStory(time,curJson.timeFormat);								// Update story pane
+
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -379,7 +381,7 @@ $("#rightDiv").html(str);
 		$(window).resize(ResizePanes);											// Dynamic resizing
 		pop=new Popup("leftDiv");												// Alloc popup module
 		mps=new Space("leftDiv",pop);											// Alloc map module
-		tln=new Timeline(pop);													// Alloc time module
+		tln=new Timeline("bottomDiv",pop);										// Alloc time module
 		dtl=new DataLoad();														// Alloc data module
 		sto=new Story("rightDiv",pop);											// Alloc story module
 		mps.InitMap();															// Init map

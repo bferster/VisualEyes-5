@@ -5,32 +5,35 @@
 // Calls global functions: Draw(), ClearPopUps()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function Timeline(pop)														// CONSTRUCTOR
+function Timeline(div, pop)												// CONSTRUCTOR
 {
 
 /* 
   	@constructor
-
+ 	Init library and connect to div
+  	@param {string} div div to draw timeline into
+	@param {object} pop	Points to popup library in popup.js.
 */
 
 	var sd={};
+	this.div="#"+div;														// Current div selector
 	this.pop=pop;															// Point at popup lib
 	this.curTime=this.curStart=this.start;									// Set start
 	this.curEnd=this.end;													// Set end
 }
 
 
-Timeline.prototype.InitTimeline=function(div, data)						// INIT TIMELINE
+Timeline.prototype.InitTimeline=function(data)							// INIT TIMELINE
 {
+	
 /* 
-  	Init library and connect to div
-  	@param {string} div div to draw timeline into
+	Init library and set data
+	@param {object} data	Points to mobs
 */
 
 	this.margin=18;
 	this.curSeg=-1;															// Assume all segs
 	if (data)	this.sd=data;												// Point at setting and data
-	if (div)	this.div="#"+div;											// Current div selector
 
 	this.timeFormat=this.sd.timeFormat;										// Set date format
 	this.start=pop.DateToTime(this.sd.start);								// Start date

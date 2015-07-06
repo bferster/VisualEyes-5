@@ -21,23 +21,31 @@ function Story(div, pop)											// CONSTRUCTOR
 
 Story.prototype.InitStory=function(data)							// INIT STORY
 {
+
 /* 
-  	Init library and connect to div
- */
+	Init library and set data
+	@param {object} data	Points to mobs
+*/
 
 	if (data)	this.sd=data;											// Point at setting and data
 	this.UpdateStory();													// Resize 
 }	
 
 
-Story.prototype.UpdateStory=function() 									// UPDATE STORY PANE
+Story.prototype.UpdateStory=function(curTime, timeFormat) 			// UPDATE STORY PANE
 {
 	
-/* 
-	Resize timeline to fit container div
+
+/*
+	Update the current time and set layer visibilities accordingly.
+	@param {number} curTime 	Current project time in mumber of mins += 1/1/1970
+	@param {string} timeFormat	Format to use when making time human readable	
 */
 
+	this.timeFormat=timeFormat;												// Set format
+	this.curTime=curTime-0;													// Set current timet
 }
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
