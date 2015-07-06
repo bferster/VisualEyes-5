@@ -44,6 +44,9 @@ Story.prototype.UpdateStory=function(curTime, timeFormat) 			// UPDATE STORY PAN
 
 	this.timeFormat=timeFormat;												// Set format
 	this.curTime=curTime-0;													// Set current timet
+
+var str="<img src='http://www.viseyes.org/efolio/declaration.JPG' width='100%'> &nbsp; ";
+$("#rightDiv").html(str);
 }
 
 

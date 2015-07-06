@@ -292,9 +292,6 @@
 		sto.InitStory(curJson);													// Initialize story
 		ResizePanes();															// Resize panes
 		if (curJson.mapStartPos)		mps.Goto(curJson.mapStartPos);			// Position map
-
-var str="<img src='http://www.viseyes.org/efolio/declaration.JPG' width='100%'> &nbsp; ";
-$("#rightDiv").html(str);
 	}
 		
 
@@ -302,7 +299,6 @@ $("#rightDiv").html(str);
 	{
 		mps.UpdateMap(time,curJson.timeFormat,curJson.panTime);					// Update map layers
 		sto.UpdateStory(time,curJson.timeFormat);								// Update story pane
-
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -694,7 +690,7 @@ $("#rightDiv").html(str);
 		$("#alertBoxDiv").remove();												// Remove oldalert boxe
 		$("#st-popup").remove();												// Remove old popup
 		$("#colorPickerDiv").remove();											// Remove old colorpicker
-	$("#rightDiv").html("<img src='http://www.viseyes.org/efolio/declaration.JPG' width='100%'>");
+		sto.UpdateStory(curTime,curJson.timeFormat);							// Update story pane
 	}
 
 </script>
