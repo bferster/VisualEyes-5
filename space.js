@@ -484,6 +484,7 @@ Space.prototype.DrawPath=function(num, time) 						// DRAW PATH
 	@param {number} time 	Current time in number of mins += 1/1/1970
 */
 	
+
 	var s,e,pct,v=[],i=0,animate=false;
 	var o=this.overlays[num];											// Point at overlay
 	if (o.show && o.show.match(/a/i))	animate=true;					// Set animation mode

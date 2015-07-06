@@ -197,6 +197,7 @@
 				if (o.show.match(/e/i)) 	e=o.end;							// End timed
 				if (o.show.match(/off/i)) 	s=e=-1;								// Hide it
 				}
+			trace(marker)
 			if (o.marker || o.mapMarker) {										// If a marker spec'd 
 				var marker=o.mapMarker ? o.mapMarker : o.marker;				// Use mapMarker first, then marker
 				o.type="icon";													// Assume icon
@@ -214,7 +215,7 @@
 						marker="loaddata.php?kml=1&id="+marker.split(".")[0];	// Load from qdata
 					o.lid=mps.AddKMLLayer(marker,o.opacity,o.id,s,e);			// Add KML layer								 
 					}
-				else if (marker.toLowerCase() == "path") {						// A path
+				else if (o.marker && (o.marker.toLowerCase() == "path")) {		// A path
 					var dots=[];
 					o.type="path";												// Set type
 					v=o.desc.split(",");										// Split by comma
