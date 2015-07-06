@@ -574,7 +574,8 @@ $("#rightDiv").html(str);
 	    var fs=new ol.format.KML().readFeatures(data.data);						// Read in features
 	    for (i=0;i<fs.length;++i){												// For each feature
 	        f=fs[i].clone();													// Clone feature
-		   	os=fs[i].values_.Style[0];											// Get style the hard way
+			if (f.get("Style")) 												// If an embedded style
+				os=f.get("Style")[0];											// Get embedded style 
 			if (f.getGeometry().getType() == "Point") 							// If a marker
 				s=new ol.style.Style({											// Alloc text style
 				   image: new ol.style.Circle( {								// Draw circle

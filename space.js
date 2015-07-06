@@ -367,18 +367,21 @@ Space.prototype.DrawChoropleth=function(num, time) 						// DRAW CHOROPLETH
 	var features=this.overlays[o.base].src.getSource().getFeatures();	// Get KML feature array
 	if (!o.styles.length) {												// No original styles yet
 		for (i=0;i<features.length;++i) {								// For each feature in KML
-			os=features[i].values_.Style[0];							// Get style the hard way
-			o.styles[i]={};												// Alloc style storage object
-			if (os.getFill()) {											// If a fill
-				c=os.getFill().getColor();								// Get color
-				o.styles[i].fr=c[0];	o.styles[i].fg=c[1];
-				o.styles[i].fb=c[2];	o.styles[i].fa=c[3];
-				}
-			if (os.getStroke())	{										// If a stroke
-				c=os.getStroke().getColor();							// Get edge color
-				o.styles[i].er=c[0];	o.styles[i].eg=c[1];
-				o.styles[i].eb=c[2];	o.styles[i].ea=c[3];
-				o.styles[i].ew=os.getStroke().getWidth();				// Get edge width		
+			o.styles[i]={ fr:0,fb:0,fg:255,fa:0,						// Alloc style storage object
+				er:0,eg:0,eb:0,ea:0,ew:2 };								// Defaults
+			if (features[i].get("Style")) {								// If an embedded style
+				os=features[i].get("Style")[0];							// Get embedded style 
+				if (os.getFill()) {										// If a fill
+					c=os.getFill().getColor();							// Get color
+					o.styles[i].fr=c[0];	o.styles[i].fg=c[1];
+					o.styles[i].fb=c[2];	o.styles[i].fa=c[3];
+					}
+				if (os.getStroke())	{									// If a stroke
+					c=os.getStroke().getColor();						// Get edge color
+					o.styles[i].er=c[0];	o.styles[i].eg=c[1];
+					o.styles[i].eb=c[2];	o.styles[i].ea=c[3];
+					o.styles[i].ew=os.getStroke().getWidth();			// Get edge width		
+					}
 				}
 			sty=new ol.style.Style( {									// Alloc style								
 				fill: 	new ol.style.Fill(	 { color:[o.styles[i].fr,o.styles[i].fg,o.styles[i].fb,o.styles[i].fa] } ),							// Fill
@@ -658,7 +661,7 @@ Space.prototype.AddKMLLayer=function(url, opacity, id, start, end) 		// ADD KML 
 	o.src=new ol.layer.Vector({  source: new ol.source.Vector({				// New layer
 							title: "LAYER-"+this.overlays.length,			// Set name
 				   			projection: ol.proj.get(this.curProjection),	// Set KML projection
-				    		format: new ol.format.KML(),					// KML format
+				    		format: new ol.format.KML({ extractStyles:true}),					// KML format
 				    		url: url										// URL
 				  			})
 						});
