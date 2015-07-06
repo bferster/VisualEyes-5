@@ -250,7 +250,7 @@ DataLoad.prototype.Query=function(src, dst, query, fields, sort) 	// RUN QUERY
 	n=fields.length;													// Number of fields
 	if (allFields) {													// If doing all fields
 		for (i=0;i<results.length;++i) 									// For each result
-			dst.push(src[results[i]]);									// Add row
+			dst.push(src[results[i]+1]);								// Add row (skip header)
 		}
 	else{																// Selected fields
 		var ids=new Array();

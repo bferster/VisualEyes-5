@@ -363,66 +363,78 @@ Space.prototype.DrawChoropleth=function(num, time) 						// DRAW CHOROPLETH
 
 	var i,v,os,sty;
 	var fr,fb,fg,fa,er,eg,eb,ea,ew;
-	var o=this.overlays[num];											// Point at overlay
-	var features=this.overlays[o.base].src.getSource().getFeatures();	// Get KML feature array
-	if (!o.styles.length) {												// No original styles yet
-		for (i=0;i<features.length;++i) {								// For each feature in KML
-			o.styles[i]={ fr:0,fb:0,fg:255,fa:0,						// Alloc style storage object
-				er:0,eg:0,eb:0,ea:0,ew:2 };								// Defaults
-			if (features[i].get("Style")) {								// If an embedded style
-				os=features[i].get("Style")[0];							// Get embedded style 
-				if (os.getFill()) {										// If a fill
-					c=os.getFill().getColor();							// Get color
-					o.styles[i].fr=c[0];	o.styles[i].fg=c[1];
+	var o=this.overlays[num];												// Point at overlay
+	var features=this.overlays[o.base].src.getSource().getFeatures();		// Get KML feature array
+	if (!o.styles.length) {													// No original styles yet
+		for (i=0;i<features.length;++i) {									// For each feature in KML
+			o.styles[i]={ fr:0,fb:0,fg:255,fa:0,							// Alloc style storage object
+				er:0,eg:0,eb:0,ea:0,ew:2 };									// Defaults
+			if (features[i].get("Style")) {									// If an embedded style
+				os=features[i].get("Style")[0];								// Get embedded style 
+				if (os.getFill()) {											// If a fill
+					c=os.getFill().getColor();								// Get color
+					o.styles[i].fr=c[0];	o.styles[i].fg=c[1];			// Set colors
 					o.styles[i].fb=c[2];	o.styles[i].fa=c[3];
 					}
-				if (os.getStroke())	{									// If a stroke
-					c=os.getStroke().getColor();						// Get edge color
-					o.styles[i].er=c[0];	o.styles[i].eg=c[1];
+				if (os.getStroke())	{										// If a stroke
+					c=os.getStroke().getColor();							// Get edge color
+					o.styles[i].er=c[0];	o.styles[i].eg=c[1];			// Set colors
 					o.styles[i].eb=c[2];	o.styles[i].ea=c[3];
-					o.styles[i].ew=os.getStroke().getWidth();			// Get edge width		
+					o.styles[i].ew=os.getStroke().getWidth();				// Get edge width		
 					}
 				}
-			sty=new ol.style.Style( {									// Alloc style								
+			sty=new ol.style.Style( {										// Alloc style								
 				fill: 	new ol.style.Fill(	 { color:[o.styles[i].fr,o.styles[i].fg,o.styles[i].fb,o.styles[i].fa] } ),							// Fill
 				stroke: new ol.style.Stroke( { color:[o.styles[i].er,o.styles[i].eg,o.styles[i].eb,o.styles[i].ea], width: o.styles[i].ew-0 })	// Edge
 				});
- 			features[i].setStyle(sty);									// Style it
+ 			features[i].setStyle(sty);										// Style it
 			}
 		}
-	var v=o.where.split(":")[1].split(",");							// Get features
-   	if (o.col && (o.col.length == 4)) 	o.col+=o.col.substr(1,3);	// Turn #555 into #55555
-  	if (o.ecol && (o.ecol.length == 4)) o.ecol+=o.ecol.substr(1,3);	// Turn #555 into #55555
+	var v=o.where.split(":")[1].split(",");									// Get features
+	if (o.where.match(/from/i)) {											// Must be a query
+		var dst=[];
+		v=o.where.match(/(.+) *from *(\S+) *(.+)/i);						// Split into base, data, and query parts
+		if ((i=FindMobByID(v[2])) < 0)										// Get index of data element
+			return;															// Quit of not found
+		if (!(i=curJson.mobs[i].src))										// No data yet
+			return;															// Quit of not found
+		dtl.Query(i,dst,v[3],"feature");									// Run query on data
+		v=[];																// A blank slate
+		for (i=1;i<dst.length;++i)											// For each one found (skip header)
+			v.push(dst[i][0]);												// Add id to list to select
+		}
+   	if (o.col && (o.col.length == 4)) 	o.col+=o.col.substr(1,3);			// Turn #555 into #55555
+  	if (o.ecol && (o.ecol.length == 4)) o.ecol+=o.ecol.substr(1,3);			// Turn #555 into #55555
 
-	for (i=0;i<features.length;++i) {								// For each feature
-		s=o.styles[i];												// Point at style
-		fr=s.fr;	fg=s.fg;	fb=s.fb;	fa=s.fa;				// Get original values
-		er=s.er;	eg=s.eg;	eb=s.eb;	ea=s.ea; 	ew=s.ew;	// Get original values
-		if (!o.start || (time >= o.start) && (time < o.end)) {		// If showing
-			for (j=0;j<v.length;++j) {								// For each potential match
-				if (v[j] == i) {									// A match
-					if (o.col) {									// If a fill
-					  	fr=parseInt("0x"+o.col.substr(1,2),16);		// R
-						fg=parseInt("0x"+o.col.substr(3,2),16);		// G
-						fb=parseInt("0x"+o.col.substr(5,2),16);		// B
-						fa=o.opacity;								// A
+	for (i=0;i<features.length;++i) {										// For each feature
+		s=o.styles[i];														// Point at style
+		fr=s.fr;	fg=s.fg;	fb=s.fb;	fa=s.fa;						// Get original values
+		er=s.er;	eg=s.eg;	eb=s.eb;	ea=s.ea; 	ew=s.ew;			// Get original values
+		if (!o.start || (time >= o.start) && (time < o.end)) {				// If showing
+			for (j=0;j<v.length;++j) {										// For each potential match
+				if (v[j] == i) {											// A match
+					if (o.col) {											// If a fill
+					  	fr=parseInt("0x"+o.col.substr(1,2),16);				// R
+						fg=parseInt("0x"+o.col.substr(3,2),16);				// G
+						fb=parseInt("0x"+o.col.substr(5,2),16);				// B
+						fa=o.opacity;										// A
 						}
-					if (o.ecol) {									// If an edge					
-					  	er=parseInt("0x"+o.ecol.substr(1,2),16);	// R
-						eg=parseInt("0x"+o.ecol.substr(3,2),16);	// G
-						eb=parseInt("0x"+o.ecol.substr(5,2),16);	// B
-						ea=o.opacity;								// A
+					if (o.ecol) {											// If an edge					
+					  	er=parseInt("0x"+o.ecol.substr(1,2),16);			// R
+						eg=parseInt("0x"+o.ecol.substr(3,2),16);			// G
+						eb=parseInt("0x"+o.ecol.substr(5,2),16);			// B
+						ea=o.opacity;										// A
 						}
-					if (o.ewid) 									// If an edge width					
-						ew=o.ewid;									// W
+					if (o.ewid) 											// If an edge width					
+						ew=o.ewid;											// W
 					}
 				}
 			}
-		sty=new ol.style.Style( {									// Alloc style								
-			fill: 	new ol.style.Fill(	 { color:[fr,fg,fb,fa] } ),	// Fill
+		sty=new ol.style.Style( {											// Alloc style								
+			fill: 	new ol.style.Fill(	 { color:[fr,fg,fb,fa] } ),			// Fill
 			stroke: new ol.style.Stroke( { color:[er,eg,eb,ea], width:o.ewid-0 })	// Edge
 			});
-		features[i].setStyle(sty);									// Style it
+		features[i].setStyle(sty);											// Style it
 		}
 }
 

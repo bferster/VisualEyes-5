@@ -214,7 +214,7 @@
 						marker="loaddata.php?kml=1&id="+marker.split(".")[0];	// Load from qdata
 					o.lid=mps.AddKMLLayer(marker,o.opacity,o.id,s,e);			// Add KML layer								 
 					}
-				else if (o.marker && o.marker.match(/path/i)) {					// A path
+				else if (marker.toLowerCase() == "path") {						// A path
 					var dots=[];
 					o.type="path";												// Set type
 					v=o.desc.split(",");										// Split by comma
@@ -248,12 +248,16 @@
 					o.type="image";												// Set type
 					o.lid=mps.AddImageLayer(marker,o.where, o.opacity,s,e);		// Add image layer								 
 					}
-				else if (marker.match(/segment/i)) 								// A segment
+				else if (marker.toLowerCase() == "segment") 					// A segment
 					o.type="segment";											// Set type
-				else if (marker.match(/init/i)) 								// An init
+				else if (marker.toLowerCase() == "init") 						// An init
 					o.type="init";												// Set type
-				else if (marker.match(/:/)) 									// A feature click
-					o.type="feature";											// Set type
+				else if (marker.toLowerCase() == "data") {						// Data
+					o.type="data";												// Set type
+					dtl.GetSpreadsheet(o.where, false, null, function(data) {	// Get spreadsheet data
+						o.src=data												// Save data
+						}, true);
+					}
 				else if (marker.match(/choro/i)) {								// A choro
 					o.type="choro";												// Set type
 					o.base=FindMobByID(o.where.split(":")[0]);					// Find mod index of base layer
@@ -262,6 +266,8 @@
 						mps.AddChoroplethLayer(o.color,o.edge,o.size, o.opacity,o.base,o.where,s,e);	// Add choro layer
 						}
 					}
+				else if (marker.match(/:/)) 									// A feature click
+					o.type="feature";											// Set type
 				else if (o.where) { 											// Must be an icon
 					var sty={};													// Not style
 					o.type="icon";												// Set type
