@@ -27,7 +27,7 @@ Story.prototype.InitStory=function(data)							// INIT STORY
 	@param {object} data	Points to mobs
 */
 
-	if (data)	this.sd=data;											// Point at setting and data
+	if (data)	this.sd=data;											// Point at data
 	this.UpdateStory();													// Resize 
 }	
 
@@ -42,14 +42,31 @@ Story.prototype.UpdateStory=function(curTime, timeFormat) 			// UPDATE STORY PAN
 	@param {string} timeFormat	Format to use when making time human readable	
 */
 
+	var i,o,str="",indent=0,open=true;
+	if (this.sd.title)	str+="<div class='story-title'>"+this.sd.title+"</div>";
 	this.timeFormat=timeFormat;												// Set format
 	this.curTime=curTime-0;													// Set current timet
-
-var str="<img src='http://www.viseyes.org/efolio/declaration.JPG' width='100%'> &nbsp; ";
-$("#rightDiv").html(str);
+	for (i=0;i<this.sd.mobs.length;++i) 
+		if (this.sd.mobs[i].marker && (this.sd.mobs[i].marker.toLowerCase() == "story"))	// If a story item
+			str+=this.DrawStoryItem(this.sd.mobs[i],indent,open);			// Add it to html
+//str="<img src='http://www.viseyes.org/efolio/declaration.JPG' width='100%'> &nbsp; ";
+	$("#rightDiv").html(str);
 }
 
 
+Story.prototype.DrawStoryItem=function(mob, indent, open) 			// DRAW STORY ITEM
+{
+
+/*
+	Create HTML for story item
+	@param {number} curTime 	Current project time in mumber of mins += 1/1/1970
+	@param {string} timeFormat	Format to use when making time human readable	
+*/
+
+	var str="";
+	trace(mob)
+	return str;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // HELPERS 
