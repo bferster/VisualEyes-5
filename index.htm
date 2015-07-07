@@ -77,16 +77,18 @@
 		.ve-unselectable { 	-moz-user-select: none;     -khtml-user-select: none;
 		   			 		-webkit-user-select: none;  	-ms-user-select: none;   user-select: none;
 							}
-		.story-pic { 		margin-right:8px;vertical-align:top;cursor:zoom-in;
-							border:1px solid #999;max-width:80px;max-height:60px;overflow:hidden;
+		.story-title {		margin:12px;font-size:24px;color:#555;font-weight:bold
+							}
+		.story-pic { 		margin-left:16px;vertical-align:top;cursor:zoom-in;margin-right:12px;
+							border:1px solid #999;max-width:100px;width:50%;float:left;
 							}				
-		.story-desc { 		vertical-align:top;color:#555;cursor:zoom-in;
+		.story-desc { 		margin-left:16px;color:#333;font-size:11px;margin-right:12px;
 							}				
-		.story-title {		margin:18px;font-size:24px;color:#555;font-weight:bold
+		.story-header {		margin-left:4px;font-size:12px;color:#555;font-weight:bold;margin-bottom:8px;
 							}
 		.story-date { 		color:#999;font-size:9px;
 							}
-		.story-cite { 		text-align:right;font-size:8px;color:#999;display:none;
+		.story-cite { 		margin:18px;text-align:right;font-size:9px;color:#006600;
 							}
 		.ve-base { 			position:absolute;height:100%;width:100%;
 							}	
@@ -115,7 +117,7 @@
 	<div id="leftDiv" style="position:absolute;opacity:inherit" class="ve-left"></div>
 	<div id="rightDiv" style="position:absolute;opacity:inherit" class="ve-right"></div>
 	<div id="lrSiz" style="position:absolute;width:8px;cursor:col-resize;opacity:inherit" class="ve-unselectable" title="Resize panes">
-		<div id="lrSiz1" style="position:absolute;width:40px;height:100%;left:-8px" class="ve-unselectable"></div>
+		<div id="lrSiz1" style="position:absolute;width:20px;height:100%;left:-8px" class="ve-unselectable"></div>
 	</div>
 	<div id="bSiz" style="position:absolute;height:8px;width:100%;cursor:row-resize;opacity:inherit" class="ve-unselectable" title="Resize timeline">
 		<div id="bSiz1" style="position:absolute;height:20px;width:100%" class="ve-unselectable"></div>
