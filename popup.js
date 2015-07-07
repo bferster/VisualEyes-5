@@ -344,6 +344,7 @@ Popup.prototype.ShowWebPage=function(div, url, title)						// SHOW WEB PAGE
 	
 	var pan=false;
 	$("#st-webpage").remove();												// Remove any pre-existing popup
+	$("#st-popup").remove();												// Remove any old popup
 	if (!url)																// If no url defined
 		return;																// We're just removing
 	var str="<div id='st-webpage' class='popup-webpage' style='";			// Add div

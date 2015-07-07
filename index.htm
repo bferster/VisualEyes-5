@@ -129,6 +129,7 @@
 	var qmf=null;																// File system
 	var curShow="";																// Current show
 	var _this=this;																// Save context for callbacks
+	var origLR=.66, origUD=.75;													// Pane size to come back to
 	
 	function ResizePanes()													// RESIZE PANES
 	{ 
@@ -151,7 +152,6 @@
 		$("#settingsBut").css({ top:$("#bottomDiv").height()-18,left:cx-18});	// Settings button
 		mps.UpdateMapSize();													// Update map size to div size
 		tln.UpdateTimeline();													// Update timeline to div size
-		Draw();																	// Redraw
 	}		
 
 	function LoadShow(data)													// LOAD A SHOW
@@ -188,10 +188,13 @@
 			curJson.upDownSplit=.75;
 			curJson.leftRightSplit=.66;													
 			}
+		origLR=curJson.leftRightSplit;											// Save return ratio
+		origUD=curJson.upDownSplit;												// Save return ratio
 		for (i=0;i<curJson.mobs.length;++i) {									// For each mob	
 			o=curJson.mobs[i];													// Point at mob
-			if (o.start)	o.start=pop.DateToTime(o.start);					// Convert date to time
-			if (o.end)		o.end=pop.DateToTime(o.end);						// Convert date to time
+			if (o.start)		o.start=pop.DateToTime(o.start);				// Convert date to time
+			if (o.end)			o.end=pop.DateToTime(o.end);					// Convert date to time
+			if (o.opacity > 1)	o.opacity/=100;									// 0-100 to 0-1
 			s=e=0;																// Assume not timed
 			if (o.show) {														// If show mode spec'd
 				if (o.show.match(/s/i)) 	s=o.start;							// Start timed
@@ -240,7 +243,7 @@
  						o.mapColor    ?	sty.f=o.mapColor    : sty.f=o.color;	// Use map options first, then path options		
 						o.mapEdge     ?	sty.s=o.mapEdge     : sty.s=o.edge;				
 						o.mapSize     ?	sty.w=o.mapSize     : sty.w=o.size;				
-						o.mapOpacity  ? sty.a=o.mapOpacity  : sty.a=o.opacity;				
+						o.mapOpacity  ? sty.a=o.mapOpacity  : sty.a=eo;				
 						o.header=mps.AddMarkerLayer("0,0",sty,i);	
 						}	
 					mps.AddPathLayer(dots,o.color,ew,eo,s,o.end ? o.end: e, o.show, o.header);// Add path to overlays
@@ -253,8 +256,10 @@
 					o.type="segment";											// Set type
 				else if (marker.toLowerCase() == "init") 						// An init
 					o.type="init";												// Set type
+				else if (marker.toLowerCase() == "story") 						// An init
+					o.type="init";												// Set type
 				else if (marker.toLowerCase() == "data") {						// Data
-					o.type="data";												// Set type
+					o.type="story";												// Set type
 					dtl.GetSpreadsheet(o.where, false, null, function(data) {	// Get spreadsheet data
 						o.src=data												// Save data
 						}, true);
@@ -271,6 +276,7 @@
 					o.type="feature";											// Set type
 				else if (o.where) { 											// Must be an icon
 					var sty={};													// Not style
+					var eo=o.opacity ? o.opacity  : 1;							// Set opacity with 1.0 default
 					o.type="icon";												// Set type
 					o.mapMarker ?	sty.m=o.mapMarker : sty.m=o.marker;			// Use map marker first, then time marker
 					o.mapTitle  ?	sty.t=o.mapTitle  : sty.t=o.title;			
@@ -280,7 +286,7 @@
 					o.mapSize   ?	sty.w=o.mapSize   : sty.w=o.size;				
 					o.mapTextCol  ? sty.tc=o.mapTextCol  : sty.tc=curJson.mapTextCol;				
 					o.mapTextFont ? sty.tf=o.mapTextFont : sty.tf=curJson.mapTextFont;				
-					o.mapOpacity  ? sty.a=o.mapOpacity   : sty.a=o.opacity;				
+					o.mapOpacity  ? sty.a=o.mapOpacity   : sty.a=eo;				
 					mps.AddMarkerLayer(o.where,sty,i,s,e);						// Add marker to overlays
 					}
 			}
@@ -298,7 +304,7 @@
 	function Draw(time)														// DRAW PROJECT
 	{
 		mps.UpdateMap(time,curJson.timeFormat,curJson.panTime);					// Update map layers
-		sto.UpdateStory(time,curJson.timeFormat);								// Update story pane
+//		sto.UpdateStory(time,curJson.timeFormat);								// Update story pane
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -409,7 +415,13 @@
 				mps.Goto(v[1])													// Move map
 			if (e.data.match(/=zoom/i))	{										// Set position
 				$("#rightDiv").html("");										// Clear div
-				pop.DrawZoomer("rightDiv",v[1],2,4);							// Show zoomer
+				var vv=v[1].split(",");											// Divide param									
+				if (vv[1])														// If a percentage spec'd
+					AnimatePanes("map",vv[1]/100,undefined,function() {			// Animate pane there
+						pop.DrawZoomer("rightDiv",vv[0],2,4);					// Show zoomer
+						});								
+				else
+					pop.DrawZoomer("rightDiv",vv[0],2,4);						// Show zoomer
 				}
 			else if (e.data.match(/=show/i))	{								// Set position
 				var i;
@@ -427,7 +439,13 @@
 				Draw(v[1])														// Redraw
 			if (e.data.match(/=zoom/i)) {										// Set position
 				$("#rightDiv").html("");										// Clear div
-				pop.DrawZoomer("rightDiv",v[1],2,4);							// Show zoomer
+				var vv=v[1].split(",");											// Divide param									
+				if (vv[1])														// If a percentage spec'd
+					AnimatePanes("map",vv[1]/100,undefined,function() {			// Animate pane there
+						pop.DrawZoomer("rightDiv",vv[0],2,4);					// Show zoomer
+						});								
+				else
+					pop.DrawZoomer("rightDiv",vv[0],2,4);						// Show zoomer
 				}
 			else if (e.data.match(/=show/i))	{								// Set position
 				var i;
@@ -626,6 +644,47 @@
 	}
 
 
+	function AnimatePanes(which, end, dur, callback)						// ANIMATE CHANGE OF PANE RATIO
+	{
+		var start;
+		if (which == "map") 	 	start=curJson.leftRightSplit;				// Get current map
+		else if (which == "time")  	start=curJson.upDownSplit;					// Get current timeline ratio
+		var dif=Math.abs(end-start);											// Difference
+		if ((dif < .05) || (paneAnimationTimer)) {								// If close enough or animating alredy
+			clearInterval(paneAnimationTimer);									// Kill timer
+			paneAnimationTimer=null;											// Clear timer var
+			if (which == "map") 	 	curJson.leftRightSplit=end;				// Set map ratio
+			else if (which == "time") 	curJson.upDownSplit=end;				// Set timeline ratio
+			if (dif)															// If not there yet
+				ResizePanes();													// Resize
+			if (callback)				callback();								// If a callback defined
+			return;																// Quit
+			}
+		clearInterval(paneAnimationTimer);										// Kill timer
+		paneAnimationTimer=null;												// Clear timer var
+		var startTime=new Date().getTime();										// Set start
+		if (dur == undefined)													// If no duration set
+			dur=.5;																// Set default
+		dur=dur*1000;															// Secs to ms
+		paneAnimationTimer=setInterval(onAnimate,24);							// Set timer ~40ps
+
+		function onAnimate() {
+			var now=(new Date().getTime()-startTime)/dur;						// Get now
+			now=1.0-((Math.cos(3.1414*Math.min(now,1))+1)/2.0);					// Full cosine curve
+			var pos=start+(end-start)*now;										// Get val
+			if (now > .99)	{													// If done
+				clearInterval(paneAnimationTimer);								// Kill timer
+				pos=end;														// Force to end
+				paneAnimationTimer=null;										// Null it out
+				if (callback)	callback();										// If a callback defined
+				}
+			if (which == "map") 	 	curJson.leftRightSplit=pos;				// Set map ratio
+			else if (which == "time") 	curJson.upDownSplit=pos;				// Set timeline ratio
+			ResizePanes();														// Resize
+			}
+	}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // HELPERS
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -690,8 +749,9 @@
 		$("#alertBoxDiv").remove();												// Remove oldalert boxe
 		$("#st-popup").remove();												// Remove old popup
 		$("#colorPickerDiv").remove();											// Remove old colorpicker
-		sto.UpdateStory(curTime,curJson.timeFormat);							// Update story pane
-		ResizePanes();
+		AnimatePanes("map",origLR,undefined, function() {						// Animate pane back
+			sto.UpdateStory(curTime,curJson.timeFormat);						// Update story pane
+			});												
 	}
 
 </script>
