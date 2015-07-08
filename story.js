@@ -33,8 +33,12 @@ Story.prototype.InitStory=function(data)								// INIT STORY
 	if (this.sd.title)	str+="<div class='story-title'>"+this.sd.title+"</div>";
 	for (i=0;i<this.sd.mobs.length;++i) 									// For each mob
 		if (this.sd.mobs[i].marker && (this.sd.mobs[i].marker.toLowerCase() == "story")) {	// If a story item
-			if (this.sd.mobs[i].open == undefined)							// If fist time
-				this.sd.mobs[i].open=this.sd.mobs[i].show.toLowerCase() == "open" ? true : false;
+			if (this.sd.mobs[i].open == undefined) {							// If fiest time
+				if (this.sd.mobs[i].show && (this.sd.mobs[i].show.toLowerCase() == "open"))	// If set to open
+					this.sd.mobs[i].open=true;								// Set true
+				else														// Otherwise, must be closed
+					this.sd.mobs[i].open=false;								// Set false
+				}
 			if (this.sd.mobs[i].pos)	ind=this.sd.mobs[i].pos;			// If a pos set, use it
 			str+="<div id='story"+i+"' style='margin-left:"+(ind*18+12)+"px'>"; // Container div
 			str+=this.DrawStoryItem(i)+"</div>";							// Add it to html
@@ -59,11 +63,24 @@ Story.prototype.UpdateStory=function(curTime, timeFormat) 				// UPDATE STORY PA
 
 function onStoryClick(e,mode) 											// TOGGLE STORY ITEM
 {
+	var i,hide=99,pos;
 	var id=e.substr(8);														// Get ID
-	sto.sd.mobs[id].open=!sto.sd.mobs[id].open;								// Toggle closure state						
-	sto.pop.Sound("click",curJson.muteSound);								// Click sound
-	$("#story"+id).html(sto.DrawStoryItem(id)); 							// Redraw this one
+	curJson.mobs[id].open=!curJson.mobs[id].open;								// Toggle closure state						
+	pop.Sound("click",curJson.muteSound);									// Click sound
+	for (i=id;i<curJson.mobs.length;++i) {									// For each mob
+		if (curJson.mobs[i].marker && (curJson.mobs[i].marker.toLowerCase() != "story")) // If not a story item
+			continue;														// Skip
+		pos=curJson.mobs[i].pos ? curJson.mobs[i].pos : 0;					// Get pos
+		if (pos > hide)														// If this is hidden
+			curJson.mobs[i].open=false;										// Close it
+		else if (!curJson.mobs[i].open) 									// If closed
+			hide=pos;														// Set level
+		else																// Open or unset
+			curJson.mobs[i].open=true;										// Don't hide
+		$("#story"+i).html(sto.DrawStoryItem(i)); 							// Redraw 
+		}
 }
+
 
 
 Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
@@ -83,7 +100,7 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 	if (mob.open) 															// Draw a down triangle
 		str+="border-left:6px solid transparent;border-right:6px solid transparent;border-top:10px solid #aaa'></div>";
 	else																	// Draw right triangle
-		str+="border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:8px solid #aaa;margin-left:4px'></div>";
+		str+="border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:10px solid #aaa;margin-left:2px'></div>";
 	if (mob.title)															// If a title
 		str+="<div class='story-header' style='display:inline-block;color:"+col+"'>"+mob.title+"</div><br>";
 	if (mob.open) {															// If open

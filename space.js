@@ -18,7 +18,6 @@ function Space(div, pop)														// CONSTRUCTOR
 
 	this.div="#"+div;														// Current div selector
   	this.pop=pop;															// Point at popup lib
-  	this.controlKey=this.shiftKey=false;									// Shift/control key flags
 	this.showBoxes=false;													// Show boxes
 	this.showRoads=false;													// Hide Roads/borders
 	this.showScale=true;													// Show scale
@@ -104,7 +103,6 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
   	Init map library.
  
 */
-	this.controlKey=this.shiftKey=false;									// Shift/control key flags
 	this.showBoxes=false;													// Show boxes
 	this.showRoads=false;													// Hide Roads/borders
 	this.showScale=true;													// Hide or show scale
