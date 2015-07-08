@@ -33,7 +33,8 @@ Story.prototype.InitStory=function(data)								// INIT STORY
 	if (this.sd.title)	str+="<div class='story-title'>"+this.sd.title+"</div>";
 	for (i=0;i<this.sd.mobs.length;++i) 									// For each mob
 		if (this.sd.mobs[i].marker && (this.sd.mobs[i].marker.toLowerCase() == "story")) {	// If a story item
-			this.sd.mobs[i].open=this.sd.mobs[i].show.toLowerCase() == "open" ? true : false;
+			if (this.sd.mobs[i].open == undefined)							// If fist time
+				this.sd.mobs[i].open=this.sd.mobs[i].show.toLowerCase() == "open" ? true : false;
 			if (this.sd.mobs[i].pos)	ind=this.sd.mobs[i].pos;			// If a pos set, use it
 			str+="<div id='story"+i+"' style='margin-left:"+(ind*18+12)+"px'>"; // Container div
 			str+=this.DrawStoryItem(i)+"</div>";							// Add it to html
