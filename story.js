@@ -28,7 +28,7 @@ Story.prototype.InitStory=function(data)								// INIT STORY
 */
 
 	var i,str="",ind=0;
-	this.sd=data;															// Point at data
+	if (data)	this.sd=data;												// Point at data
 	var _this=this;															// Save context for callback
 	if (this.sd.title)	str+="<div class='story-title'>"+this.sd.title+"</div>";
 	for (i=0;i<this.sd.mobs.length;++i) 									// For each mob
@@ -53,7 +53,7 @@ Story.prototype.UpdateStory=function(curTime, timeFormat) 				// UPDATE STORY PA
 
 	this.timeFormat=timeFormat;												// Set format
 	this.curTime=curTime-0;													// Set current timet
-	this.InitStory(this.sd);												// Reshow
+	this.InitStory();														// Re-build page
 }
 
 
@@ -66,13 +66,12 @@ function onStoryClick(e,mode) 											// TOGGLE STORY ITEM
 }
 
 
-Story.prototype.DrawStoryItem=function(num, update) 					// DRAW STORY ITEM
+Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 {
 
 /*
-	Create HTML for story item
-	@param {number} curTime 	Current project time in mumber of mins += 1/1/1970
-	@param {string} timeFormat	Format to use when making time human readable	
+	Create HTML for story mob
+	@param {number} num 		Index of mob to draw
 */
 	
 	var desc,col="#555",v,vv,title;
@@ -82,42 +81,46 @@ Story.prototype.DrawStoryItem=function(num, update) 					// DRAW STORY ITEM
 	var str="<div id='storyBut"+num+"' onclick='onStoryClick(this.id)' ";	// Triangle head
 	str+="style='width:0px;height:0px;display:inline-block;cursor:pointer;";	
 	if (mob.open) 															// Draw a down triangle
-		str+="border-left:6px solid transparent;border-right:6px solid transparent;border-top:10px solid "+col+"'></div>";
+		str+="border-left:6px solid transparent;border-right:6px solid transparent;border-top:10px solid #999'></div>";
 	else																	// Draw right triangle
-		str+="border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:12px solid "+col+"'></div>";
+		str+="border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:12px solid #999'></div>";
 	if (mob.title)															// If a title
 		str+="<div class='story-header' style='display:inline-block;color:"+col+"'>"+mob.title+"</div><br>";
 	if (mob.open) {															// If open
-		if (mob.pic)														// If a pic
-			str+="<img class='story-pic' style='display:inline-block;' src='"+mob.pic+"'/>";
+		if (mob.pic) {														// If a pic
+			str+="<img class='story-pic' style='display:inline-block;' src='"+mob.pic+"' ";
+			
+			str+="onclick='javascript:$(this).css(\"max-width\") == \"100px\" ? $(this).css(\"max-width\",500) : $(this).css(\"max-width\",100)'";
+			str+="/>";
+			}
 		if (mob.desc) {														// If a desc
 			desc=mob.desc;													// Make local copy
 			if (desc.match(/where\(/)) {									// If where macro
 				v=(desc+" ").match(/where\(.*?\)/ig);						// Extract where(s)
 				for (i=0;i<v.length;++i) {									// For each macro
 					vv=v[i].match(/where\(([^,]+),(.+)\)/i);				// Get parts
-					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a href='javascript:mps.Goto(\""+vv[2].replace(/<.*?>/g,"")+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:mps.Goto(\""+vv[2].replace(/<.*?>/g,"")+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 					}	
 				}
 			if (desc.match(/link\(/)) {										// If link macro
 				v=(desc+" ").match(/link\(.*?\)/ig);						// Extract links(s)
 				for (i=0;i<v.length;++i) {									// For each macro
 					vv=v[i].match(/link\(([^,]+),(.+)\)/i);					// Get parts
-					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a href='javascript:addIframe(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a  onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:ShowIframe(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 					}	
 				}
 			if (desc.match(/show\(/)) {										// If show macro
 				v=(desc+" ").match(/show\(.*?\)/ig);						// Extract show(s)
 				for (i=0;i<v.length;++i) {									// For each macro
 					vv=v[i].match(/show\(([^,]+),(.+)\)/i);					// Get parts
-					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a href='javascript:showLayer(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:toggleLayers(\""+vv+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 					}	
 				}
 			if (desc && desc.match(/foot\(/)) {								// If foot macro
 				v=(desc+" ").match(/foot\(.*?\)/ig);						// Extract footnotes(s)
 				for (i=0;i<v.length;++i) {									// For each url
 					title=v[i].substr(5,v[i].length-6);						// Extract actual note
-					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&"))," <a href='#' title='"+title+"'><b><sup>"+(i+1)+"</b></sup></a> ");	// Replace with anchor tag
+					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&"))," <a href='#' title='"+title+"'><b><sup></ul>"+(i+1)+"</b></sup></a> ");	// Replace with anchor tag
 					}	
 				}
 			if (desc.match(/pic\(/)) {										// If pic macro
@@ -139,13 +142,17 @@ Story.prototype.DrawStoryItem=function(num, update) 					// DRAW STORY ITEM
 // HELPERS 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function addIframe(url)
-{
-	$("#rightDiv").html("<iframe id='popupIF' frameborder='0' height='"+($(window).height()-2)+"' width='100%' style='opacity:0,border:1px solid #666' src='"+url+"'/>");
-}	
 
-function showLayer(id)
+function toggleLayers(id)												// TOGGLE LAYER(s)
 {
+	var i,j;
+	var ids=id.split(",");													// Divide into parts
+	ids.splice(0,3);														// Remove debris from match()
+	for (i=0;i<ids.length;++i) 												// For each part
+		if ((j=FindMobByID(ids[i])) != -1)									// Get mob index
+			ids[i]=curJson.mobs[j].lid;										// Get layer index					
+	trace(id,ids,j)
+	mps.DrawMapLayers(ids,true);											// Show them
 }
 
 Story.prototype.SendMessage=function(cmd, msg) 							// SEND MESSAGE

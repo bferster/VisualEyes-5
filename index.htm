@@ -90,6 +90,9 @@
 							}
 		.story-cite { 		margin:18px;text-align:right;font-size:9px;color:#006600;
 							}
+		.story-return { 	position:absolute;top:8px;left:8px;border-radius:10px;padding-left:8px;padding-right:8px;
+							font-size:10px;height:13px;background-color:#eee;text-align:center;cursor:pointer;color:#990000;
+							}				
 		.ve-base { 			position:absolute;height:100%;width:100%;
 							}	
 		.ve-left { 			}	
@@ -259,7 +262,7 @@
 						o.mapOpacity  ? sty.a=o.mapOpacity  : sty.a=eo;				
 						o.header=mps.AddMarkerLayer("0,0",sty,i);	
 						}	
-					mps.AddPathLayer(dots,o.color,ew,eo,s,o.end ? o.end: e, o.show, o.header);// Add path to overlays
+					o.lid=mps.AddPathLayer(dots,o.color,ew,eo,s,o.end ? o.end: e, o.show, o.header);// Add path to overlays
 					}
 				else if (marker.match(/\.png|.gif|\.jpg|\.jpeg/i) && (o.where.split(",").length > 3)) { // An image file with a full georef
 					o.type="image";												// Set type
@@ -282,7 +285,7 @@
 					o.base=FindMobByID(o.where.split(":")[0]);					// Find mod index of base layer
 					if (o.base != -1) {											// If found
 						o.base=curJson.mobs[o.base].lid;						// Get layer id of base
-						mps.AddChoroplethLayer(o.color,o.edge,o.size, o.opacity,o.base,o.where,s,e);	// Add choro layer
+						o.lid=mps.AddChoroplethLayer(o.color,o.edge,o.size, o.opacity,o.base,o.where,s,e);	// Add choro layer
 						}
 					}
 				else if (marker.match(/:/)) 									// A feature click
@@ -432,6 +435,7 @@
 				if (vv[1])														// If a percentage spec'd
 					AnimatePanes("map",vv[1]/100,undefined,function() {			// Animate pane there
 						pop.DrawZoomer("rightDiv",vv[0],2,4);					// Show zoomer
+						$("#rightDiv").append("<br><div class='story-return' style='position:static' onclick='ClearPopUps();sto.pop.Sound(\"click\",curJson.muteSound)'>Back to story</div>");
 						});								
 				else
 					pop.DrawZoomer("rightDiv",vv[0],2,4);						// Show zoomer
@@ -441,7 +445,7 @@
 				var vv=v[1].split(",");											// Get array of ids
 				for (i=0;i<vv.length;++i)										// For each one spec'd
 				if (vv[i] && (vv[i].match(/\/\//))) 							// A url
-					$("#rightDiv").html("<iframe id='popupIF' frameborder='0' height='"+($(window).height()-2)+"' width='100%' style='opacity:0,border:1px solid #666' src='"+vv[i]+"'></iframe>");	// Add iframe
+					ShowIframe(vv[i]);											// Show in story pane
 				}
 			}
 		else if (e.data && e.data.match(/Time=/)) {								// If a time event
@@ -456,6 +460,7 @@
 				if (vv[1])														// If a percentage spec'd
 					AnimatePanes("map",vv[1]/100,undefined,function() {			// Animate pane there
 						pop.DrawZoomer("rightDiv",vv[0],2,4);					// Show zoomer
+						$("#rightDiv").append("<br><div class='story-return' style='position:static' onclick='ClearPopUps();sto.pop.Sound(\"click\",curJson.muteSound)'>Back to story</div>");
 						});								
 				else
 					pop.DrawZoomer("rightDiv",vv[0],2,4);						// Show zoomer
@@ -465,7 +470,7 @@
 				var vv=v[1].split(",");											// Get array of ids
 				for (i=0;i<vv.length;++i)										// For each one spec'd
 					if (vv[i] && (vv[i].match(/\/\//)))							// A url
-						$("#rightDiv").html("<iframe id='popupIF' frameborder='0' height='"+($(window).height()-2)+"' width='100%' style='opacity:0,border:1px solid #666' src='"+vv[i]+"'></iframe>");	// Add iframe
+						ShowIframe(vv[i]);										// Show in story pane
 					else
 						vv[i]=FindMobByID(vv[i]);								// Convert to mob index
 				mps.DrawMapLayers(vv,v[2])										// Show markers(s)
@@ -766,6 +771,13 @@
 			sto.UpdateStory(curTime,curJson.timeFormat);						// Update story pane
 			});												
 	}
+
+	function ShowIframe(url)													// SHOW IFRAME AND RETURN BUTTON
+	{
+		var str="<iframe id='popupIF' frameborder='0' height='"+($(window).height()-2)+"' width='100%' style='opacity:0,border:1px solid #666' src='"+url+"'/>";
+		str+="<div class='story-return' onclick='ClearPopUps();sto.pop.Sound(\"click\",curJson.muteSound)'>Back to story</div>";
+		$("#rightDiv").html(str);
+	}	
 
 </script>
 </body></html>

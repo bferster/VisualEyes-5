@@ -70,9 +70,9 @@ Space.prototype.DrawMapLayers=function(indices, mode)					// DRAW OVERLAY LAYERS
 	      	if (o.start && (this.curTime >= o.start))	vis=true;			// If past start and start defined, show it
 	      	if (o.end && (this.curTime > o.end))		vis=false;			// If past end and end defined, hide it
 	        a=(o.opacity != undefined) ? o.opacity : 1						// Use defined opacity or 1
-            if (indices) {													// If indices spec'd
+             if (indices) {													// If indices spec'd
             	if (mode == undefined)	mode=true;							// Default to showing marker
-            	for (j=0;j<indices.length;++j) 								// For each index					
+              	for (j=0;j<indices.length;++j) 								// For each index					
             		if (i == indices[j])									// This is one to set
             			vis=mode;											// Hide or show it
            		}
@@ -333,14 +333,15 @@ Space.prototype.AddChoroplethLayer=function(col, ecol, ewid,opacity, base, where
 		
 /* 	
  	Add choropleth  layer.
- 	@param {string} col 	Color 
-	@param {string} ecol 	Edge color 
-	@param {number} ewid 	Edge width 
- 	@param {number} opacity Opacity  0-1
- 	@param {number} base 	Index of base vector layer to style
- 	@param {string} where 	Conditions (id:featureId[,featureId,...]
- 	@param {number} start 	Starting time of marker in number of mins += 1/1/1970
-	@param {number} end 	Ending time of marker in number of mins += 1/1/1970
+ 	@param {string} 	col 	Color 
+	@param {string} 	ecol 	Edge color 
+	@param {number} 	ewid 	Edge width 
+ 	@param {number} 	opacity Opacity  0-1
+ 	@param {number} 	base 	Index of base vector layer to style
+ 	@param {string} 	where 	Conditions (id:featureId[,featureId,...]
+ 	@param {number} 	start 	Starting time of marker in number of mins += 1/1/1970
+	@param {number} 	end 	Ending time of marker in number of mins += 1/1/1970
+	@return {number} 	index	Index of layer added
 */
 
 	var o={};
@@ -349,7 +350,9 @@ Space.prototype.AddChoroplethLayer=function(col, ecol, ewid,opacity, base, where
   	o.start=start;	o.end=end;		o.col=col; 	  	o.opacity=opacity;		// Save parameters
   	o.ecol=ecol;	o.ewid=ewid;	o.where=where; 	o.base=base;			// Save parameters
 	o.styles=[];															// Alloc orginal style array
+	var index=this.overlays.length;											// Get index
 	this.overlays.push(o);													// Add to overlay
+	return index;															// Return layer index
 }
 
 Space.prototype.DrawChoropleth=function(num, time) 						// DRAW CHOROPLETH						
@@ -444,15 +447,17 @@ Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show,
 
 /* 	
  	Add path to marker layer.
- 	@param {array} 	dots 	Array of lat/long,time triplets separated by commas ie. [[-77,40,-4526267], ...]
- 	@param {string} col 	Color of path
- 	@param {number} wid 	Width of path in pixels
- 	@param {number} opacity Opacity of path 0-1
- 	@param {number} start 	Starting time of marker in number of mins += 1/1/1970
-	@param {number} end 	Ending time of marker in number of mins += 1/1/1970
+ 	@param {array} 		dots 	Array of lat/long,time triplets separated by commas ie. [[-77,40,-4526267], ...]
+ 	@param {string} 	col 	Color of path
+ 	@param {number} 	wid 	Width of path in pixels
+ 	@param {number} 	opacity Opacity of path 0-1
+ 	@param {number} 	start 	Starting time of marker in number of mins += 1/1/1970
+	@param {number} 	end 	Ending time of marker in number of mins += 1/1/1970
+	@return {number} 	index	Index of layer added
 */
 
 	var i,v,o={};
+	var index=this.overlays.length;											// Get index
 	o.type="path";															// Path
   	o.start=start;	o.end=end;	o.show=show; o.header=header				// Save start, end, show, and header
 	this.overlays.push(o);													// Add to overlay
@@ -532,6 +537,7 @@ Space.prototype.AddMarkerLayer=function(pos, style, id, start, end) 	// ADD MARK
 						ts: {string} text format
 	@param {number} start 	Starting time of marker in number of mins += 1/1/1970
 	@param {number} end 	Ending time of marker in number of mins += 1/1/1970
+	@return {object} 	obj	Pointer to feature added to markerLayer
 
 */
 
@@ -679,7 +685,7 @@ Space.prototype.AddKMLLayer=function(url, opacity, id, start, end) 		// ADD KML 
 				  			})
 						});
 	
-	o.src.set('kmlId',id)													// Set idt
+	o.src.set('kmlId',id)													// Set id
 	o.src.set('visible',false)												// Hide it
 	this.overlays.push(o);													// Add to overlay
 	this.loadCounter++;														// Add to count
@@ -765,7 +771,7 @@ Space.prototype.AddImageLayer=function(url, geoRef, alpha, start, end) 	// ADD M
   							Rotation is optional and defaults to 0 degrees.				
  	@param {number} start 	Starting time of marker in number of mins += 1/1/1970
 	@param {number} end 	Ending time of marker in number of mins += 1/1/1970
- 	@return {number}index of new layer added to overlays array.
+ 	@return {number}		index of new layer added to overlays array.
 */
 
 	var o={};
