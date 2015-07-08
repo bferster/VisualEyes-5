@@ -364,7 +364,7 @@
 				ResizePanes();													// Resize panes
 				},
 			stop: function(event, ui) {											// On drag end
-				$("#lrSiz1").css({ width:"40px", left:"-8px" });				// Contract hiding div
+				$("#lrSiz1").css({ width:"20px", left:"-8px" });				// Contract hiding div
 				ResizePanes();													// Resize panes
 				}
 			});
@@ -571,10 +571,9 @@
 				case "Drawing": 		mps.DrawingTool();	break;				// Run KML drawing tool
 				case "Geo-reference": 	mps.GeoReference("//farm9.staticflickr.com/8019/7310697988_18eb47c466_z.jpg");	break;		// Georef
 				}
-			$(this).val("Save/Load");											// Reset select
+			$(this).val("Choose");												// Reset select
 			}); 
 		});																		// End settings
-
 
 		
 	function SaveUserData(data, type)										// SAVE DATA TO USERDATA

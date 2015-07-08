@@ -81,9 +81,9 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 	var str="<div id='storyBut"+num+"' onclick='onStoryClick(this.id)' ";	// Triangle head
 	str+="style='width:0px;height:0px;display:inline-block;cursor:pointer;";	
 	if (mob.open) 															// Draw a down triangle
-		str+="border-left:6px solid transparent;border-right:6px solid transparent;border-top:10px solid #999'></div>";
+		str+="border-left:6px solid transparent;border-right:6px solid transparent;border-top:10px solid #aaa'></div>";
 	else																	// Draw right triangle
-		str+="border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:12px solid #999'></div>";
+		str+="border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:8px solid #aaa;margin-left:4px'></div>";
 	if (mob.title)															// If a title
 		str+="<div class='story-header' style='display:inline-block;color:"+col+"'>"+mob.title+"</div><br>";
 	if (mob.open) {															// If open

@@ -445,8 +445,7 @@ Space.prototype.DrawChoropleth=function(num, time) 						// DRAW CHOROPLETH
 Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show, header) 	// ADD PATH LAYER TO MAP						
 {
 
-/* 	
- 	Add path to marker layer.
+/* 	Add path to marker layer.
  	@param {array} 		dots 	Array of lat/long,time triplets separated by commas ie. [[-77,40,-4526267], ...]
  	@param {string} 	col 	Color of path
  	@param {number} 	wid 	Width of path in pixels
@@ -478,24 +477,24 @@ Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show,
 		});
 	o.src.setStyle(sty);													// Set style
 	this.markerLayer.getSource().addFeature(o.src);							// Add it
+	return index;															// Return feature
 }
 
 Space.prototype.DrawPath=function(num, time) 						// DRAW PATH						
 {
 
-/* 	
- 	Add path to marker layer.
+/* 	Add path to marker layer.
  	@param {number} num 	Layer to draw 
 	@param {number} time 	Current time in number of mins += 1/1/1970
 */
 	
-
 	var s,e,pct,v=[],i=0,animate=false;
 	var o=this.overlays[num];											// Point at overlay
 	if (o.show && o.show.match(/a/i))	animate=true;					// Set animation mode
 	v.push([o.dots[0][0],o.dots[0][1]]);								// Add moveto dot
 	if (o.header) {														// If a header defined
-		var sty=o.header.getStyle();  									// Point at style
+		var head=this.overlays[o.header].src;							// Point at header feature
+		var sty=head.getStyle();										// Get header style
 		sty.getImage().setOpacity(0);									// Hide
 		}			
 	for (e=1;e<o.dots.length;++e) {										// For each lineto dot
@@ -507,7 +506,7 @@ Space.prototype.DrawPath=function(num, time) 						// DRAW PATH
 				v[e][0]=o.dots[s][0]+((o.dots[e][0]-o.dots[s][0])*pct);	// Interpolate x
 				v[e][1]=o.dots[s][1]+((o.dots[e][1]-o.dots[s][1])*pct);	// Interpolate y
 				if (o.header && (pct < 1))	{							// If a header defined
-					o.header.setGeometry(new ol.geom.Point(v[e]));		// Move it
+					head.setGeometry(new ol.geom.Point(v[e]));			// Move it
 					sty.getImage().setOpacity(1);						// Show it
 					}
 				}
@@ -544,15 +543,16 @@ Space.prototype.AddMarkerLayer=function(pos, style, id, start, end) 	// ADD MARK
 	var o={};
 	o.type="icon";															// Icon
   	o.start=start;	o.end=end;												// Save start, end
+	var index=this.overlays.length;											// Get index
 	this.overlays.push(o);													// Add to overlay
   	var v=pos.split(",");													// Split into parts
 	var c=ol.proj.transform([v[0]-0,""+v[1]-0],'EPSG:4326',this.curProjection);	// Transform
 	o.src=new ol.Feature({ geometry: new ol.geom.Point(c) });				// Create feature at coord
- 	var index=this.markerLayer.getSource().getFeatures().length;			// Index of feature
+ 	var i=this.markerLayer.getSource().getFeatures().length;			// Index of feature
  	o.src.setId("Mob-"+id);													// Set id of mob
  	this.markerLayer.getSource().addFeature(o.src);							// Add it
- 	this.StyleMarker([index],style);										// Style marker
-	return o.src;															// Return feature
+ 	this.StyleMarker([i],style);											// Style marker
+	return index;															// Return feature
 }
 
 
