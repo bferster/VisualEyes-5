@@ -52,6 +52,7 @@ Story.prototype.UpdateStory=function(curTime, timeFormat) 				// UPDATE STORY PA
 
 	this.timeFormat=timeFormat;												// Set format
 	this.curTime=curTime-0;													// Set current timet
+	this.InitStory(this.sd);												// Reshow
 }
 
 
@@ -73,7 +74,7 @@ Story.prototype.DrawStoryItem=function(num, update) 					// DRAW STORY ITEM
 	@param {string} timeFormat	Format to use when making time human readable	
 */
 	
-	var desc,col="#555",v,vv;
+	var desc,col="#555",v,vv,title;
 	var mob=this.sd.mobs[num];												// Point at mob
 	if (mob.color)	col=mob.color;											// If a color set, use it
 	var _this=this;															// Save context for callback
@@ -94,14 +95,35 @@ Story.prototype.DrawStoryItem=function(num, update) 					// DRAW STORY ITEM
 				v=(desc+" ").match(/where\(.*?\)/ig);						// Extract where(s)
 				for (i=0;i<v.length;++i) {									// For each macro
 					vv=v[i].match(/where\(([^,]+),(.+)\)/i);				// Get parts
-					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&"))," <a href='javascript:mps.Goto(\""+vv[2].replace(/<.*?>/g,"")+"\")'>"+vv[1]+"</a> ");	// Replace with anchor tag
+					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a href='javascript:mps.Goto(\""+vv[2].replace(/<.*?>/g,"")+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 					}	
 				}
 			if (desc.match(/link\(/)) {										// If link macro
 				v=(desc+" ").match(/link\(.*?\)/ig);						// Extract links(s)
 				for (i=0;i<v.length;++i) {									// For each macro
 					vv=v[i].match(/link\(([^,]+),(.+)\)/i);					// Get parts
-					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&"))," <a target='_blank' href='"+vv[2]+"'>"+vv[1]+"</a> ");	// Replace with anchor tag
+					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a href='javascript:addIframe(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+					}	
+				}
+			if (desc.match(/show\(/)) {										// If show macro
+				v=(desc+" ").match(/show\(.*?\)/ig);						// Extract show(s)
+				for (i=0;i<v.length;++i) {									// For each macro
+					vv=v[i].match(/show\(([^,]+),(.+)\)/i);					// Get parts
+					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a href='javascript:showLayer(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+					}	
+				}
+			if (desc && desc.match(/foot\(/)) {								// If foot macro
+				v=(desc+" ").match(/foot\(.*?\)/ig);						// Extract footnotes(s)
+				for (i=0;i<v.length;++i) {									// For each url
+					title=v[i].substr(5,v[i].length-6);						// Extract actual note
+					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&"))," <a href='#' title='"+title+"'><b><sup>"+(i+1)+"</b></sup></a> ");	// Replace with anchor tag
+					}	
+				}
+			if (desc.match(/pic\(/)) {										// If pic macro
+				v=(desc+" ").match(/pic\(.*?\)/ig);							// Extract pics(s)
+				for (i=0;i<v.length;++i) {									// For each macro
+					vv=v[i].match(/pic\(([^,]+),(.+)\)/i);					// Get parts
+					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"");	// Replace with anchor tag
 					}	
 				}
 			str+="<div class='story-desc'>"+desc+"</div>";					// Add in
@@ -116,6 +138,14 @@ Story.prototype.DrawStoryItem=function(num, update) 					// DRAW STORY ITEM
 // HELPERS 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+function addIframe(url)
+{
+	$("#rightDiv").html("<iframe id='popupIF' frameborder='0' height='"+($(window).height()-2)+"' width='100%' style='opacity:0,border:1px solid #666' src='"+url+"'/>");
+}	
+
+function showLayer(id)
+{
+}
 
 Story.prototype.SendMessage=function(cmd, msg) 							// SEND MESSAGE
 {
