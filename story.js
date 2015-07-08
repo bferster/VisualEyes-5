@@ -65,8 +65,13 @@ function onStoryClick(e,mode) 											// TOGGLE STORY ITEM
 {
 	var i,hide=99,pos;
 	var id=e.substr(8);														// Get ID
-	curJson.mobs[id].open=!curJson.mobs[id].open;								// Toggle closure state						
+	curJson.mobs[id].open=!curJson.mobs[id].open;							// Toggle closure state						
 	pop.Sound("click",curJson.muteSound);									// Click sound
+	if (curJson.mobs[id].where)												// If a where
+		mps.Goto(curJson.mobs[id].where);									// Got there
+	if (curJson.mobs[id].start)												// If a start
+		tln.Goto(curJson.mobs[id].start);									// Go there
+	
 	for (i=id;i<curJson.mobs.length;++i) {									// For each mob
 		if (curJson.mobs[i].marker && (curJson.mobs[i].marker.toLowerCase() != "story")) // If not a story item
 			continue;														// Skip
