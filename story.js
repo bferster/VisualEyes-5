@@ -184,7 +184,6 @@ function toggleLayers(id)												// TOGGLE LAYER(s)
 	for (i=0;i<ids.length;++i) 												// For each part
 		if ((j=FindMobByID(ids[i])) != -1)									// Get mob index
 			ids[i]=curJson.mobs[j].lid;										// Get layer index					
-	trace(id,ids,j)
 	mps.DrawMapLayers(ids,true);											// Show them
 }
 
