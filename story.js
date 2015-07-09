@@ -111,7 +111,6 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 	if (mob.open) {															// If open
 		if (mob.pic) {														// If a pic
 			str+="<img class='story-pic' style='display:inline-block;' src='"+mob.pic+"' ";
-			
 			str+="onclick='javascript:$(this).css(\"max-width\") == \"100px\" ? $(this).css(\"max-width\",500) : $(this).css(\"max-width\",100)'";
 			str+="/>";
 			}
@@ -145,11 +144,21 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&"))," <a href='#' title='"+title+"'><b><sup></ul>"+(i+1)+"</b></sup></a> ");	// Replace with anchor tag
 					}	
 				}
-			if (desc.match(/pic\(/)) {										// If pic macro
-				v=(desc+" ").match(/pic\(.*?\)/ig);							// Extract pics(s)
+			if (desc && desc.match(/pic\(/)) {								// If pic macro
+				v=(desc+" ").match(/pic\(.*?\)/ig);							// Extract pic(s)
+				for (i=0;i<v.length;++i) {									// For each url
+					vv=v[i].match(/pic\(([^,\)]*),*(.*)\)/i);				// Get parts
+					if (!vv[2])	vv[2]=60;									// Default size
+					title="<img class='story-pic' style='display:inline-block;max-width:"+vv[2]+"px' src='"+vv[1]+"' ";
+					title+="onclick='javascript:$(this).css(\"max-width\") == \""+vv[2]+"px\" ? $(this).css(\"max-width\",500) : $(this).css(\"max-width\","+vv[2]+")'>";
+					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),title);	// Replace with image
+					}	
+				}
+			if (desc.match(/zoomer\(/)) {									// If zoomer macro
+				v=(desc+" ").match(/zoomer\(.*?\)/ig);						// Extract zoomer(s)
 				for (i=0;i<v.length;++i) {									// For each macro
-					vv=v[i].match(/pic\(([^,]+),(.+)\)/i);					// Get parts
-					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"");	// Replace with anchor tag
+					vv=v[i].match(/zoomer\(([^,]+),(.+)\)/i);				// Get parts
+					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.ShowWebPage(\"#leftDiv\",\""+vv[2]+"\",\"zoomer\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 					}	
 				}
 			str+="<div class='story-desc'>"+desc+"</div>";					// Add in
@@ -159,6 +168,8 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 		}
 	return str;																// Return story item html
 }
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // HELPERS 
