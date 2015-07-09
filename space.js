@@ -880,15 +880,18 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
  	 					}
  	 				}
      			if (id.match(/Mob-/)) {										// If a mob
-  					o=curJson.mobs[id.substr(4)];							// Point at mob data
+  					var i=id.substr(4);										// Strip off header
+  					o=curJson.mobs[i];										// Point at mob data
  					if (o.title) 		var title=o.title;					// Lead with title
   					if (o.spaceTitle) 	var title=o.spaceTitle;				// Space over-rides
  					if (o.desc) 		var desc=o.desc;					// Lead with desc
   					if (o.spaceDesc) 	var desc=o.spaceDesc;				// Space over-rides
   					if (o.pic) 			var pic=o.pic;						// Lead with pic
   					if (o.spacePic) 	var title=o.spacePic;				// Space over-rides
-       				if (o.citation)											// If a cite
-			    	desc+="<br><br><div id='popcite' class='popup-cite'>__________________<br><br>"+o.citation+"</div>"; // Add cite
+       				if (o.citation)	{										// If a cite
+						desc+="<div class='story-cite' style='cursor:pointer'><br><a onclick='$(\"#cite"+i+"\").fadeIn()'>";
+						desc+="<u>Citation</u><br><span style='display:none' id='cite"+i+"'><br>"+o.citation+"</span></div>";
+						}
      				_this.pop.ShowPopup(_this.div,_this.timeFormat,evt.pixel[0],evt.pixel[1],title,desc,pic,o.start,o.end);
 					if (o.start)											// If a time defined
 						_this.SendMessage("time",o.start);					// Send new time

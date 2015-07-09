@@ -163,8 +163,10 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 				}
 			str+="<div class='story-desc'>"+desc+"</div>";					// Add in
 			}
-		if (mob.citation) 													// If a citation
-			str+="<div class='story-cite'>___________________<br><br>"+mob.citation+"</div>";
+		if (mob.citation) {													// If a citation
+			str+="<div class='story-cite' style='cursor:pointer'><br><a onclick='$(\"#cite"+num+"\").fadeIn()'>";
+			str+="<u>Citation</u><br><span style='display:none' id='cite"+num+"'><br>"+mob.citation+"</span></div>";
+			}
 		}
 	return str;																// Return story item html
 }
