@@ -83,6 +83,7 @@ Space.prototype.DrawMapLayers=function(indices, mode)					// DRAW OVERLAY LAYERS
              	}
         	else if (o.type == "icon") {									// If an icon 
 				sty=o.src.getStyle();  										// Point at style
+				if (!sty)	continue;										// Skip if no style
 				sty.getImage().setOpacity(vis ? 1: 0);						// Set icon opacity
 				sty.getText().setScale(vis ? 1 : 0);						// Set text opacity
               	}
@@ -491,9 +492,10 @@ Space.prototype.DrawPath=function(num, time) 						// DRAW PATH
 	if (o.show && o.show.match(/a/i))	animate=true;					// Set animation mode
 	v.push([o.dots[0][0],o.dots[0][1]]);								// Add moveto dot
 	if (o.header) {														// If a header defined
-		var head=this.overlays[o.header].src;							// Point at header feature
+		var head=this.overlays[num-1].src;								// Point at header feature
 		var sty=head.getStyle();										// Get header style
-		sty.getImage().setOpacity(0);									// Hide
+		if (sty)
+			sty.getImage().setOpacity(0);								// Hide
 		}			
 	for (e=1;e<o.dots.length;++e) {										// For each lineto dot
 		s=e-1;															// Point at start of line
@@ -503,7 +505,7 @@ Space.prototype.DrawPath=function(num, time) 						// DRAW PATH
 				pct=(time-o.dots[s][2])/(o.dots[e][2]-o.dots[s][2]);	// Get pct
 				v[e][0]=o.dots[s][0]+((o.dots[e][0]-o.dots[s][0])*pct);	// Interpolate x
 				v[e][1]=o.dots[s][1]+((o.dots[e][1]-o.dots[s][1])*pct);	// Interpolate y
-				if (o.header && (pct < 1))	{							// If a header defined
+				if (head && sty && (pct < 1))	{						// If a header defined
 					head.setGeometry(new ol.geom.Point(v[e]));			// Move it
 					sty.getImage().setOpacity(1);						// Show it
 					}
