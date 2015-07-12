@@ -548,13 +548,11 @@ Space.prototype.AddMarkerLayer=function(pos, style, id, start, end) 	// ADD MARK
   	var v=pos.split(",");													// Split into parts
 	var c=ol.proj.transform([v[0]-0,""+v[1]-0],'EPSG:4326',this.curProjection);	// Transform
 	o.src=new ol.Feature({ geometry: new ol.geom.Point(c) });				// Create feature at coord
- 	var i=this.markerLayer.getSource().getFeatures().length;			// Index of feature
  	o.src.setId("Mob-"+id);													// Set id of mob
  	this.markerLayer.getSource().addFeature(o.src);							// Add it
- 	this.StyleMarker([i],style);											// Style marker
+ 	this.StyleMarker([index],style);										// Style marker
 	return index;															// Return feature
 }
-
 
 Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)			
 {
@@ -651,7 +649,7 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 		image: image, text: text											// Add icon, text
 		});
 	for (i=0;i<indices.length;++i)											// For each layer
-		this.markerLayer.getSource().getFeatures()[indices[i]].setStyle(s);	// Set style
+		this.overlays[indices[i]].src.setStyle(s);							// Set style
 }
 
 Space.prototype.AddKMLLayer=function(url, opacity, id, start, end) 		// ADD KML LAYER TO MAP						
