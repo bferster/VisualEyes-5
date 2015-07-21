@@ -21,7 +21,7 @@ function Timeline(div, pop)												// CONSTRUCTOR
 	this.curTime=this.curStart=this.start;									// Set start
 	this.curEnd=this.end;													// Set end
 	this.lastViewLeft=0;													// Saves scroll of timelime
-	this.timeViewScale=.5;													// Scale of timeview
+	this.timeViewScale=1;													// Scale of timeview
 }
 
 
@@ -204,15 +204,17 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 				$("#svgMarkerText"+i).attr("x",x/2);						// Center origin 
 				}
 			}
-		w=$($("#timeSlider")).width()/10;									// Spacing
+		w=$("#timeSlider").width()/10;										// Spacing
 		x=$("#timeSlider").offset().left;									// Starting point
 		for (i=0;i<9;++i) {													// For each grid line
 			x+=w;															// Advance
 			$("#svgGrid"+i).attr("transform","translate("+x+", 0)");		// Move grid
 			$("#svgGridDate"+i).text(this.pop.FormatTime(s+(e-s/scale)*((i+1)/10),this.timeFormat));	// Set date
 			}	
+		$("#tvScaleBox").css("top",$("#timeViewBar").height()/2-18+"px");	// Center scale buttons
 		}
 	this.Goto(this.curTime);												// Go there
+	$("#tvScale").text(Math.floor(this.timeViewScale*100)+"%");				// Show scale value
 }
 
 
@@ -544,7 +546,24 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 		str+="</g>";														// End group
 		}
 	str+="</g></svg></div>";												// End markers group, svg, & div
+	str+="<div id='tvScaleBox' style='width:40px;position:absolute;left:6px;text-align:center;background-color:#fff'>";		// Container
+	str+="<div id='tvPlus'  style='display:inline-block;text-align:center;margin-bottom:4px;background-color:#bbb;color:#fff;border-radius:10px;width:11px;height:11px;cursor:pointer'>+</div>";		// Up button
+	str+="<div id='tvScale' style='color:#999'>100%</div>";					// Scale display
+	str+="<div id='tvMinus' style='display:inline-block;text-align:center;margin-top:4px;background-color:#bbb;color:#fff;border-radius:10px;width:11px;height:11px;cursor:pointer'>-</div></div>";	// down button
+	
 	$(this.div).append(str+"</div>");										// Add timeview bar				
+
+	$("#tvPlus").click( function() {										// Zoom in
+		_this.timeViewScale=Math.min(_this.timeViewScale*2,8);				// Cap at 8x
+		_this.pop.Sound("click",_this.muteSound);							// Click sound							
+		_this.UpdateTimeline(); 											// Redraw timeline 
+		});
+
+	$("#tvMinus").click( function() {										// Zoom out
+		_this.timeViewScale=Math.max(_this.timeViewScale/2,.125);			// Cap at 1/8
+		_this.pop.Sound("click",_this.muteSound);							// Click sound							
+		_this.UpdateTimeline(); 											// Redraw timeline 
+		});
 
 	$("#timeViewBar").draggable({											// Allow dragging
 			axis:"x",														// X only
