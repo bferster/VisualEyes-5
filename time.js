@@ -72,7 +72,7 @@ Timeline.prototype.InitTimeline=function(data)							// INIT TIMELINE
 }	
 
 
-Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
+Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 {
 	
 /* 
@@ -83,6 +83,7 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 	var i,w2,m=this.margin;
 	var w=$(this.div).width()-m-m;											// Width of time area
 	var t=$(this.div).height()-$("#timeBar").height()-20-m;					// Top position
+
 	var dur=this.end-this.start;											// Timeline 
 	this.timeFormat=this.sd.timeFormat;										// Set date format
 	if (this.segmentPos == "Bottom")										// If putting segments below timebar
@@ -147,7 +148,11 @@ Timeline.prototype.UpdateTimeline=function() 							// UPDATE TIMELINE PANES
 		s=ts[this.curSeg].start-0;											// Get start
 		e=ts[this.curSeg].end-0;											// Get end
 		}
+	
 	dur=e-s;																// Calc dur
+
+	if (start)																// If a start spec'd
+		s=start;															// Use it
 	$("#timeStart").html(this.pop.FormatTime(s,this.timeFormat)+"&nbsp;&nbsp;&nbsp;");	// Set start
 	$("#timeEnd").html("&nbsp;&nbsp;&nbsp;"+this.pop.FormatTime(e,this.timeFormat)); 	// Set end
 	$("#ticklab1").html(this.pop.FormatTime(s+(e-s)/4,this.timeFormat));				// Add label div
@@ -537,6 +542,16 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 		}
 	str+="</g></svg></div>";												// End markers group, svg, & div
 	$(this.div).append(str+"</div>");										// Add timeview bar				
+
+	$("#timeViewBar").draggable({											// Allow dragging
+			axis:"x",														// X only
+			stop: function(e,ui) {											// ON STOP
+					var x=ui.position.left;									// Pos scolled					
+					var d=_this.curDur/$("#timeSlider").width();			// Time/pixel
+					$("#timeViewBar").css("left","0px");					// Restore old drag point
+					 _this.UpdateTimeline(_this.curStart-(x*d)) 			// Redraw timeline from there
+					}
+			});
 
 	for (i=0;i<this.sd.mobs.length;++i) {									// For each mob
 		o=this.sd.mobs[i];													// Point at mob
