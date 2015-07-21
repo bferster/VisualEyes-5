@@ -20,6 +20,8 @@ function Timeline(div, pop)												// CONSTRUCTOR
 	this.pop=pop;															// Point at popup lib
 	this.curTime=this.curStart=this.start;									// Set start
 	this.curEnd=this.end;													// Set end
+	this.lastViewLeft=0;													// Saves scroll of timelime
+	this.timeViewScale=.5;													// Scale of timeview
 }
 
 
@@ -148,11 +150,12 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 		s=ts[this.curSeg].start-0;											// Get start
 		e=ts[this.curSeg].end-0;											// Get end
 		}
-	
 	dur=e-s;																// Calc dur
-
-	if (start)																// If a start spec'd
-		s=start;															// Use it
+	this.curStart=s;														// Save start
+	this.curEnd=e;															// Save end
+	this.curDur=dur;														// Save duration
+	this.curTime=Math.min(Math.max(this.curTime,s),e);						// Cap at at bounds
+	
 	$("#timeStart").html(this.pop.FormatTime(s,this.timeFormat)+"&nbsp;&nbsp;&nbsp;");	// Set start
 	$("#timeEnd").html("&nbsp;&nbsp;&nbsp;"+this.pop.FormatTime(e,this.timeFormat)); 	// Set end
 	$("#ticklab1").html(this.pop.FormatTime(s+(e-s)/4,this.timeFormat));				// Add label div
@@ -161,6 +164,10 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 	$("#timeSlider").slider("option",{min:s,max:e,value:s}); 							// Set slider
 
 	if (this.hasTimeView) {													// If a timeview
+		var scale=this.timeViewScale;										// Get scale
+		if (start)															// If a start spec'd
+			s=start;														// Use it
+		e/=scale;	dur/=scale;												// Account for scale
 		var h=$(this.div).height()-m-8;										// Total bottom height
 		if (this.hasTimeBar) {												// If a timebar
 			h-=$("#timeBar").height()+m+24;									// Account for it
@@ -174,7 +181,7 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 		$("#timeViewBar").css("top",8+"px");								// Set top
 		var rowHgt=12;														// Set row height
 		var rowPad=4;														// Space between rows
-		var offx=(s-this.start)/Math.max(1,(this.end-this.start))*-w;		// Offset from full timeline start (avoid / 0)
+		var offx=(s*scale-this.start)/Math.max(1,(this.end-this.start))*-w;	// Offset from full timeline start (avoid / 0)
 		$("#svgMarkers").attr("transform","translate("+offx+",0)");			// Move markers group
 		
 		for (i=0;i<this.sd.mobs.length;++i) {								// For each mob
@@ -202,14 +209,9 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 		for (i=0;i<9;++i) {													// For each grid line
 			x+=w;															// Advance
 			$("#svgGrid"+i).attr("transform","translate("+x+", 0)");		// Move grid
-			$("#svgGridDate"+i).text(this.pop.FormatTime(s+(e-s)*((i+1)/10),this.timeFormat));	// Set date
+			$("#svgGridDate"+i).text(this.pop.FormatTime(s+(e-s/scale)*((i+1)/10),this.timeFormat));	// Set date
 			}	
 		}
-		
-	this.curStart=s;														// Save start
-	this.curEnd=e;															// Save end
-	this.curDur=dur;														// Save duration
-	this.curTime=Math.min(Math.max(this.curTime,s),e);						// Cap at at bounds
 	this.Goto(this.curTime);												// Go there
 }
 
@@ -419,6 +421,7 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 		
 		$("#timeseg"+i).click( function(e) {								// ON SEG CLICK
 			var i,v,j;
+			_this.lastViewLeft=0;											// Reset view position
 			var id=e.target.id.substr(7);									// Get ID
 			_this.pop.Sound("click",_this.muteSound);						// Click sound
 			for (i=0;i<ts.length;++i)  										// For each segment
@@ -546,8 +549,9 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 	$("#timeViewBar").draggable({											// Allow dragging
 			axis:"x",														// X only
 			stop: function(e,ui) {											// ON STOP
-					var x=ui.position.left;									// Pos scolled					
-					var d=_this.curDur/$("#timeSlider").width();			// Time/pixel
+					var x=$("#timeViewBar").offset().left+_this.lastViewLeft;	// Pos scolled					
+					var d=_this.curDur/_this.timeViewScale/$("#timeSlider").width();	// Time per pixel
+					_this.lastViewLeft=x;									// Get new offset
 					$("#timeViewBar").css("left","0px");					// Restore old drag point
 					 _this.UpdateTimeline(_this.curStart-(x*d)) 			// Redraw timeline from there
 					}
