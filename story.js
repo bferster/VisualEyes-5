@@ -144,6 +144,7 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&"))," <a href='#' title='"+title+"'><b><sup></ul>"+(i+1)+"</b></sup></a> ");	// Replace with anchor tag
 					}	
 				}
+			str+="<div>"
 			if (desc && desc.match(/pic\(/)) {								// If pic macro
 				v=(desc+" ").match(/pic\(.*?\)/ig);							// Extract pic(s)
 				for (i=0;i<v.length;++i) {									// For each url
@@ -162,12 +163,15 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 					}	
 				}
 			str+="<div class='story-desc'>"+desc+"</div>";					// Add in
+			str+="</div>"
 			}
 		if (mob.citation) {													// If a citation
 			str+="<div class='story-cite' style='cursor:pointer'><br><a onclick='$(\"#cite"+num+"\").fadeIn()'>";
 			str+="<u>Citation</u><br><span style='display:none' id='cite"+num+"'><br>"+mob.citation+"</span></div>";
 			}
 		}
+	if (mob.open)															// If open
+		str+="<div style='clear:both'></div><br>";							// Clear float
 	return str;																// Return story item html
 }
 

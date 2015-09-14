@@ -487,7 +487,7 @@ Space.prototype.DrawPath=function(num, time) 						// DRAW PATH
 	@param {number} time 	Current time in number of mins += 1/1/1970
 */
 	
-	var s,e,pct,v=[],i=0,animate=false;
+	var s,e,pct,v=[],i=0,last,animate=false;
 	var o=this.overlays[num];											// Point at overlay
 	if (o.show && o.show.match(/a/i))	animate=true;					// Set animation mode
 	v.push([o.dots[0][0],o.dots[0][1]]);								// Add moveto dot
@@ -499,14 +499,16 @@ Space.prototype.DrawPath=function(num, time) 						// DRAW PATH
 		}			
 	for (e=1;e<o.dots.length;++e) {										// For each lineto dot
 		s=e-1;															// Point at start of line
-		if ((time >= o.dots[s][2]) && (time < o.end)) {					// This one's active
+		last=v.length-1;												// Point at last dot
+		if ((time >= o.dots[last][2]) && (time < o.end)) {				// This one's active
 			v.push([o.dots[e][0],o.dots[e][1]]);						// Add end dot
+			last++;														// Point at last dot
 			if ((time < o.dots[e][2]) && animate){						// If before end of end dot and animating
 				pct=(time-o.dots[s][2])/(o.dots[e][2]-o.dots[s][2]);	// Get pct
-				v[e][0]=o.dots[s][0]+((o.dots[e][0]-o.dots[s][0])*pct);	// Interpolate x
-				v[e][1]=o.dots[s][1]+((o.dots[e][1]-o.dots[s][1])*pct);	// Interpolate y
+				v[last][0]=o.dots[s][0]+((o.dots[e][0]-o.dots[s][0])*pct);	// Interpolate x
+				v[last][1]=o.dots[s][1]+((o.dots[e][1]-o.dots[s][1])*pct);	// Interpolate y
 				if (head && sty && (pct < 1))	{						// If a header defined
-					head.setGeometry(new ol.geom.Point(v[e]));			// Move it
+					head.setGeometry(new ol.geom.Point(v[last]));		// Move it
 					sty.getImage().setOpacity(1);						// Show it
 					}
 				}
