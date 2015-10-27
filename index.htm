@@ -184,6 +184,12 @@
    			curShow=qmf.curFile;												// Set curshow
    		if (data.sheet) {														// If a spreadsheet spec'd
 		 	dtl.GetSpreadsheet(data.sheet,true,null,function(mobs) {			// Get spreadsheet data
+				var i,key;
+				for (i=0;i<mobs.length;++i) 									// For each mob
+				    for (key in mobs[i]) {										// For each field in mob
+   						if (mobs[i][key])										// If not null
+   							mobs[i][key]=mobs[i][key].replace(/(\s)$/,"");		// Strip trailing space
+   						}
 				data.mobs=mobs;													// Set mobs
 				InitProject(data);												// Re-init project
 				},true);
@@ -736,9 +742,9 @@
 	function FindMobByID(id)												// FIND MOB BY ITS ID
 	{
 		var i,o;
-		var n=curJson.mobs.length;													// Get length
+		var n=curJson.mobs.length;												// Get length
 		for (i=0;i<n;++i) {														// For each mob
-			o=curJson.mobs[i].id;													// Get id												
+			o=curJson.mobs[i].id;												// Get id												
 			if (o && o.indexOf(id) != -1)										// If it matches
 				return i;														// Return index of mob
 			}
