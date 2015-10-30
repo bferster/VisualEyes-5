@@ -110,7 +110,8 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 		str+="<div class='story-header' style='display:inline-block;color:"+col+"'>"+mob.title+"</div><br>";
 	if (mob.open) {															// If open
 		if (mob.pic) {														// If a pic
-			str+="<img class='story-pic' style='display:inline-block;' src='"+mob.pic+"' ";
+			var pic=ConvertFromGoogleDrive(mob.pic);						// Point at pic
+			str+="<img class='story-pic' style='display:inline-block;' src='"+pic+"' ";
 			str+="onclick='javascript:$(this).css(\"max-width\") == \"100px\" ? $(this).css(\"max-width\",500) : $(this).css(\"max-width\",100)'";
 			str+="/>";
 			}
@@ -150,6 +151,7 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 				for (i=0;i<v.length;++i) {									// For each url
 					vv=v[i].match(/pic\(([^,\)]*),*(.*)\)/i);				// Get parts
 					if (!vv[2])	vv[2]=60;									// Default size
+					vv[1]=ConvertFromGoogleDrive(vv[1]);					// Convert pic
 					title="<img class='story-pic' style='display:inline-block;max-width:"+vv[2]+"px' src='"+vv[1]+"' ";
 					title+="onclick='javascript:$(this).css(\"max-width\") == \""+vv[2]+"px\" ? $(this).css(\"max-width\",500) : $(this).css(\"max-width\","+vv[2]+")'>";
 					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),title);	// Replace with image

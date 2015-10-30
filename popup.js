@@ -54,8 +54,10 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 		str+="<span class='popup-date'>&nbsp;-&nbsp;"+end+"</span>";		// Add it
 		}
 	str+="</div><table style='width:100%'><tr>";
-	if (pic) 																// If pic set
+	if (pic) {																// If pic set
+		pic=ConvertFromGoogleDrive(pic);									// Convert pic
 		str+="<td style='vertical-align:top'><img id='poppic' src='"+pic+"' class='popup-pic'></td>";	// Add image
+		}
 	if (desc)																// If desc set
 		str+="<td class='popup-desc' id='popdesc'>"+desc+"</div></td>";		// Add it
 	$("body").append("</tr></table>"+str);									// Add popup
@@ -479,6 +481,7 @@ Popup.prototype.DrawZoomer=function(div, url, startZoom, overviewSize) 	//	DRAW 
 	$(this.div).append(str);												// Add div
   	this.zoomerScale=startZoom;												// Init scale
 	this.zoomerOverviewSize=overviewSize;									// Set size
+	url=ConvertFromGoogleDrive(url);										// Convert pic
 	str="<img id='zoomerImg' src='"+url+"' ";								// Add image
 	str+="height='100%' width='100%'>";										// Size
 	$("#zoomerDiv").append(str);											// Add image to zoomer
@@ -543,6 +546,7 @@ Popup.prototype.DrawZoomerOverview=function(url) 						// DRAW ZOOMER OVERVIEW
 		str="<div id='zoomerOverDiv'></div>";								// Frame box div
 		$("#zoomerOuterDiv").append(str);									// Add to div
 		$("#zoomerOverDiv").css(css);										// Set overview frame
+		url=ConvertFromGoogleDrive(url);									// Convert pic
 		str="<img src='"+url+"' ";											// Name
 		str+="height='"+h+"' ";												// Height
 		str+="width='"+w+"' >";												// Width
