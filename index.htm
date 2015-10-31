@@ -262,8 +262,9 @@
 						}	
 					o.lid=mps.AddPathLayer(dots,o.color,ew,eo,s,o.end ? o.end: e,o.show,o.header);// Add path to overlays
 					}
-				else if (marker.match(/\.png|.gif|\.jpg|\.jpeg/i) && (o.where.split(",").length > 3)) { // An image file with a full georef
+				else if (marker.match(/\.png|.gif|\.jpg|\.jpeg|drive\.google/i) && (o.where.split(",").length > 3)) { // An image file with a full georef
 					o.type="image";												// Set type
+					marker=ConvertFromGoogleDrive(marker);						// Get direct link if google drive
 					o.lid=mps.AddImageLayer(marker,o.where, o.opacity,s,e);		// Add image layer								 
 					}
 				else if (marker.toLowerCase() == "segment") 					// A segment
@@ -795,7 +796,7 @@
 			if (!id)																// Nothing there
 				id=url.match(/\/d\/(.*?)\//);										// Try this way
 			if (id)																	// An id found
-				url="//drive.google.com/uc?export=view&id="+id[1];					// Construct 'direct' link
+				url="//drive.google.com/uc?export=download&id="+id[1];				// Construct 'direct' link
 			}
 		return url;																	// Return link
 	}
