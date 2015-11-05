@@ -417,18 +417,18 @@ Popup.prototype.FormatTime=function(time, format) 						// FORMAT TIME TO DATE
 */
 	var str;
 	var mos=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-	d=new Date(time*36000000);												// Convert minutes to ms
+	d=new Date(time*60000);													// Convert minutes to ms
 	if (format == "Mo/Year") 												// 1/1900
 		str=(d.getMonth()+1)+"/"+d.getFullYear();							// Set it
 	else if (format == "Mo/Day/Year") 										// 1/1/1900
-		str=(d.getMonth()+1)+"/"+(d.getDay()+1)+"/"+d.getFullYear();		// Set it
+		str=(d.getMonth()+1)+"/"+d.getDate()+"/"+d.getFullYear();			// Set it
 	else if (format == "Mon Year") 											// Jan 1900
 		str=mos[d.getMonth()]+" "+d.getFullYear();							// Set it
 	else if (format == "Mon Day, Year") 									// Jan 1, 1900
-		str=mos[d.getMonth()]+" "+(d.getDay()+1)+", "+d.getFullYear();		// Set it
+		str=mos[d.getMonth()]+" "+d.getDate()+", "+d.getFullYear();			// Set it
 	else																	// Default to only year
 		str=d.getFullYear();												// Set it
- 	return str;																// Return formatted date
+  	return str;																// Return formatted date
 }
 
 Popup.prototype.DateToTime=function(dateString) 						// CONVERT DATE TO MINS +/- 1960
@@ -441,7 +441,7 @@ Popup.prototype.DateToTime=function(dateString) 						// CONVERT DATE TO MINS +/
 	if (!dateString)														// No date
 		return 0;															// Quit
 	if (!isNaN(dateString) && (dateString < -2500) || (dateString > 2500))	// Already in minutea
-		return dateString;													// Retun original
+		return dateString;													// Return original
 	var d=new Date();														// Make new date
 	var v=(dateString+"").split("/");										// Split date into parts
 	if (v.length == 3)														// Mon/Day/Year
@@ -450,7 +450,8 @@ Popup.prototype.DateToTime=function(dateString) 						// CONVERT DATE TO MINS +/
 		d.setFullYear(v[1],v[0]-1);											// Set it to time
 	else																	// Year
 		d.setFullYear(v[0]);												// Set it to time
- 	var time=d.getTime()/36000000;											// Conver ms to minutes
+	d.setMinutes(0); 	d.setSeconds(0); 									// Clear minutes/seconds
+ 	var time=d.getTime()/60000;												// Conver ms to minutes
   	return time;															// Return minutes +/- 1970
 
 }

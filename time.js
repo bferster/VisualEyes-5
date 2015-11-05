@@ -81,7 +81,7 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 	Resize timeline to fit container div
 */
 
-	var s,e,x,y,dur;
+	var s,e,x,y,dur,tmp;
 	var i,w2,m=this.margin;
 	var w=$(this.div).width()-m-m;											// Width of time area
 	var t=$(this.div).height()-$("#timeBar").height()-20-m;					// Top position
@@ -194,7 +194,8 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 			if (o.pos)														// If a row spec'd
 				y=h-(o.pos*rowHgt+(o.pos-1)*rowPad);						// Position it
 			$("#svgMarker"+i).attr("transform","translate("+x+","+y+")");	// Move marker
-			if (o.end)	 {													// If a spanned event
+			if (o.marker) tmp=o.marker.toLowerCase();						// Marker type as lc
+				if (o.end && ((tmp == "line") || (tmp == "bar"))) {			// If a spanned event
 				x=(o.end-o.start)/dur*w;									// Calc end
 				$("#svgMarkerBar"+i).attr("width",x);						// Move bar
 				$("#svgMarkerEnd"+i).attr("x1",x);							// Move end line
@@ -386,10 +387,12 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 		o=this.sd.mobs[i];													// Point at mob
 		if (o.type != "segment")											// If not a segment
 			continue;														// Skip it
+		if (o.show == "open")												// If it's the open one
+			this.curSeg=i;													// This is current seg
 		oo={};																// New obj
 		oo.start=o.start;			oo.end=o.end;							// Start, end
 		oo.title=o.title;			oo.col=o.color;							// Title, color
-		oo.click=o.click;													// Click
+		oo.click=o.click;			oo.size=o.size							// Click, size
 		ts.push(oo);														// Add seg
 		}
 	if (!ts.length)															// No segmenta
@@ -397,6 +400,8 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 	str="<div id='segmentBar' style='position:absolute;height:16px;'>"		// Enclosing div
 	for (i=0;i<ts.length;++i) { 											// For each tick
 		ts[i].pct=(ts[i].end-ts[i].start)/dur;								// Calc percentage
+		if (ts[0].size == "equal")											// If equal aize
+			ts[i].pct=1/ts.length;											// Divide them up equally
 		str+="<div class='time-seg' id='timeseg"+i+"' ";					// Add div
 		str+="style='color:"+this.segmentTextColor+";background-color:"+ts[i].col+"'>";
 		str+=ts[i].title+"</div>";											// Add title
@@ -448,6 +453,8 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 			_this.UpdateTimeline();											// Redraw timeline
 			});
 		}
+
+	$("#timeseg"+this.curSeg).trigger("click");								// Turn segment on
 }
 
 Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
