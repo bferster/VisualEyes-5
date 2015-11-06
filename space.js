@@ -72,6 +72,7 @@ Space.prototype.DrawMapLayers=function(indices, mode)					// DRAW OVERLAY LAYERS
 				vis=false;													// Assume off
 				if ((o.start >= tln.curStart) && (o.start < tln.curEnd)) 	// In current time
 					vis=true;												// Show it
+				trace(tim(tln.curStart),tim(tln.curEnd),tim(o.start))
 				}
 	        a=(o.opacity != undefined) ? o.opacity : 1						// Use defined opacity or 1
              if (indices) {													// If indices spec'd
@@ -100,7 +101,7 @@ Space.prototype.DrawMapLayers=function(indices, mode)					// DRAW OVERLAY LAYERS
 		}
 	if (this.geoRef)														// If georeferencing
 		this.geoRef.img.drawMapImage(this.geoRef.a,this);					// Show pic we're referencing
-	this.markerLayer.getSource().changed();					// Redraw marker layer
+	this.markerLayer.getSource().changed();									// Redraw marker layer
 }
 
 

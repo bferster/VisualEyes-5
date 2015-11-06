@@ -398,19 +398,25 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 	if (!ts.length)															// No segmenta
 		return;																// Quit
 	str="<div id='segmentBar' style='position:absolute;height:16px;'>"		// Enclosing div
+	var hasAll=false;														// Assume no all button
+	for (i=0;i<ts.length;++i) { 												// For each tick
+		if (!ts[i].start) {													// No start time
+			ts[i].all=true													// Flag it as show all button
+			hasAll=true;													// Set local flag
+			break;															// Quit looking
+			}													
+		}
 	for (i=0;i<ts.length;++i) { 											// For each tick
 		ts[i].pct=(ts[i].end-ts[i].start)/dur;								// Calc percentage
 		if (ts[0].size == "equal")											// If equal aize
-			ts[i].pct=1/ts.length;											// Divide them up equally
+			ts[i].pct=hasAll ? 1/(ts.length-1) : 1/ts.length;				// Divide them up equally
 		str+="<div class='time-seg' id='timeseg"+i+"' ";					// Add div
 		str+="style='color:"+this.segmentTextColor+";background-color:"+ts[i].col+"'>";
 		str+=ts[i].title+"</div>";											// Add title
-		if (!ts[i].start)													// No start time
-			ts[i].all=true;													// Flag it as show all button
 		}	
 	$(this.div).append(str+"</div>");										// Add segment bar				
 	$("#timeseg0").css({"border-top-left-radius":"10px","border-bottom-left-radius":"10px"});
-	if (ts[i-1].all) {														// Has show all button
+	if (hasAll) {															// Has show all button
 		$("#timeseg"+(ts.length-2)).css({"border-top-right-radius":"10px","border-bottom-right-radius":"10px"});
 		$("#timeseg"+(ts.length-1)).css({"border-top-left-radius":"10px","border-bottom-left-radius":"10px"});
 		$("#timeseg"+(ts.length-1)).css({"border-top-right-radius":"10px","border-bottom-right-radius":"10px"});
