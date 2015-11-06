@@ -222,6 +222,7 @@
 				if (o.show.match(/s/i)) 	s=o.start;							// Start timed
 				if (o.show.match(/e/i)) 	e=o.end;							// End timed
 				if (o.show.match(/off/i)) 	s=e=-1;								// Hide it
+				if (o.show.match(/g/i)) 	s=o.start;							// When controlled by timeline segment
 				}
 			if (o.marker || o.mapMarker) {										// If a marker spec'd 
 				var marker=o.mapMarker ? o.mapMarker : o.marker;				// Use mapMarker first, then marker
@@ -258,7 +259,7 @@
 						o.mapEdge     ?	sty.s=o.mapEdge     : sty.s=o.edge;				
 						o.mapSize     ?	sty.w=o.mapSize     : sty.w=o.size;				
 						o.mapOpacity  ? sty.a=o.mapOpacity  : sty.a=eo;				
-						o.header=mps.AddMarkerLayer("0,0",sty,i+"h");	
+						o.header=mps.AddMarkerLayer("0,0",sty,i+"h","");	
 						}	
 					o.lid=mps.AddPathLayer(dots,o.color,ew,eo,s,o.end ? o.end: e,o.show,o.header);// Add path to overlays
 					}
@@ -302,7 +303,7 @@
 					o.mapTextCol  ? sty.tc=o.mapTextCol  : sty.tc=curJson.mapTextCol;				
 					o.mapTextFont ? sty.tf=o.mapTextFont : sty.tf=curJson.mapTextFont;				
 					o.mapOpacity  ? sty.a=o.mapOpacity   : sty.a=eo;				
-					mps.AddMarkerLayer(o.where,sty,i,s,e);						// Add marker to overlays
+					mps.AddMarkerLayer(o.where,sty,i,s,e,o.show);			// Add marker to overlays
 					}
 			}
 		}

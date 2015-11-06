@@ -68,6 +68,11 @@ Space.prototype.DrawMapLayers=function(indices, mode)					// DRAW OVERLAY LAYERS
  
 	      	if (o.start && (this.curTime >= o.start))	vis=true;			// If past start and start defined, show it
 	      	if (o.end && (this.curTime > o.end))		vis=false;			// If past end and end defined, hide it
+			if (o.show && o.show.match(/g/i)) {								// If only showing if timeline segment is active
+				vis=false;													// Assume off
+				if ((o.start >= tln.curStart) && (o.start < tln.curEnd)) 	// In current time
+					vis=true;												// Show it
+				}
 	        a=(o.opacity != undefined) ? o.opacity : 1						// Use defined opacity or 1
              if (indices) {													// If indices spec'd
             	if (mode == undefined)	mode=true;							// Default to showing marker
@@ -95,6 +100,7 @@ Space.prototype.DrawMapLayers=function(indices, mode)					// DRAW OVERLAY LAYERS
 		}
 	if (this.geoRef)														// If georeferencing
 		this.geoRef.img.drawMapImage(this.geoRef.a,this);					// Show pic we're referencing
+	this.markerLayer.getSource().changed();					// Redraw marker layer
 }
 
 
@@ -518,7 +524,7 @@ Space.prototype.DrawPath=function(num, time) 						// DRAW PATH
 }
 
 
-Space.prototype.AddMarkerLayer=function(pos, style, id, start, end) 	// ADD MARKER LAYER TO MAP						
+Space.prototype.AddMarkerLayer=function(pos, style, id, start, end, show) 	// ADD MARKER LAYER TO MAP						
 {
 
 /* 	
@@ -538,13 +544,14 @@ Space.prototype.AddMarkerLayer=function(pos, style, id, start, end) 	// ADD MARK
 						ts: {string} text format
 	@param {number} start 	Starting time of marker in number of mins += 1/1/1970
 	@param {number} end 	Ending time of marker in number of mins += 1/1/1970
+	@param {string} show 	Show status of marker
 	@return {object} 	obj	Pointer to feature added to markerLayer
 
 */
 
 	var o={};
 	o.type="icon";															// Icon
-  	o.start=start;	o.end=end;												// Save start, end
+  	o.start=start;	o.end=end; 	o.show=show;								// Save start, end, show
 	var index=this.overlays.length;											// Get index
 	this.overlays.push(o);													// Add to overlay
   	var v=pos.split(",");													// Split into parts
