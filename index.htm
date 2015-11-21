@@ -188,7 +188,7 @@
 				for (i=0;i<mobs.length;++i) 									// For each mob
 				    for (key in mobs[i]) {										// For each field in mob
    						if (mobs[i][key])										// If not null
-   							mobs[i][key]=mobs[i][key].replace(/(\s)$/,"");		// Strip trailing space
+   							mobs[i][key]=(""+mobs[i][key]).replace(/(\s)$/,"");	// Strip trailing space
    						}
 				data.mobs=mobs;													// Set mobs
 				InitProject(data);												// Re-init project
