@@ -74,6 +74,9 @@
 							}
 		.time-timeview { 	position:absolute;color:#666;overflow:hidden;width:100%;cursor:e-resize;
 							}
+		.time-labels { 		position:absolute;font-weight:bold;background-color:#f8f8f8;padding-left:4px;
+							height:16px;
+							}
 		.ve-unselectable { 	-moz-user-select: none;    	 -khtml-user-select: none;
 		   			 		-webkit-user-select: none;  	-ms-user-select: none;   user-select: none;
 							}
@@ -274,6 +277,8 @@
 					o.type="init";												// Set type
 				else if (marker.toLowerCase() == "story") 						// An init
 					o.type="init";												// Set type
+				else if (o.marker && (o.marker.toLowerCase() == "label")) 		// A label
+					o.type="label";												// Set type
 				else if (marker.toLowerCase() == "data") {						// Data
 					o.type="story";												// Set type
 					dtl.GetSpreadsheet(o.where, false, null, function(data) {	// Get spreadsheet data

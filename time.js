@@ -216,6 +216,14 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 		}
 	this.Goto(this.curTime);												// Go there
 	$("#tvScale").text(Math.floor(this.timeViewScale*100)+"%");				// Show scale value
+	for (i=0;i<this.sd.mobs.length;++i) {									// For each mob
+		o=this.sd.mobs[i];													// Point at mob
+		if (!o.marker || !o.pos || (o.type != "label"))						// No marker set, or not a label
+			continue;														// Skip
+		x=$("#timePlayer").offset().left-4;									// Left
+		y=$("#timeViewBar").height()-(o.pos*rowHgt+(o.pos-1)*rowPad)-6;		// Top
+		$("#timeLabel-"+o.pos).css({left:x+"px",top:y+"px",width:$("#timePlayer").width()}); // Position it
+		}
 }
 
 
@@ -559,12 +567,21 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 		str+="</g>";														// End group
 		}
 	str+="</g></svg></div>";												// End markers group, svg, & div
-	str+="<div id='tvScaleBox' style='width:40px;position:absolute;left:6px;text-align:center;background-color:#fff'>";		// Container
+	str+="<div id='tvScaleBox' style='width:40px;position:absolute;left:6px;text-align:center;background-color:#f8f8f8'>";		// Container
 	str+="<div id='tvPlus'  style='display:inline-block;text-align:center;margin-bottom:4px;background-color:#bbb;color:#fff;border-radius:10px;width:11px;height:11px;cursor:pointer'>+</div>";		// Up button
 	str+="<div id='tvScale' style='color:#999'>100%</div>";					// Scale display
 	str+="<div id='tvMinus' style='display:inline-block;text-align:center;margin-top:4px;background-color:#bbb;color:#fff;border-radius:10px;width:11px;height:11px;cursor:pointer'>-</div></div>";	// down button
-	
 	$(this.div).append(str+"</div>");										// Add timeview bar				
+
+	for (i=0;i<this.sd.mobs.length;++i) {									// For each mob
+		o=this.sd.mobs[i];													// Point at mob
+		if ((o.type == "label") && o.pos) {									// A label
+			var ld="<div class='time-labels' id='timeLabel-"+o.pos+"' ";	// Base 
+			if (o.color)													// If a color set
+				ld+="style='color:"+o.color+"'";							// Use it
+			$(this.div).append(ld+">"+o.title+"</div>");					// Add div to timebar					
+			}
+	}
 
 	$("#tvPlus").click( function() {										// Zoom in
 		_this.timeViewScale=Math.min(_this.timeViewScale*2,8);				// Cap at 8x
