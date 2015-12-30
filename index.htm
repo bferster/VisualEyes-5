@@ -217,6 +217,9 @@
 		origUD=curJson.upDownSplit;												// Save return ratio
 		for (i=0;i<curJson.mobs.length;++i) {									// For each mob	
 			o=curJson.mobs[i];													// Point at mob
+			o.color=ColorToHex(o.color);										// Convert named color
+			o.mapColor=ColorToHex(o.mapColor);									// Convert named color
+			o.edge=ColorToHex(o.edge);											// Convert named color
 			if (o.start)		o.start=pop.DateToTime(o.start);				// Convert date to time
 			if (o.end)			o.end=pop.DateToTime(o.end);					// Convert date to time
 			if (o.opacity > 1)	o.opacity/=100;									// 0-100 to 0-1
@@ -748,6 +751,29 @@
 				return i;														// Return index of mob
 			}
 		return -1;																// Return nothing found
+	}
+
+	function ColorToHex(color)												// Convert a color name to hex
+	{
+		if (!color || color.match(/#/))											// Nothing or already hex
+			return color;														// Return color
+		color=color.toLowerCase();												// Force lc
+		switch (color) {														// Route on color
+			case "white": 		color="#ffffff";	break;									
+			case "gray1": 		color="#cccccc";	break;									
+			case "gray2": 		color="#888888";	break;									
+			case "gray": 		color="#888888";	break;									
+			case "gray3": 		color="#444444";	break;									
+			case "black": 		color="#000000";	break;									
+			case "gray": 		color="#888888";	break;									
+			case "red": 		color="#990000";	break;									
+			case "green": 		color="#009900";	break;									
+			case "blue": 		color="#000099";	break;									
+			case "orange": 		color="#ffa500";	break;									
+			case "skyblue": 	color="#87ceeb";	break;									
+			case "yellow": 		color="#ffd700";	break;									
+			}
+		return color;															// Return color
 	}
 
 	function MakeSelect(id, multi, items, sel, extra, values)				// CREATE HTML SELECT
