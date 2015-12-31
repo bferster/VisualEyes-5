@@ -88,8 +88,7 @@ DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendErr
      
     function handleGoogleResponse(response) {							// HANDLE INCOMING DATA
 	    var i,j,o,lab;
-		var keys=new Array();												
-		var theData=new Array();
+		var keys=[],theData=[];
 		var data=response.getDataTable();									// Try getting table from Google
 		if (!data && sendError) {											// If no data and sending
 			callback(null,url);												// Send to callback
@@ -97,18 +96,21 @@ DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendErr
 			}
 		var cols=data.getNumberOfColumns();									// Get cols
 		var rows=data.getNumberOfRows();									// Get rows
-		if (fields) {														// If setting header
-			for (i=0;i<cols;++i) {											// For each field
-//			 	lab=$.trim(data.getColumnLabel(i));							// Get trimmed lab
-			 	lab=$.trim(data.getValue(0,i));								// Get trimmed lab
-				if (!lab)													// If noting there
-			 		break;													// Quit
-				keys.push(lab);												// Add to keys array
-				}
-			cols=keys.length;												// Cols = keys length
+		var hasLabels=data.getColumnLabel(0) ? true : false;				// Is it a table with a header?
+		
+		for (i=0;i<cols;++i) {												// For each field
+		 	if (hasLabels)													// A table with labels
+		 		lab=$.trim(data.getColumnLabel(i));							// Get trimmed label
+			else															// No embedded label in data
+		 		lab=$.trim(data.getFormattedValue(0,i));					// Get trimmed value
+			if (!lab)														// If noting there
+		 		break;														// Quit
+			keys.push(lab);													// Add to keys array
 			}
+		cols=keys.length;													// Cols = keys length
 		if (fields) {														// If fielded JSON mode
-			for (i=1;i<rows;++i) {											// For each row
+			var s=hasLabels ? 0 : 1;										// Starting row
+			for (i=s;i<rows;++i) {											// For each row
 				o={};														// New obj
 				for (j=0;j<keys.length;++j) 								// For each key
 					o[keys[j]]=data.getValue(i,j);							// Get data
