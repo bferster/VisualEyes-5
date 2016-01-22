@@ -207,10 +207,11 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 			}
 		w=$("#timeSlider").width()/10;										// Spacing
 		x=$("#timeSlider").offset().left;									// Starting point
+		var startTime=(e-s)/w*this.lastViewLeft;							// Start time if dragged
 		for (i=0;i<9;++i) {													// For each grid line
 			x+=w;															// Advance
 			$("#svgGrid"+i).attr("transform","translate("+x+", 0)");		// Move grid
-			$("#svgGridDate"+i).text(this.pop.FormatTime(s+(e-s/scale)*((i+1)/10),this.timeFormat));	// Set date
+			$("#svgGridDate"+i).text(this.pop.FormatTime(s+(dur*(i+1)/10),this.timeFormat));	// Set date
 			}	
 		$("#tvScaleBox").css("top",$("#timeViewBar").height()/2-18+"px");	// Center scale buttons
 		}
