@@ -1025,6 +1025,10 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 	if (n)																	// If north set
 		$("#grc").val(n+","+s+","+e+","+w+","+r);							// Combined
 
+	$("#grurl").on("change",function() {									// URL CHANGED
+		url=$(this).val();													// Get value
+		});		
+
 	$("#grn").on("change",function() {										// NORTH CHANGED
 		n=$(this).val();													// Get value
 		$("#grc").val(n+","+s+","+e+","+w+","+r);							// Combined
@@ -1034,8 +1038,8 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 		s=$(this).val();													// Get value
 		$("#grc").val(n+","+s+","+e+","+w+","+r);							// Combined
 		});		
-	$
-	("#gre").on("change",function() {										// EAST CHANGED
+
+	$("#gre").on("change",function() {										// EAST CHANGED
 		e=$(this).val();													// Get value
 		$("#grc").val(n+","+s+","+e+","+w+","+r);							// Combined
 		});		
@@ -1048,6 +1052,9 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 	$("#grr").on("change",function() {										// ROTATION CHANGED
 		r=$(this).val();													// Get value
 		$("#grc").val(n+","+s+","+e+","+w+","+r);							// Combined
+		if (_this.geoRef)	_this.geoRef.r=r; 								// If georef up. set val
+				ReDrawImage(true);											// Redraw image only, not the dots
+		_this.DrawMapLayers();												// Redraw map
 		});		
 
 	$("#grstart").click( function() {										// START CLICK
@@ -1097,29 +1104,34 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 					n=p[1]+h2;												// Set N
 					s=p[1]-h2;												// Set S
 					}
+
 				else if (id == "georef1") {									// NW
 					w=p[0];													// Set W
-					n=((e-w)*asp)+(s-0);									// Set N
 					if (shift)												// If shift key											
-						n=p[1];												// Distort aspect
+						s=p[1];												// Distort aspect
+					else													// Maintain aspect
+						n=((e-w)*asp)+(s-0);								// Set N
 					}
 				else if (id == "georef2") {									// NE
 					e=p[0];													// Set E
-					n=((e-w)*asp)+(s-0);									// Set N
 					if (shift)												// If shift key											
-						n=p[1];												// Distort aspect
+						s=p[1];												// Distort aspect
+					else													// Maintain aspect
+						n=((e-w)*asp)+(s-0);								// Set N
 					}
 				else if (id == "georef3") {									// SE
 					e=p[0];													// Set E
-					s=n-((e-w)*asp);										// Set S
 					if (shift)												// If shift key											
-						s=p[1];												// Distort aspect
+						n=p[1];												// Distort aspect
+					else													// Maintain aspect
+						s=n-((e-w)*asp);									// Set S
 					}
 				else if (id == "georef4") {									// SW
 					w=p[0];													// Set W
-					s=n-((e-w)*asp);										// Set S
 					if (shift)												// If shift key											
-						s=p[1];												// Distort aspect
+						n=p[1];												// Distort aspect
+					else													// Maintain aspect
+						s=n-((e-w)*asp);									// Set S
 					}
 				ReDrawImage(true);											// Redraw image only, not the dots
 				});															// Each feature
