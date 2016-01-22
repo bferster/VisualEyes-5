@@ -211,7 +211,8 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 		for (i=0;i<9;++i) {													// For each grid line
 			x+=w;															// Advance
 			$("#svgGrid"+i).attr("transform","translate("+x+", 0)");		// Move grid
-			$("#svgGridDate"+i).text(this.pop.FormatTime(s+(dur*(i+1)/10),this.timeFormat));	// Set date
+			y=this.lastViewLeft*w/dur;										// Compensate for scroll
+			$("#svgGridDate"+i).text(this.pop.FormatTime(s-y+(dur*(i+1)/10),this.timeFormat));	// Set date
 			}	
 		$("#tvScaleBox").css("top",$("#timeViewBar").height()/2-18+"px");	// Center scale buttons
 		}
