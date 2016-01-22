@@ -543,8 +543,8 @@
 			curJson.mapTextCol=$("#setstcol").val();							// Set map label color
 			curJson.mapTextFont=$("#setstfont").val();							// Set map label font
 			curJson.start=$("#setstart").val();									// Set start
-			curJson.leftRightSplit=$("#setlr").val()/100;						// Set lr split
-			curJson.upDownSplit=$("#setud").val()/100;							// Set ud split
+			curJson.leftRightSplit=Math.min(1,Math.max(0,$("#setlr").val()/100));	// Set lr split
+			curJson.upDownSplit=Math.min(1,Math.max(0,$("#setud").val()/100));	// Set ud split
 			curJson.end=$("#setend").val();										// Set end
 			curJson.mapStartPos=$("#setstartpos").val();						// Set end
 			curJson.title=$("#settitle").val();									// Set sheet
