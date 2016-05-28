@@ -245,7 +245,7 @@
 					v=o.desc.split(",");										// Split by comma
 					for (j=0;j<v.length;++j) {									// For each one spec'd
  						id=curJson.mobs[FindMobByID(v[j])];						// Point at mob
- 						if ((id == undefined) || (id < 0))						// Mob not found
+ 						if ((id == undefined) || (id < 0) || (!id.where))		// Mob not found or no where set
  							continue;											// Skip it
  						t=id.start;												// Get time
   						t=pop.DateToTime(t);									// +/- min past 1970
@@ -445,8 +445,10 @@
 						pop.DrawZoomer("rightDiv",vv[0],2,4);					// Show zoomer
 						$("#rightDiv").append("<br><div class='story-return' style='position:static' onclick='ClearPopUps();sto.pop.Sound(\"click\",curJson.muteSound)'>Back to story</div>");
 						});								
-				else
+				else{
 					pop.DrawZoomer("rightDiv",vv[0],2,4);						// Show zoomer
+					$("#rightDiv").append("<br><div class='story-return' style='position:static' onclick='ClearPopUps();sto.pop.Sound(\"click\",curJson.muteSound)'>Back to story</div>");
+					}
 				}
 			else if (e.data.match(/=show/i))	{								// Set position
 				var i;
@@ -470,8 +472,10 @@
 						pop.DrawZoomer("rightDiv",vv[0],2,4);					// Show zoomer
 						$("#rightDiv").append("<br><div class='story-return' style='position:static' onclick='ClearPopUps();sto.pop.Sound(\"click\",curJson.muteSound)'>Back to story</div>");
 						});								
-				else
+				else{
 					pop.DrawZoomer("rightDiv",vv[0],2,4);						// Show zoomer
+					$("#rightDiv").append("<br><div class='story-return' style='position:static' onclick='ClearPopUps();sto.pop.Sound(\"click\",curJson.muteSound)'>Back to story</div>");
+					}
 				}
 			else if (e.data.match(/=show/i))	{								// Set position
 				var i;

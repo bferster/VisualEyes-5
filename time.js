@@ -535,7 +535,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 			}
 		else if (m == "tridown") {											// A down triangle
 			str+="<polygon fill='"+o.color+"' points='";					// Add polygon
-			str+=(-w2)+","+(w2)+" "+w2+","+(w2)+" "+(0)+","+(w2)+"'/>";		// Points
+			str+="0,"+(w2)+" "+w2+","+(-w2)+" "+(-w2)+","+(-w2)+"'/>";		// Points
 			}
 		else if (m == "trileft") {											// A left triangle
 			str+="<polygon fill='"+o.color+"' points='";					// Add polygon

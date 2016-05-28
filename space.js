@@ -80,8 +80,11 @@ Space.prototype.DrawMapLayers=function(indices, mode)					// DRAW OVERLAY LAYERS
             		if (i == indices[j])									// This is one to set
             			vis=mode;											// Hide or show it
            		}
-            if (vis && (o.type == "image"))									// If a visible image 
-           		o.src.drawMapImage(vis,this);   							// Draw it   
+            if (vis && (o.type == "image"))	{								// If a visible image 
+           		(o.alpha == undefined) ? a=1 : a=o.alpha;					// Let alpha control opacity if defined
+           		if (!vis) a=0;												// Hide if invisible
+            		o.src.drawMapImage(a,this);   							// Draw it   
+        		}
         	else if (o.type == "kml") {										// If a kml 
        			o.src.set('visible',vis);									// Show/hide it
             	o.src.set("opacity",a);										// Set opacity								
@@ -496,6 +499,8 @@ Space.prototype.DrawPath=function(num, time) 						// DRAW PATH
 	var s,e,pct,v=[],i=0,last,animate=false;
 	var o=this.overlays[num];											// Point at overlay
 	if (o.show && o.show.match(/a/i))	animate=true;					// Set animation mode
+	if (!o.dots.length)													// No dots
+		return;															// Quit
 	v.push([o.dots[0][0],o.dots[0][1]]);								// Add moveto dot
 	if (o.header) {														// If a header defined
 		var head=this.overlays[num-1].src;								// Point at header feature
