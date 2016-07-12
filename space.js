@@ -121,7 +121,10 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 	this.layers=[															// Hold layers
 		new ol.layer.Tile({													// Sat 
 				visible: false,												// Invisible
-				source: new ol.source.MapQuest({layer: 'sat'}),				// MapQuest sat
+	   			source: new ol.source.BingMaps({							// Bing
+     			key: 'Avsv5vFZCgNtp6DYSf4dVOx_TG6ZREK9ivsaGcjebscLVe5EcC2078H3YmLNRncB',
+    				imagerySet:"Aerial"
+     				}),
 				projection: this.curProjection,								// Default projection
 				title: "Satellite"											// Set name
 				}),
@@ -159,7 +162,7 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 		
 		new ol.layer.Tile({													// Roadmap
 				visible:false,												// Hide it
-				source: new ol.source.MapQuest({layer: 'osm'}),				// MapQuest roads
+  				source: new ol.source.OSM(),								// OSM
 				projection: this.curProjection,								// Default projection
 				title: "Roadmap"											// Set name
 				}),
