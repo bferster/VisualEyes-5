@@ -562,7 +562,7 @@ Space.prototype.AddMarkerLayer=function(pos, style, id, start, end, show) 	// AD
   	o.start=start;	o.end=end; 	o.show=show;								// Save start, end, show
 	var index=this.overlays.length;											// Get index
 	this.overlays.push(o);													// Add to overlay
-  	var v=pos.split(",");													// Split into parts
+  	var v=(""+pos).split(",");												// Split into parts
 	var c=ol.proj.transform([v[0]-0,""+v[1]-0],'EPSG:4326',this.curProjection);	// Transform
 	o.src=new ol.Feature({ geometry: new ol.geom.Point(c) });				// Create feature at coord
  	o.src.setId("Mob-"+id);													// Set id of mob
