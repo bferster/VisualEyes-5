@@ -443,7 +443,7 @@ Popup.prototype.DateToTime=function(dateString) 						// CONVERT DATE TO MINS +/
 	if (!isNaN(dateString) && (dateString < -2500) || (dateString > 2500))	// Already in minutea
 		return dateString;													// Return original
 	var d=new Date();														// Make new date
-	var v=(dateString+"").split("/");										// Split date into parts
+	var v=(dateString+"").split(" ")[0].split("/");							// Split date into parts
 	if (v.length == 3)														// Mon/Day/Year
 		d.setFullYear(v[2],v[0]-1,v[1]);									// Set it to time
 	else if (v.length == 2)													// Mon/Year
