@@ -269,6 +269,7 @@
 						o.mapOpacity  ? sty.a=o.mapOpacity  : sty.a=eo;				
 						o.header=mps.AddMarkerLayer("0,0",sty,i+"h","");	
 						}	
+					dots=dots.sort(function(a, b) {  return a[2]-b[2]; });		// Sort ascending by time
 					o.lid=mps.AddPathLayer(dots,o.color,ew,eo,s,o.end ? o.end: e,o.show,o.header);// Add path to overlays
 					}
 				else if (marker.match(/\.png|.gif|\.jpg|\.jpeg|drive\.google/i) && o.where && ((""+o.where.split(",")).length > 3)) { // An image file with a full georef
