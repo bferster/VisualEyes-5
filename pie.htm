@@ -17,7 +17,7 @@
 		.pi-main {		text-align:center;position:absolute;opacity:0;
 						border:2px solid #ddd;
 						}
-		.pi-dot {		text-align:center;position:absolute;cursor:pointer;
+		.pi-dot {		text-align:center;position:absolute;cursor:pointer;overflow:hidden
 						}
 		.pi-text {		text-align:left;position:absolute;white-space:nowrap;cursor:pointer;
 						}
@@ -41,8 +41,8 @@
 	Sound("ding",true);														// Init sound
 	Sound("delete",true);													// Init sound
 	o={	x:500,y:300,wid:50,type:"dot",col:"#990000",						// Center dot 
-		edge:2,ecol:"#666",name:"Options",id:0,
-		tcol:"#ffffff",thgt:"12",tfont:"sans-serif"
+		name:"Options",id:0,
+		tcol:"#ffffff",thgt:"11",tfont:"sans-serif"
 		};	
 	o.callback=function(s){ trace(s); };
 	ops.slices.push(o);														// Add slice to pie menu
