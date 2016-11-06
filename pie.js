@@ -5,102 +5,61 @@
 
 function Pie(options)														// CONSTRUCTOR
 {
-	var i;
+	var _this=this;																// Save context
 	this.ops=options;															// Save options
+	this.curSlice=0;															// Current slice
 	this.ops.parent=options.parent ? options.parent : "body";					// If a parent div spec'd use it
 	var str="<div id='pimenu' class='pi-main unselectable'></div>";				// Main shell
 	$(this.ops.parent).append(str);												// Add to DOM														
-	for (i=0;i<this.ops.slices.length;++i)										// For each slice
-		this.DrawSlice(this.ops.slices[i]);										// Draw slice
+	str="<img id='piback' class='pi-slice' src='"+ops.dial+"'/>";				// Menu back			
+	str+="<img id='pihigh' class='pi-slice' style='pointer-events: none' src='philite.png'/>";	// Slice highlight				
+	$("#pimenu").append(str);													// Add to DOM														
 
-	$("#pimenu").animate({ opacity:1},500, function() {							// Animate in content		
-		$("#pimenu").css("opacity",1);											// Force full
-		});
+
+	$("#piback").on("mousemove",function(e) { 									// ON HOVER ON
+ 		var alpha=0,cur="auto";													// Assume off
+ 		var w=_this.ops.wid;													// Size
+ 		var x=e.clientX-(_this.ops.x+_this.ops.wid/2);							// Dx from center
+ 		var y=e.clientY-(_this.ops.y+_this.ops.wid/2);							// Dy from center
+ 		var h=Math.sqrt(x*x+y*y); 												// Euclidian distance from center
+		_this.curSlice=Math.floor((180-Math.atan2(x,y)*(180/Math.PI))/45);		// Get cuerrnt slice
+		if (h < w/10) {															// In settings
+			alpha=0;   cur="pointer"											// Show it
+			}
+		else if ((h > w/4) && _this.ops.active[_this.curSlice]) {				// In first orbit and an active slice
+			alpha=1;   cur="pointer"											// Show it
+ 			$("#pihigh").css({"transform":"rotate("+_this.curSlice*45+"deg)"}); // Rotate highlight
+			}
+		$("#pihigh").css({"opacity":alpha});									// Set highlight
+		$("#pimenu").css({"cursor":cur});										// Set cursor
+		});	
+	$("#piback").on("mouseover",function(e) { 									// ON HOVER ON
+ 		$("#pihigh").css({"opacity":1});										// Show highlight
+		$("#pimenu").css({"cursor":"pointer"});									// Pointer cursor
+		});	
+	$("#piback").on("mouseout",function() { 									// ON HOVER ON
+		$("#pihigh").css({"opacity":0});										// No highlight
+		$("#pimenu").css({"cursor":"auto"});									// Normal cursor
+		});	
+
 }
 
-Pie.prototype.DrawSlice=function(slice)								// DRAW PIE SLICE
+Pie.prototype.ShowPieMenu=function()										// SHOW PIE MENU
 {
-	var str;
-	var id="slice"+slice.id;													// Slice id
-	var th=slice.thgt ? slice.thgt : "12";										// Text height
-	var orbit=Math.ceil(+slice.id/100);											// Calc orbit ring
-	var w=slice.wid ? slice.wid : 50;											// Slice size
-	if (slice.edge) 	w-=slice.edge;											// Account for border
-	var center=this.ops.slices[0];												// Point at center dot
-	var x=center.x+(w*1.5*orbit);
-	var y=center.y+4;
-	slice.col=slice.col ? slice.col : center.col;								// Cascade
-	slice.tcol=slice.tcol ? slice.tcol : center.tcol;							// Cascade
-	slice.tfont=slice.tfont ? slice.tfont : center.tfont;						// Cascade
-	slice.thgt=slice.tght ? slice.thgt : center.thgt;							// Cascade
-	if (orbit)	w*=.75,th*=.75;													// Size outer orbits
-		
-	switch (slice.type) { 														// Dot
-		case "dot":
-			str="<div id='"+id+"' class='pi-dot' style='";						// Main shell
-			str+="left:"+x+"px;top:"+y+"px;"									// Position
-			str+="height:"+w+"px;width:"+w+"px;"								// Size
-			if (slice.col)	str+="background-color:"+slice.col+";"				// Color
-			if (slice.edge) str+="border:"+slice.edge+"px solid "+slice.ecol+";"// Edge
-			if (slice.alpha != undefined) str+="opacity:"+slice.alpha+";"		// Alpha
-			if (slice.tcol)	str+="color:"+slice.tcol+";"						// Text color
-			if (slice.thgt)	str+="font-size:"+slice.thgt+"px;"					// Text height
-			str+="font-size:"+th+"px;border-radius:"+w+"px'>";										// End style
-			if (slice.name)	str+="<div style='padding-top:"+((w-th)/2)+"px'>"+slice.name+"</div>";	// Name
-			$("#pimenu").append(str+"</div>");									// Add to DOM														
-		
-			$("#"+id).on("mouseover",function() { 								// ON HOVER ON
-				$("#"+id).css({"background-color":ShadeColor(slice.col,.33)});	// Lighten	
-				});	
-			$("#"+id).on("mouseout",function() { 								// ON HOVER OFF
-				$("#"+id).css({"background-color":slice.col});					// Full color
-				});	
-			break;
-		case "text":
-			str="<div id='"+id+"' class='pi-text' style='";						// Main shell
-			str+="left:"+x+"px;top:"+y+"px;"									// Position
-			if (slice.alpha != undefined) str+="opacity:"+slice.alpha+";"		// Alpha
-			if (slice.tcol)	str+="color:"+slice.tcol+";"						// Text color
-			if (slice.tfont) str+="font-family:"+slice.tfont+";"				// Text font
-			if (slice.thgt)	str+="font-size:"+slice.thgt+"px;"					// Text height
-			str+="px'>";														// End style
-			if (slice.name)	str+=slice.name;									// Name
-			$("#pimenu").append(str+"</div>");									// Add to DOM														
+	var o=this.ops;																// Point at ops
+	$("#pimenu").css({"width":"0px","height":"0px"});							// Hide
+	$("#pimenu").css({"top":(o.y+o.wid/2)+"px","left":(o.x+o.wid/2)+"px"});		// Position
+	$("#pimenu").animate({ width:o.wid, height:o.wid,top:o.y, left:o.x });		// Zoom on
+}
 
-			$("#"+id).on("mouseover",function() { 								// ON HOVER ON
-				$("#"+id).css({"color":ShadeColor(slice.tcol,.5)});				// Lighten	
-				});	
-			$("#"+id).on("mouseout",function() { 								// ON HOVER OFF
-				$("#"+id).css({"color":slice.tcol});							// Full color
-				});	
-			break;
-		case "bar":
-			str="<div id='"+id+"' class='pi-bar' style='";						// Main shell
-			str+="left:"+x+"px;top:"+y+"px;"									// Position
-			if (slice.alpha != undefined) str+="opacity:"+slice.alpha+";"		// Alpha
-			if (slice.tcol)	str+="color:"+slice.tcol+";"						// Text color
-			if (slice.tfont) str+="font-family:"+slice.tfont+";"				// Text font
-			if (slice.thgt)	str+="font-size:"+slice.thgt+"px;"					// Text height
-			if (slice.col)	str+="background-color:"+slice.col+";"				// Color
-			if (slice.edge) str+="border:"+slice.edge+"px solid "+slice.ecol+";"// Edge
-			str+="border-radius:"+w/2+"px'>";									// End style
-			if (slice.name)	str+=slice.name;									// Name
-			$("#pimenu").append(str+"</div>");									// Add to DOM														
 
-			$("#"+id).on("mouseover",function() { 								// ON HOVER ON
-				$("#"+id).css({"background-color":ShadeColor(slice.col,.33)});	// Lighten	
-				});	
-			$("#"+id).on("mouseout",function() { 								// ON HOVER OFF
-				$("#"+id).css({"background-color":slice.col});					// Full color
-				});	
-			break;
-		}
 
+/*
 		$("#"+id).on("click",function() {										// ON SLICE CLICK
 			$("#pimenu").remove();												// Remove menu
 			});	
 
-}
+*/
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // HELPERS

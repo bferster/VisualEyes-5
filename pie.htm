@@ -14,16 +14,12 @@
 		body { 			font-family:Verdana,Geneva,sans-serif; font-size:10px; 
 						padding:0px;margin:0px;box-sizing:border-box;
 						}
-		.pi-main {		text-align:center;position:absolute;opacity:0;
-						border:2px solid #ddd;
+		.pi-main {		text-align:center;position:absolute;width:0px,height:0px;
+						
 						}
-		.pi-dot {		text-align:center;position:absolute;cursor:pointer;overflow:hidden
+		.pi-slice {		position:absolute;width:100%;left:0px;top:0px;
 						}
-		.pi-text {		text-align:left;position:absolute;white-space:nowrap;cursor:pointer;
-						}
-		.pi-bar {		text-align:left;position:absolute;white-space:nowrap;
-						padding-left:4px;padding-right:4px;cursor:pointer;
-						}
+							}
 		.unselectable { -moz-user-select: none;     -khtml-user-select: none;
 		   			 	-webkit-user-select: none;  -ms-user-select: none;   user-select: none;
 		   				}
@@ -34,27 +30,14 @@
 
 </head>
 <body>
+<img id='fakeback' src='back.JPG'/>
 <script>
-	var o;
-	var ops={slices:[]}
-	Sound("click",true);													// Init sound
-	Sound("ding",true);														// Init sound
-	Sound("delete",true);													// Init sound
-	o={	x:500,y:300,wid:50,type:"dot",col:"#990000",						// Center dot 
-		name:"Options",id:0,
-		tcol:"#ffffff",thgt:"11",tfont:"sans-serif"
-		};	
-	o.callback=function(s){ trace(s); };
-	ops.slices.push(o);														// Add slice to pie menu
-	o={	type:"dot",col:"#000099",name:"Option 1",id:1};						// 1st orbit dot
-	o.callback=function(s){ trace(o.name,s); };
-	ops.slices.push(o);														// Add slice to pie menu
-	o={	type:"text",name:"Option 1a",id:101,tcol:"#000000"};				// 2nd orbit text 
-	o.callback=function(s){ trace(o.name,s); };
-	ops.slices.push(o);														// Add slice to pie menu
-	
-	
-	var pie=new Pie(ops);													// Init menu
-	
+	var ops={x:250,y:260,wid:150,dial:"pdraw.png"};
+	ops.active=[1,1,0,1,1,0,1];
+	Sound("click",true);														// Init sound
+	Sound("ding",true);															// Init sound
+	Sound("delete",true);														// Init sound
+	var pie=new Pie(ops);														// Init menu
+	$("#fakeback").on("click",function() { pie.ShowPieMenu() });				// Show pie menu on click
 </script>
 </body></html>
