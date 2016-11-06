@@ -33,8 +33,10 @@
 <img id='fakeback' src='back.JPG'/>
 <script>
 	var ops={x:250,y:260,wid:150,ang:45};
-	ops.active=[1,1,1,0,1,1,0,1,1];
-	ops.dial="img/pdraw.png";
+	ops.active=[1,1,1,0,1,1,0,1,1];												// Active slices
+	ops.close=[0,0,0,0,1,1,0,0,0];												// Vlose on click
+	ops.dial="img/pdraw.png";													// Dial background
+	ops.slice="img/philite.png";												// Slice highlight
 	Sound("click",true);														// Init sound
 	Sound("ding",true);															// Init sound
 	Sound("delete",true);														// Init sound

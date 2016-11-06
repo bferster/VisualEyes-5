@@ -12,7 +12,7 @@ function Pie(options)														// CONSTRUCTOR
 	var str="<div id='pimenu' class='pi-main unselectable'></div>";				// Main shell
 	$(this.ops.parent).append(str);												// Add to DOM														
 	str="<img id='piback' class='pi-slice' src='"+ops.dial+"'/>";				// Menu back			
-	str+="<img id='pihigh' class='pi-slice' style='pointer-events: none' src='img/philite.png'/>";	// Slice highlight				
+	str+="<img id='pihigh' class='pi-slice' style='pointer-events: none' src='"+ops.slice+"/>";	// Slice highlight				
 	$("#pimenu").append(str);													// Add to DOM														
 
 	$("#piback").on("mousemove",function(e) { 									// ON HOVER ON
@@ -48,8 +48,11 @@ function Pie(options)														// CONSTRUCTOR
 		$("#pimenu").css({"cursor":"auto"});									// Normal cursor
 		});	
 	$("#piback").on("click",function() { 										// ON CLICK
-		if (_this.curSlice >= 0)												// A valid pick
-			SendMessage("click",_this.curSlice);								// Senf event
+		if (_this.curSlice >= 0) {												// A valid pick
+			SendMessage("click",_this.curSlice);								// Send event
+			if (_this.ops.close[_this.curSlice])								// If close option set
+				_this.ShowPieMenu(false);										// Close menu
+			}
 		});	
 }
 
