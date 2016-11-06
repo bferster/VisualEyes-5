@@ -32,12 +32,32 @@
 <body>
 <img id='fakeback' src='back.JPG'/>
 <script>
-	var ops={x:250,y:260,wid:150,dial:"pdraw.png"};
-	ops.active=[1,1,0,1,1,0,1];
+	var ops={x:250,y:260,wid:150,ang:45};
+	ops.active=[1,1,1,0,1,1,0,1,1];
+	ops.dial="img/pdraw.png";
 	Sound("click",true);														// Init sound
 	Sound("ding",true);															// Init sound
 	Sound("delete",true);														// Init sound
+
+$(document).ready(function() {												// ON PAGE LOADED
+	isMobile=navigator.userAgent.match(/(ipad|iphone|ipod|android)/i) ? true : false; // Set mobile flag
+	var url=window.location.search.substring(1);								// Get query string
 	var pie=new Pie(ops);														// Init menu
-	$("#fakeback").on("click",function() { pie.ShowPieMenu() });				// Show pie menu on click
+	if (window.addEventListener) 												// If supported this way
+		window.addEventListener("message",html5MessageHandler,false);			// Add event handler
+	else																		// Use other method
+		window.attachEvent("message",html5MessageHandler);						// Add handler
+	
+	$("#fakeback").on("click",function() { pie.ShowPieMenu(!$("#pimenu").width()) }); // Show pie menu on click
+	
+	});									
+
+
+	function html5MessageHandler(e)											// ON HTML5 MESSAGE
+	{
+   		if (e && e.data && e.data.match(/PiMenu/))								// If a pimenu message
+ 			trace(e.data.split("|"))
+ 	}
+
 </script>
 </body></html>
