@@ -31,6 +31,9 @@ function Pie(options)														// CONSTRUCTOR
 			if ((_this.curSlice > 0) && _this.ops.active[_this.curSlice]) {		// A valid slice
 				alpha=1;   cur="pointer"										// Show it
  				$("#pihigh").css({"transform":"rotate("+(_this.curSlice-1)*_this.ops.ang+"deg)"}); // Rotate highlight
+	//open next level if there
+	
+	
 				}
 			}
 		$("#pihigh").css({"opacity":alpha});									// Set highlight
