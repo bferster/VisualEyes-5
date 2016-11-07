@@ -12,26 +12,32 @@ function Pie(options)														// CONSTRUCTOR
 	var str="<div id='pimenu' class='pi-main unselectable'></div>";				// Main shell
 	$(this.ops.parent).append(str);												// Add to DOM														
 	str="<img id='piback' class='pi-slice' src='"+ops.dial+"'/>";				// Menu back			
-	str+="<img id='pihigh' class='pi-slice' style='pointer-events: none' src='"+ops.slice+"'/>";	// Slice highlight				
+	str+="<img id='pihigh' class='pi-slice' style='pointer-events: none' src='"+ops.hilite+"'/>";	// Slice highlight				
 	$("#pimenu").append(str);													// Add to DOM														
 
 	$("#piback").on("mousemove",function(e) { 									// ON HOVER ON
- 		var alpha=0,cur="auto";													// Assume off
- 		_this.curSlice=-1;														// Assume nothing pickec
- 		var w=_this.ops.wid;													// Size
- 		var x=e.clientX-(_this.ops.x+_this.ops.wid/2);							// Dx from center
- 		var y=e.clientY-(_this.ops.y+_this.ops.wid/2);							// Dy from center
+ 		var lastSlice=_this.curSlice;											// Save existing slice state
+		var alpha=0,cur="auto",cs=-1;											// Assume off
+  		var w=_this.ops.wid/2;													// Size
+ 		var x=e.clientX-(_this.ops.x+w);										// Dx from center
+ 		var y=e.clientY-(_this.ops.y+w);										// Dy from center
  		var h=Math.sqrt(x*x+y*y); 												// Euclidian distance from center
-		if (h < w/10) {															// In settings
+		if (h < w/5) {															// In settings
 			alpha=0;   cur="pointer"; 											// Show it
-			_this.curSlice=0;													// Center slice
+			cs=0;																// Center slice
 			}
-		else if (h > w/4) {														// In first orbit and an active slice
-			_this.curSlice=Math.floor((180-Math.atan2(x,y)*(180/Math.PI))/_this.ops.ang)+1;	// Get current slice
-			if ((_this.curSlice > 0) && _this.ops.active[_this.curSlice]) {		// A valid slice
-				alpha=1;   cur="pointer"										// Show it
- 				$("#pihigh").css({"transform":"rotate("+(_this.curSlice-1)*_this.ops.ang+"deg)"}); // Rotate highlight
-	//open next level if there
+		else if (h > w/2) {														// In first orbit ring
+			cs=Math.floor((180-Math.atan2(x,y)*(180/Math.PI))/_this.ops.ang)+1;	// Get current slice
+				if (_this.ops.slices[cs].type)									// If a valid slice
+					alpha=1,cur="pointer"										// Show it
+			}
+		if (cs != lastSlice) {													// A slice change
+			_this.curSlice=cs;													// Change it
+			_this.ShowColorBars(false,-1);										// Hide color bars										
+			if (cs > 0) {														// A valid slice
+  				$("#pihigh").css({"transform":"rotate("+(cs-1)*_this.ops.ang+"deg)"}); // Rotate highlight
+				var o=_this.ops.slices[cs];										// Point at slice
+				if (o.type == "col")	_this.ShowColorBars(true,o.def);		// Show color bars
 				}
 			}
 		$("#pihigh").css({"opacity":alpha});									// Set highlight
@@ -44,11 +50,12 @@ function Pie(options)														// CONSTRUCTOR
 	$("#piback").on("mouseout",function() { 									// ON HOVER ON
 		$("#pihigh").css({"opacity":0});										// No highlight
 		$("#pimenu").css({"cursor":"auto"});									// Normal cursor
+		_this.ShowColorBars(false,-1);											// Hide color bars										
 		});	
 	$("#piback").on("click",function() { 										// ON CLICK
 		if (_this.curSlice >= 0) {												// A valid pick
 			SendMessage("click",_this.curSlice);								// Send event
-			if (_this.ops.close[_this.curSlice])								// If close option set
+			if (_this.ops.slices[_this.curSlice].close)							// If close option set
 				_this.ShowPieMenu(false);										// Close menu
 			}
 		});	
@@ -62,8 +69,15 @@ Pie.prototype.ShowPieMenu=function(mode)									// SHOW PIE MENU
 		$("#pimenu").css({"top":(o.y+o.wid/2)+"px","left":(o.x+o.wid/2)+"px"});	// Position
 		$("#pimenu").animate({ width:o.wid, height:o.wid,top:o.y, left:o.x });	// Zoom on
 		}
-	else
+	else{
+		this.ShowColorBars(false,-1);											// Hide color bars										
 		$("#pimenu").animate({ width:0, height:0,top:o.y+o.wid/2,left:o.x+o.wid/2},200);	// Zoom off
+	}	
+}
+
+Pie.prototype.ShowColorBars=function(mode, def)									// SHOW COLOR BARS
+{
+	trace(def)
 }
 
 
