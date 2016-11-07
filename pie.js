@@ -33,28 +33,29 @@ function Pie(options)														// CONSTRUCTOR
 			}
 		if (cs != lastSlice) {													// A slice change
 			_this.curSlice=cs;													// Change it
-			_this.ShowColorBars(false,-1);										// Hide color bars										
+			_this.HideSubMenus();												// Hide submenus										
 			if (cs > 0) {														// A valid slice
   				$("#pihigh").css({"transform":"rotate("+(cs-1)*_this.ops.ang+"deg)"}); // Rotate highlight
 				var o=_this.ops.slices[cs];										// Point at slice
-				if (o.type == "col")	_this.ShowColorBars(true,o.def);		// Show color bars
+				if (o.type == "col")	_this.ShowColorBars(cs,o.def);			// Show color bars
 				}
 			}
 		$("#pihigh").css({"opacity":alpha});									// Set highlight
 		$("#pimenu").css({"cursor":cur});										// Set cursor
 		});	
-	$("#piback").on("mouseover",function(e) { 									// ON HOVER ON
+	$("#pimenu").on("mouseover",function(e) { 									// ON HOVER ON
  		$("#pihigh").css({"opacity":1});										// Show highlight
 		$("#pimenu").css({"cursor":"pointer"});									// Pointer cursor
 		});	
-	$("#piback").on("mouseout",function() { 									// ON HOVER ON
+	$("#pimenu").on("mouseout",function() { 									// ON HOVER ON
+		trace(33)
 		$("#pihigh").css({"opacity":0});										// No highlight
 		$("#pimenu").css({"cursor":"auto"});									// Normal cursor
-		_this.ShowColorBars(false,-1);											// Hide color bars										
+		_this.HideSubMenus();													// Hide submenus										
 		});	
-	$("#piback").on("click",function() { 										// ON CLICK
+	$("#pimenu").on("click",function() { 										// ON CLICK
 		if (_this.curSlice >= 0) {												// A valid pick
-			SendMessage("click",_this.curSlice);								// Send event
+			_this.SendMessage("click",_this.curSlice);							// Send event
 			if (_this.ops.slices[_this.curSlice].close)							// If close option set
 				_this.ShowPieMenu(false);										// Close menu
 			}
@@ -70,57 +71,38 @@ Pie.prototype.ShowPieMenu=function(mode)									// SHOW PIE MENU
 		$("#pimenu").animate({ width:o.wid, height:o.wid,top:o.y, left:o.x });	// Zoom on
 		}
 	else{
-		this.ShowColorBars(false,-1);											// Hide color bars										
+		this.HideSubMenus();													// Hide submenus										
 		$("#pimenu").animate({ width:0, height:0,top:o.y+o.wid/2,left:o.x+o.wid/2},200);	// Zoom off
 	}	
 }
 
-Pie.prototype.ShowColorBars=function(mode, def)									// SHOW COLOR BARS
+Pie.prototype.HideSubMenus=function()										// HIDE SUBMENUS
 {
-	trace(def)
+	$("#picol").remove();														// Remove colorbars
 }
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// HELPERS
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	function trace(msg, p1, p2, p3, p4)										// CONSOLE 
-	{
-		if (p4 != undefined)
-			console.log(msg,p1,p2,p3,p4);
-		else if (p3 != undefined)
-			console.log(msg,p1,p2,p3);
-		else if (p2 != undefined)
-			console.log(msg,p1,p2);
-		else if (p1 != undefined)
-			console.log(msg,p1);
-		else
-			console.log(msg);
-	}
-
-	function Sound(sound, mute)												// PLAY SOUND
-	{
-		var snd=new Audio();													// Init audio object
-		if (!snd.canPlayType("audio/mpeg") || (snd.canPlayType("audio/mpeg") == "maybe")) 
-			snd=new Audio("img/"+sound+".ogg");									// Use ogg
-		else	
-			snd=new Audio("img/"+sound+".mp3");									// Use mp3
-		if (!mute)																// If not initing or muting	
-			snd.play();															// Play sound
+Pie.prototype.ShowColorBars=function(num, def)								// SHOW COLOR BARS
+{
+	var x,y;
+	var str="<div id='picol' class='pi-colbar unselectable'>";					// Main shell
+ 	for (i=0;i<8;++i)
+  		str+="<div id='pichip"+i+"' style='background-color:rgb("+i*16+",75,75)' class='pi-colchip'></div>";					// Make color chip
+	$("#pimenu").append(str+"</div>");											// Add to menu														
+	var ang=(num)*this.ops.ang-60;
+	var w=(this.ops.wid/2)+16;
+	off=26
+	for (i=0;i<8;++i) {
+		x=(Math.sin(ang*0.0174533)*w)+w+-off;
+		y=w-off-Math.cos(ang*0.0174533)*w;
+		$("#pichip"+i).css({"transform":"translate("+x+"px,"+y+"px) rotate("+ang+"deg) "}); 	// Rotate chip
+		ang+=11
 		}
-		
-	function ShadeColor(color, percent) {   
-		if (!color)
-			return;
-		var f=parseInt(color.slice(1),16),t=percent<0?0:255,p=percent<0?percent*-1:percent,R=f>>16,G=f>>8&0x00FF,B=f&0x0000FF;
-		return "#"+(0x1000000+(Math.round((t-R)*p)+R)*0x10000+(Math.round((t-G)*p)+G)*0x100+(Math.round((t-B)*p)+B)).toString(16).slice(1);
-		}
+}
 
-	function SendMessage(cmd, msg, callback) 								// SEND HTML5 MESSAGE 
-	{
-		var str=cmd+"|PiMenu";													// Add src and window						
-		if (msg)																// If more to it
-			str+="|"+msg;														// Add it
-		window.parent.postMessage(str,"*");										// Send message to parent wind		
-	}
+Pie.prototype.SendMessage=function(cmd, msg, callback) 						// SEND HTML5 MESSAGE 
+{
+	var str=cmd+"|PiMenu";														// Add src and window						
+	if (msg)																	// If more to it
+		str+="|"+msg;															// Add it
+	window.parent.postMessage(str,"*");											// Send message to parent wind		
+}

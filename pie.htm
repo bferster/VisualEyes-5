@@ -19,7 +19,12 @@
 						}
 		.pi-slice {		position:absolute;width:100%;left:0px;top:0px;
 						}
-							}
+							
+		.pi-colbar {	position:absolute;left:0px;top:0px;
+						}
+		.pi-colchip {	position:absolute;left:0px;top:0px;width:20px;height:20px;
+						background-color:#990000;
+						}
 		.unselectable { -moz-user-select: none;     -khtml-user-select: none;
 		   			 	-webkit-user-select: none;  -ms-user-select: none;   user-select: none;
 		   				}
@@ -64,6 +69,41 @@ $(document).ready(function() {												// ON PAGE LOADED
 	$("#fakeback").on("click",function() { pie.ShowPieMenu(!$("#pimenu").width()) }); // Show pie menu on click
 	});									
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// HELPERS
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	function trace(msg, p1, p2, p3, p4)										// CONSOLE 
+	{
+		if (p4 != undefined)
+			console.log(msg,p1,p2,p3,p4);
+		else if (p3 != undefined)
+			console.log(msg,p1,p2,p3);
+		else if (p2 != undefined)
+			console.log(msg,p1,p2);
+		else if (p1 != undefined)
+			console.log(msg,p1);
+		else
+			console.log(msg);
+	}
+
+	function Sound(sound, mute)												// PLAY SOUND
+	{
+		var snd=new Audio();													// Init audio object
+		if (!snd.canPlayType("audio/mpeg") || (snd.canPlayType("audio/mpeg") == "maybe")) 
+			snd=new Audio("img/"+sound+".ogg");									// Use ogg
+		else	
+			snd=new Audio("img/"+sound+".mp3");									// Use mp3
+		if (!mute)																// If not initing or muting	
+			snd.play();															// Play sound
+		}
+		
+	function ShadeColor(color, percent) {   
+		if (!color)
+			return;
+		var f=parseInt(color.slice(1),16),t=percent<0?0:255,p=percent<0?percent*-1:percent,R=f>>16,G=f>>8&0x00FF,B=f&0x0000FF;
+		return "#"+(0x1000000+(Math.round((t-R)*p)+R)*0x10000+(Math.round((t-G)*p)+G)*0x100+(Math.round((t-B)*p)+B)).toString(16).slice(1);
+		}
 
 	function html5MessageHandler(e)											// ON HTML5 MESSAGE
 	{
