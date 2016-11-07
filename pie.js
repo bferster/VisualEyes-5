@@ -12,7 +12,7 @@ function Pie(options)														// CONSTRUCTOR
 	var str="<div id='pimenu' class='pi-main unselectable'></div>";				// Main shell
 	$(this.ops.parent).append(str);												// Add to DOM														
 	str="<img id='piback' class='pi-slice' src='"+ops.dial+"'/>";				// Menu back			
-	str+="<img id='pihigh' class='pi-slice' style='pointer-events: none' src='"+ops.slice+"/>";	// Slice highlight				
+	str+="<img id='pihigh' class='pi-slice' style='pointer-events: none' src='"+ops.slice+"'/>";	// Slice highlight				
 	$("#pimenu").append(str);													// Add to DOM														
 
 	$("#piback").on("mousemove",function(e) { 									// ON HOVER ON
@@ -32,8 +32,6 @@ function Pie(options)														// CONSTRUCTOR
 				alpha=1;   cur="pointer"										// Show it
  				$("#pihigh").css({"transform":"rotate("+(_this.curSlice-1)*_this.ops.ang+"deg)"}); // Rotate highlight
 	//open next level if there
-	
-	
 				}
 			}
 		$("#pihigh").css({"opacity":alpha});									// Set highlight
