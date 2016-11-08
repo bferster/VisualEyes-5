@@ -8,6 +8,8 @@ function Pie(options)														// CONSTRUCTOR
 	var _this=this;																// Save context
 	this.ops=options;															// Save options
 	this.curSlice=0;															// Current slice
+	options.x-=options.wid/2;													// Center x
+	options.y-=options.wid/2;													// Center y
 	this.ops.parent=options.parent ? options.parent : "body";					// If a parent div spec'd use it
 	var str="<div id='pimenu' class='pi-main unselectable'></div>";				// Main shell
 	$(this.ops.parent).append(str);												// Add to DOM														
@@ -18,22 +20,22 @@ function Pie(options)														// CONSTRUCTOR
 	$("#piback").on("mousemove",function(e) { 									// ON HOVER ON
  		var lastSlice=_this.curSlice;											// Save existing slice state
 		var alpha=0,cur="auto",cs=-1;											// Assume off
-  		var w=_this.ops.wid/2;													// Size
+   		var w=_this.ops.wid/2;													// Size
  		var x=e.clientX-(_this.ops.x+w);										// Dx from center
  		var y=e.clientY-(_this.ops.y+w);										// Dy from center
  		var h=Math.sqrt(x*x+y*y); 												// Euclidian distance from center
-		if (h < w/5) {															// In settings
+			if (h < w/5) {															// In settings
 			alpha=0;   cur="pointer"; 											// Show it
 			cs=0;																// Center slice
 			}
-		else if (h > w/2) {														// In first orbit ring
+		else if (h > w/3) {														// In first orbit ring
 			cs=Math.floor((180-Math.atan2(x,y)*(180/Math.PI))/_this.ops.ang)+1;	// Get current slice
 				if (_this.ops.slices[cs].type)									// If a valid slice
 					alpha=1,cur="pointer"										// Show it
 			}
 		if (cs != lastSlice) {													// A slice change
 			_this.curSlice=cs;													// Change it
-			_this.HideSubMenus();												// Hide submenus										
+			_this.HideSubMenus(true);											// Hide submenus										
 			if (cs > 0) {														// A valid slice
   				$("#pihigh").css({"transform":"rotate("+(cs-1)*_this.ops.ang+"deg)"}); // Rotate highlight
 				var o=_this.ops.slices[cs];										// Point at slice
@@ -43,21 +45,12 @@ function Pie(options)														// CONSTRUCTOR
 		$("#pihigh").css({"opacity":alpha});									// Set highlight
 		$("#pimenu").css({"cursor":cur});										// Set cursor
 		});	
-	$("#pimenu").on("mouseover",function(e) { 									// ON HOVER ON
- 		$("#pihigh").css({"opacity":1});										// Show highlight
-		$("#pimenu").css({"cursor":"pointer"});									// Pointer cursor
-		});	
-	$("#pimenu").on("mouseout",function() { 									// ON HOVER ON
-		trace(33)
-		$("#pihigh").css({"opacity":0});										// No highlight
-		$("#pimenu").css({"cursor":"auto"});									// Normal cursor
-		_this.HideSubMenus();													// Hide submenus										
-		});	
-	$("#pimenu").on("click",function() { 										// ON CLICK
+	$("#piback").on("click",function() { 										// ON CLICK
 		if (_this.curSlice >= 0) {												// A valid pick
 			_this.SendMessage("click",_this.curSlice);							// Send event
 			if (_this.ops.slices[_this.curSlice].close)							// If close option set
 				_this.ShowPieMenu(false);										// Close menu
+			_this.curSlice=-1;													// Reset slice
 			}
 		});	
 }
@@ -71,33 +64,82 @@ Pie.prototype.ShowPieMenu=function(mode)									// SHOW PIE MENU
 		$("#pimenu").animate({ width:o.wid, height:o.wid,top:o.y, left:o.x });	// Zoom on
 		}
 	else{
-		this.HideSubMenus();													// Hide submenus										
+		this.HideSubMenus(true);												// Hide submenus										
 		$("#pimenu").animate({ width:0, height:0,top:o.y+o.wid/2,left:o.x+o.wid/2},200);	// Zoom off
 	}	
 }
 
-Pie.prototype.HideSubMenus=function()										// HIDE SUBMENUS
+Pie.prototype.HideSubMenus=function(mode)										// HIDE SUBMENUS
 {
+	if (!mode)
+		return;
 	$("#picol").remove();														// Remove colorbars
 }
 
 Pie.prototype.ShowColorBars=function(num, def)								// SHOW COLOR BARS
 {
-	var x,y;
+	var x,y,i;
+	var _this=this;																// Save context
+	var cols=[ "#3182bd","#6baed6","#9ecae1","#e6550d","#fd8d3c","#fdae6b",
+			   "#31a354","#74c476","#a1d99b","None","#756bb1","#9e9ac8","#bcbddc",
+				"#ffffff","#cccccc","#888888","#666666","#444444","#000000"
+				];
 	var str="<div id='picol' class='pi-colbar unselectable'>";					// Main shell
- 	for (i=0;i<8;++i)
-  		str+="<div id='pichip"+i+"' style='background-color:rgb("+i*16+",75,75)' class='pi-colchip'></div>";					// Make color chip
+ 	for (i=0;i<cols.length;++i)													// For each color
+  		str+="<div id='pichip"+i+"' style='background-color:rgb("+i*8+",32,32)' class='pi-colchip'></div>";					// Make color chip
 	$("#pimenu").append(str+"</div>");											// Add to menu														
-	var ang=(num)*this.ops.ang-60;
-	var w=(this.ops.wid/2)+16;
-	off=26
-	for (i=0;i<8;++i) {
-		x=(Math.sin(ang*0.0174533)*w)+w+-off;
-		y=w-off-Math.cos(ang*0.0174533)*w;
-		$("#pichip"+i).css({"transform":"translate("+x+"px,"+y+"px) rotate("+ang+"deg) "}); 	// Rotate chip
-		ang+=11
-		}
+	$("#pichip9").text("X");													// None icon
+	
+	var ang=(num)*this.ops.ang-82.5;											// Start of colors angle
+	var w=this.ops.wid/2+12;													// Radius of colors
+	
+	var w2=w+13;																// Outer circle
+	var ang2=ang+54;															// Center angle																
+	x=(Math.sin((ang2)*0.0174533)*w2)+w2-18;									// Calc x
+	y=(w2-Math.cos((ang2)*0.0174533)*w2-18);									// y
+	if (ang2 > 180) x-=66,y-=30;												// Shift if on left side
+	str="<input type='text' class='pi-coltext' id='picoltext' "; 
+	str+="style='left:"+x+"px;top:"+y+"px'>";
+	str+="<div id='pitextcol' class='pi-colchip unselectable'";	
+	str+="style='left:"+(x+49)+"px;top:"+(y+3)+"px;height:9px;width:9px'></div>";
+	$("#picol").append(str);													// Add to color bar														
+	$("#pitextcol").css("background-color",def);								// Def col
+	$("#picoltext").val(def);													// Def text
+	$("#picoltext").on("change",function(){
+		var col=$("#picoltext").val();											// Get text
+		if (col.substr(0,1) != "#") col="#"+col;								// Add #
+		_this.SendMessage("hover",_this.curSlice+"|"+col);						// Send event
+		$("#pitextcol").css("background-color",col);							// Color chip
+		$("#picoltext").val(col);												// Set text
+		});
+	
+	for (i=0;i<cols.length;++i) {												// For each color
+		x=(Math.sin(ang*0.0174533)*w)+w-18;
+		y=(w-Math.cos(ang*0.0174533)*w-18);
+		$("#pichip"+i).css(
+			{"transform":"translate("+x+"px,"+y+"px) rotate("+ang+"deg)",		// Rotate 
+			"background-color":cols[i]											// Chip color
+			}); 	
+		ang+=7;																	// Next angle for chip
+		
+		$("#pichip"+i).on("click", function(e) {								// COLOR CHIP CLICK
+			var id=e.currentTarget.id.substr(6)-0;								// Extract id
+			_this.SendMessage("click",_this.curSlice+"|"+cols[id]);				// Send event
+			_this.HideSubMenus(true);											// Hide submenus										
+			_this.curSlice=-1;													// Reset slice
+			$("#picoltext").val(cols[id]);										// Show value
+			$("#pitextcol").css("background-color",cols[id]);					// Color chip
+			});
+
+		$("#pichip"+i).on("mouseover", function(e) {							// COLOR CHIP HOVER
+			var id=e.currentTarget.id.substr(6)-0;								// Extract id
+			_this.SendMessage("hover",_this.curSlice+"|"+cols[id]);				// Send event
+			$("#picoltext").val(cols[id]);										// Show value
+			$("#pitextcol").css("background-color",cols[id]);					// Color chip
+			});
+	}
 }
+
 
 Pie.prototype.SendMessage=function(cmd, msg, callback) 						// SEND HTML5 MESSAGE 
 {

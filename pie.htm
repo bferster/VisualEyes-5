@@ -19,11 +19,14 @@
 						}
 		.pi-slice {		position:absolute;width:100%;left:0px;top:0px;
 						}
-							
 		.pi-colbar {	position:absolute;left:0px;top:0px;
 						}
-		.pi-colchip {	position:absolute;left:0px;top:0px;width:20px;height:20px;
-						background-color:#990000;
+		.pi-colchip {	position:absolute;width:12px;height:12px;
+						color:#ff0000;text-align:center;
+						}
+		.pi-coltext {	position:absolute;width:55px;height:10px;font-size:9px;
+						border-radius:10px;padding-top:2px;padding-left:6px;
+						border:1px solid #666;color:#666;background-color:#e8e8e8;
 						}
 		.unselectable { -moz-user-select: none;     -khtml-user-select: none;
 		   			 	-webkit-user-select: none;  -ms-user-select: none;   user-select: none;
@@ -39,7 +42,7 @@
 <script>
 	var o;
 	var pie;
-	var ops={x:250,y:260,wid:150,ang:45,slices:[]};
+	var ops={x:330,y:334,wid:150,ang:45,slices:[]};
 	ops.dial="img/pdraw.png";													// Dial background
 	ops.hilite="img/philite.png";												// Slice highlight
 	ops.slices[0]={ type:"but" };												// Center 
