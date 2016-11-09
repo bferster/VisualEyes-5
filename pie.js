@@ -42,6 +42,7 @@ function Pie(options)														// CONSTRUCTOR
 				if (o.type == "col")		_this.ShowColorBars(cs,o.def);		// Show color bars
 				else if (o.type == "txt")	_this.ShowTextPick(cs);				// Show text picker
 				else if (o.type == "typ")	_this.ShowTextType(cs,o.def);		// Show text picker
+				else if (o.type == "lin")	_this.ShowLineWidth(cs,o.def);		// Show width picker
 				}
 			}
 		$("#pihigh").css({"opacity":alpha});									// Set highlight
@@ -200,6 +201,47 @@ Pie.prototype.ShowColorBars=function(num, def)								// SHOW COLOR BARS
 			});
 	}
 }
+
+Pie.prototype.ShowLineWidth=function(num, def)								// SHOW LINE WIDTH
+{
+	var x,y,i;
+	var _this=this;																// Save context
+	var wids=[0,1,2,3,4,5,6,7,8 ];
+	var str="<div id='pisubback' class='pi-subbar unselectable'>";				// Shell
+ 	for (i=0;i<wids.length;++i)													// For each width
+  		str+="<div id='piline"+i+"' class='pi-linechip'></div>";				// Make width chip
+	$("#pimenu").append(str+"</div>");											// Add to menu														
+	$("#piline0").text("X");													// None icon
+	
+	var ang=(num)*this.ops.ang-22.5-36;											// Start angle
+	var w=this.ops.wid/2+12;													// Radius
+ 	for (i=0;i<wids.length;++i)	{												// For each width
+		x=(Math.sin(ang*0.0174533)*w)+w-18;
+		y=(w-Math.cos(ang*0.0174533)*w-18);
+		$("#piline"+i).css({ "width":wids[i],									// Set width
+			"transform":"translate("+x+"px,"+y+"px) rotate("+ang+"deg)"			// Rotate 
+			});
+		ang+=9;																	// Next angle for chip
+		
+		$("#piline"+i).on("click", function(e) {								// LINE CLICK
+			var id=e.currentTarget.id.substr(6)-0;								// Extract id
+			_this.SendMessage("click",_this.curSlice+"|"+wids[id]);				// Send event
+			_this.HideSubMenus(true);											// Hide submenus										
+			_this.curSlice=-1;													// Reset slice
+			});
+
+		$("#piline"+i).on("mouseover", function(e) {							// LINE HOVER
+			var id=e.currentTarget.id.substr(6)-0;								// Extract id
+			_this.SendMessage("hover",_this.curSlice+"|"+wids[id]);				// Send event
+			$(this).css("background-color","#999");
+			});
+		$("#piline"+i).on("mouseout", function(e) {								// LINE OUT
+			$(this).css("background-color","#e8e8e8");
+			});
+		}
+	$("#piline0").css({ "background-color":"transparent" });
+}
+
 
 Pie.prototype.SendMessage=function(cmd, msg, callback) 						// SEND HTML5 MESSAGE 
 {

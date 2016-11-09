@@ -36,6 +36,9 @@
 						border-radius:12px;padding-top:2px;padding-left:6px;
 						border:1px solid #666;color:#666;background-color:#e8e8e8;
 						}
+		.pi-linechip {	position:absolute;height:12px;background-color:#e8e8e8;
+						color:#ff0000;vertical-align:middle;
+						}
 		.unselectable { -moz-user-select: none;     -khtml-user-select: none;
 		   			 	-webkit-user-select: none;  -ms-user-select: none;   user-select: none;
 		   				}
@@ -56,10 +59,10 @@
 	ops.slices[0]={ type:"but" };												// Center 
 	ops.slices[1]={ type:"lin", def:1};											// Line width slice 
 	ops.slices[2]={ type:"col", def:"#000000"};									// Line col slice 
-	ops.slices[3]={ type:"txt"};													// Blank slice 
+	ops.slices[3]={ type:"txt"};												// Blank slice 
 	ops.slices[4]={ type:"but", close:0};										// Redo slice 
 	ops.slices[5]={ type:"but", close:1};										// Undo slice 
-	ops.slices[6]={ type:"typ", def:"default"};													// Blank slice 
+	ops.slices[6]={ type:"typ", def:"default"};									// Blank slice 
 	ops.slices[7]={ type:"col", def:"#990000"};									// Line col slice 
 	ops.slices[8]={ type:"sli", def:100};										// Alpha slice 
 
