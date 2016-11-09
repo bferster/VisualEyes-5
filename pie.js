@@ -43,6 +43,7 @@ function Pie(options)														// CONSTRUCTOR
 				else if (o.type == "txt")	_this.ShowTextPick(cs);				// Show text picker
 				else if (o.type == "typ")	_this.ShowTextType(cs,o.def);		// Show text picker
 				else if (o.type == "lin")	_this.ShowLineWidth(cs,o.def);		// Show width picker
+				else if (o.type == "sli")	_this.ShowSlider(cs,o.def);			// Show slider
 				}
 			}
 		$("#pihigh").css({"opacity":alpha});									// Set highlight
@@ -242,6 +243,61 @@ Pie.prototype.ShowLineWidth=function(num, def)								// SHOW LINE WIDTH
 	$("#piline0").css({ "background-color":"transparent" });
 }
 
+Pie.prototype.ShowSlider=function(num, def)								// SHOW COLOR BARS
+{
+	var x,y,i;
+	var _this=this;																// Save context
+	var str="<div id='pisubback' class='pi-subbar unselectable'>";				// Shell
+ 	for (i=0;i<61;++i)															// For each arc part
+  		str+="<div id='piarc"+i+"' class='pi-sliarc'></div>";					// Make arc chip
+	str+="<div id='pislidot' class='pi-slidot'></div>";							// Make slider dot
+	$("#pimenu").append(str+"</div>");											// Add to menu														
+	var ang=(num)*this.ops.ang-52.5;											// Start of angle
+	var w=this.ops.wid/2+18;													// Radius
+	
+	var ang2=ang+24;															// Center angle																
+	x=Math.floor((Math.sin((ang2)*0.0174533)*w)+w-12);							// Calc x
+	y=Math.floor((w-Math.cos((ang2)*0.0174533)*w-12));							// Y
+	if (ang2 > 180) x-=20,y-=36;												// Shift if on left side
+	str="<input type='text' class='pi-coltext' id='pislitext' "; 
+	str+="style='left:"+x+"px;top:"+y+"px;width:30px;text-align:center'>";
+	$("#pisubback").append(str);												// Add to color bar														
+	setDot(def);
+
+	$("#pislitext").on("change",function() {									// TYPING OF VALUE
+		var val=$(this).val();
+		_this.SendMessage("hover",_this.curSlice+"|"+val);						// Send event
+		setDot(val);
+		});
+	$("#piarc60").html("&nbsp;&nbsp;100")
+	$("#piarc60").css({"margin-top":"-6px","opacity":1,"background-color":"transparent"})
+	for (i=0;i<61;++i) {														// For each color
+		x=(Math.sin(ang*0.0174533)*w)+w-18;
+		y=(w-Math.cos(ang*0.0174533)*w-18);
+		$("#piarc"+i).css({"transform":"translate("+x+"px,"+y+"px) rotate("+ang+"deg)"}); // Rotate 
+		ang+=1;																	// Next angle for chip
+		
+		$("#pichip"+i).on("click", function(e) {								// COLOR CHIP CLICK
+			var id=e.currentTarget.id.substr(6)-0;								// Extract id
+			_this.SendMessage("click",_this.curSlice+"|"+cols[id]);				// Send event
+			_this.HideSubMenus(true);											// Hide submenus										
+			_this.curSlice=-1;													// Reset slice
+			$("#picoltext").val(cols[id]);										// Show value
+			$("#pitextcol").css("background-color",cols[id]);					// Color chip
+			});
+
+		}
+
+	function setDot(val) {
+		var ang2=ang;
+		$("#pislitext").val(val);												// Set text
+		x=Math.floor((Math.sin(ang2*0.0174533)*w)+w-18-6);						// Calc x
+		y=Math.floor((w-Math.cos(ang2*0.0174533)*w-18)-6);						// Y
+		$(pislidot).css({"transform":"translate("+x+"px,"+y+"px) rotate("+ang+"deg)"}); // Rotate 
+	
+	}
+
+}
 
 Pie.prototype.SendMessage=function(cmd, msg, callback) 						// SEND HTML5 MESSAGE 
 {

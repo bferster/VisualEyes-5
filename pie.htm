@@ -24,20 +24,26 @@
 		.pi-colchip {	position:absolute;width:12px;height:12px;
 						color:#ff0000;text-align:center;
 						}
-		.pi-coltext {	position:absolute;width:55px;height:10px;font-size:9px;
-						border-radius:10px;padding-top:2px;padding-left:6px;
+		.pi-coltext {	position:absolute;width:50px;height:10px;font-size:9px;
+						border-radius:10px;padding-top:2px;padding-left:6px;padding-right:6px;
 						border:1px solid #666;color:#666;background-color:#e8e8e8;
 						}
 		.pi-textopt	{	position:absolute;height:12px;opacity:.75;
 						border-radius:12px;padding-bottom:1px;padding-left:5px;padding-right:6px;
 						border:1px solid #666;color:#666;background-color:#e8e8e8;
 						}
-		.pi-type {	position:absolute;width:100px;height:12px;font-size:12px;
+		.pi-type {		position:absolute;width:100px;height:12px;font-size:12px;
 						border-radius:12px;padding-top:2px;padding-left:6px;
 						border:1px solid #666;color:#666;background-color:#e8e8e8;
 						}
 		.pi-linechip {	position:absolute;height:12px;background-color:#e8e8e8;
 						color:#ff0000;vertical-align:middle;
+						}
+		.pi-sliarc {	position:absolute;height:3px;width:3px;background-color:#fff;opacity:.5;
+						color:#fff;
+						}
+		.pi-slidot {	position:absolute;height:11px;width:11px;background-color:#e8e8e8;
+						border-radius:12px;border:1px solid #666;
 						}
 		.unselectable { -moz-user-select: none;     -khtml-user-select: none;
 		   			 	-webkit-user-select: none;  -ms-user-select: none;   user-select: none;
@@ -59,7 +65,7 @@
 	ops.slices[0]={ type:"but" };												// Center 
 	ops.slices[1]={ type:"lin", def:1};											// Line width slice 
 	ops.slices[2]={ type:"col", def:"#000000"};									// Line col slice 
-	ops.slices[3]={ type:"txt"};												// Blank slice 
+	ops.slices[3]={ type:"sli"};												// Blank slice 
 	ops.slices[4]={ type:"but", close:0};										// Redo slice 
 	ops.slices[5]={ type:"but", close:1};										// Undo slice 
 	ops.slices[6]={ type:"typ", def:"default"};									// Blank slice 
