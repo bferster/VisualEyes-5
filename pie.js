@@ -39,7 +39,8 @@ function Pie(options)														// CONSTRUCTOR
 			if (cs > 0) {														// A valid slice
   				$("#pihigh").css({"transform":"rotate("+(cs-1)*_this.ops.ang+"deg)"}); // Rotate highlight
 				var o=_this.ops.slices[cs];										// Point at slice
-				if (o.type == "col")	_this.ShowColorBars(cs,o.def);			// Show color bars
+				if (o.type == "col")		_this.ShowColorBars(cs,o.def);		// Show color bars
+				else if (o.type == "txt")	_this.ShowTextPick(cs);				// Show text picker
 				}
 			}
 		$("#pihigh").css({"opacity":alpha});									// Set highlight
@@ -47,7 +48,8 @@ function Pie(options)														// CONSTRUCTOR
 		});	
 	$("#piback").on("click",function() { 										// ON CLICK
 		if (_this.curSlice >= 0) {												// A valid pick
-			_this.SendMessage("click",_this.curSlice);							// Send event
+			if (_this.ops.slices[_this.curSlice].type == "but")							// If close option set
+				_this.SendMessage("click",_this.curSlice);							// Send event
 			if (_this.ops.slices[_this.curSlice].close)							// If close option set
 				_this.ShowPieMenu(false);										// Close menu
 			_this.curSlice=-1;													// Reset slice
@@ -73,7 +75,44 @@ Pie.prototype.HideSubMenus=function(mode)										// HIDE SUBMENUS
 {
 	if (!mode)
 		return;
-	$("#picol").remove();														// Remove colorbars
+	$("#pisubback").remove();														// Remove colorbars
+}
+
+Pie.prototype.ShowTextPick=function(num)									// SHOW TEXT PICK
+{
+	var x,y,i,str="";
+	var _this=this;																// Save context
+	var o=this.ops.slices[num];
+	var n=o.options.length;
+	var ang=(num)*this.ops.ang-22.5-(n*11);										// Start angle
+	var w=this.ops.wid/2+12;													// Radius of menu
+	var str="<div id='pisubback' class='pi-subbar unselectable'>";				// Main shell
+	for (i=0;i<n;++i) {															// For each option
+		str+="<div class='pi-textopt' id='pitext"+i+"'>"; 						// Add div
+		str+=o.options[i]+"</div>";												// Add label
+		}
+	$("#pimenu").append(str+"</div>");											// Add to menu														
+	for (i=0;i<n;++i) {															// For each option
+		x=Math.floor((Math.sin((ang)*0.0174533)*w)+w-18);						// Calc x
+		y=Math.floor((w-Math.cos((ang)*0.0174533)*w-18));						// y
+		if (ang > 180) x-=$("#pitext"+i).width(),y-=6;							// Shift if on left side
+		ang+=22;																// Next angle
+		$("#pitext"+i).css({"left":x+"px","top":y+"px"});						// Position
+		
+		$("#pitext"+i).on("mouseover", function() {								// OVER ITEM
+			$(this).css("opacity",1);											// Highlight
+			});
+		$("#pitext"+i).on("mouseout", function() {								// OUT OF ITEM
+			$(this).css("opacity",.75);											// Highlight
+			});
+		$("#pitext"+i).on("click", function(e) {								// CLICK ITEM
+			var id=e.currentTarget.id.substr(6)-0;								// Extract id
+			_this.SendMessage("click",_this.curSlice+"|"+id);					// Send event
+			_this.HideSubMenus(true);											// Hide submenus										
+			_this.curSlice=-1;													// Reset slice
+			});
+		}
+
 }
 
 Pie.prototype.ShowColorBars=function(num, def)								// SHOW COLOR BARS
@@ -84,9 +123,9 @@ Pie.prototype.ShowColorBars=function(num, def)								// SHOW COLOR BARS
 			   "#31a354","#74c476","#a1d99b","None","#756bb1","#9e9ac8","#bcbddc",
 				"#ffffff","#cccccc","#888888","#666666","#444444","#000000"
 				];
-	var str="<div id='picol' class='pi-colbar unselectable'>";					// Main shell
+	var str="<div id='pisubback' class='pi-subbar unselectable'>";				// Shell
  	for (i=0;i<cols.length;++i)													// For each color
-  		str+="<div id='pichip"+i+"' style='background-color:rgb("+i*8+",32,32)' class='pi-colchip'></div>";					// Make color chip
+  		str+="<div id='pichip"+i+"' class='pi-colchip'></div>";					// Make color chip
 	$("#pimenu").append(str+"</div>");											// Add to menu														
 	$("#pichip9").text("X");													// None icon
 	
@@ -102,10 +141,11 @@ Pie.prototype.ShowColorBars=function(num, def)								// SHOW COLOR BARS
 	str+="style='left:"+x+"px;top:"+y+"px'>";
 	str+="<div id='pitextcol' class='pi-colchip unselectable'";	
 	str+="style='left:"+(x+49)+"px;top:"+(y+3)+"px;height:9px;width:9px'></div>";
-	$("#picol").append(str);													// Add to color bar														
+	$("#pisubback").append(str);												// Add to color bar														
 	$("#pitextcol").css("background-color",def);								// Def col
 	$("#picoltext").val(def);													// Def text
-	$("#picoltext").on("change",function(){
+	
+	$("#picoltext").on("change",function(){										// TYPING OF COLOR
 		var col=$("#picoltext").val();											// Get text
 		if (col.substr(0,1) != "#") col="#"+col;								// Add #
 		_this.SendMessage("hover",_this.curSlice+"|"+col);						// Send event
