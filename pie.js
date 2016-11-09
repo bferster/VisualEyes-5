@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // PIE.JS 
-// Provides pie/radial menu and some utilities
+// Provides pie/radial menu 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function Pie(options)														// CONSTRUCTOR
@@ -24,16 +24,16 @@ function Pie(options)														// CONSTRUCTOR
  		var x=e.clientX-(_this.ops.x+w);										// Dx from center
  		var y=e.clientY-(_this.ops.y+w);										// Dy from center
  		var h=Math.sqrt(x*x+y*y); 												// Euclidian distance from center
-			if (h < w/5) {															// In settings
+		if (h < w/5) {															// In settings
 			alpha=0;   cur="pointer"; 											// Show it
 			cs=0;																// Center slice
 			}
-		else if (h > w/3) {														// In first orbit ring
+		else if (h > w/2) {														// In first orbit ring
 			cs=Math.floor((180-Math.atan2(x,y)*(180/Math.PI))/_this.ops.ang)+1;	// Get current slice
 				if (_this.ops.slices[cs].type)									// If a valid slice
-					alpha=1,cur="pointer"										// Show it
+				alpha=1,cur="pointer"											// Show it
 			}
-		if (cs != lastSlice) {													// A slice change
+		if ((cs != lastSlice) && (h < w)) {										// A slice change
 			_this.curSlice=cs;													// Change it
 			_this.HideSubMenus(true);											// Hide submenus										
 			if (cs > 0) {														// A valid slice
@@ -41,6 +41,7 @@ function Pie(options)														// CONSTRUCTOR
 				var o=_this.ops.slices[cs];										// Point at slice
 				if (o.type == "col")		_this.ShowColorBars(cs,o.def);		// Show color bars
 				else if (o.type == "txt")	_this.ShowTextPick(cs);				// Show text picker
+				else if (o.type == "typ")	_this.ShowTextType(cs,o.def);		// Show text picker
 				}
 			}
 		$("#pihigh").css({"opacity":alpha});									// Set highlight
@@ -78,13 +79,34 @@ Pie.prototype.HideSubMenus=function(mode)										// HIDE SUBMENUS
 	$("#pisubback").remove();														// Remove colorbars
 }
 
+
+Pie.prototype.ShowTextType=function(num, def)								// SHOW COLOR BARS
+{
+	var _this=this;																// Save context
+	var ang=(num)*this.ops.ang-22.5;											// Start angle
+	var w=this.ops.wid/2+12;													// Radius of menu
+	var x=Math.floor((Math.sin((ang)*0.0174533)*w)+w-18);						// Calc x
+	var y=Math.floor((w-Math.cos((ang)*0.0174533)*w-18));						// Y
+	if (ang > 180) x-=100;														// Shift if on left side
+
+	var str="<div id='pisubback' class='pi-subbar unselectable'>";				// Shell
+ 	str+="<input type='text' class='pi-type' id='pitype' "; 					// Input
+	if (def)	str+="value='"+def+"'";											// Add default
+	str+="style='left:"+x+"px;top:"+y+"px'>";									// Position
+	$("#pimenu").append(str+"</div>");											// Add to menu														
+
+	$("#pitype").on("change",function(){										// TYPING TEXT
+		_this.SendMessage("click",_this.curSlice+"|"+$("#pitype").val());		// Send event
+		});
+}
+
 Pie.prototype.ShowTextPick=function(num)									// SHOW TEXT PICK
 {
 	var x,y,i,str="";
 	var _this=this;																// Save context
 	var o=this.ops.slices[num];
 	var n=o.options.length;
-	var ang=(num)*this.ops.ang-22.5-(n*11);										// Start angle
+	var ang=(num)*this.ops.ang-11.5-(n*11);										// Start angle
 	var w=this.ops.wid/2+12;													// Radius of menu
 	var str="<div id='pisubback' class='pi-subbar unselectable'>";				// Main shell
 	for (i=0;i<n;++i) {															// For each option
@@ -94,7 +116,7 @@ Pie.prototype.ShowTextPick=function(num)									// SHOW TEXT PICK
 	$("#pimenu").append(str+"</div>");											// Add to menu														
 	for (i=0;i<n;++i) {															// For each option
 		x=Math.floor((Math.sin((ang)*0.0174533)*w)+w-18);						// Calc x
-		y=Math.floor((w-Math.cos((ang)*0.0174533)*w-18));						// y
+		y=Math.floor((w-Math.cos((ang)*0.0174533)*w-18));						// Y
 		if (ang > 180) x-=$("#pitext"+i).width(),y-=6;							// Shift if on left side
 		ang+=22;																// Next angle
 		$("#pitext"+i).css({"left":x+"px","top":y+"px"});						// Position
@@ -112,7 +134,6 @@ Pie.prototype.ShowTextPick=function(num)									// SHOW TEXT PICK
 			_this.curSlice=-1;													// Reset slice
 			});
 		}
-
 }
 
 Pie.prototype.ShowColorBars=function(num, def)								// SHOW COLOR BARS
@@ -179,7 +200,6 @@ Pie.prototype.ShowColorBars=function(num, def)								// SHOW COLOR BARS
 			});
 	}
 }
-
 
 Pie.prototype.SendMessage=function(cmd, msg, callback) 						// SEND HTML5 MESSAGE 
 {
