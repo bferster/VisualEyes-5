@@ -207,19 +207,23 @@ Pie.prototype.ShowLineWidth=function(num, def)								// SHOW LINE WIDTH
 {
 	var x,y,i;
 	var _this=this;																// Save context
-	var wids=[0,1,2,3,4,5,6,7,8 ];
+	var wids=[0,1,2,3,4,5,6,7,8 ];												// Width choice
 	var str="<div id='pisubback' class='pi-subbar unselectable'>";				// Shell
  	for (i=0;i<wids.length;++i)													// For each width
   		str+="<div id='piline"+i+"' class='pi-linechip'></div>";				// Make width chip
 	$("#pimenu").append(str+"</div>");											// Add to menu														
-	$("#piline0").text("X");													// None icon
 	
-	var ang=(num)*this.ops.ang-22.5-36;											// Start angle
-	var w=this.ops.wid/2+12;													// Radius
+	$("#piline0").text("X");													// None icon
+	$("#piline0").css({"color":"#ff0000","border":"none","margin-top":"4px"});	// Style none
+	
+	var ang=(num)*this.ops.ang-22.5-40;											// Start angle
+	var w=this.ops.wid/2;														// Center
+	var r=w+23;																	// Radius
+
  	for (i=0;i<wids.length;++i)	{												// For each width
-		x=(Math.sin(ang*0.0174533)*w)+w-18;
-		y=(w-Math.cos(ang*0.0174533)*w-18);
-		$("#piline"+i).css({ "width":wids[i],									// Set width
+		x=Math.floor(w+(Math.sin((ang)*0.0174533)*r));							// Calc x
+		y=Math.floor((w-Math.cos((ang)*0.0174533)*r--));						// Y
+		$("#piline"+i).css({ "width":wids[i]-1,									// Set width
 			"transform":"translate("+x+"px,"+y+"px) rotate("+ang+"deg)"			// Rotate 
 			});
 		ang+=9;																	// Next angle for chip
@@ -228,16 +232,14 @@ Pie.prototype.ShowLineWidth=function(num, def)								// SHOW LINE WIDTH
 			var id=e.currentTarget.id.substr(6)-0;								// Extract id
 			_this.SendMessage("click",_this.curSlice+"|"+wids[id]);				// Send event
 			_this.HideSubMenus(true);											// Hide submenus										
-			_this.curSlice=-1;													// Reset slice
 			});
-
 		$("#piline"+i).on("mouseover", function(e) {							// LINE HOVER
 			var id=e.currentTarget.id.substr(6)-0;								// Extract id
 			_this.SendMessage("hover",_this.curSlice+"|"+wids[id]);				// Send event
-			$(this).css("background-color","#999");
+			$(this).css("background-color","#999");								// Make darker
 			});
-		$("#piline"+i).on("mouseout", function(e) {								// LINE OUT
-			$(this).css("background-color","#e8e8e8");
+		$("#piline"+i).on("mouseout", function() {								// LINE OUT
+			$(this).css("background-color","#e8e8e8");							// Restore color
 			});
 		}
 	$("#piline0").css({ "background-color":"transparent" });
@@ -254,7 +256,7 @@ Pie.prototype.ShowSlider=function(num, def)								// SHOW COLOR BARS
 	$("#pimenu").append(str+"</div>");											// Add to menu														
 	var ang=(num)*this.ops.ang-52.5;											// Start of angle
 	var w=this.ops.wid/2;														// Center
-	var r=w+18;																	// Radius
+	var r=w+12;																	// Radius
 
 	var ang2=ang+24;															// Center angle																
 	x=Math.floor(w+(Math.sin((ang2)*0.0174533)*(r+8)));							// Calc x
@@ -270,8 +272,9 @@ Pie.prototype.ShowSlider=function(num, def)								// SHOW COLOR BARS
 	//		get ang
 	//		convert to x,y
 	//		convert to val		
-			ui.position.left=50
-			},
+			ui.position.top=50
+			$("#pislitext").val(val);											// Set text
+		},
 		stop:function(event,ui) {
 			setDot(25)
 			trace(event)
