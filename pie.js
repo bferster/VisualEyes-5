@@ -86,10 +86,11 @@ Pie.prototype.ShowTextType=function(num, def)								// SHOW COLOR BARS
 {
 	var _this=this;																// Save context
 	var ang=(num)*this.ops.ang-22.5;											// Start angle
-	var w=this.ops.wid/2+12;													// Radius of menu
-	var x=Math.floor((Math.sin((ang)*0.0174533)*w)+w-18);						// Calc x
-	var y=Math.floor((w-Math.cos((ang)*0.0174533)*w-18));						// Y
-	if (ang > 180) x-=100;														// Shift if on left side
+	var w=this.ops.wid/2;														// Center
+	var r=w+10;																	// Radius
+	x=Math.floor(w+(Math.sin((ang)*0.0174533)*r));								// Calc x
+	y=Math.floor((w-Math.cos((ang)*0.0174533)*r))-6;							// Y
+	if (ang > 180) x-=105;														// Shift if on left side
 
 	var str="<div id='pisubback' class='pi-subbar unselectable'>";				// Shell
  	str+="<input type='text' class='pi-type' id='pitype' "; 					// Input
@@ -106,10 +107,11 @@ Pie.prototype.ShowTextPick=function(num)									// SHOW TEXT PICK
 {
 	var x,y,i,str="";
 	var _this=this;																// Save context
-	var o=this.ops.slices[num];
-	var n=o.options.length;
-	var ang=(num)*this.ops.ang-11.5-(n*11);										// Start angle
-	var w=this.ops.wid/2+12;													// Radius of menu
+	var o=this.ops.slices[num];													// Point at data
+	var n=o.options.length;														// Number of options
+	var ang=(num)*this.ops.ang-11.5-(n*11);										// Angle
+	var w=this.ops.wid/2;														// Center
+	var r=w+8;																	// Radius
 	var str="<div id='pisubback' class='pi-subbar unselectable'>";				// Main shell
 	for (i=0;i<n;++i) {															// For each option
 		str+="<div class='pi-textopt' id='pitext"+i+"'>"; 						// Add div
@@ -117,9 +119,9 @@ Pie.prototype.ShowTextPick=function(num)									// SHOW TEXT PICK
 		}
 	$("#pimenu").append(str+"</div>");											// Add to menu														
 	for (i=0;i<n;++i) {															// For each option
-		x=Math.floor((Math.sin((ang)*0.0174533)*w)+w-18);						// Calc x
-		y=Math.floor((w-Math.cos((ang)*0.0174533)*w-18));						// Y
-		if (ang > 180) x-=$("#pitext"+i).width(),y-=6;							// Shift if on left side
+		x=Math.floor(w+(Math.sin((ang)*0.0174533)*r));							// Calc x
+		y=Math.floor((w-Math.cos((ang)*0.0174533)*r))-6;						// Y
+		if (ang > 180) x-=$("#pitext"+i).width()+14,y-=6;						// Shift if on left side
 		ang+=22;																// Next angle
 		$("#pitext"+i).css({"left":x+"px","top":y+"px"});						// Position
 		
@@ -133,7 +135,6 @@ Pie.prototype.ShowTextPick=function(num)									// SHOW TEXT PICK
 			var id=e.currentTarget.id.substr(6)-0;								// Extract id
 			_this.SendMessage("click",_this.curSlice+"|"+id);					// Send event
 			_this.HideSubMenus(true);											// Hide submenus										
-			_this.curSlice=-1;													// Reset slice
 			});
 		}
 }
@@ -153,13 +154,12 @@ Pie.prototype.ShowColorBars=function(num, def)								// SHOW COLOR BARS
 	$("#pichip9").text("X");													// None icon
 	
 	var ang=(num)*this.ops.ang-82.5;											// Start of colors angle
-	var w=this.ops.wid/2+12;													// Radius of colors
-	
-	var w2=w+13;																// Outer circle
+	var w=this.ops.wid/2;														// Center
+	var r=w+32;																	// Radius
 	var ang2=ang+54;															// Center angle																
-	x=(Math.sin((ang2)*0.0174533)*w2)+w2-18;									// Calc x
-	y=(w2-Math.cos((ang2)*0.0174533)*w2-18);									// y
-	if (ang2 > 180) x-=66,y-=30;												// Shift if on left side
+	x=Math.floor(w+(Math.sin((ang2)*0.0174533)*r));								// Calc x
+	y=Math.floor((w-Math.cos((ang2)*0.0174533)*r))+10;							// Y
+	if (ang2 > 180) x-=52,y-=30;												// Shift if on left side
 	str="<input type='text' class='pi-coltext' id='picoltext' "; 
 	str+="style='left:"+x+"px;top:"+y+"px'>";
 	str+="<div id='pitextcol' class='pi-colchip unselectable'";	
@@ -176,9 +176,10 @@ Pie.prototype.ShowColorBars=function(num, def)								// SHOW COLOR BARS
 		$("#picoltext").val(col);												// Set text
 		});
 	
+	r=w+12;																		// Set color chip radius
 	for (i=0;i<cols.length;++i) {												// For each color
-		x=(Math.sin(ang*0.0174533)*w)+w-18;
-		y=(w-Math.cos(ang*0.0174533)*w-18);
+		x=(w+(Math.sin(ang*0.0174533)*r)-6).toFixed(4);							// Calc x
+		y=(w-Math.cos(ang*0.0174533)*r-6).toFixed(4);							// y
 		$("#pichip"+i).css(
 			{"transform":"translate("+x+"px,"+y+"px) rotate("+ang+"deg)",		// Rotate 
 			"background-color":cols[i]											// Chip color
