@@ -253,27 +253,46 @@ Pie.prototype.ShowSlider=function(num, def)								// SHOW COLOR BARS
 	str+="<div id='pislidot' class='pi-slidot'></div>";							// Make slider dot
 	$("#pimenu").append(str+"</div>");											// Add to menu														
 	var ang=(num)*this.ops.ang-52.5;											// Start of angle
-	var w=this.ops.wid/2+18;													// Radius
-	
+	var w=this.ops.wid/2;														// Center
+	var r=w+18;																	// Radius
+
 	var ang2=ang+24;															// Center angle																
-	x=Math.floor((Math.sin((ang2)*0.0174533)*w)+w-12);							// Calc x
-	y=Math.floor((w-Math.cos((ang2)*0.0174533)*w-12));							// Y
-	if (ang2 > 180) x-=20,y-=36;												// Shift if on left side
-	str="<input type='text' class='pi-coltext' id='pislitext' "; 
-	str+="style='left:"+x+"px;top:"+y+"px;width:30px;text-align:center'>";
-	$("#pisubback").append(str);												// Add to color bar														
-	setDot(def);
+	x=Math.floor(w+(Math.sin((ang2)*0.0174533)*(r+8)));							// Calc x
+	y=Math.floor((w-Math.cos((ang2)*0.0174533)*(r+8)))+6;						// Y
+	if (ang2 > 180) x-=20,y-=24;												// Shift if on left side
+	str="<input type='text' class='pi-coltext' id='pislitext' "; 				// Make angle input
+	str+="style='left:"+x+"px;top:"+y+"px;width:16px;text-align:center'>";		// Style it
+	$("#pisubback").append(str);												// Add to submenu														
+	setDot(def);																// Put up dot
+
+	$("#pislidot").draggable({
+		drag:function(event,ui) {
+	//		get ang
+	//		convert to x,y
+	//		convert to val		
+			ui.position.left=50
+			},
+		stop:function(event,ui) {
+			setDot(25)
+			trace(event)
+			}
+		})
 
 	$("#pislitext").on("change",function() {									// TYPING OF VALUE
-		var val=$(this).val();
+		var val=$(this).val();													// Get val
+		val=val ? val : 0;														// Fix if null
+		val=Math.max(0,Math.min(val,100));										// Cap 0-100
 		_this.SendMessage("hover",_this.curSlice+"|"+val);						// Send event
 		setDot(val);
 		});
+
 	$("#piarc60").html("&nbsp;&nbsp;100")
 	$("#piarc60").css({"margin-top":"-6px","opacity":1,"background-color":"transparent"})
+
+
 	for (i=0;i<61;++i) {														// For each color
-		x=(Math.sin(ang*0.0174533)*w)+w-18;
-		y=(w-Math.cos(ang*0.0174533)*w-18);
+		x=(w+(Math.sin(ang*0.0174533)*r)).toFixed(4);							// Calc x
+		y=(w-Math.cos(ang*0.0174533)*r).toFixed(4);								// Y
 		$("#piarc"+i).css({"transform":"translate("+x+"px,"+y+"px) rotate("+ang+"deg)"}); // Rotate 
 		ang+=1;																	// Next angle for chip
 		
@@ -289,12 +308,14 @@ Pie.prototype.ShowSlider=function(num, def)								// SHOW COLOR BARS
 		}
 
 	function setDot(val) {
-		var ang2=ang;
+		val=val ? val : 0;														// Fix if null
+		val=Math.max(0,Math.min(val,100));										// Cap 0-100
 		$("#pislitext").val(val);												// Set text
-		x=Math.floor((Math.sin(ang2*0.0174533)*w)+w-18-6);						// Calc x
-		y=Math.floor((w-Math.cos(ang2*0.0174533)*w-18)-6);						// Y
-		$(pislidot).css({"transform":"translate("+x+"px,"+y+"px) rotate("+ang+"deg)"}); // Rotate 
-	
+		var a=(num)*this.ops.ang-52.5;											// Start of angle
+		a=(a+(val*.6))*0.0174533;												// Calc angle
+		x=Math.floor((Math.sin(a)*r)+w)-5;										// Calc x
+		y=Math.floor((w-Math.cos(a)*r))-5;										// Y
+		$("#pislidot").css({"left":+x+"px","top":+y+"px"});						// Position
 	}
 
 }
