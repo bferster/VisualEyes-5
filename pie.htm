@@ -59,9 +59,12 @@
 	var o;
 	var pie;
 	var ops={x:330,y:334,wid:150,ang:45,slices:[]};
+	ops.sy=0;															// Start x
+	ops.sx=0;															// Start y
+
 	ops.dial="img/pdraw.png";													// Dial background
 	ops.hilite="img/philite.png";												// Slice highlight
-	ops.slices[0]={ type:"but" };												// Center 
+	ops.slices[0]={ type:"txt" };												// Center 
 	ops.slices[1]={ type:"lin", def:1};											// Line width slice 
 	ops.slices[2]={ type:"col", def:"#000000"};									// Line col slice 
 	ops.slices[3]={ type:"sli"};												// Blank slice 
@@ -71,7 +74,7 @@
 	ops.slices[7]={ type:"col", def:"#990000"};									// Line col slice 
 	ops.slices[8]={ type:"sli", def:100};										// Alpha slice 
 
-	ops.slices[3].options=["Line","Polygon","Circle","Box"] ;
+	ops.slices[0].options=["Line","Polygon","Circle","Box"] ;
 
 	Sound("click",true);														// Init sound
 	Sound("ding",true);															// Init sound

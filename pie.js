@@ -8,9 +8,12 @@ function Pie(options)														// CONSTRUCTOR
 	var _this=this;																// Save context
 	this.ops=options;															// Save options
 	this.curSlice=0;															// Current slice
+	if (options.sx == undefined) 	options.sx=options.x;						// Use center y if no start offset
+	if (options.sy == undefined) 	options.sy=options.y;						// Y
 	options.x-=options.wid/2;													// Center x
 	options.y-=options.wid/2;													// Center y
 	this.ops.parent=options.parent ? options.parent : "body";					// If a parent div spec'd use it
+
 	var str="<div id='pimenu' class='pi-main unselectable'></div>";				// Main shell
 	$(this.ops.parent).append(str);												// Add to DOM														
 	str="<img id='piback' class='pi-slice' src='"+ops.dial+"'/>";				// Menu back			
@@ -36,7 +39,7 @@ function Pie(options)														// CONSTRUCTOR
 		if ((cs != lastSlice) && (h < w)) {										// A slice change
 			_this.curSlice=cs;													// Change it
 			_this.HideSubMenus(true);											// Hide submenus										
-			if (cs > 0) {														// A valid slice
+			if (cs >= 0) {														// A valid slice
   				$("#pihigh").css({"transform":"rotate("+(cs-1)*_this.ops.ang+"deg)"}); // Rotate highlight
 				var o=_this.ops.slices[cs];										// Point at slice
 				if (o.type == "col")		_this.ShowColorBars(cs,o.def);		// Show color bars
@@ -65,12 +68,12 @@ Pie.prototype.ShowPieMenu=function(mode)									// SHOW PIE MENU
 	var o=this.ops;																// Point at ops
 	if (mode) {	
 		$("#pimenu").css({"width":"0px","height":"0px"});						// Hide
-		$("#pimenu").css({"top":(o.y+o.wid/2)+"px","left":(o.x+o.wid/2)+"px"});	// Position
+		$("#pimenu").css({"top":(o.sy)+"px","left":(o.sx)+"px"});	// Position
 		$("#pimenu").animate({ width:o.wid, height:o.wid,top:o.y, left:o.x });	// Zoom on
 		}
 	else{
 		this.HideSubMenus(true);												// Hide submenus										
-		$("#pimenu").animate({ width:0, height:0,top:o.y+o.wid/2,left:o.x+o.wid/2},200);	// Zoom off
+		$("#pimenu").animate({ width:0, height:0,top:o.sy,left:o.sx},200);	// Zoom off
 	}	
 }
 
@@ -82,15 +85,15 @@ Pie.prototype.HideSubMenus=function(mode)										// HIDE SUBMENUS
 }
 
 
-Pie.prototype.ShowTextType=function(num, def)								// SHOW COLOR BARS
+Pie.prototype.ShowTextType=function(num, def)								// TYPE IN A VALUE
 {
 	var _this=this;																// Save context
 	var ang=(num)*this.ops.ang-22.5;											// Start angle
 	var w=this.ops.wid/2;														// Center
-	var r=w+10;																	// Radius
-	x=Math.floor(w+(Math.sin((ang)*0.0174533)*r));								// Calc x
-	y=Math.floor((w-Math.cos((ang)*0.0174533)*r))-6;							// Y
-	if (ang > 180) x-=105;														// Shift if on left side
+	var r=w+18;																	// Radius
+	x=Math.floor(w+(Math.sin((ang)*0.0174533)*r))-7;							// Calc x
+	y=Math.floor((w-Math.cos((ang)*0.0174533)*r))-7;							// Y
+	if (ang > 180) x-=96;														// Shift if on left side
 
 	var str="<div id='pisubback' class='pi-subbar unselectable'>";				// Shell
  	str+="<input type='text' class='pi-type' id='pitype' "; 					// Input
@@ -105,24 +108,29 @@ Pie.prototype.ShowTextType=function(num, def)								// SHOW COLOR BARS
 
 Pie.prototype.ShowTextPick=function(num)									// SHOW TEXT PICK
 {
-	var x,y,i,str="";
+	var x,y,i,t,str;
 	var _this=this;																// Save context
 	var o=this.ops.slices[num];													// Point at data
 	var n=o.options.length;														// Number of options
 	var ang=(num)*this.ops.ang-11.5-(n*11);										// Angle
 	var w=this.ops.wid/2;														// Center
-	var r=w+8;																	// Radius
+	var r=w+16;																	// Radius
 	var str="<div id='pisubback' class='pi-subbar unselectable'>";				// Main shell
 	for (i=0;i<n;++i) {															// For each option
 		str+="<div class='pi-textopt' id='pitext"+i+"'>"; 						// Add div
 		str+=o.options[i]+"</div>";												// Add label
 		}
 	$("#pimenu").append(str+"</div>");											// Add to menu														
+
 	for (i=0;i<n;++i) {															// For each option
-		x=Math.floor(w+(Math.sin((ang)*0.0174533)*r));							// Calc x
-		y=Math.floor((w-Math.cos((ang)*0.0174533)*r))-6;						// Y
-		if (ang > 180) x-=$("#pitext"+i).width()+14,y-=6;						// Shift if on left side
-		ang+=22;																// Next angle
+		if (((ang+360)%360 > 180) && $("#pitext"+i).text())						// Shift if on left side
+			t=$("#pitext"+i).css("width").replace(/px/,"")-0;					// Accomodate text
+		else																	// 0-180
+			t=0;																// No shift
+		x=Math.floor(w+(Math.sin((ang)*0.0174533)*r-t-7));						// Calc x
+		y=Math.floor((w-Math.cos((ang)*0.0174533)*r)-7);						// Y
+		ang+=30;																// Next angle
+		
 		$("#pitext"+i).css({"left":x+"px","top":y+"px"});						// Position
 		
 		$("#pitext"+i).on("mouseover", function() {								// OVER ITEM
