@@ -21,12 +21,12 @@
 						}
 		.pi-subbar {	position:absolute;left:0px;top:0px;
 						}
-		.pi-colchip {	position:absolute;width:12px;height:12px;
-						color:#ff0000;text-align:center;
+		.pi-colchip {	position:absolute;width:12px;height:12px;font-size:10px;
+						color:#ff0000;text-align:center;background-color:#fff;
 						}
 		.pi-coltext {	position:absolute;width:50px;height:10px;font-size:9px;
 						border-radius:10px;padding-top:2px;padding-left:6px;padding-right:6px;
-						border:1px solid #666;color:#666;background-color:#e8e8e8;
+						border:1px solid #666;color:#666;background-color:#fff;
 						}
 		.pi-textopt	{	position:absolute;height:12px;opacity:.75;
 						border-radius:12px;padding-bottom:1px;padding-left:5px;padding-right:6px;
@@ -36,13 +36,20 @@
 						border-radius:12px;padding-top:2px;padding-left:6px;
 						border:1px solid #666;color:#666;background-color:#e8e8e8;
 						}
-		.pi-linechip {	position:absolute;height:12px;background-color:#e8e8e8;border:.5px solid #ddd;
+		.pi-linechip2 {	position:absolute;width:40px;background-color:#e8e8e8;
+						margin-bottom:3px;left:0px;
+						}
+		.pi-linechip {	position:absolute;height:15px;background-color:#e8e8e8;
+						width:2px;border:.5px solid #ddd;
 						}
 		.pi-sliarc {	position:absolute;height:3px;width:3px;background-color:#ddd;opacity:.5;
 						color:#999;
 						}
 		.pi-slidot {	position:absolute;height:11px;width:11px;background-color:#e8e8e8;
 						border-radius:12px;border:1px solid #666;
+						}
+		.pi-icon {		position:absolute;height:24px;width:24px;background-color:#e8e8e8;text-align:center;
+						border-radius:24px;border:1px solid #666;opacity:.75;
 						}
 		.unselectable { -moz-user-select: none;     -khtml-user-select: none;
 		   			 	-webkit-user-select: none;  -ms-user-select: none;   user-select: none;
@@ -64,16 +71,17 @@
 	ops.dial="img/pdraw.png";													// Dial background
 	ops.hilite="img/philite.png";												// Slice highlight
 	ops.slices[0]={ type:"but" };												// Center 
-	ops.slices[1]={ type:"lin", def:1};											// Line width slice 
-	ops.slices[2]={ type:"col", def:"#000000"};									// Line col slice 
-	ops.slices[3]={ type:"txt"};												// Blank slice 
-	ops.slices[4]={ type:"but", close:0};										// Redo slice 
-	ops.slices[5]={ type:"but", close:1};										// Undo slice 
-	ops.slices[6]={ type:"typ", def:"default"};									// Blank slice 
-	ops.slices[7]={ type:"col", def:"#990000"};									// Line col slice 
-	ops.slices[8]={ type:"sli", def:100};										// Alpha slice 
+	ops.slices[1]={ type:"lin", def:1 };										// Blank slice 
+	ops.slices[2]={ type:"col", def:"#000000"};									// Edge 
+	ops.slices[3]={ type:"ico", def:2 };										// Blank slice 
+	ops.slices[4]={ type:"but", close:0 };										// Redo slice 
+	ops.slices[5]={ type:"but", close:1 };										// Undo slice 
+	ops.slices[6]={ type:"txt", def:2 };										// Blank slice 
+	ops.slices[7]={ type:"col", def:"#990000" };								// Line col slice 
+	ops.slices[8]={ type:"sli", def:100 };										// Alpha slice 
 
-	ops.slices[3].options=["Line","Polygon","Circle","Box"] ;
+	ops.slices[3].options=["img/trashdot.gif","img/arr1.png","img/arr2.png","img/arr3.png"] ;
+	ops.slices[6].options=["Line","Polygon","Circle","Box"] ;
 
 	Sound("click",true);														// Init sound
 	Sound("ding",true);															// Init sound
@@ -131,7 +139,7 @@ $(document).ready(function() {												// ON PAGE LOADED
 	function html5MessageHandler(e)											// ON HTML5 MESSAGE
 	{
    		if (e && e.data && e.data.match(/PiMenu/))								// If a pimenu message
- 			trace(e.data.split("|"))
+ 			trace(e.data.split("|").toString())
  	}
 
 </script>
