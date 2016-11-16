@@ -75,7 +75,7 @@ Pie.prototype.ShowPieMenu=function(mode)									// SHOW PIE MENU
 		}
 	else{
 		this.HideSubMenus(true);												// Hide submenus										
-		$("#pimenu").animate({ width:0, height:0,top:o.sy,left:o.sx},200);	// Zoom off
+		$("#pimenu").animate({ width:0, height:0,top:o.sy,left:o.sx},200);		// Zoom off
 	}	
 }
 
@@ -155,7 +155,7 @@ Pie.prototype.ShowColorBars=function(num, edge, def)						// SET COLOR / EDGE
 {
 	var x,y,i;
 	var _this=this;																// Save context
-	var wids=[1,2,3,4,5,6,7,8];													// Width choice
+	var wids=[8,6,4,3,2,1];														// Width choice
 	var cols=[ "#3182bd","#6baed6","#9ecae1","#e6550d","#fd8d3c","#fdae6b",
 			   "#31a354","#74c476","#a1d99b","None","#756bb1","#9e9ac8","#bcbddc",
 				"#ffffff","#cccccc","#888888","#666666","#444444","#000000"
@@ -164,15 +164,20 @@ Pie.prototype.ShowColorBars=function(num, edge, def)						// SET COLOR / EDGE
  	for (i=0;i<cols.length;++i)													// For each color
   		str+="<div id='pichip"+i+"' class='pi-colchip'></div>";					// Make color chip
  	if (edge) {																	// If setting edge
-		str+="<div id='pilinback' class='pi-subbar unselectable' style='width:50px'>";	// Line shell
+		str+="<div id='pilinback' class='pi-subbar unselectable' style='width:50px;height:72px'>";			// Line shell
 		for (i=0;i<wids.length;++i)												// For each width
   			str+="<div id='piline"+i+"' class='pi-linechip2'></div>";			// Make width chip
+		str+="</div><div id='piarrback' class='pi-subbar unselectable' style='width:50px;height:64px'>";	// Arrow shell
+		for (i=0;i<4;++i)														// For each width
+  			str+="<div id='piarr"+i+"' class='pi-arrow'></div>";				// Make arrow chip
 		str+="</div>";
 		}
 	$("#pimenu").append(str+"</div>");											// Add to menu														
 	$("#pichip9").text("X");													// None icon
 	if (!def)	def=["#000000,0,0"];											// If no def defined, set default
 	def=def.split(",");															// Split int params
+	if (!def[1]) def[1]=0;														// Force to none
+	if (!def[2]) def[2]=0;														// Force to none
 	var ang=(num)*this.ops.ang-82.5;											// Start of colors angle
 	var w=this.ops.wid/2;														// Center
 	var r=w+32;																	// Radius
@@ -192,7 +197,7 @@ Pie.prototype.ShowColorBars=function(num, edge, def)						// SET COLOR / EDGE
 	$("#picoltext").on("change",function(){										// TYPING OF COLOR
 		def[0]=$("#picoltext").val();											// Get text
 		if (def[0].substr(0,1) != "#") def[0]="#"+def[0];						// Add # if not there
-		updateColor("click",def[0]);											// Update menu
+		updateColor("click");													// Update menu
 		});
 	
 	r=w+12;																		// Set color chip radius
@@ -208,39 +213,75 @@ Pie.prototype.ShowColorBars=function(num, edge, def)						// SET COLOR / EDGE
 		$("#pichip"+i).on("click", function(e) {								// COLOR CHIP CLICK
 			var id=e.currentTarget.id.substr(6)-0;								// Extract id
 			def[0]=cols[id];													// Get color
-			updateColor("click",def[0]);											// Update menu
-			_this.HideSubMenus(true);											// Hide submenus										
+			updateColor("click");												// Update menu
+			if (!edge) 															// If just setting color
+				_this.HideSubMenus(true);										// Hide submenus										
 			});
 
 		$("#pichip"+i).on("mouseover", function(e) {							// COLOR CHIP HOVER
 			var id=e.currentTarget.id.substr(6)-0;								// Extract id
-			def[0]=cols[id];													// Get color
-			updateColor("hover",def[0]);										// Update menu
+			if (!edge) {														// If just setting color
+				def[0]=cols[id];												// Get color
+				updateColor("hover");											// Update menu
+				}
 			});
 	}
 
-	ix+=10;																		// Starting point
+	ix+=12;																		// Starting point
 	for (i=0;i<wids.length;++i) {												// For each width
-		$("#piline"+i).css({ "top":(10*i)+"px","height":wids[wids.length-i]+"px" }); // Set line width
+		$("#piline"+i).css({ "top":(13*i)+"px","height":wids[i]-0+1+"px" }); 	// Set line width
 		$("#piline"+i).on("mouseover", function(e) {							// LINE HOVER
 			var id=e.currentTarget.id.substr(6)-0;								// Extract id
-			
-			updateColor("hover");												// Update menu
-			$(this).css("background-color","#00a8ff");							// Make blue
+			var tid=def[1];														// Save width
+			def[1]=wids[id];													// Get width
+			updateColor();														// Update menu
+			def[1]=tid;															// Restore true width
 			});
-		$("#piline"+i).on("mouseout", function() {								// LINE OUT
-			$(this).css("background-color","#e8e8e8");							// Restore color
+		$("#piline"+i).on("click", function(e) {								// LINE HOVER
+			var id=e.currentTarget.id.substr(6)-0;								// Extract id
+			def[1]=wids[id];													// Get width
+			updateColor("click");												// Update menu
 			});
 		}
 	
-	$("#pilinback").css({														// Set b/g for lines
-			"left":ix+"px","top":iy-(10*wids.length)+"px",						// Position
-			"height":10*wids.length												// Height
+	for (i=0;i<4;++i) {															// For each arrow
+		$("#piarr"+i).css({ "top":(16*i)+"px" }); 								// Set position
+		$("#piarr"+i).on("mouseover", function(e) {								// LINE HOVER
+			var id=e.currentTarget.id.substr(5)-0;								// Extract id
+			var tid=def[2];														// Save width
+			def[2]=id;															// Get style
+			updateColor();														// Update menu
+			def[2]=tid;															// Restore true width
 			});
+		$("#piarr"+i).on("click", function(e) {									// LINE HOVER
+			var id=e.currentTarget.id.substr(5)-0;								// Extract id
+			def[2]=id;															// Get width
+			updateColor("click");												// Update menu
+			});
+		}
+	
+	 
+	$("#piarr1").append("<div id='parr1' class='pi-rarr' style='left:36px;top:-4px'</div>")
+	$("#piarr2").append("<div id='parr2' class='pi-larr' style='left:-2px;top:-4px'</div>");
+	$("#piarr3").append("<div id='parr3' class='pi-larr' style='left:-2px;top:-4px'</div>");
+	$("#piarr3").append("<div id='parr4' class='pi-rarr' style='left:36px;top:-4px'</div>")
+	
+	$("#pilinback").css({														// Set b/g for lines
+		"left":ix+"px","top":iy-4-(12*wids.length)+"px",						// Position
+		"height":12*wids.length+"px"											// Height
+		});
+	$("#piarrback").css({ "left":ix+"px","top":iy+25+"px" });					// Set b/g for arrows
 		
+		
+	updateColor();																// Update menu
+	
 	function updateColor(send) {												// SET COLOR INFO
 		$("#picoltext").val(def[0]);											// Show value
 		$("#pitextcol").css("background-color",def[0]);							// Color chip
+		for (j=0;j<wids.length;++j) 											// For each width
+			$("#piline"+j).css("background-color",(wids[j] == def[1]) ? "#00a8ff" : "#e8e8e8");	// Make blue
+		for (j=0;j<4;++j) 														// For each arrow
+			$("#piarr"+j).css("background-color",(j == def[2]) ? "#00a8ff" : "#e8e8e8");	// Make blue
 		if (send) {
 			if (edge)
 				_this.SendMessage(send,_this.curSlice+"|"+def[0]+","+def[1]+","+def[2]);	// Send event
