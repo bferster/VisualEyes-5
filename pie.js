@@ -124,7 +124,7 @@ Pie.prototype.ShowTextPick=function(num, def)								// SHOW TEXT PICK
 	$("#pimenu").append(str+"</div>");											// Add to menu														
 	
 	if (def != undefined)														// If a default
-		$("#pitext"+def).css({"border":"1px solid #00a8ff","opacity":1});		// Highlight
+		$("#pitext"+def).css({"opacity":1});									// Highlight
 
 	for (i=0;i<n;++i) {															// For each option
 		if (((ang+360)%360 > 180) && $("#pitext"+i).text())						// Shift if on left side
@@ -138,15 +138,14 @@ Pie.prototype.ShowTextPick=function(num, def)								// SHOW TEXT PICK
 		$("#pitext"+i).css({"left":x+"px","top":y+"px"});						// Position
 		
 		$("#pitext"+i).on("mouseover", function() {								// OVER ITEM
-			$(this).css({"border":"1px solid #00a8ff","opacity":1});			// Highlight
+			$(this).css({"opacity":1});											// Highlight
 			});
 		$("#pitext"+i).on("mouseout", function() {								// OUT OF ITEM
-			$(this).css({"border":"1px solid #dddddd","opacity":.75});			// Restore color
+			$(this).css({"opacity":.75});										// Restore 
 			});
 		$("#pitext"+i).on("click", function(e) {								// CLICK ITEM
 			var id=e.currentTarget.id.substr(6)-0;								// Extract id
 			_this.SendMessage("click",_this.curSlice+"|"+id);					// Send event
-			_this.HideSubMenus(true);											// Hide submenus										
 			});
 		}
 }
@@ -215,29 +214,34 @@ Pie.prototype.ShowColorBars=function(num, edge, def)						// SET COLOR / EDGE
 			def[0]=cols[id];													// Get color
 			updateColor("click");												// Update menu
 			Sound("click");														// Click
-			if (!edge) 															// If just setting color
-				_this.HideSubMenus(true);										// Hide submenus										
 			});
 
 		$("#pichip"+i).on("mouseover", function(e) {							// COLOR CHIP HOVER
 			var id=e.currentTarget.id.substr(6)-0;								// Extract id
+			$(this).css("opacity",.5);											// Darken
 			if (!edge) {														// If just setting color
 				def[0]=cols[id];												// Get color
 				updateColor("hover");											// Update menu
 				}
+			});
+	
+		$("#pichip"+i).on("mouseout", function() {								// COLOR OUT
+			$(this).css("opacity",1);											// Restore
 			});
 	}
 
 	ix+=12;																		// Starting point
 	for (i=0;i<wids.length;++i) {												// For each width
 		$("#piline"+i).css({ "top":(13*i)+"px","height":wids[i]+1+"px" }); 		// Set line width
-		$("#piline"+i).on("mouseover", function(e) {							// LINE HOVER
-			var id=e.currentTarget.id.substr(6)-0;								// Extract id
-			var tid=def[1];														// Save width
-			def[1]=wids[id];													// Get width
-			updateColor();														// Update menu
-			def[1]=tid;															// Restore true width
+		
+		$("#piline"+i).on("mouseover", function() {								// LINE HOVER
+			$(this).css("opacity",.5);											// Darken
 			});
+		
+		$("#piline"+i).on("mouseout", function() {								// LINE OUT
+			$(this).css("opacity",1);											// Restore
+			});
+		
 		$("#piline"+i).on("click", function(e) {								// LINE HOVER
 			var id=e.currentTarget.id.substr(6)-0;								// Extract id
 			def[1]=wids[id];													// Get width
@@ -248,13 +252,15 @@ Pie.prototype.ShowColorBars=function(num, edge, def)						// SET COLOR / EDGE
 	
 	for (i=0;i<4;++i) {															// For each arrow
 		$("#piarr"+i).css({ "top":(19*i)+10+"px" }); 							// Set position
-		$("#piarr"+i).on("mouseover", function(e) {								// LINE HOVER
-			var id=e.currentTarget.id.substr(5)-0;								// Extract id
-			var tid=def[2];														// Save arrow
-			def[2]=id;															// Get style
-			updateColor();														// Update menu
-			def[2]=tid;															// Restore true width
+		
+		$("#piarr"+i).on("mouseover", function(e) {								// ARROW HOVER
+			$(this).css("opacity",.5);											// Darjen
 			});
+		
+		$("#piarr"+i).on("mouseout", function(e) {								// ARROW OUT
+			$(this).css("opacity",1);											// Restore
+			});
+		
 		$("#piarr"+i).on("click", function(e) {									// LINE HOVER
 			var id=e.currentTarget.id.substr(5)-0;								// Extract id
 			def[2]=id;															// Get arrow
@@ -326,7 +332,7 @@ Pie.prototype.ShowLineWidth=function(num, def)								// SHOW LINE WIDTH
 		$("#piline"+i).css({ "width":wids[i]-1,									// Set width
 			"transform":"translate("+x+"px,"+y+"px) rotate("+ang+"deg)"			// Rotate 
 			});
-		ang+=10;																	// Next angle for chip
+		ang+=10;																// Next angle for chip
 		
 		if ((def == wids[i]) && i)												// If current width	
 			$("#piline"+i).css({ "background-color":"#00a8ff",					// Highlight it
@@ -335,7 +341,6 @@ Pie.prototype.ShowLineWidth=function(num, def)								// SHOW LINE WIDTH
 		$("#piline"+i).on("click", function(e) {								// LINE CLICK
 			var id=e.currentTarget.id.substr(6)-0;								// Extract id
 			_this.SendMessage("click",_this.curSlice+"|"+wids[id]);				// Send event
-			_this.HideSubMenus(true);											// Hide submenus										
 			});
 		$("#piline"+i).on("mouseover", function(e) {							// LINE HOVER
 			var id=e.currentTarget.id.substr(6)-0;								// Extract id
@@ -407,17 +412,7 @@ Pie.prototype.ShowSlider=function(num, def)									// SHOW COLOR BARS
 		y=(w-Math.cos(ang2*0.0174533)*r).toFixed(4);							// Y
 		$("#piarc"+i).css({"transform":"translate("+x+"px,"+y+"px) rotate("+ang+"deg)"}); // Rotate 
 		ang2+=1;																// Next angle for arc
-		
-		$("#pichip"+i).on("click", function(e) {								// COLOR CHIP CLICK
-			var id=e.currentTarget.id.substr(6)-0;								// Extract id
-			_this.SendMessage("click",_this.curSlice+"|"+cols[id]);				// Send event
-			_this.HideSubMenus(true);											// Hide submenus										
-			_this.curSlice=-1;													// Reset slice
-			$("#picoltext").val(cols[id]);										// Show value
-			$("#pitextcol").css("background-color",cols[id]);					// Color chip
-			});
-
-		}
+				}
 
 	function setDot(val) {
 		val=val ? val : 0;														// Fix if null
@@ -429,7 +424,6 @@ Pie.prototype.ShowSlider=function(num, def)									// SHOW COLOR BARS
 		y=Math.floor((w-Math.cos(a)*r))-5;										// Y
 		$("#pislidot").css({"left":+x+"px","top":+y+"px"});						// Position
 	}
-
 }
 
 Pie.prototype.ShowIcons=function(num, def)									// SHOW ICON RING
@@ -438,18 +432,18 @@ Pie.prototype.ShowIcons=function(num, def)									// SHOW ICON RING
 	var _this=this;																// Save context
 	var o=this.ops.slices[num];													// Point at data
 	var n=o.options.length;														// Number of options
-	var ang=(num)*this.ops.ang-11.5-(n*12);										// Angle
+	var ang=(num)*this.ops.ang-11.5-(n*11);										// Angle
 	var w=this.ops.wid/2;														// Center
 	var r=w+18;																	// Radius
 	var str="<div id='pisubback' class='pi-subbar unselectable'>";				// Main shell
 	for (i=0;i<n;++i) {															// For each option
 		str+="<div class='pi-icon' id='piicon"+i+"'>"; 							// Add div
-		str+="<img src='"+o.options[i]+"'align='middle'</img></div>";			// Add icon
+		str+="<img src='"+o.options[i]+"' align='middle'></img></div>";			// Add icon
 		}
 	$("#pimenu").append(str+"</div>");											// Add to menu														
 	
 	if (def != undefined)														// If a default
-		$("#piicon"+def).css({"border":"1px solid #00a8ff","opacity":1});		// Highlight
+		$("#piicon"+def).css({"opacity":1});									// Highlight
 
 	for (i=0;i<n;++i) {															// For each option
 		if (((ang+360)%360 > 180) && $("#piicon"+i).text())						// Shift if on left side
@@ -464,15 +458,11 @@ Pie.prototype.ShowIcons=function(num, def)									// SHOW ICON RING
 		$("#piicon"+i).on("mouseover", function(e) {							// OVER ITEM
 			var id=e.currentTarget.id.substr(6)-0;								// Extract id
 			for (var j=0;j<n;++j)												// For each width
-				$("#piicon"+j).css({											// Set css
-					"opacity":(j == id) ? 1: .75,								// Highlight if current
-					"border":"1px solid "+((j == id) ? "#00a8ff" : "#666666")	// Border too
-					});
+				$("#piicon"+j).css({"opacity":(j == id) ? 1: .75 });			// Highlight if current
 			});
 		$("#piicon"+i).on("click", function(e) {								// CLICK ITEM
 			var id=e.currentTarget.id.substr(6)-0;								// Extract id
 			_this.SendMessage("click",_this.curSlice+"|"+id);					// Send event
-			_this.HideSubMenus(true);											// Hide submenus										
 			});
 		}
 }
