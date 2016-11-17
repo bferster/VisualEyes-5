@@ -41,7 +41,7 @@
 						}
 		.pi-linechip2 {	position:absolute;width:40px;background-color:#e8e8e8;left:0px;
 						}
-		.pi-arrow {		position:absolute;width:40px;height:3px;background-color:#e8e8e8;left:0px;
+		.pi-arrow {		position:absolute;width:20px;height:5px;background-color:#e8e8e8;left:0px;
 						}
 		.pi-sliarc {	position:absolute;height:3px;width:3px;background-color:#ddd;opacity:.5;
 						color:#999;
@@ -52,11 +52,11 @@
 		.pi-icon {		position:absolute;height:24px;width:24px;background-color:#e8e8e8;text-align:center;
 						border-radius:24px;border:1px solid #666;opacity:.75;
 						}
-		.pi-rarr { 	 	position:absolute;width:0;height:0;border-top:6px solid transparent;
-						border-bottom:6px solid transparent;border-left:6px solid #e8e8e8;
+		.pi-rarr { 	 	position:absolute;width:0;height:0;border-top:8px solid transparent;
+						border-bottom:8px solid transparent;border-left:8px solid #e8e8e8;
 						}
-		.pi-larr { 	 	position:absolute;width:0;height:0;border-top:6px solid transparent;
-						border-bottom:6px solid transparent;border-right:6px solid #e8e8e8;
+		.pi-larr { 	 	position:absolute;width:0;height:0;border-top:8px solid transparent;
+						border-bottom:8px solid transparent;border-right:8px solid #e8e8e8;
 						}
 		.unselectable { -moz-user-select: none;     -khtml-user-select: none;
 		   			 	-webkit-user-select: none;  -ms-user-select: none;   user-select: none;
@@ -80,14 +80,14 @@
 	ops.slices[0]={ type:"but" };												// Center 
 	ops.slices[1]={ type:"", def:1 };											// Blank slice 
 	ops.slices[2]={ type:"edg", def:"#000099,2,1"};								// Edge 
-	ops.slices[3]={ type:"ico", def:2 };										// Blank slice 
+	ops.slices[3]={ type:"", def:2 };											// Blank slice 
 	ops.slices[4]={ type:"but", close:0 };										// Redo slice 
 	ops.slices[5]={ type:"but", close:1 };										// Undo slice 
 	ops.slices[6]={ type:"txt", def:2 };										// Blank slice 
 	ops.slices[7]={ type:"col", def:"#990000" };								// Line col slice 
 	ops.slices[8]={ type:"sli", def:100 };										// Alpha slice 
 
-	ops.slices[3].options=["img/trashdot.gif","img/arr1.png","img/arr2.png","img/arr3.png"] ;
+//	ops.slices[3].options=["img/trashdot.gif","img/arr1.png","img/arr2.png","img/arr3.png"] ;
 	ops.slices[6].options=["Line","Polygon","Circle","Box"] ;
 
 	Sound("click",true);														// Init sound
