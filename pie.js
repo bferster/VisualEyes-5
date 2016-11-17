@@ -412,7 +412,7 @@ Pie.prototype.ShowSlider=function(num, def)									// SHOW COLOR BARS
 		y=(w-Math.cos(ang2*0.0174533)*r).toFixed(4);							// Y
 		$("#piarc"+i).css({"transform":"translate("+x+"px,"+y+"px) rotate("+ang+"deg)"}); // Rotate 
 		ang2+=1;																// Next angle for arc
-				}
+		}
 
 	function setDot(val) {
 		val=val ? val : 0;														// Fix if null
@@ -474,4 +474,47 @@ Pie.prototype.SendMessage=function(cmd, msg, callback) 						// SEND HTML5 MESSA
 	if (msg)																	// If more to it
 		str+="|"+msg;															// Add it
 	window.parent.postMessage(str,"*");											// Send message to parent wind		
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DRAWPAL.JS 
+// Provides drawing palette 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function Pal(horz, vert, parent)											// CONSTRUCTOR
+{
+	var _this=this;																// Save context
+	this.parent=parent;		this.horz=horz;		this.vert=vert;					// Save settings
+	parent=parent ? parent : "body";											// If a parent div spec'd use it
+	if (parent != "body")  parent="#"+parent;									// Add #
+	var str="<div id='pamenu' class='pa-main unselectable'></div>";				// Main shell
+	$(parent).append(str+"");													// Add to DOM														
+	this.Draw();																// Draw it
+	
+	$("#pamenu").draggable({													// Make it draggable
+		stop:function(e,ui) {													// On stop
+			var cx=$(_this.parent).width()/2;									// Center x
+			var y=$(_this.parent).height();										// Center y
+			_this.horz=(e.clientX < cx) ? "left" : "right";						// Snap to left or right side
+			_this.vert=null;													// Set y
+			_this.Draw();														// Redraw it
+			Sound("click");														// Click
+			}
+		});
+}
+
+Pal.prototype.Draw=function() 												// SHOW DRAWING PALETTE
+{
+	if (this.horz == "left")
+		$("#pamenu").css({"border-radius":"0px","left":"0px",
+			"border-top-right-radius":"100%",
+			"border-bottom-right-radius":"100%"
+			});								
+	else
+		$("#pamenu").css({"border-radius":"0px","left":"calc(100% - 50px)",
+			"border-top-left-radius":"100%",
+			"border-bottom-left-radius":"100%"
+			});								
+	$("#pamenu").css({"top":this.vert+"%"});
 }
