@@ -657,7 +657,7 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 	var text=new ol.style.Text( {											// Text style
 		textAlign: "center", textBaseline: "top",							// Set alignment
 		font: sty.tf,														// Set font
-		text: sty.t,														// Get label
+		text: sty.t ? sty.t : " ",											// Get label
 		fill: new ol.style.Fill({color: sty.tc }),							// Set color
 		stroke: new ol.style.Stroke({color: "#666", width:1 }),				// Outline
 		offsetY: w2,														// Set offset
