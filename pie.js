@@ -25,6 +25,7 @@ function Pie(options)														// CONSTRUCTOR
 	str+="<img id='pihigh' class='pi-slice' style='pointer-events: none' src='"+ops.hilite+"'/>";	// Slice highlight				
 	str+="<div>"
 	for (i=1;i<9;++i) {															// For each option
+		if (!this.ops.slices[i])	this.ops.slices[i]={ type:"" };				// Make blank object
 		if (!this.ops.slices[i].ico)											// No icon
 			continue;															// Skip
 		ang=(45*i)-22.5;														// Next angle
@@ -398,17 +399,17 @@ Pie.prototype.ShowSlider=function(num, def)									// SHOW COLOR BARS
 
 Pie.prototype.ShowIcons=function(num, def)									// SHOW ICON RING
 {
-	var x,y,i,t,str;
+	var x,y,i,str;
 	var _this=this;																// Save context
 	var o=this.ops.slices[num];													// Point at data
 	var n=o.options.length;														// Number of options
 	var ang=(num)*this.ops.ang-11.5-(n*11);										// Angle
 	var w=this.ops.wid/2;														// Center
-	var r=w+18;																	// Radius
+	var r=w+10;																	// Radius
 	var str="<div id='pisubback' class='pi-subbar unselectable'>";				// Main shell
 	for (i=0;i<n;++i) {															// For each option
 		str+="<div class='pi-icon' id='piicon"+i+"'>"; 							// Add div
-		str+="<img src='"+o.options[i]+"' width='16'></img></div>";				// Add icon
+		str+="<img src='"+o.options[i]+"' width='14'></img></div>";				// Add icon
 		}
 	$("#pimenu").append(str+"</div>");											// Add to menu														
 	
@@ -416,13 +417,9 @@ Pie.prototype.ShowIcons=function(num, def)									// SHOW ICON RING
 		$("#piicon"+def).css({"opacity":1});									// Highlight
 
 	for (i=0;i<n;++i) {															// For each option
-		if (((ang+360)%360 > 180) && $("#piicon"+i).text())						// Shift if on left side
-			t=$("#piicon"+i).css("width").replace(/px/,"")-0;					// Accomodate text
-		else																	// 0-180
-			t=0;																// No shift
-		x=Math.floor(w+(Math.sin((ang)*0.0174533)*r-t-12));						// Calc x
-		y=Math.floor((w-Math.cos((ang)*0.0174533)*r)-12);						// Y
-		ang+=20;																// Next angle
+		x=Math.floor(w+(Math.sin((ang)*0.0174533)*r-14));						// Calc x
+		y=Math.floor((w-Math.cos((ang)*0.0174533)*r)-14);						// Y
+		ang+=19;																// Next angle
 		$("#piicon"+i).css({"left":x+"px","top":y+"px"});						// Position
 		
 		$("#piicon"+i).on("mouseover", function(e) {							// OVER ITEM

@@ -59,10 +59,9 @@
 						}
 		.pa-main {		position:absolute;width:50px;height:50px;
 						background-color:#e8e8e8;border:1px solid #666;
-						box-shadow: 2px 2px 16px;opacity:.5;
+						box-shadow: 2px 2px 16px;opacity:.66;
 						}
-		.pa-dot {		width:31px;height:31px;border-radius:30px;margin:8px;text-align:center;
-						border:2px solid #666;
+		.pa-dot {		width:31px;height:31px;border-radius:30px;margin:8px;opacity:1;
 						}
 		.unselectable { -moz-user-select: none;     -khtml-user-select: none;
 		   			 	-webkit-user-select: none;  -ms-user-select: none;   user-select: none;
@@ -156,8 +155,8 @@ $(document).ready(function() {												// ON PAGE LOADED
 
 	function html5MessageHandler(e)											// ON HTML5 MESSAGE
 	{
-   		if (e && e.data && e.data.match(/PiMenu/))								// If a pimenu message
- 			trace(e.data.split("|").toString())
+   		if (e && e.data)														// If a valid message				
+ 			qd.HandleMessage(e.data);											// Handle it
  	}
 
 </script>
