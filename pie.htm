@@ -8,6 +8,7 @@
 	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css" />
 	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 	<script src="jquery.ui.touch-punch.min.js"></script>
+   	<script src="qdraw.js" type="text/javascript"></script>
    	<script src="pie.js" type="text/javascript"></script>
 
  	<style type="text/css">
@@ -73,7 +74,10 @@
 
 </head>
 <body>
-<img id='fakeback' src='back.JPG' style='opacity:1'/>
+
+<img src='back.JPG' style='opacity:1'/>
+<div id='containerDiv' style='position:absolute;width:930px;height:583px;left:0px;top:0px'></div>
+
 <script>
 	var o;
 	var pie,pal;
@@ -92,7 +96,7 @@
 	ops.slices[7]={ type:"col", ico:"img/color-icon.png", def:"#990000" };		// Color slice 
 	ops.slices[8]={ type:"sli", ico:"img/alpha-icon.png", def:100 };			// Alpha slice 
 
-	ops.slices[1].options=["img/draw-icon.png","img/text-icon.png","img/helpicon.gif",] ;
+	ops.slices[1].options=["img/line-icon.png","img/box-icon.png","img/circle-icon.png","img/text-icon.png"] ;
 	ops.slices[3].options=["Yes","No"] ;
 
 	Sound("click",true);														// Init sound
@@ -102,15 +106,16 @@
 $(document).ready(function() {												// ON PAGE LOADED
 	isMobile=navigator.userAgent.match(/(ipad|iphone|ipod|android)/i) ? true : false; // Set mobile flag
 	var url=window.location.search.substring(1);								// Get query string
-	pie=new Pie(ops);															// Init pie menu
-	pal=new Pal("left",50,"body");												// Init drawing palette
+	qd=new QDraw("left",50,"containerDiv");										// Init drawing palette
+//	pie=new Pie(ops);															// Init pie menu
+	
 
 	if (window.addEventListener) 												// If supported this way
 		window.addEventListener("message",html5MessageHandler,false);			// Add event handler
 	else																		// Use other method
 		window.attachEvent("message",html5MessageHandler);						// Add handler
 	
-	$("#fakeback").on("click",function() { pie.ShowPieMenu(!$("#pimenu").width()) }); // Show pie menu on click
+//	$("#containerDiv").on("click",function() { pie.ShowPieMenu(!$("#pimenu").width()) }); // Show pie menu on click
 	});									
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

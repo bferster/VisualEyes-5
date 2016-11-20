@@ -8,6 +8,7 @@ function Pie(options)														// CONSTRUCTOR
 	var x,y,i,ang;
 	var _this=this;																// Save context
 	this.ops=options;															// Save options
+	this.active=false;															// Inactive
 	var w=this.ops.wid/2;														// Center
 	var iw=(this.ops.wid/200*24).toFixed(4);									// Calc scale
 	var r=w-(w/4);																// Radius
@@ -83,15 +84,16 @@ function Pie(options)														// CONSTRUCTOR
 Pie.prototype.ShowPieMenu=function(mode)									// SHOW PIE MENU
 {
 	var o=this.ops;																// Point at ops
-	if (mode) {	
-		$("#pimenu").css({"width":"0px","height":"0px"});				// Hide
+	if (mode) {																	// If showing
+		$("#pimenu").css({"width":"0px","height":"0px"});						// Hide
 		$("#pimenu").css({"top":(o.sy)+"px","left":(o.sx)+"px"});				// Position
 		$("#pimenu").animate({ width:o.wid, height:o.wid,top:o.y, left:o.x,opacity:1});	// Zoom on
 		}
-	else{
+	else{																		// If hiding
 		this.HideSubMenus(true);												// Hide submenus										
-		$("#pimenu").animate({ width:0, height:0,top:o.sy,left:o.sx, opacity:0},200);		// Zoom off
+		$("#pimenu").animate({ width:0, height:0,top:o.sy,left:o.sx, opacity:0},200);	// Zoom off
 	}	
+	this.active=mode;															// Set active status
 }
 
 Pie.prototype.HideSubMenus=function(mode)									// HIDE SUBMENUS
@@ -444,63 +446,4 @@ Pie.prototype.SendMessage=function(cmd, msg, callback) 						// SEND HTML5 MESSA
 	window.parent.postMessage(str,"*");											// Send message to parent wind		
 }
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// DRAWPAL.JS 
-// Provides drawing palette 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function Pal(horz, vert, parent)											// CONSTRUCTOR
-{
-	var _this=this;																// Save context
-	this.parent=parent;		this.horz=horz;		this.vert=vert;					// Save settings
-	this.curCol="#e6550d";	this.curWid=1;		this.curEcol="#000000";			// Default settings
-	this.curTip=0;			this.curShape=0;
-	this.curTsize=12;		this.curTstyle="B";	this.curTfont="Sans-Serif"
-	parent=parent ? parent : "body";											// If a parent div spec'd use it
-	if (parent != "body")  parent="#"+parent;									// Add #
-	var str="<div id='pamenu' class='pa-main unselectable'>";					// Main shell
-	str+="<div id='pacoldot' class='pa-dot unselectable'>";						// Color dot
-	$(parent).append(str);														// Add to DOM														
-	this.Draw();																// Draw it
-		
-	$("#pamenu").draggable({													// Make it draggable
-		stop:function(e,ui) {													// On stop
-			var cx=$(_this.parent).width()/2;									// Center x
-			var y=$(_this.parent).height();										// Center y
-			_this.horz=(e.clientX < cx) ? "left" : "right";						// Snap to left or right side
-			_this.vert=null;													// Set y
-			_this.Draw();														// Redraw it
-			Sound("click");														// Click
-			}
-		});
-
-		$("#pamenu").on("click", function(e) {								// CLICK ITEM
-			pie.ops.x=e.clientX+50;			pie.ops.y=e.clientY-70;
-			pie.ops.sx=e.clientX;			pie.ops.sy=e.clientY;
-			pie.ShowPieMenu(true)
-			});
-
-}
-
-Pal.prototype.Draw=function() 												// SHOW DRAWING PALETTE
-{
-	var col=this.curCol;														// Set color
-	var ico="point-icon";
-	if (!col || (col == "None"))												// If a null color
-		col="transparent";														// Make transparent
-	$("#pacoldot").css({"background":col+" url('img/"+ico+".png') no-repeat center center" });
-	
-	if (this.horz == "left")
-		$("#pamenu").css({"border-radius":"0px","left":"0px",
-			"border-top-right-radius":"100px",
-			"border-bottom-right-radius":"100px"
-			});								
-	else
-		$("#pamenu").css({"border-radius":"0px","left":"calc(100% - 50px)",
-			"border-top-left-radius":"100px",
-			"border-bottom-left-radius":"100px"
-			});								
-	$("#pamenu").css({"top":this.vert+"%"});
-}
 
