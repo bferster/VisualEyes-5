@@ -78,26 +78,7 @@
 <div id='containerDiv' style='position:absolute;width:930px;height:583px;left:0px;top:0px'></div>
 
 <script>
-	var o;
-	var pie,pal;
-	var ops={id:"piseg",x:330,y:334,wid:150,ang:45,slices:[]};
-//	ops.sy=0;	ops.sx=0;															
-
-	ops.dial="img/piback.png";													// Dial background
-	ops.hilite="img/philite.png";												// Slice highlight
-	ops.slices[0]={ type:"but", ico:"img/gear-icon.png" };						// Center 
-	ops.slices[1]={ type:"ico", ico:"img/draw-icon.png", def:2 };				// Blank slice 
-	ops.slices[2]={ type:"edg", ico:"img/edge-icon.png", def:"#000099,2,1"};	// Edge 
-	ops.slices[3]={ type:"men", ico:"img/trash-icon.png", close:1};				// Delete slice 
-	ops.slices[4]={ type:"but", ico:"img/redo-icon.png", close:0 };				// Redo slice 
-	ops.slices[5]={ type:"but", ico:"img/undo-icon.png", close:1 };				// Undo slice 
-	ops.slices[6]={ type:"txt", ico:"img/text-icon.png", def:"#009999,12,R,100"};// Text slice 
-	ops.slices[7]={ type:"col", ico:"img/color-icon.png", def:"#990000" };		// Color slice 
-	ops.slices[8]={ type:"sli", ico:"img/alpha-icon.png", def:100 };			// Alpha slice 
-
-	ops.slices[1].options=["img/line-icon.png","img/box-icon.png","img/circle-icon.png","img/text-icon.png"] ;
-	ops.slices[3].options=["Yes","No"] ;
-
+	var qd;
 	Sound("click",true);														// Init sound
 	Sound("ding",true);															// Init sound
 	Sound("delete",true);														// Init sound
@@ -106,15 +87,11 @@ $(document).ready(function() {												// ON PAGE LOADED
 	isMobile=navigator.userAgent.match(/(ipad|iphone|ipod|android)/i) ? true : false; // Set mobile flag
 	var url=window.location.search.substring(1);								// Get query string
 	qd=new QDraw("left",50,"containerDiv");										// Init drawing palette
-	
-
 	if (window.addEventListener) 												// If supported this way
 		window.addEventListener("message",html5MessageHandler,false);			// Add event handler
 	else																		// Use other method
 		window.attachEvent("message",html5MessageHandler);						// Add handler
-	
-//	$("#containerDiv").on("click",function() { pie.ShowPieMenu(!$("#pimenu").width()) }); // Show pie menu on click
-	});									
+	});
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // HELPERS

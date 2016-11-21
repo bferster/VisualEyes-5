@@ -22,8 +22,8 @@ function PieMenu(options, parObj)												// CONSTRUCTOR
 
 	var str="<div id='pimenu' class='pi-main unselectable'></div>";				// Main shell
 	$(this.ops.parent).append(str);												// Add to DOM														
-	str="<img id='piback' class='pi-slice' src='"+ops.dial+"'/>";				// Menu back			
-	str+="<img id='pihigh' class='pi-slice' style='pointer-events: none' src='"+ops.hilite+"'/>";	// Slice highlight				
+	str="<img id='piback' class='pi-slice' src='"+this.ops.dial+"'/>";			// Menu back			
+	str+="<img id='pihigh' class='pi-slice' style='pointer-events: none' src='"+this.ops.hilite+"'/>";	// Slice highlight				
 	str+="<div>"
 	for (i=1;i<9;++i) {															// For each option
 		if (!this.ops.slices[i])	this.ops.slices[i]={ type:"" };				// Make blank object
@@ -402,7 +402,7 @@ PieMenu.prototype.ShowSlider=function(num, def)								// SHOW COLOR BARS
 		val=val ? val : 0;														// Fix if null
 		val=Math.max(0,Math.min(val,100));										// Cap 0-100
 		$("#pislitext").val(val);												// Set text
-		var a=(num)*this.ops.ang-52.5;											// Start of angle
+		var a=(num)*_this.ops.ang-52.5;											// Start of angle
 		a=(a+(val*.6))*0.0174533;												// Calc angle
 		x=Math.floor((Math.sin(a)*r)+w)-5;										// Calc x
 		y=Math.floor((w-Math.cos(a)*r))-5;										// Y
