@@ -3,11 +3,12 @@
 // Provides pie/radial menu 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function Pie(options)														// CONSTRUCTOR
+function PieMenu(options, parObj)												// CONSTRUCTOR
 {
 	var x,y,i,ang;
 	var _this=this;																// Save context
 	this.ops=options;															// Save options
+	this.parObj=parObj;															// Save calling context
 	this.active=false;															// Inactive
 	var w=this.ops.wid/2;														// Center
 	var iw=(this.ops.wid/200*24).toFixed(4);									// Calc scale
@@ -71,6 +72,7 @@ function Pie(options)														// CONSTRUCTOR
 		$("#pihigh").css({"opacity":alpha});									// Set highlight
 		$("#pimenu").css({"cursor":cur});										// Set cursor
 		});	
+
 	$("#piback").on("click",function() { 										// ON CLICK
 		if (_this.curSlice >= 0) {												// A valid pick
 			if (_this.ops.slices[_this.curSlice].type == "but")					// If close option set
@@ -82,7 +84,7 @@ function Pie(options)														// CONSTRUCTOR
 		});	
 }
 
-Pie.prototype.ShowPieMenu=function(mode)									// SHOW PIE MENU
+PieMenu.prototype.ShowPieMenu=function(mode)								// SHOW PIE MENU
 {
 	var o=this.ops;																// Point at ops
 	if (mode) {																	// If showing
@@ -97,14 +99,14 @@ Pie.prototype.ShowPieMenu=function(mode)									// SHOW PIE MENU
 	this.active=mode;															// Set active status
 }
 
-Pie.prototype.HideSubMenus=function(mode)									// HIDE SUBMENUS
+PieMenu.prototype.HideSubMenus=function(mode)									// HIDE SUBMENUS
 {
 	if (!mode)
 		return;
 	$("#pisubback").remove();													// Remove colorbars
 }
 
-Pie.prototype.ShowTextType=function(num, def)								// TYPE IN A VALUE
+PieMenu.prototype.ShowTextType=function(num, def)								// TYPE IN A VALUE
 {
 	var _this=this;																// Save context
 	var ang=(num)*this.ops.ang-22.5;											// Start angle
@@ -125,7 +127,7 @@ Pie.prototype.ShowTextType=function(num, def)								// TYPE IN A VALUE
 		});
 }
 
-Pie.prototype.ShowMenuPick=function(num, def)								// SHOW TEXT PICK
+PieMenu.prototype.ShowMenuPick=function(num, def)							// SHOW TEXT PICK
 {
 	var x,y,i,t,str;
 	var _this=this;																// Save context
@@ -169,9 +171,9 @@ Pie.prototype.ShowMenuPick=function(num, def)								// SHOW TEXT PICK
 		}
 }
 
-Pie.prototype.ShowColorBars=function(num, mode, def)						// SET COLOR / EDGE
+PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE / TYPE
 {
-	var x,y,i;
+	var x,y,i,n=4;
 	var _this=this;																// Save context
 	var wids=[8,6,4,3,2,1];														// Width choice
 	var cols=[ "#3182bd","#6baed6","#9ecae1","#e6550d","#fd8d3c","#fdae6b",
@@ -183,11 +185,17 @@ Pie.prototype.ShowColorBars=function(num, mode, def)						// SET COLOR / EDGE
   		str+="<div id='pichip"+i+"' class='pi-colchip'></div>";					// Make color chip
  	if (mode == "edge") {														// If setting edge
 		str+="<div id='pilinback' class='pi-subbar unselectable' style='width:50px;height:72px'>";			// Line shell
-		for (i=0;i<wids.length;++i)												// For each width
-  			str+="<div id='piline"+i+"' class='pi-linechip2'></div>";			// Make width chip
+		if (this.parObj.curShape < 4)
+			for (i=0;i<wids.length;++i)											// For each width
+  				str+="<div id='piline"+i+"' class='pi-linechip2'></div>";		// Make width chip
 		str+="</div><div id='piarrback' class='pi-subbar unselectable' style='width:50px;height:72px'>";	// Arrow shell
-		for (i=0;i<4;++i)														// For each width
-  			str+="<div id='piarr"+i+"' class='pi-arrow'></div>";				// Make arrow chip
+		if (this.parObj.curShape == 2) { 										// If drawing boxes
+			str+="<div id='piarr0' class='pi-arrow'></div>";					// Make arrow chip
+			str+="<div id='piarr1' class='pi-arrow'></div>";					// Make arrow chip
+			}
+		else if (this.parObj.curShape < 3)										// Not in circles or text
+			for (i=0;i<4;++i)													// For each width
+  				str+="<div id='piarr"+i+"' class='pi-arrow'></div>";			// Make arrow chip
 		str+="</div>";
 		}
 	$("#pimenu").append(str+"</div>");											// Add to menu														
@@ -288,11 +296,16 @@ Pie.prototype.ShowColorBars=function(num, mode, def)						// SET COLOR / EDGE
 			});
 		}
 	
-	$("#piarr1").append("<div id='parr1' class='pi-rarr' style='left:16px;top:-5px'</div>")
-	$("#piarr2").append("<div id='parr2' class='pi-larr' style='left:-2px;top:-5px'</div>");
-	$("#piarr3").append("<div id='parr3' class='pi-larr' style='left:-2px;top:-5px'</div>");
-	$("#piarr3").append("<div id='parr4' class='pi-rarr' style='left:16px;top:-5px'</div>")
-	
+	if (this.parObj.curShape == 2) { 											// If drawing boxes
+		$("#piarr0").css({ "height":"10px","left":"0px","top":"10px" })
+		$("#piarr1").css({ "height":"10px","left":"0px","top":"28px","border-radius":"4px" })
+		}
+	else if (this.parObj.curShape < 2) {										// Drawing arrows
+		$("#piarr1").append("<div id='parr1' class='pi-rarr' style='left:16px;top:-5px'</div>")
+		$("#piarr2").append("<div id='parr2' class='pi-larr' style='left:-2px;top:-5px'</div>");
+		$("#piarr3").append("<div id='parr3' class='pi-larr' style='left:-2px;top:-5px'</div>");
+		$("#piarr3").append("<div id='parr4' class='pi-rarr' style='left:16px;top:-5px'</div>")
+		}
 	$("#pilinback").css({														// Set b/g for lines
 		"left":ix+"px","top":iy-4-(12*wids.length)+"px",						// Position
 		"height":12*wids.length+"px"											// Height
@@ -325,7 +338,7 @@ Pie.prototype.ShowColorBars=function(num, mode, def)						// SET COLOR / EDGE
 		}
 }
 
-Pie.prototype.ShowSlider=function(num, def)									// SHOW COLOR BARS
+PieMenu.prototype.ShowSlider=function(num, def)								// SHOW COLOR BARS
 {
 	var x,y,i;
 	var _this=this;																// Save context
@@ -397,7 +410,7 @@ Pie.prototype.ShowSlider=function(num, def)									// SHOW COLOR BARS
 	}
 }
 
-Pie.prototype.ShowIcons=function(num, def)									// SHOW ICON RING
+PieMenu.prototype.ShowIcons=function(num, def)								// SHOW ICON RING
 {
 	var x,y,i,str;
 	var _this=this;																// Save context
@@ -409,7 +422,7 @@ Pie.prototype.ShowIcons=function(num, def)									// SHOW ICON RING
 	var str="<div id='pisubback' class='pi-subbar unselectable'>";				// Main shell
 	for (i=0;i<n;++i) {															// For each option
 		str+="<div class='pi-icon' id='piicon"+i+"'>"; 							// Add div
-		str+="<img src='"+o.options[i]+"' width='14'></img></div>";				// Add icon
+		str+="<img src='"+o.options[i]+"' width='18'></img></div>";				// Add icon
 		}
 	$("#pimenu").append(str+"</div>");											// Add to menu														
 	
@@ -435,7 +448,7 @@ Pie.prototype.ShowIcons=function(num, def)									// SHOW ICON RING
 		}
 }
 
-Pie.prototype.SendMessage=function(cmd, msg, callback) 						// SEND HTML5 MESSAGE 
+PieMenu.prototype.SendMessage=function(cmd, msg, callback) 					// SEND HTML5 MESSAGE 
 {
 	var str=cmd+"|"+this.ops.id;												// Add src and id						
 	if (msg)																	// If more to it

@@ -58,8 +58,8 @@
 						border-bottom:8px solid transparent;border-right:8px solid #e8e8e8;
 						}
 		.pa-main {		position:absolute;width:50px;height:50px;
-						background-color:#e8e8e8;border:1px solid #666;
-						box-shadow: 2px 2px 16px;opacity:.66;
+						background-color:#aaa;border:1px solid #666;box-shadow: 2px 2px 16px;
+						
 						}
 		.pa-dot {		width:31px;height:31px;border-radius:30px;margin:8px;opacity:1;
 						}
@@ -106,7 +106,6 @@ $(document).ready(function() {												// ON PAGE LOADED
 	isMobile=navigator.userAgent.match(/(ipad|iphone|ipod|android)/i) ? true : false; // Set mobile flag
 	var url=window.location.search.substring(1);								// Get query string
 	qd=new QDraw("left",50,"containerDiv");										// Init drawing palette
-//	pie=new Pie(ops);															// Init pie menu
 	
 
 	if (window.addEventListener) 												// If supported this way
