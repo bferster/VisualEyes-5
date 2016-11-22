@@ -3,7 +3,7 @@
 // Provides pie/radial menu 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function PieMenu(options, parObj)												// CONSTRUCTOR
+function PieMenu(options, parObj)											// CONSTRUCTOR
 {
 	var x,y,i,ang;
 	var _this=this;																// Save context
@@ -25,6 +25,9 @@ function PieMenu(options, parObj)												// CONSTRUCTOR
 	str="<img id='piback' class='pi-slice' src='"+this.ops.dial+"'/>";			// Menu back			
 	str+="<img id='pihigh' class='pi-slice' style='pointer-events: none' src='"+this.ops.hilite+"'/>";	// Slice highlight				
 	str+="<div>"
+	str+="<img id='sliceicon0' src='"+this.ops.slices[0].ico+"' style='position:absolute;";	// Center Icon
+	str+="left:"+(w-iw/2)+"px;top:"+(w-iw/2)+"px;width:"+iw+"px'/>";			// Position
+
 	for (i=1;i<9;++i) {															// For each option
 		if (!this.ops.slices[i])	this.ops.slices[i]={ type:"" };				// Make blank object
 		if (!this.ops.slices[i].ico)											// No icon
@@ -32,12 +35,13 @@ function PieMenu(options, parObj)												// CONSTRUCTOR
 		ang=(45*i)-22.5;														// Next angle
 		x=Math.floor(w+(Math.sin((ang)*0.0174533)*r-iw/2));						// Calc x
 		y=Math.floor((w-Math.cos((ang)*0.0174533)*r)-iw/2);						// Y
-		str+="<img src='"+this.ops.slices[i].ico+"' style='position:absolute;";	// Icon
+		str+="<img id='sliceicon"+i+"' src='"+this.ops.slices[i].ico+"' style='position:absolute;";	// Icon
 		str+="left:"+x+"px;top:"+y+"px;width:"+iw+"px'/>";						// Position
 		}
 	str+="</div>"
 	$("#pimenu").append(str);													// Add to DOM														
-
+	this.ShowPieMenu(false);													// Hide it
+	
 	$("#piback").on("mousemove",function(e) { 									// ON HOVER ON
  		var lastSlice=_this.curSlice;											// Save existing slice state
 		var alpha=0,cur="auto",cs=-1;											// Assume off
@@ -104,6 +108,12 @@ PieMenu.prototype.HideSubMenus=function(mode)									// HIDE SUBMENUS
 	if (!mode)
 		return;
 	$("#pisubback").remove();													// Remove colorbars
+}
+
+PieMenu.prototype.SetSlice=function(num, obj)								// SET SLICE INFO
+{
+	$("#sliceicon"+num).prop("src",obj.ico);									// Change icon
+	this.ops.slices[num]=obj;													// Set data
 }
 
 PieMenu.prototype.ShowTextType=function(num, def)								// TYPE IN A VALUE
@@ -185,9 +195,9 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
   		str+="<div id='pichip"+i+"' class='pi-colchip'></div>";					// Make color chip
  	if (mode == "edge") {														// If setting edge
 		str+="<div id='pilinback' class='pi-subbar unselectable' style='width:50px;height:72px'>";			// Line shell
-		if (this.parObj.curShape < 4)
+		if (this.parObj.curShape < 4)											// Not text
 			for (i=0;i<wids.length;++i)											// For each width
-  				str+="<div id='piline"+i+"' class='pi-linechip2'></div>";		// Make width chip
+  				str+="<div id='piline"+i+"' class='pi-linechip'></div>";		// Make width chip
 		str+="</div><div id='piarrback' class='pi-subbar unselectable' style='width:50px;height:72px'>";	// Arrow shell
 		if (this.parObj.curShape == 2) { 										// If drawing boxes
 			str+="<div id='piarr0' class='pi-arrow'></div>";					// Make arrow chip
@@ -215,10 +225,36 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 	str+="style='left:"+ix+"px;top:"+iy+"px'>";
 	str+="<div id='pitextcol' class='pi-colchip unselectable'";	
 	str+="style='left:"+(ix+49)+"px;top:"+(iy+3)+"px;height:9px;width:9px'></div>";
-
+	if ((this.parObj.curShape == 4) && mode == "edge") {						// Text
+		str+="<select class='pi-select' id='pifont'";							// Add font selection
+		str+="style='position:absolute;width:64px;left:"+ix+"px;top:"+(iy-18)+"px'>";	
+		str+="<option value='0'>Sans</option>";
+		str+="<option value='1'>Serif</option>";
+		str+="<option value='2'>Fixed</option></select>"
+		str+="<div id='pibold' class='pi-fstyle unselectable' " ;				// Bold
+		str+="style='left:"+(ix+70)+"px;top:"+(iy-18)+"px'>B</div>";	
+		str+="<div id='piital' class='pi-fstyle unselectable' ";				// Ital
+		str+="style='left:"+(ix+89)+"px;top:"+(iy-18)+"px'><i>I</i></div>";	
+		str+="<div id='pifsize' class='pi-fstyle unselectable' ";				// Size
+		str+="style='width:50px;height:0px;left:"+(ix+5)+"px;top:"+(iy-32)+"px'></div>";	
+		str+="<input type='text' class='pi-coltext' id='pisiztxt' "; 
+		str+="style='text-align:center;width:19px;height:9px;left:"+(ix+70)+"px;top:"+(iy-38)+"px'>";	
+		}
 	$("#pisubback").append(str);												// Add to color bar														
 	$("#pitextcol").css("background-color",def[0]);								// Def col
 	$("#picoltext").val(def[0]);												// Def text
+	$("#pifont").val(def[3]-0);													// Def font
+	$("#pifontsty").val(def[2]-0);												// Def font style
+	$("#pisiztxt").val(def[1]);													// Def text size
+	$("#pifsize").slider({														// Init size slider
+		min:6,max:72,step:2,value:def[1],										// Params
+		slide: function(e,ui) { $("#pisiztxt").val(ui.value)},					// On slide
+		stop: function(e,ui) { 													// On stop
+			def[1]=ui.value;													// Get size
+			updateColor("click");												// Update menu
+			Sound("click");														// Click
+			}
+		});	
 	
 	$("#picoltext").on("change",function(){										// TYPING OF COLOR
 		def[0]=$("#picoltext").val();											// Get text
@@ -310,12 +346,45 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 		"left":ix+"px","top":iy-4-(12*wids.length)+"px",						// Position
 		"height":12*wids.length+"px"											// Height
 		});
-	$("#piarrback").css({ "left":ix+10+"px","top":iy+15+"px" });					// Set b/g for arrows
+	$("#piarrback").css({ "left":ix+10+"px","top":iy+15+"px" });				// Set b/g for arrows
 	updateColor();																// Update menu
+
+	$("#pifont").on("change", function(e) {										// ON FONT CHANGE
+		def[3]=$(this).val();													// Get font
+		updateColor("click");													// Update menu
+		Sound("click");															// Click
+		});
+
+	$("#pibold").on("click", function(e) {										// ON FONT BOLD CLICK
+		if (def[2]&1)															// If bold 
+			def[2]&=2;															// Retain italic status and unbold
+		else																	// Not bold
+			def[2]|=1;															// Bold it														
+		updateColor("click");													// Update menu
+		Sound("click");															// Click
+		});
+
+	$("#piital").on("click", function(e) {										// ON FONT ITAL CLICK
+		if (def[2]&2)															// If ital 
+			def[2]&=1;															// Retain bold status and unital
+		else																	// Not ital
+			def[2]|=2;															// Ital it														
+		updateColor("click");													// Update menu
+		Sound("click");															// Click
+		});
+
+	$("#pisiztxt").on("change", function(e) {									// ON FONT SIZECHANGE
+		def[1]=$(this).val();													// Get font
+		updateColor("click");													// Update menu
+		Sound("click");															// Click
+		});
 	
 	function updateColor(send) {												// SET COLOR INFO
 		$("#picoltext").val(def[0]);											// Show value
 		$("#pitextcol").css("background-color",def[0]);							// Color chip
+		$("#pibold").css("background-color",(def[2]&1) ? "#00a8ff" : "#999");				// Color bold
+		$("#piital").css("background-color",(def[2]&2) ? "#00a8ff" : "#999");				// Color ital
+	
 		for (j=0;j<wids.length;++j) 											// For each width
 			$("#piline"+j).css("background-color",(wids[j] == def[1]) ? "#00a8ff" : "#e8e8e8");	// Make blue
 		for (j=0;j<4;++j) {														// For each arrow
@@ -329,12 +398,8 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 				$("#parr4").css("border-left","6px solid "+((j == def[2]) ? "#00a8ff" : "#e8e8e8"));	// Make blue
 				}
 			}
-		if (send) {
-			if (mode == "edge")													// Edge mode
-				_this.SendMessage(send,_this.curSlice+"|"+def[0]+","+def[1]+","+def[2]);	// Send event
-			else																// Color mode
-				_this.SendMessage(send,_this.curSlice+"|"+def[0]);				// Send event
-				}
+		if (send) 
+			_this.SendMessage(send,_this.curSlice+"|"+def.toString());			// Send event
 		}
 }
 
@@ -445,6 +510,8 @@ PieMenu.prototype.ShowIcons=function(num, def)								// SHOW ICON RING
 			_this.SendMessage("click",_this.curSlice+"|"+id);					// Send event
 			Sound("click");														// Click
 			});
+
+
 		}
 }
 
