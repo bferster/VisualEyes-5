@@ -11,7 +11,7 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	this.parent=parent;		this.dockSide=dockSide;		this.dockPos=dockPos;	// Save settings
 	this.curCol="#e6550d";	this.curEwid=1;				this.curEcol="#000000";	// Default settings
 	this.curEtip=0;			this.curShape=0;			this.curAlpha=100;
-	this.curTsiz=12;		this.curTsty=0;				this.curTfon=0;
+	this.curTsiz=24;		this.curTsty=0;				this.curTfon=0;
 	var str="<div id='pamenu' class='pa-main unselectable'>";					// Main shell
 	str+="<div id='pacoldot' class='pa-dot unselectable'>";						// Color dot
 	$(parent).append(str);														// Add to DOM														
@@ -37,10 +37,10 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 			_this.pie.ShowPieMenu(false);										// Hide menu
 			},
 		stop:function(e,ui) {													// On stop
-			var l=$(_this.parent).width()*.2;									// L
+			var l=$(_this.parent).width()*.1;									// L
 			var r=$(_this.parent).width()*.8;									// R
-			var t=$(_this.parent).height()*.2;									// T
-			var b=$(_this.parent).height()*.8;									// B
+			var t=$(_this.parent).height()*.1;									// T
+			var b=$(_this.parent).height()*.9;									// B
 			if (e.clientX < l)			_this.dockSide="left";					// Left
 			else if (e.clientX > r)		_this.dockSide="right";					// Right
 			else if (e.clientY < t)		_this.dockSide="top";					// Top

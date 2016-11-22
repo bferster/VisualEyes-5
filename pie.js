@@ -228,9 +228,9 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 	if ((this.parObj.curShape == 4) && mode == "edge") {						// Text
 		str+="<select class='pi-select' id='pifont'";							// Add font selection
 		str+="style='position:absolute;width:64px;left:"+ix+"px;top:"+(iy-18)+"px'>";	
-		str+="<option value='0'>Sans</option>";
-		str+="<option value='1'>Serif</option>";
-		str+="<option value='2'>Fixed</option></select>"
+		str+="<option value='0'>Arial</option>";
+		str+="<option value='1'>Times</option>";
+		str+="<option value='2'>Courier</option></select>"
 		str+="<div id='pibold' class='pi-fstyle unselectable' " ;				// Bold
 		str+="style='left:"+(ix+70)+"px;top:"+(iy-18)+"px'>B</div>";	
 		str+="<div id='piital' class='pi-fstyle unselectable' ";				// Ital
@@ -238,7 +238,9 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 		str+="<div id='pifsize' class='pi-fstyle unselectable' ";				// Size
 		str+="style='width:50px;height:0px;left:"+(ix+5)+"px;top:"+(iy-32)+"px'></div>";	
 		str+="<input type='text' class='pi-coltext' id='pisiztxt' "; 
-		str+="style='text-align:center;width:19px;height:9px;left:"+(ix+70)+"px;top:"+(iy-38)+"px'>";	
+		str+="style='text-align:center;width:19px;height:9px;left:"+(ix+70)+"px;top:"+(iy-36)+"px'>";	
+		str+="<div id='pifdemo' class='pi-fdemo unselectable' " ;				// Demo letter
+		str+="style='left:"+ix+"px;top:"+(iy+18)+"px'>A</div>";	
 		}
 	$("#pisubback").append(str);												// Add to color bar														
 	$("#pitextcol").css("background-color",def[0]);								// Def col
@@ -247,7 +249,7 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 	$("#pifontsty").val(def[2]-0);												// Def font style
 	$("#pisiztxt").val(def[1]);													// Def text size
 	$("#pifsize").slider({														// Init size slider
-		min:6,max:72,step:2,value:def[1],										// Params
+		min:10,max:99,step:2,value:def[1],										// Params
 		slide: function(e,ui) { $("#pisiztxt").val(ui.value)},					// On slide
 		stop: function(e,ui) { 													// On stop
 			def[1]=ui.value;													// Get size
@@ -382,9 +384,18 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 	function updateColor(send) {												// SET COLOR INFO
 		$("#picoltext").val(def[0]);											// Show value
 		$("#pitextcol").css("background-color",def[0]);							// Color chip
-		$("#pibold").css("background-color",(def[2]&1) ? "#00a8ff" : "#999");				// Color bold
-		$("#piital").css("background-color",(def[2]&2) ? "#00a8ff" : "#999");				// Color ital
-	
+		$("#pibold").css("background-color",(def[2]&1) ? "#00a8ff" : "#999");	// Color bold
+		$("#piital").css("background-color",(def[2]&2) ? "#00a8ff" : "#999");	// Color ital
+
+		var font="Sans-serif";													// Assume sans
+		if (def[3] == 1)		font="Serif";									// Serif
+		else if (def[3] == 2)	font="Courier";									// Fixed
+		$("#pifdemo").css({"color":def[0],"font-size":def[1]+"px",				// Font size and color
+			"font-weight":def[2]&1 ? "bold" : "normal",							// Bold
+			"font-style":def[2]&2 ? "italic" : "normal"	,						// Italic
+			"font-family":font 													// Font
+			});
+		
 		for (j=0;j<wids.length;++j) 											// For each width
 			$("#piline"+j).css("background-color",(wids[j] == def[1]) ? "#00a8ff" : "#e8e8e8");	// Make blue
 		for (j=0;j<4;++j) {														// For each arrow
