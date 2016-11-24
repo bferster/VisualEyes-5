@@ -25,9 +25,10 @@ function PieMenu(options, parObj)											// CONSTRUCTOR
 	str="<img id='piback' class='pi-slice' src='"+this.ops.dial+"'/>";			// Menu back			
 	str+="<img id='pihigh' class='pi-slice' style='pointer-events: none' src='"+this.ops.hilite+"'/>";	// Slice highlight				
 	str+="<div>"
-	str+="<img id='sliceicon0' src='"+this.ops.slices[0].ico+"' style='position:absolute;";	// Center Icon
-	str+="left:"+(w-iw/2)+"px;top:"+(w-iw/2)+"px;width:"+iw+"px'/>";			// Position
-
+	if (this.ops.slices[0]) {													// If a center slice defined
+		str+="<img id='sliceicon0' src='"+this.ops.slices[0].ico+"' style='position:absolute;";	// Center Icon
+		str+="left:"+(w-iw/2)+"px;top:"+(w-iw/2)+"px;width:"+iw+"px'/>";			// Position
+		}
 	for (i=1;i<9;++i) {															// For each option
 		if (!this.ops.slices[i])	this.ops.slices[i]={ type:"" };				// Make blank object
 		if (!this.ops.slices[i].ico)											// No icon
@@ -91,6 +92,8 @@ function PieMenu(options, parObj)											// CONSTRUCTOR
 PieMenu.prototype.ShowPieMenu=function(mode)								// SHOW PIE MENU
 {
 	var o=this.ops;																// Point at ops
+	trace("sho",mode)
+	this.active=mode;															// Set active status
 	if (mode) {																	// If showing
 		$("#pimenu").css({"width":"0px","height":"0px"});						// Hide
 		$("#pimenu").css({"top":(o.sy)+"px","left":(o.sx)+"px"});				// Position
@@ -100,7 +103,6 @@ PieMenu.prototype.ShowPieMenu=function(mode)								// SHOW PIE MENU
 		this.HideSubMenus(true);												// Hide submenus										
 		$("#pimenu").animate({ width:0, height:0,top:o.sy,left:o.sx, opacity:0},200);	// Zoom off
 	}	
-	this.active=mode;															// Set active status
 }
 
 PieMenu.prototype.HideSubMenus=function(mode)									// HIDE SUBMENUS
@@ -195,15 +197,15 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
   		str+="<div id='pichip"+i+"' class='pi-colchip'></div>";					// Make color chip
  	if (mode == "edge") {														// If setting edge
 		str+="<div id='pilinback' class='pi-subbar unselectable' style='width:50px;height:72px'>";			// Line shell
-		if (this.parObj.curShape < 4)											// Not text
+		if (this.parObj.curShape < 5)											// Not text
 			for (i=0;i<wids.length;++i)											// For each width
   				str+="<div id='piline"+i+"' class='pi-linechip'></div>";		// Make width chip
 		str+="</div><div id='piarrback' class='pi-subbar unselectable' style='width:50px;height:72px'>";	// Arrow shell
-		if (this.parObj.curShape == 2) { 										// If drawing boxes
+		if (this.parObj.curShape == 3) { 										// If drawing boxes
 			str+="<div id='piarr0' class='pi-arrow'></div>";					// Make arrow chip
 			str+="<div id='piarr1' class='pi-arrow'></div>";					// Make arrow chip
 			}
-		else if (this.parObj.curShape < 3)										// Not in circles or text
+		else if (this.parObj.curShape < 4)										// Not in circles or text
 			for (i=0;i<4;++i)													// For each width
   				str+="<div id='piarr"+i+"' class='pi-arrow'></div>";			// Make arrow chip
 		str+="</div>";
@@ -227,7 +229,7 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 	str+="style='left:"+ix+"px;top:"+iy+"px'>";
 	str+="<div id='pitextcol' class='pi-colchip unselectable'";	
 	str+="style='left:"+(ix+49)+"px;top:"+(iy+3)+"px;height:9px;width:9px'></div>";
-	if ((this.parObj.curShape == 4) && mode == "edge") {						// Text
+	if ((this.parObj.curShape == 5) && mode == "edge") {						// Text
 		str+="<select class='pi-select' id='pifont'";							// Add font selection
 		str+="style='position:absolute;width:64px;left:"+ix+"px;top:"+(iy-18)+"px'>";	
 		str+="<option value='0'>Arial</option>";
@@ -338,11 +340,11 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 			});
 		}
 	
-	if (this.parObj.curShape == 2) { 											// If drawing boxes
+	if (this.parObj.curShape == 3) { 											// If drawing boxes
 		$("#piarr0").css({ "height":"10px","left":"0px","top":"10px" })
 		$("#piarr1").css({ "height":"10px","left":"0px","top":"28px","border-radius":"4px" })
 		}
-	else if (this.parObj.curShape < 2) {										// Drawing arrows
+	else if (this.parObj.curShape < 3) {										// Drawing arrows
 		$("#piarr1").append("<div id='parr1' class='pi-rarr' style='left:16px;top:-5px'</div>")
 		$("#piarr2").append("<div id='parr2' class='pi-larr' style='left:-2px;top:-5px'</div>");
 		$("#piarr3").append("<div id='parr3' class='pi-larr' style='left:-2px;top:-5px'</div>");
