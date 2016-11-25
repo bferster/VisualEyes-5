@@ -15,7 +15,6 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	var str="<div id='pamenu' class='pa-main unselectable'>";					// Main shell
 	str+="<div id='pacoldot' class='pa-dot unselectable'>";						// Color dot
 	$(parent).append(str);														// Add to DOM														
-	this.DrawMenu();															// Draw it
 
 	var ops={id:"qdraw",x:330,y:334,wid:150,ang:45,slices:[]};
 	ops.dial="img/piback.png";													// Dial background
@@ -27,9 +26,11 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	ops.slices[4]={ type:"but", ico:"img/redo-icon.png" };						// Redo slice 
 	ops.slices[5]={ type:"but", ico:"img/undo-icon.png" };						// Undo slice 
 	ops.slices[6]={ type:"but", ico:"img/save-icon.png"};						// Undo slice 
+	ops.slices[7]={ type:"but", ico:"img/gear-icon.png" };						// Center 
 	ops.slices[8]={ type:"ico", ico:"img/draw-icon.png", def:this.curShape };	// Blank slice 
 	ops.slices[8].options=["img/point-icon.png","img/line-icon.png","img/curve-icon.png","img/box-icon.png","img/circle-icon.png","img/text-icon.png"] ;
 	this.pie=new PieMenu(ops,this);												// Init pie menu
+	this.DrawMenu();															// Draw it
 	
 	$("#pamenu").draggable({													// Make it draggable
 		 containment: "parent",
@@ -79,15 +80,18 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 				}
 			_this.pie.ops.sx=x;		_this.pie.ops.sy=y;							// Start point
 			_this.pie.ShowPieMenu(!_this.pie.active);							// Toggle
+			_this.DrawMenu();	
 			});
 	
 	$(parent).on("mousedown",function(e) { 										// CLICK ON BACKGROUND
-		if (e.target.id == "containerDiv")										// If on background
+		if (e.target.id == "containerDiv")	{									// If on background
 			_this.pie.ShowPieMenu(false);										// Hide it
+			_this.DrawMenu();	
+			}
 		}); 
 }
 
-QDraw.prototype.DrawMenu=function(mode)										// SHOW DRAWING TOOL MENU
+QDraw.prototype.DrawMenu=function()											// SHOW DRAWING TOOL MENU
 {
 	var col=this.curCol;														// Set color
 	var icons=["point","line","curve","box","circle","text"];					// Names of icons
@@ -122,6 +126,10 @@ QDraw.prototype.DrawMenu=function(mode)										// SHOW DRAWING TOOL MENU
 			"border-top-right-radius":"100px"
 			});								
 	$("#pamenu").css({"top":this.dockPos+"%"});
+	this.pie.sx=$("#pamenu").position().left;
+	this.pie.sy=$("#pamenu").position().top;
+	if (this.pie.active)
+		$("#pamenu").css({"border-radius":"100px"});
 }
 
 QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT

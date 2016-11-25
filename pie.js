@@ -92,17 +92,18 @@ function PieMenu(options, parObj)											// CONSTRUCTOR
 PieMenu.prototype.ShowPieMenu=function(mode)								// SHOW PIE MENU
 {
 	var o=this.ops;																// Point at ops
-	trace("sho",mode)
 	this.active=mode;															// Set active status
+	var w=o.wid/2-25;
 	if (mode) {																	// If showing
 		$("#pimenu").css({"width":"0px","height":"0px"});						// Hide
-		$("#pimenu").css({"top":(o.sy)+"px","left":(o.sx)+"px"});				// Position
+		$("#pimenu").css({"top":o.sy+"px","left":o.sx+"px"});					// Position
 		$("#pimenu").animate({ width:o.wid, height:o.wid,top:o.y, left:o.x,opacity:1});	// Zoom on
+		$("#pamenu").animate({ top:o.y+w, left:o.x+w });						// Zoom on
 		}
 	else{																		// If hiding
 		this.HideSubMenus(true);												// Hide submenus										
 		$("#pimenu").animate({ width:0, height:0,top:o.sy,left:o.sx, opacity:0},200);	// Zoom off
-	}	
+}	
 }
 
 PieMenu.prototype.HideSubMenus=function(mode)									// HIDE SUBMENUS
