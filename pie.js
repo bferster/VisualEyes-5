@@ -102,8 +102,8 @@ PieMenu.prototype.ShowPieMenu=function(mode)								// SHOW PIE MENU
 		}
 	else{																		// If hiding
 		this.HideSubMenus(true);												// Hide submenus										
-		$("#pimenu").animate({ width:0, height:0,top:o.sy,left:o.sx, opacity:0},200);	// Zoom off
-}	
+		$("#pimenu").animate({ width:0, height:0,top:o.sy,left:o.sx, opacity:0},0);	// Zoom off
+		}	
 }
 
 PieMenu.prototype.HideSubMenus=function(mode)									// HIDE SUBMENUS
