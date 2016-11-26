@@ -105,31 +105,33 @@ QDraw.prototype.DrawMenu=function()											// SHOW DRAWING TOOL MENU
 	col=(this.curEcol == "None") ? this.curCol : this.curEcol					// Set edge
 	$("#pacoldot").css({"border":"2px solid "+col} );							// Edge color
 	
-	if (this.dockSide == "left")
-		$("#pamenu").css({"border-radius":"0px","left":"0px",
-			"border-top-right-radius":"100px",
-			"border-bottom-right-radius":"100px"
-			});								
-	else if (this.dockSide == "right")
-		$("#pamenu").css({"border-radius":"0px","left":x+"px",
-			"border-top-left-radius":"100px",
-			"border-bottom-left-radius":"100px"
-			});								
-	else if (this.dockSide == "top")
-		$("#pamenu").css({"border-radius":"0px","top":"0px",
-			"border-bottom-left-radius":"100px",
-			"border-bottom-right-radius":"100px"
-			});								
-	else if (this.dockSide == "bottom")
-		$("#pamenu").css({"border-radius":"0px","top":y+"px",
-			"border-top-left-radius":"100px",
-			"border-top-right-radius":"100px"
-			});								
-	$("#pamenu").css({"top":this.dockPos+"%"});
-	this.pie.sx=$("#pamenu").position().left;
-	this.pie.sy=$("#pamenu").position().top;
-	if (this.pie.active)
-		$("#pamenu").css({"border-radius":"100px"});
+	if (this.pie.active) 														// If pie menu is visible
+		$("#pamenu").css({"border-radius":"100px"});							// Make it round
+	else{																		// Pie hidden
+		if (this.dockSide == "left")
+			$("#pamenu").css({"border-radius":"0px","left":"0px",
+				"border-top-right-radius":"100px",
+				"border-bottom-right-radius":"100px"
+				});								
+		else if (this.dockSide == "right")
+			$("#pamenu").css({"border-radius":"0px","left":x+"px",
+				"border-top-left-radius":"100px",
+				"border-bottom-left-radius":"100px"
+				});								
+		else if (this.dockSide == "top")
+			$("#pamenu").css({"border-radius":"0px","top":"0px",
+				"border-bottom-left-radius":"100px",
+				"border-bottom-right-radius":"100px"
+				});								
+		else if (this.dockSide == "bottom")
+			$("#pamenu").css({"border-radius":"0px","top":y+"px",
+				"border-top-left-radius":"100px",
+				"border-top-right-radius":"100px"
+				});								
+		$("#pamenu").css({"top":this.dockPos+"%"});
+		this.pie.sx=$("#pamenu").position().left;
+		this.pie.sy=$("#pamenu").position().top;
+	}
 }
 
 QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
@@ -137,7 +139,7 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 	var v=msg.split("|");														// Split into parts
 	if ((v[1] == "qdraw") && (v[0] == "click")) {								// A click in main menu
 		if (v[2] == 8) {														// Setting shape
-			if (v[3] == 4)														// If text
+			if (v[3] == 5)														// If text
 				this.pie.SetSlice(2,{type:"edg", ico:"img/font-icon.png", def:this.curCol+","+this.curTsiz+","+this.curTsty+","+this.curTfon+","+this.curTdrop});// Text menu 
 			else																// If shape
 				this.pie.SetSlice(2,{type:"edg", ico:"img/edge-icon.png", def:this.curEcol+","+this.curEwid+","+this.curEtip});	// Edge menu
@@ -150,7 +152,7 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 				this.curCol=vv[0];												// Set color
 				break;
 			case 2:																// Edge or text styling 
-				if (this.curShape == 4) {										// If text
+				if (this.curShape == 5) {										// If text
 					this.curCol=vv[0];											// Set color
 					this.curTsiz=vv[1];											// Set size
 					this.curTsty=vv[2];											// Set style

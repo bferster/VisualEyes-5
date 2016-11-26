@@ -407,6 +407,7 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 		var drop="transparent";													// Assume no drop
 		if (def[4] == 1)		drop="#ffffff";									// White drop
 		else if (def[4] == 2)	drop="#000000";									// Black drop
+		trace(def)
 		$("#pifdemo").css({"color":def[0],"font-size":def[1]+"px",				// Font size and color
 			"font-weight":def[2]&1 ? "bold" : "normal",							// Bold
 			"font-style":def[2]&2 ? "italic" : "normal",						// Italic
