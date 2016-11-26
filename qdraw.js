@@ -8,10 +8,12 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	var _this=this;																// Save context
 	parent=parent ? parent : "body";											// If a parent div spec'd use it
 	if (parent != "body")  parent="#"+parent;									// Add #
-	this.parent=parent;		this.dockSide=dockSide;		this.dockPos=dockPos;	// Save settings
-	this.curCol="#e6550d";	this.curEwid=1;				this.curEcol="#000000";	// Default settings
-	this.curEtip=0;			this.curShape=0;			this.curAlpha=100;
-	this.curTsiz=24;		this.curTsty=0;				this.curTfon=0;		this.curTdrop=0;
+	this.parent=parent;		this.dockSide=dockSide;	this.dockPos=dockPos;		// Save settings
+	this.curUndo=0;			this.curRedo=0;										// Undo/redo
+	this.curCol="#e6550d";	this.curEwid=1;		this.curEcol="#000000";			// Default settings
+	this.curEtip=0;			this.curShape=0;	this.curAlpha=100;
+	this.curTsiz=24;		this.curTdrop=0;	this.curTsty=0;		this.curTfon=0;		
+	
 	var str="<div id='pamenu' class='pa-main unselectable'>";					// Main shell
 	str+="<div id='pacoldot' class='pa-dot unselectable'>";						// Color dot
 	$(parent).append(str);														// Add to DOM														
@@ -23,9 +25,9 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	ops.slices[1]={ type:"col", ico:"img/color-icon.png", def:this.curCol };	// Color slice 
 	ops.slices[2]={ type:"edg", ico:"img/edge-icon.png", def:this.curEcol+","+this.curEwid+","+this.curEtip };	// Edge 
 	ops.slices[3]={ type:"sli", ico:"img/alpha-icon.png", def:100 };			// Alpha slice 
-	ops.slices[4]={ type:"but", ico:"img/redo-icon.png" };						// Redo slice 
-	ops.slices[5]={ type:"but", ico:"img/undo-icon.png" };						// Undo slice 
-	ops.slices[6]={ type:"but", ico:"img/save-icon.png"};						// Undo slice 
+	ops.slices[4]={ type:"men", ico:"img/redo-icon.png", options:["Redo"]};		// Redo slice 
+	ops.slices[5]={ type:"men", ico:"img/undo-icon.png",options:["Undo"]};		// Undo slice 
+	ops.slices[6]={ type:"men", ico:"img/save-icon.png", options:["Save","Load","Clear"]};	// Save slice 
 	ops.slices[7]={ type:"but", ico:"img/gear-icon.png" };						// Center 
 	ops.slices[8]={ type:"ico", ico:"img/draw-icon.png", def:this.curShape };	// Blank slice 
 	ops.slices[8].options=["img/point-icon.png","img/line-icon.png","img/curve-icon.png","img/box-icon.png","img/circle-icon.png","img/text-icon.png"] ;
@@ -136,7 +138,7 @@ QDraw.prototype.DrawMenu=function()											// SHOW DRAWING TOOL MENU
 
 QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 {
-	var v=msg.split("|");														// Split into parts
+	var vv,v=msg.split("|");													// Split into parts
 	if ((v[1] == "qdraw") && (v[0] == "click")) {								// A click in main menu
 		if (v[2] == 8) {														// Setting shape
 			if (v[3] == 5)														// If text
@@ -146,7 +148,8 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 			}
 		if (v[2])																// If not center
 			this.pie.ops.slices[v[2]].def=v[3];									// Set new default
-		var vv=v[3].split(",");													// Split into sub parts
+		if (v[3])
+			vv=v[3].split(",");													// Split into sub parts
 		switch(v[2]-0) {														// Route on slice
 			case 1:																// Color
 				this.curCol=vv[0];												// Set color
@@ -168,12 +171,58 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 			case 3:																// Alpha
 				this.curAlpha=vv[0];											// Set alpha
 				break;
+			case 4:																// Redo
+				this.ReDo();													// Do it
+				break;
+			case 5:																// Undo
+				this.UnDo();													// Undo it
+				break;
 			case 8:																// Shape
 				this.curShape=vv[0];											// Set shape
+this.Do();
 				break;
 			}
 		this.DrawMenu();														// Redraw menu
 		}
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// UNDO / REDO
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+QDraw.prototype.Do=function()												// SAVE DRAWING IN SESSION STORAGE
+{
+	var o={};
+var data={test:123};	
+	o.date=new Date().toString().substr(0,21);									// Get date
+	o.script=JSON.stringify(data);												// Stringify
+	sessionStorage.setItem("do-"+sessionStorage.length,JSON.stringify(o));		// Add new do												
+	this.curUndo++;																// Something to undo
+	trace("do",data,this.curUndo);
+}
+	
+QDraw.prototype.UnDo=function(msg)											// GET DRAWING FROM SESSION STORAGE
+{
+	if (!this.curUndo)															// Nothing to undo
+		return;																	// Quit
+	var key=sessionStorage.key(this.curUndo);									// Get key for undo
+	var o=$.parseJSON(sessionStorage.getItem(key));								// Get undo from local storage
+	var data=$.parseJSON(o.script);												// Get data
+	Sound("delete");															// Delete
+	this.curUndo--;																// One less to undo
+	trace("do",data,this.curUndo);
+}
+
+QDraw.prototype.ReDo=function(msg)											// REDO DRAWING FROM UNDO
+{
+	if (!this.curRedo)															// Nothing to redo
+		return;																	// Quit
+	var key=sessionStorage.key(this.curRedo);									// Get key for undo
+	var o=$.parseJSON(sessionStorage.getItem(key));								// Get undo from local storage
+	var data=$.parseJSON(o.script);												// Get data
+	Sound("click");																// Click
+	trace("redo",data,this.curRedo);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
