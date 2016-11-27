@@ -10,6 +10,7 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	if (parent != "body")  parent="#"+parent;									// Add #
 	this.parent=parent;		this.dockSide=dockSide;	this.dockPos=dockPos;		// Save settings
 	this.curUndo=0;			this.curRedo=0;										// Undo/redo
+	sessionStorage.clear();														// Celar session storage
 	this.curCol="#e6550d";	this.curEwid=1;		this.curEcol="#000000";			// Default settings
 	this.curEtip=0;			this.curShape=0;	this.curAlpha=100;
 	this.curTsiz=24;		this.curTdrop=0;	this.curTsty=0;		this.curTfon=0;		
@@ -193,36 +194,41 @@ this.Do();
 
 QDraw.prototype.Do=function()												// SAVE DRAWING IN SESSION STORAGE
 {
-	var o={};
-var data={test:123};	
+	var data="",o={};
+
+if (sessionStorage.length) {													// If not first one
+var o=$.parseJSON(sessionStorage.getItem("do-"+(this.curUndo-1)));				
+data=o.script.replace(/\"/g,"");												
+}
+data+=String.fromCharCode(65+sessionStorage.length)
 	o.date=new Date().toString().substr(0,21);									// Get date
 	o.script=JSON.stringify(data);												// Stringify
-	sessionStorage.setItem("do-"+sessionStorage.length,JSON.stringify(o));		// Add new do												
-	this.curUndo++;																// Something to undo
-	trace("do",data,this.curUndo);
+	sessionStorage.setItem("do-"+this.curUndo,JSON.stringify(o));				// Add new do												
+	trace("do",data,this.curUndo++);
 }
 	
 QDraw.prototype.UnDo=function(msg)											// GET DRAWING FROM SESSION STORAGE
 {
 	if (!this.curUndo)															// Nothing to undo
 		return;																	// Quit
-	var key=sessionStorage.key(this.curUndo);									// Get key for undo
+	var key=sessionStorage.key(--this.curUndo);									// Get key for undo
 	var o=$.parseJSON(sessionStorage.getItem(key));								// Get undo from local storage
 	var data=$.parseJSON(o.script);												// Get data
 	Sound("delete");															// Delete
-	this.curUndo--;																// One less to undo
-	trace("do",data,this.curUndo);
+	this.curRedo++;																// Add to redo count
+	trace("undo",data,this.curUndo+":"+this.curUndo);
 }
 
 QDraw.prototype.ReDo=function(msg)											// REDO DRAWING FROM UNDO
 {
 	if (!this.curRedo)															// Nothing to redo
 		return;																	// Quit
-	var key=sessionStorage.key(this.curRedo);									// Get key for undo
+	var key=sessionStorage.key(this.curRedo--);									// Get key for redo
 	var o=$.parseJSON(sessionStorage.getItem(key));								// Get undo from local storage
 	var data=$.parseJSON(o.script);												// Get data
 	Sound("click");																// Click
-	trace("redo",data,this.curRedo);
+	this.curUndo++;																// Add to undo count
+	trace("redo",data,this.curUndo+":"+this.curUndo);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
