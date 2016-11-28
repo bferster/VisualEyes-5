@@ -78,16 +78,13 @@ function PieMenu(options, parObj)											// CONSTRUCTOR
 		$("#pimenu").css({"cursor":cur});										// Set cursor
 		});	
 
-	$("#piback").on("click",function() { 										// ON CLICK
-		if (_this.curSlice >= 0) {												// A valid pick
-			if (_this.ops.slices[_this.curSlice].type == "but")					// If close option set
-				_this.SendMessage("click",_this.curSlice);						// Send event
-			if (_this.ops.slices[_this.curSlice].close)							// If close option set
-				_this.ShowPieMenu(false);										// Close menu
-			_this.curSlice=-1;													// Reset slice
-			}
-		});	
-}
+	for (i=1;i<9;++i) 															// For each slice
+ 		if (this.ops.slices[i].type == "but")									// If a button
+			$("#sliceicon"+i).on("click",function(e) { 							// Add click handler
+				var id=e.currentTarget.id.substr(9)-0;							// Extract id
+				_this.SendMessage("click",id);									// Send event
+				});
+ }
 
 PieMenu.prototype.ShowPieMenu=function(mode)								// SHOW PIE MENU
 {
@@ -407,7 +404,6 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 		var drop="transparent";													// Assume no drop
 		if (def[4] == 1)		drop="#ffffff";									// White drop
 		else if (def[4] == 2)	drop="#000000";									// Black drop
-		trace(def)
 		$("#pifdemo").css({"color":def[0],"font-size":def[1]+"px",				// Font size and color
 			"font-weight":def[2]&1 ? "bold" : "normal",							// Bold
 			"font-style":def[2]&2 ? "italic" : "normal",						// Italic
@@ -544,7 +540,7 @@ PieMenu.prototype.ShowIcons=function(num, def)								// SHOW ICON RING
 		}
 }
 
-PieMenu.prototype.SendMessage=function(cmd, msg, callback) 					// SEND HTML5 MESSAGE 
+PieMenu.prototype.SendMessage=function(cmd, msg) 							// SEND HTML5 MESSAGE 
 {
 	var str=cmd+"|"+this.ops.id;												// Add src and id						
 	if (msg)																	// If more to it

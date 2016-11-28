@@ -10,11 +10,10 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	if (parent != "body")  parent="#"+parent;									// Add #
 	this.parent=parent;		this.dockSide=dockSide;	this.dockPos=dockPos;		// Save settings
 	this.curUndo=0;			this.curRedo=0;										// Undo/redo
-	sessionStorage.clear();														// Celar session storage
 	this.curCol="#e6550d";	this.curEwid=1;		this.curEcol="#000000";			// Default settings
 	this.curEtip=0;			this.curShape=0;	this.curAlpha=100;
 	this.curTsiz=24;		this.curTdrop=0;	this.curTsty=0;		this.curTfon=0;		
-	
+	this.segs=[];																// Drawing data
 	var str="<div id='pamenu' class='pa-main unselectable'>";					// Main shell
 	str+="<div id='pacoldot' class='pa-dot unselectable'>";						// Color dot
 	$(parent).append(str);														// Add to DOM														
@@ -26,14 +25,19 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	ops.slices[1]={ type:"col", ico:"img/color-icon.png", def:this.curCol };	// Color slice 
 	ops.slices[2]={ type:"edg", ico:"img/edge-icon.png", def:this.curEcol+","+this.curEwid+","+this.curEtip };	// Edge 
 	ops.slices[3]={ type:"sli", ico:"img/alpha-icon.png", def:100 };			// Alpha slice 
-	ops.slices[4]={ type:"men", ico:"img/redo-icon.png", options:["Redo"]};		// Redo slice 
-	ops.slices[5]={ type:"men", ico:"img/undo-icon.png",options:["Undo"]};		// Undo slice 
+	ops.slices[4]={ type:"but", ico:"img/redo-icon.png", options:["Redo"]};		// Redo slice 
+	ops.slices[5]={ type:"but", ico:"img/undo-icon.png",options:["Undo"]};		// Undo slice 
 	ops.slices[6]={ type:"men", ico:"img/save-icon.png", options:["Save","Load","Clear"]};	// Save slice 
 	ops.slices[7]={ type:"but", ico:"img/gear-icon.png" };						// Center 
 	ops.slices[8]={ type:"ico", ico:"img/draw-icon.png", def:this.curShape };	// Blank slice 
 	ops.slices[8].options=["img/point-icon.png","img/line-icon.png","img/curve-icon.png","img/box-icon.png","img/circle-icon.png","img/text-icon.png"] ;
+
 	this.pie=new PieMenu(ops,this);												// Init pie menu
 	this.DrawMenu();															// Draw it
+	sessionStorage.clear();														// Clear session storage
+	this.Do();																	// Add starting undo
+	document.onkeyup=$.proxy(this.onKeyUp,this);								// Keyup listener
+	document.onkeydown==$.proxy(this.onKeyDown,this);							// Keydown listener
 	
 	$("#pamenu").draggable({													// Make it draggable
 		 containment: "parent",
@@ -194,41 +198,75 @@ this.Do();
 
 QDraw.prototype.Do=function()												// SAVE DRAWING IN SESSION STORAGE
 {
-	var data="",o={};
 
-if (sessionStorage.length) {													// If not first one
-var o=$.parseJSON(sessionStorage.getItem("do-"+(this.curUndo-1)));				
-data=o.script.replace(/\"/g,"");												
-}
-data+=String.fromCharCode(65+sessionStorage.length)
+//if (this.segs[0] == undefined) this.segs.push("")
+//else this.segs[0]+=String.fromCharCode(65+this.segs[0].length)
+
+	var o={};
 	o.date=new Date().toString().substr(0,21);									// Get date
-	o.script=JSON.stringify(data);												// Stringify
-	sessionStorage.setItem("do-"+this.curUndo,JSON.stringify(o));				// Add new do												
-	trace("do",data,this.curUndo++);
+	o.script=this.segs;															// Get drawing data
+	sessionStorage.setItem("do-"+this.curUndo++,JSON.stringify(o));				// Add new do												
+	this.curRedo=0;																// Stop any redos
+	this.SetUndoStatus();														// Set undo/reco icons
+//	trace("do",this.segs,this.curUndo);
 }
 	
-QDraw.prototype.UnDo=function(msg)											// GET DRAWING FROM SESSION STORAGE
+QDraw.prototype.UnDo=function()												// GET DRAWING FROM SESSION STORAGE
 {
-	if (!this.curUndo)															// Nothing to undo
+	if (this.curUndo < 2)														// Nothing to undo
 		return;																	// Quit
-	var key=sessionStorage.key(--this.curUndo);									// Get key for undo
+	var key=sessionStorage.key(this.curUndo-2);									// Get key for undo
 	var o=$.parseJSON(sessionStorage.getItem(key));								// Get undo from local storage
-	var data=$.parseJSON(o.script);												// Get data
+	this.segs=o.script;															// Get data
 	Sound("delete");															// Delete
-	this.curRedo++;																// Add to redo count
-	trace("undo",data,this.curUndo+":"+this.curUndo);
+	this.curRedo++;																// Inc redo count
+	this.curUndo--;																// Dec undo count
+	this.SetUndoStatus();														// Set undo/reco icons
+//	trace("undo",this.segs,this.curUndo+":"+this.curRedo);
 }
 
-QDraw.prototype.ReDo=function(msg)											// REDO DRAWING FROM UNDO
+QDraw.prototype.ReDo=function()												// REDO DRAWING FROM UNDO
 {
 	if (!this.curRedo)															// Nothing to redo
 		return;																	// Quit
-	var key=sessionStorage.key(this.curRedo--);									// Get key for redo
+	var key=sessionStorage.key(this.curUndo);									// Get key for redo
 	var o=$.parseJSON(sessionStorage.getItem(key));								// Get undo from local storage
-	var data=$.parseJSON(o.script);												// Get data
-	Sound("click");																// Click
-	this.curUndo++;																// Add to undo count
-	trace("redo",data,this.curUndo+":"+this.curUndo);
+	this.segs=o.script;															// Get data
+	Sound("ding");																// Click
+	this.curUndo++;																// Inc undo count
+	this.curRedo--;																// Dec redo count
+	this.SetUndoStatus();														// Set undo/reco icons
+//	trace("redo",this.segs,this.curUndo+":"+this.curRedo);
+}
+
+QDraw.prototype.SetUndoStatus=function()									// SET UNDO/REDO ICONS
+{
+	$("#sliceicon5").css("opacity",(this.curUndo > 1) ? 1 : .33);
+	$("#sliceicon4").css("opacity",(this.curRedo > 0) ? 1 : .33);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// EVENTS
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+QDraw.prototype.onKeyUp=function(e)											// KEY UP HANDLER
+{
+	if ((e.key == "z") && e.ctrlKey)											// Control z
+		this.UnDo();															// Undo
+	else if ((e.key == "Z") && e.ctrlKey)										// Control-shift Z
+		this.ReDo();															// Undo
+	else if ((e.key == "y") && e.ctrlKey)										// Control y
+		this.ReDo();															// Redo
+}
+
+QDraw.prototype.onKeyDown=function(e)										// KEY DOWN HANDLER
+{
+	if ((e.keyCode == 8) &&													// Look for Del key
+        (e.target.tagName != "TEXTAREA") && 								// In text area
+        (e.target.tagName != "INPUT")) { 									// or input
+		e.stopPropagation();												// Trap it
+     	return false;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -761,6 +799,9 @@ SHIVA_Draw.prototype.onKeyDown=function(e)								// KEY DOWN HANDLER
 
 SHIVA_Draw.prototype.onKeyUp=function(e)								// KEY UP HANDLER
 {
+	
+/*	
+	
 	if ($("#shivaDrawPaletteDiv").length == 0) 								// If no palette
 		return;																// Quit
 	if ((e.which == 83) && (e.ctrlKey) && (e.altKey)) {						// CTRL+ALT+S
@@ -836,7 +877,7 @@ SHIVA_Draw.prototype.onKeyUp=function(e)								// KEY UP HANDLER
 	else if (e.which == 40)  drObj.MoveSegs(0,-1,0);						// Move U 
 	else if (e.which == 38)  drObj.MoveSegs(0,1,0);							// Move D 
 	}
-}
+*/}
 
 SHIVA_Draw.prototype.AddSelect=function(x, y, shiftKey)					// SELECT SEGMENT/DOT FROM CLICK
 {
