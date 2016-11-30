@@ -27,10 +27,12 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	ops.slices[3]={ type:"sli", ico:"img/alpha-icon.png", def:100 };			// Alpha slice 
 	ops.slices[4]={ type:"but", ico:"img/redo-icon.png", options:["Redo"]};		// Redo slice 
 	ops.slices[5]={ type:"but", ico:"img/undo-icon.png",options:["Undo"]};		// Undo slice 
-	ops.slices[6]={ type:"men", ico:"img/save-icon.png", options:["Save","Load","Clear"]};	// Save slice 
+	ops.slices[6]={ type:"men", ico:"img/save-icon.png", options:["Save","Save-As","Load","Clear"]};	// Save slice 
 	ops.slices[7]={ type:"but", ico:"img/gear-icon.png" };						// Center 
 	ops.slices[8]={ type:"ico", ico:"img/draw-icon.png", def:this.curShape };	// Blank slice 
 	ops.slices[8].options=["img/point-icon.png","img/line-icon.png","img/curve-icon.png","img/box-icon.png","img/circle-icon.png","img/text-icon.png"] ;
+
+	this.gd=new Gdrive();														// Google drive access
 
 	this.pie=new PieMenu(ops,this);												// Init pie menu
 	this.DrawMenu();															// Draw it
@@ -143,6 +145,7 @@ QDraw.prototype.DrawMenu=function()											// SHOW DRAWING TOOL MENU
 
 QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 {
+	var _this=this;																// Save context
 	var vv,v=msg.split("|");													// Split into parts
 	if ((v[1] == "qdraw") && (v[0] == "click")) {								// A click in main menu
 		if (v[2] == 8) {														// Setting shape
@@ -182,9 +185,38 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 			case 5:																// Undo
 				this.UnDo();													// Undo it
 				break;
+			case 6:
+				trace(v[3])
+				var data='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle r="32" cx="35" cy="65" fill="#F00" opacity="0.5"/><circle r="32" cx="65" cy="65" fill="#0F0" opacity="0.5"/><circle r="32" cx="50" cy="35" fill="#00F" opacity="0.5"/></svg>'
+					if (v[3] == 0)													// Save
+					this.gd.AccessAPI(function() {
+						 _this.gd.Upload($("#myName").val(),data,_this.gd.lastId ? _this.gd.lastId : "",function(res) {
+						 	 trace(res); 
+						 	 }); 
+						 });
+				else if (v[3] == 1)													// Save As
+					this.gd.AccessAPI(function() {
+						_this.gd.Upload($("#myName").val(),data, null,function(res) {
+							 trace(res); 
+							 }); 
+						});
+				else if (v[3] == 2)													// Load
+					this.gd.AccessAPI(function() {
+						 _this.gd.Picker(false,function(res) {
+						 	 _this.gd.AccessAPI(function() {
+						 	 	 _this.gd.Download(_this.gd.lastId,function(res) {
+						 	 	 	 trace(res); 
+						 	 	 	 }); 
+						 	 	 }); 
+						 	 }); 
+						 });
+				else if (v[3] == 3)												// Clear
+					Sound("delete");
+				break;
+
 			case 8:																// Shape
 				this.curShape=vv[0];											// Set shape
-this.Do();
+//this.Do();
 				break;
 			}
 		this.DrawMenu();														// Redraw menu
@@ -268,6 +300,147 @@ QDraw.prototype.onKeyDown=function(e)										// KEY DOWN HANDLER
      	return false;
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// GOOGLE DRIVE ACCESS 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function Gdrive()															// CONSTRUCTOR
+{
+	this.clientId="81792849751-1c76v0vunqu0ev9fgqsfgg9t2sehcvn2.apps.googleusercontent.com";
+	this.scope="https://www.googleapis.com/auth/drive";
+	this.contentType = 'image/svg+xml';
+	this.lastId="";
+}
+
+Gdrive.prototype.AccessAPI=function(apiCall, callback)						// CHECK FOR AUTHORIZATION and ACCESS API
+{
+	gapi.auth.authorize(														// Get logged-in status
+		{"client_id": this.clientId, "scope": this.scope, 						// Client info
+		"immediate": true},handleAuthResult										// Immediate
+		);
+		
+	function handleAuthResult(authResult) {										// ON GDRIVE RESPONSE
+        if (authResult && !authResult.error)  									// If logged in
+	 		gapi.client.load('drive', 'v2', function() {						// Load API
+ 	 			apiCall(callback);												// Run API callback
+	 		});
+	 	else																	// Not logged in
+			gapi.auth.authorize(												// Ask for auth
+				{"client_id": this.clientId, "scope": this.scope, 				// Client info
+				"immediate": false},handleAuthResult							// Force looking for auth
+				);
+		}
+ }
+
+Gdrive.prototype.Download=function(id, callback)							// DOWNLOAD DATA FROM G-DRIVE
+{
+	var request = gapi.client.drive.files.get({ 'fileId': id });				// Request file
+	request.execute(function(resp) {											// Get data
+		if (resp.downloadUrl) {													// If a link
+		    var accessToken=gapi.auth.getToken().access_token;					// Get access token
+		    var xhr=new XMLHttpRequest();										// Ajax
+		    xhr.open('GET',resp.downloadUrl);									// Set open url
+		    xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);		// Set header
+		    xhr.onload = function()  {  callback(xhr.responseText);   };		// On load
+		    xhr.send();															// Do it
+		  	}
+		});
+}
+
+Gdrive.prototype.Upload=function(name, data, id, callback)					// UPLOAD DATA TO G-DRIVE
+{
+	const boundary = '-------314159265358979323846264';							// Bounds	
+    const delimiter = "\r\n--" + boundary + "\r\n";								// Opener
+    const close_delim = "\r\n--" + boundary + "--";								// Closer
+	var metadata={ 'title': name, 'mimeType': this.contentType };				// Set metadata
+	var base64Data=btoa(data); 													// Encode to base-64 Stringify if JSON
+	var _this=this;																// Save context
+	id=id ? "/"+id : "";														// Add id if set
+   trace(id)
+    var multipartRequestBody =													// Multipart request
+        delimiter +
+        'Content-Type: application/json\r\n\r\n' +
+        JSON.stringify(metadata) +
+        delimiter +
+        'Content-Type: ' + this.contentType + '\r\n' +							// Set content type
+        'Content-Transfer-Encoding: base64\r\n' +								// Base 64
+        '\r\n' +
+        base64Data +															// Add metadate
+        close_delim;															// Closer
+    var request = gapi.client.request({											// Create request
+        'path': '/upload/drive/v2/files'+id,									// Service
+        'method': id ? 'PUT' : 'POST',											// Method based on update or create mode
+   		'params': id ? {'uploadType': 'multipart', 'alt': 'json'} : {'uploadType': 'multipart'},
+        'headers': {'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'},
+        'body': multipartRequestBody});
+  
+   request.execute(function(arg) {												// Run request
+       	_this.lastId=arg.id;													// Save last id set
+      	callback(arg);															// Run callback
+    	});
+}
+
+Gdrive.prototype.Picker=function(allFilea, callback)						// RUN G-DRIVE PICKER
+{
+	var _this=this;																// Save context
+	LoadGoogleDrive(true, function(s) {
+		callback(s.url);
+		});
+	
+ 	function LoadGoogleDrive(allFiles, callback)								// LOAD PICKER FOR GOOGLE DRIVE
+	{
+	  	var pickerApiLoaded=false;
+		var oauthToken;
+		var key="AIzaSyAVjuoRt0060MnK_5_C-xenBkgUaxVBEug";
+		var id="81792849751-1c76v0vunqu0ev9fgqsfgg9t2sehcvn2.apps.googleusercontent.com";
+		gapi.load('auth', { 'callback': function() {
+				window.gapi.auth.authorize( {
+	              	'client_id': id,
+	             	'scope': ['https://www.googleapis.com/auth/drive'],
+	              	'immediate': false }, function(authResult) {
+							if (authResult && !authResult.error) {
+	          					oauthToken=authResult.access_token;
+	          					createPicker();
+	          					}
+	          				});
+				}
+			});
+		
+		gapi.load('picker', {'callback': function() {
+				pickerApiLoaded=true;
+		        createPicker();
+	    	   	}
+			});
+	
+		function createPicker() {
+	        if (pickerApiLoaded && oauthToken) {
+	           	var view=new google.picker.DocsView().
+	           		setOwnedByMe(allFiles).
+					setIncludeFolders(true);
+	          	var picker=new google.picker.PickerBuilder().
+	          		addView(view).
+					setOAuthToken(oauthToken).
+					setDeveloperKey(key).
+					setCallback(pickerCallback).
+					setSelectableMimeTypes(_this.contentType).
+					build();
+				picker.setVisible(true);
+	       		}
+	    	}
+	
+		function pickerCallback(data) {
+	        if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
+         		var doc=data[google.picker.Response.DOCUMENTS][0];
+	      		_this.lastId=doc.id;
+	      		callback(doc)
+	       		}
+			}
+	   
+	}	// End closure
+}
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DRAWING GUTS 
