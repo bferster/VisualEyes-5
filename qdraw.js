@@ -213,7 +213,6 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 						 	 }); 
 					}
 				else if (v[3] == 3)	{											// Clear
-					trace(123)
 					if (this.ConfirmBox("Are you sure?", function() {			// Are you sure?
 							Sound("delete");
 						}));
