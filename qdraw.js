@@ -218,16 +218,28 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 						}));
 					}
 				break;
-
+			case 7:															// Settings
+				this.Settings();
+				break;
 			case 8:																// Shape
 				this.curShape=vv[0];											// Set shape
-//this.Do();
+				this.Do();
 				break;
 			}
 		this.DrawMenu();														// Redraw menu
 		}
 }
 
+QDraw.prototype.Settings=function()											// SETTINGS MENU
+{
+	var str="<table><tr height='18'>";
+	str+="<tr><td>Click volume</td><td><input id='setmute' type='checkbox'></td></tr>";
+	str+="<tr><td>Grid snap</td><td><input id='settitle' class='ve-is' style='width:220px' type='input'></td></tr>";
+	str+="<tr><td>Help</td><td><a href='https://docs.google.com/document/d/161td5ZuqKqT5R5r9z1P8AxBA6l9LaP-eYl_RvCyvw2g/edit?usp=sharing' target='_blank'>";
+	str+="<img src='img/helpicon.gif' style='vertical-align:bottom' title='Show help'></a></td></tr>";
+	str+="</table>";
+	this.Dialog("Settings",str);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // UNDO / REDO
@@ -454,14 +466,15 @@ QDraw.prototype.GetTextBox=function (title, content, def, callback)		// GET TEXT
 	$("#alertBoxDiv").remove();												// Remove any old ones
 	$("body").append("<div class='unselectable' id='alertBoxDiv'></div>");														
 	var str="<p><img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
-	str+="<span id='gtBoxTi'style='font-size:18px;text-shadow:1px 1px #ccc;color:#990000'><b>"+title+"</b></span><p>";
+	str+="<span id='gtBoxTi'style='font-size:18px;text-shadow:1px 1px #ccc;color:#666'><b>"+title+"</b></span><p>";
 	str+="<div style='font-size:14px;margin:14px'>"+content;
-	str+="<p><input class='ve-is' type='text' id='gtBoxTt' value='"+def+"'></p></div>";
+	str+="<p><input class='is' type='text' id='gtBoxTt' value='"+def+"'></p></div>";
 	$("#alertBoxDiv").append(str);	
 	$("#alertBoxDiv").dialog({ width:400, buttons: {
 				            	"OK": 		function() { callback($("#gtBoxTt").val()); $(this).remove(); },
 				            	"Cancel":  	function() { $(this).remove(); }
 								}});	
+	$("#alertBoxDiv").dialog("option","position",{ my:"center", at:"center", of:this.parent });
 	$(".ui-dialog-titlebar").hide();
 	$(".ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix").css("border","none");
 	$(".ui-dialog").css({"border-radius":"14px", "box-shadow":"4px 4px 8px #ccc"});
@@ -485,6 +498,7 @@ QDraw.prototype.Dialog=function (title, content, callback, callback2) // DIALOG 
 				            								callback2();
 				            								$(this).remove(); }
 								}});	
+	$("#dialogDiv").dialog("option","position",{ my:"center", at:"center", of:this.parent });
 	$(".ui-dialog-titlebar").hide();
 	$(".ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix").css("border","none");
 	$(".ui-dialog").css({"border-radius":"14px", "box-shadow":"4px 4px 8px #ccc"});
@@ -495,14 +509,14 @@ QDraw.prototype.ConfirmBox=function(content, callback)					// CONFIRMATION BOX
 {
 	$("body").append("<div class='unselectable' id='confirmBoxDiv'></div>");														
 	var str="<p><img src='images/qlogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
-	str+="<span style='font-size:18px;text-shadow:1px 1px #ccc;color:#990000'><b>Are you sure?</b></span><p>";
+	str+="<span style='font-size:18px;text-shadow:1px 1px #ccc;color:#666'><b>Are you sure?</b></span><p>";
 	str+="<div style='font-size:14px;margin:14px'>"+content+"</div>";
 	$("#confirmBoxDiv").append(str);	
 	$("#confirmBoxDiv").dialog({ width:400, buttons: {
 				            	"Yes": function() { $(this).remove(); callback() },
 				            	"No":  function() { $(this).remove(); }
 								}});	
-	$("#confirmBoxDiv").dialog("option","position",{ my:"center", at:"center", of:window });
+	$("#confirmBoxDiv").dialog("option","position",{ my:"center", at:"center", of:this.parent });
 	$(".ui-dialog-titlebar").hide();
 	$(".ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix").css("border","none");
 	$(".ui-dialog").css({"border-radius":"14px", "box-shadow":"4px 4px 8px #ccc"});
