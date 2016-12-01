@@ -102,9 +102,6 @@
 
 <script>
 	var qd;
-	Sound("click",true);														// Init sound
-	Sound("ding",true);															// Init sound
-	Sound("delete",true);														// Init sound
 
 $(document).ready(function() {												// ON PAGE LOADED
 	isMobile=navigator.userAgent.match(/(ipad|iphone|ipod|android)/i) ? true : false; // Set mobile flag
@@ -141,8 +138,10 @@ $(document).ready(function() {												// ON PAGE LOADED
 			snd=new Audio("img/"+sound+".ogg");									// Use ogg
 		else	
 			snd=new Audio("img/"+sound+".mp3");									// Use mp3
-		if (!mute)																// If not initing or muting	
+		if (!mute)	{															// If not initing or muting	
+			snd.volume=qd.cVolume/100;											// Set volume
 			snd.play();															// Play sound
+			}
 		}
 		
 	function ShadeColor(color, percent) {   

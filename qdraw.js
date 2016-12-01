@@ -9,6 +9,7 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	parent=parent ? parent : "body";											// If a parent div spec'd use it
 	if (parent != "body")  parent="#"+parent;									// Add #
 	this.parent=parent;		this.dockSide=dockSide;	this.dockPos=dockPos;		// Save settings
+	this.cVolume=100;		this.gridSnap=0;									// Settings
 	this.curUndo=0;			this.curRedo=0;										// Undo/redo
 	this.curCol="#e6550d";	this.curEwid=1;		this.curEcol="#000000";			// Default settings
 	this.curEtip=0;			this.curShape=0;	this.curAlpha=100;
@@ -33,6 +34,9 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	ops.slices[8].options=["img/point-icon.png","img/line-icon.png","img/curve-icon.png","img/box-icon.png","img/circle-icon.png","img/text-icon.png"] ;
 
 	this.gd=new Gdrive();														// Google drive access
+	Sound("click",true);														// Init sound
+	Sound("ding",true);															// Init sound
+	Sound("delete",true);														// Init sound
 
 	this.pie=new PieMenu(ops,this);												// Init pie menu
 	this.DrawMenu();															// Draw it
@@ -232,13 +236,33 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 
 QDraw.prototype.Settings=function()											// SETTINGS MENU
 {
-	var str="<table><tr height='18'>";
-	str+="<tr><td>Click volume</td><td><input id='setmute' type='checkbox'></td></tr>";
-	str+="<tr><td>Grid snap</td><td><input id='settitle' class='ve-is' style='width:220px' type='input'></td></tr>";
+	var _this=this;																// Save context
+	var str="<table style='font-size:10px'>";
+	str+="<tr style='height:18px'><td>Click volume &nbsp; </td>";
+	str+="<td><div id='cvol' class='unselectable' style='width:80px;display:inline-block'></div>&nbsp;&nbsp;&nbsp;"
+	str+="<div id='cvolt' class='unselectable' style='display:inline-block'>"+this.cVolume+"</div></td></tr>";
+	str+="<tr style='height:18px'><td>Grid snap</td>";
+	str+="<td><div id='gsnap' class='unselectable' style='width:80px;display:inline-block'></div>&nbsp;&nbsp;&nbsp;"
+	str+="<div id='gsnapt' class='unselectable' style='display:inline-block'>"+this.gridSnap+"</div></td></tr>";
 	str+="<tr><td>Help</td><td><a href='https://docs.google.com/document/d/161td5ZuqKqT5R5r9z1P8AxBA6l9LaP-eYl_RvCyvw2g/edit?usp=sharing' target='_blank'>";
 	str+="<img src='img/helpicon.gif' style='vertical-align:bottom' title='Show help'></a></td></tr>";
 	str+="</table>";
-	this.Dialog("Settings",str);
+
+	this.Dialog("Settings",str,250, function() {
+		_this.cVolume=$("#cvolt").text();
+		_this.gridSnap=$("#gsnapt").text();
+		});
+		
+	$("#cvol").slider({															// Init volume slider
+		min:0, max:100, value: _this.cVolume,									// Params
+		slide: function(e,ui) { $("#cvolt").text(ui.value)},					// On slide
+		});	
+	$("#gsnap").slider({														// Init snap slider
+		min:0, max:100, step:5, value: _this.gridSnap,							// Params
+		slide: function(e,ui) { $("#gsnapt").text(ui.value)},					// On slide
+		});	
+
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -471,8 +495,8 @@ QDraw.prototype.GetTextBox=function (title, content, def, callback)		// GET TEXT
 	str+="<p><input class='is' type='text' id='gtBoxTt' value='"+def+"'></p></div>";
 	$("#alertBoxDiv").append(str);	
 	$("#alertBoxDiv").dialog({ width:400, buttons: {
-				            	"OK": 		function() { callback($("#gtBoxTt").val()); $(this).remove(); },
-				            	"Cancel":  	function() { $(this).remove(); }
+				            	"OK": 		function() { Sound("click");  callback($("#gtBoxTt").val()); $(this).remove(); },
+				            	"Cancel":  	function() { Sound("delete"); $(this).remove(); }
 								}});	
 	$("#alertBoxDiv").dialog("option","position",{ my:"center", at:"center", of:this.parent });
 	$(".ui-dialog-titlebar").hide();
@@ -481,7 +505,7 @@ QDraw.prototype.GetTextBox=function (title, content, def, callback)		// GET TEXT
 	$(".ui-button").css({"border-radius":"30px","outline":"none"});
 }
 
-QDraw.prototype.Dialog=function (title, content, callback, callback2) // DIALOG BOX
+QDraw.prototype.Dialog=function (title, content, width, callback, callback2) // DIALOG BOX
 {
 	$("#dialogDiv").remove();											// Remove any old ones
 	$("body").append("<div class='unselectable' id='dialogDiv'></div>");														
@@ -489,12 +513,12 @@ QDraw.prototype.Dialog=function (title, content, callback, callback2) // DIALOG 
 	str+="<span id='gtBoxTi'style='font-size:18px;text-shadow:1px 1px #ccc;color:#666'><b>"+title+"</b></span><p>";
 	str+="<div style='font-size:14px;margin:14px'>"+content+"</div>";
 	$("#dialogDiv").append(str);	
-	$("#dialogDiv").dialog({ width:450, buttons: {
-				            	"OK": 		function() { if (callback)
+	$("#dialogDiv").dialog({ width:width, buttons: {
+				            	"OK": 		function() { Sound("click"); if (callback)
 				            								callback(); 
 				            								$(this).remove();  
 				            								},
-				            	"Cancel":  	function() { if (callback2)	            		
+				            	"Cancel":  	function() { Sound("delete"); if (callback2)	            		
 				            								callback2();
 				            								$(this).remove(); }
 								}});	
@@ -513,8 +537,8 @@ QDraw.prototype.ConfirmBox=function(content, callback)					// CONFIRMATION BOX
 	str+="<div style='font-size:14px;margin:14px'>"+content+"</div>";
 	$("#confirmBoxDiv").append(str);	
 	$("#confirmBoxDiv").dialog({ width:400, buttons: {
-				            	"Yes": function() { $(this).remove(); callback() },
-				            	"No":  function() { $(this).remove(); }
+				            	"Yes": function() { Sound("click"); $(this).remove(); callback() },
+				            	"No":  function() { Sound("delete"); $(this).remove(); }
 								}});	
 	$("#confirmBoxDiv").dialog("option","position",{ my:"center", at:"center", of:this.parent });
 	$(".ui-dialog-titlebar").hide();
