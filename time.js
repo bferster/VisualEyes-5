@@ -619,6 +619,36 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 				var id=e.currentTarget.id.substr(9);						// Get ID
 				o=_this.sd.mobs[id];										// Point at mob
 			    str=o.desc;
+       			if (str) {													// If a desc set
+					if (str.match(/where\(/)) {								// If where macro
+						v=(str+" ").match(/where\(.*?\)/ig);				// Extract where(s)
+						for (i=0;i<v.length;++i) {							// For each macro
+							vv=v[i].match(/where\(([^,]+),(.+)\)/i);		// Get parts
+							str=str.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:mps.Goto(\""+vv[2].replace(/<.*?>/g,"")+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+							}	
+						}
+					if (str.match(/link\(/)) {								// If link macro
+						v=(str+" ").match(/link\(.*?\)/ig);					// Extract links(s)
+						for (i=0;i<v.length;++i) {							// For each macro
+							vv=v[i].match(/link\(([^,]+),(.+)\)/i);			// Get parts
+							str=str.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a  onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:ShowIframe(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+							}	
+						}
+					if (str.match(/show\(/)) {								// If show macro
+						v=(str+" ").match(/show\(.*?\)/ig);					// Extract show(s)
+						for (i=0;i<v.length;++i) {							// For each macro
+							vv=v[i].match(/show\(([^,]+),(.+)\)/i);			// Get parts
+							str=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:toggleLayers(\""+vv+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+							}	
+						}
+					if (str.match(/zoomer\(/)) {							// If zoomer macro
+						v=(str+" ").match(/zoomer\(.*?\)/ig);				// Extract zoomer(s)
+						for (i=0;i<v.length;++i) {							// For each macro
+							vv=v[i].match(/zoomer\(([^,]+),(.+)\)/i);		// Get parts
+							str=str.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.ShowWebPage(\"#leftDiv\",\""+vv[2]+"\",\"zoomer\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+							}
+						}	
+					}
        			if (o.citation)	{											// If a cite
 					str+="<div class='story-cite' style='cursor:pointer'><br><a onclick='$(\"#cite"+id+"\").fadeIn()'>";
 					str+="<u>Citation</u><br><span style='display:none' id='cite"+id+"'><br>"+o.citation+"</span></div>";
