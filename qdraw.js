@@ -190,39 +190,49 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 				this.UnDo();													// Undo it
 				break;
 			case 6:
-				var data='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle r="32" cx="35" cy="65" fill="#F00" opacity="0.5"/><circle r="32" cx="65" cy="65" fill="#0F0" opacity="0.5"/><circle r="32" cx="50" cy="35" fill="#00F" opacity="0.5"/></svg>'
-				if (v[3] == 0) {													// Save
-					this.gd.AccessAPI(function() {
-						 _this.gd.Upload($("#myName").val(),data,_this.gd.lastId ? _this.gd.lastId : "",function(res) {
-						 	 trace(res); 
-						 	 }); 
-						 });
-					}
-				else if (v[3] == 1)	{											// Save As
+				var data="<!-- This is the raw seg data -->\n";
+				data+='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle r="32" cx="35" cy="65" fill="#F00" opacity="0.5"/><circle r="32" cx="65" cy="65" fill="#0F0" opacity="0.5"/><circle r="32" cx="50" cy="35" fill="#00F" opacity="0.5"/></svg>'
+				if ((v[3] == 1) || ((v[3] == 0) && !_this.gd.lastId))	{		// Save to new file
 					if (this.GetTextBox("Type name of new drawing","","",function(name) {	// Type name
 							_this.gd.AccessAPI(function() {
-								_this.gd.Upload(name,data, null,function(res) {
-									 trace(res); 
-									 }); 
+							 	_this.gd.CreateFolder("QDrawings",function(res) {		// Make sure there's a folder
+									_this.gd.Upload(name,data, null,function(res) {
+										 trace(res); 
+										 }); 
+									});
 								});
 						}));
 					}
-				else if (v[3] == 2) {												// Load
-					 _this.gd.Picker(true,function(res) {
-						 	 _this.gd.AccessAPI(function() {
-						 	 	 _this.gd.Download(_this.gd.lastId,function(res) {
-						 	 	 	 trace(res); 
+				else if (v[3] == 0) {											// Save to existing file
+					this.gd.AccessAPI(function() {
+					 	_this.gd.CreateFolder("QDrawings",function(res) {		// Make sure there's a folder
+								_this.gd.Upload($("#myName").val(),data,_this.gd.lastId ? _this.gd.lastId : "",function(res) {
+							 	 trace(res); 
+							 	 }); 
+						 	 }); 
+						 });
+					}
+				else if (v[3] == 2) {											// Load
+				 	 _this.gd.AccessAPI(function() {
+						 _this.gd.CreateFolder("QDrawings",function(res) {
+							 _this.gd.Picker(true,function(res) {
+									 	 _this.gd.AccessAPI(function() {
+									 	 	 _this.gd.Download(_this.gd.lastId,function(res) {
+									 	 	 	 trace(res); 
+									 	 	 	 }); 
+									 	 	 }); 
+									 	 }); 
 						 	 	 	 }); 
 						 	 	 }); 
-						 	 }); 
-					}
+						}
 				else if (v[3] == 3)	{											// Clear
 					if (this.ConfirmBox("Are you sure?", function() {			// Are you sure?
-							Sound("delete");
+							_this.gd.lastId=null;								// Clear last id
+							Sound("delete");									// Delete sound
 						}));
 					}
 				break;
-			case 7:															// Settings
+			case 7:																// Settings
 				this.Settings();
 				break;
 			case 8:																// Shape
@@ -349,11 +359,12 @@ QDraw.prototype.onKeyDown=function(e)										// KEY DOWN HANDLER
 
 function Gdrive()															// CONSTRUCTOR
 {
-	this.clientId="81792849751-1c76v0vunqu0ev9fgqsfgg9t2sehcvn2.apps.googleusercontent.com";
-	this.scope="https://www.googleapis.com/auth/drive";
-	this.key="AIzaSyAVjuoRt0060MnK_5_C-xenBkgUaxVBEug";
-	this.contentType="image/svg+xml";
-	this.lastId="";
+	this.clientId="81792849751-1c76v0vunqu0ev9fgqsfgg9t2sehcvn2.apps.googleusercontent.com";	// Google client id
+	this.scope="https://www.googleapis.com/auth/drive";							// Scope of access
+	this.key="AIzaSyAVjuoRt0060MnK_5_C-xenBkgUaxVBEug";							// Google API key
+	this.contentType="image/svg+xml";											// SVG mime type
+	this.folderId="";															// Id of drawings folder
+	this.lastId="";																// Id of last drawing saved/loaded
 }
 
 Gdrive.prototype.AccessAPI=function(apiCall, callback)						// CHECK FOR AUTHORIZATION and ACCESS API
@@ -383,7 +394,7 @@ Gdrive.prototype.Download=function(id, callback)							// DOWNLOAD DATA FROM G-D
 		if (resp.downloadUrl) {													// If a link
 		    var accessToken=gapi.auth.getToken().access_token;					// Get access token
 		    var xhr=new XMLHttpRequest();										// Ajax
-		    xhr.open('GET',resp.downloadUrl);									// Set open url
+		    xhr.open("GET",resp.downloadUrl);									// Set open url
 		    xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);		// Set header
 		    xhr.onload = function()  {  callback(xhr.responseText);   };		// On load
 		    xhr.send();															// Do it
@@ -391,16 +402,53 @@ Gdrive.prototype.Download=function(id, callback)							// DOWNLOAD DATA FROM G-D
 		});
 }
 
+Gdrive.prototype.CreateFolder=function(folderName, callback)				// CREATE NEW FOLDER ON G-DRIVE
+{
+	var _this=this;																// Save context
+	var token=gapi.auth.getToken().access_token;								// Get access token
+
+	var request=gapi.client.drive.files.list({									// Make request object
+	  	q:"title='"+folderName+"' and mimeType='application/vnd.google-apps.folder' and trashed = false" // Look for name and folder mimetype
+	 	});
+	request.execute(function(resp) {											// Get data
+  		if (resp.items.length) {												// If folder exists
+  			_this.folderId=resp.items[0].id;									// Get folder's id									
+ 			callback(_this.folderId);											// Run callback with id
+ 			}
+		else{																	// Need to create it
+		 	var request2=gapi.client.request({									// Make request object
+				path: "/drive/v2/files/",
+				method: "POST",
+		       	headers: {
+		           	"Content-Type": "application/json",
+		           	"Authorization": "Bearer "+token,             
+		      		},
+		       body:{
+		           	title: folderName,
+		          	mimeType: "application/vnd.google-apps.folder",
+		  	     	}
+		  	 	});
+			request2.execute(function(resp) {									// Get data
+		      	_this.folderId=resp.id;											// Save last id set
+	 			callback(_this.folderId);										// Run callback with id
+				});	
+			}	
+  		});
+
+}
+
 Gdrive.prototype.Upload=function(name, data, id, callback)					// UPLOAD DATA TO G-DRIVE
 {
 	const boundary = '-------314159265358979323846264';							// Bounds	
     const delimiter = "\r\n--" + boundary + "\r\n";								// Opener
     const close_delim = "\r\n--" + boundary + "--";								// Closer
-	var metadata={ 'title': name, 'mimeType': this.contentType };				// Set metadata
+	var metadata={ 																// Set metadata
+		'title': name, 'mimeType': this.contentType, 							// Name and mimetype							
+		parents:[{ id: this.folderId}]											// Folder to place it in
+		};
 	var base64Data=btoa(data); 													// Encode to base-64 Stringify if JSON
 	var _this=this;																// Save context
 	id=id ? "/"+id : "";														// Add id if set
-   trace(id)
     var multipartRequestBody =													// Multipart request
         delimiter +
         'Content-Type: application/json\r\n\r\n' +
@@ -458,6 +506,7 @@ Gdrive.prototype.Picker=function(allFiles, callback)						// RUN G-DRIVE PICKER
 	        if (pickerApiLoaded && oauthToken) {
 	           	var view=new google.picker.DocsView().
 	           		setOwnedByMe(allFiles).
+	           		setParent(_this.folderId).
 					setIncludeFolders(true);
 	          	var picker=new google.picker.PickerBuilder().
 	          		addView(view).
@@ -540,6 +589,7 @@ QDraw.prototype.ConfirmBox=function(content, callback)					// CONFIRMATION BOX
 				            	"Yes": function() { Sound("click"); $(this).remove(); callback() },
 				            	"No":  function() { Sound("delete"); $(this).remove(); }
 								}});	
+	Sound("ding");															
 	$("#confirmBoxDiv").dialog("option","position",{ my:"center", at:"center", of:this.parent });
 	$(".ui-dialog-titlebar").hide();
 	$(".ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix").css("border","none");
