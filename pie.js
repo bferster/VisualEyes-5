@@ -65,9 +65,9 @@ function PieMenu(options, parObj)											// CONSTRUCTOR
 			if (cs >= 0) {														// A valid slice
    				$("#pihigh").css({"transform":"rotate("+(cs-1)*_this.ops.ang+"deg)"}); // Rotate highlight
 				var o=_this.ops.slices[cs];										// Point at slice
- 				if (o.type == "col")	   _this.ShowColorBars(cs,"color",o.def); // Set color bars
-				else if (o.type == "edg")  _this.ShowColorBars(cs,"edge",o.def);  // Set color and edge
-				else if (o.type == "txt")  _this.ShowColorBars(cs,"text",o.def);  // Show text picker
+ 				if (o.type == "col")	   _this.ShowColorBars(cs,"color"); 	// Set color bars
+				else if (o.type == "edg")  _this.ShowColorBars(cs,"edge");  	// Set color and edge
+				else if (o.type == "txt")  _this.ShowColorBars(cs,"text");  	// Show text picker
 				else if (o.type == "men")  _this.ShowMenuPick(cs,o.def);		// Show menu picker
 				else if (o.type == "typ")  _this.ShowTextType(cs,o.def);		// Show text picker
 				else if (o.type == "sli")  _this.ShowSlider(cs,o.def);			// Show slider
@@ -181,7 +181,7 @@ PieMenu.prototype.ShowMenuPick=function(num, def)							// SHOW TEXT PICK
 		}
 }
 
-PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE / TYPE
+PieMenu.prototype.ShowColorBars=function(num, mode)							// SET COLOR / EDGE / TYPE
 {
 	var x,y,i,n=4;
 	var _this=this;																// Save context
@@ -189,7 +189,7 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 	var cols=[ "#0000aa","#3182bd","#6baed6","#9ecae1","#aa0000","#e6550d","#fd8d3c","#fdae6b",
 			   "#ffcc00","None","#00cc00","#31a354","#74c476","#a1d99b","#756bb1","#9e9ac8",
 			   "#bcbddc","#ffffff","#cccccc","#888888","#666666","#444444","#000000"
-				];
+				];	
 	var str="<div id='pisubback' class='pi-subbar unselectable' >";				// Color shell
  	for (i=0;i<cols.length;++i)													// For each color
   		str+="<div id='pichip"+i+"' class='pi-colchip'></div>";					// Make color chip
@@ -206,16 +206,21 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 		else if (this.parObj.curShape < 4)										// Not in circles or text
 			for (i=0;i<4;++i)													// For each width
   				str+="<div id='piarr"+i+"' class='pi-arrow'></div>";			// Make arrow chip
+		
+		if (this.parObj.curShape < 5)											// Not text
+			str+="<div id='pidrop' class='pi-fdrop unselectable'>Drop</div>";	// Add drop
 		str+="</div>";
 		}
 	$("#pimenu").append(str+"</div>");											// Add to menu														
 	$("#pichip9").text("X");													// None icon
-	if (!def)	def=["#000000,0,0,0"];											// If no def defined, set default
+	var def=this.ops.slices[num].def;											// Get def
+	if (!def)	def=["#000000,0,0,0,0"];										// If no def defined, set default
 	def=def.split(",");															// Split int params
 	if (!def[1]) def[1]=0;														// Force to none
 	if (!def[2]) def[2]=0;														// Force to none
 	if (!def[3]) def[3]=0;														// Force to none
 	if (!def[4]) def[4]=0;														// Force to none
+
 	var ang=(num)*this.ops.ang-82.5;											// Start of colors angle
 	var w=this.ops.wid/2;														// Center
 	var r=w+32;																	// Radius
@@ -250,7 +255,7 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 	$("#pitextcol").css("background-color",def[0]);								// Def col
 	$("#picoltext").val(def[0]);												// Def text
 	$("#pifont").val(def[3]-0);													// Def font
-	$("#pifontsty").val(def[2]-0);												// Def font style
+	$("#pifontsty").val(def[4]-0);												// Def font style
 	$("#pisiztxt").val(def[1]);													// Def text size
 	$("#pifsize").slider({														// Init size slider
 		min:10,max:99,step:2,value:def[1],										// Params
@@ -332,7 +337,7 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 		
 		$("#piarr"+i).on("click", function(e) {									// LINE HOVER
 			var id=e.currentTarget.id.substr(5)-0;								// Extract id
-			def[2]=id;															// Get arrow
+			def[3]=id;															// Get arrow
 			Sound("click");														// Click
 			updateColor("click");												// Update menu
 			});
@@ -341,12 +346,17 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 	if (this.parObj.curShape == 3) { 											// If drawing boxes
 		$("#piarr0").css({ "height":"10px","left":"0px","top":"10px" })
 		$("#piarr1").css({ "height":"10px","left":"0px","top":"28px","border-radius":"4px" })
+		$("#pidrop").css({ "height":"12px","left":"-5px","top":"46px" })
+		}
+	else if (this.parObj.curShape == 4) { 										// If drawing circles
+		$("#pidrop").css({ "height":"12px","left":"-5px","top":"8px" })
 		}
 	else if (this.parObj.curShape < 3) {										// Drawing arrows
 		$("#piarr1").append("<div id='parr1' class='pi-rarr' style='left:16px;top:-5px'</div>")
 		$("#piarr2").append("<div id='parr2' class='pi-larr' style='left:-2px;top:-5px'</div>");
 		$("#piarr3").append("<div id='parr3' class='pi-larr' style='left:-2px;top:-5px'</div>");
 		$("#piarr3").append("<div id='parr4' class='pi-rarr' style='left:16px;top:-5px'</div>")
+		$("#pidrop").css({ "height":"12px","left":"-5px","top":"84px" })
 		}
 	$("#pilinback").css({														// Set b/g for lines
 		"left":ix+"px","top":iy-4-(12*wids.length)+"px",						// Position
@@ -362,25 +372,25 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 		});
 
 	$("#pibold").on("click", function() {										// ON FONT BOLD CLICK
-		if (def[2]&1)															// If bold 
-			def[2]&=2;															// Retain italic status and unbold
+		if (def[4]&1)															// If bold 
+			def[4]&=2;															// Retain italic status and unbold
 		else																	// Not bold
-			def[2]|=1;															// Bold it														
+			def[4]|=1;															// Bold it														
 		updateColor("click");													// Update menu
 		Sound("click");															// Click
 		});
 
 	$("#piital").on("click", function() {										// ON FONT ITAL CLICK
-		if (def[2]&2)															// If ital 
-			def[2]&=1;															// Retain bold status and unital
+		if (def[4]&2)															// If ital 
+			def[4]&=1;															// Retain bold status and unital
 		else																	// Not ital
-			def[2]|=2;															// Ital it														
+			def[4]|=2;															// Ital it														
 		updateColor("click");													// Update menu
 		Sound("click");															// Click
 		});
 
 	$("#pidrop").on("click", function() {										// ON FONT DROP CLICK
-		def[4]=(def[4]-0+1)%3;													// Force number and step 0-2
+		def[2]=(def[2]-0+1)%3;													// Force number and step 0-2
 		updateColor("click");													// Update menu
 		Sound("click");															// Click
 		});
@@ -394,37 +404,39 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 	function updateColor(send) {												// SET COLOR INFO
 		$("#picoltext").val(def[0]);											// Show value
 		$("#pitextcol").css("background-color",def[0]);							// Color chip
-		$("#pibold").css("background-color",(def[2]&1) ? "#00a8ff" : "#999");	// Color bold
-		$("#piital").css("background-color",(def[2]&2) ? "#00a8ff" : "#999");	// Color ital
-		$("#pidrop").css("background-color",(def[4]>0) ? "#00a8ff" : "#999");	// Color drop
-		$("#pidrop").css("color",(def[4]>1) ? "#000" : "#fff");					// Color drop text
+		$("#pidrop").css("background-color",(def[2]>0) ? "#00a8ff" : "#999");	// Color drop
+		$("#pidrop").css("color",(def[2]>1) ? "#000" : "#fff");					// Color drop text
+		$("#pibold").css("background-color",(def[4]&1) ? "#00a8ff" : "#999");	// Color bold
+		$("#piital").css("background-color",(def[4]&2) ? "#00a8ff" : "#999");	// Color ital
 		var font="Sans-serif";													// Assume sans
 		if (def[3] == 1)		font="Serif";									// Serif
 		else if (def[3] == 2)	font="Courier";									// Fixed
 		var drop="transparent";													// Assume no drop
-		if (def[4] == 1)		drop="#ffffff";									// White drop
-		else if (def[4] == 2)	drop="#000000";									// Black drop
+		if (def[2] == 1)		drop="#ffffff";									// White drop
+		else if (def[2] == 2)	drop="#000000";									// Black drop
 		$("#pifdemo").css({"color":def[0],"font-size":def[1]+"px",				// Font size and color
-			"font-weight":def[2]&1 ? "bold" : "normal",							// Bold
-			"font-style":def[2]&2 ? "italic" : "normal",						// Italic
+			"font-weight":def[4]&1 ? "bold" : "normal",							// Bold
+			"font-style":def[4]&2 ? "italic" : "normal",						// Italic
 			"font-family":font,"text-shadow":"4px 4px 16px "+drop				// Drop													// Font
 			});
 		
 		for (j=0;j<wids.length;++j) 											// For each width
 			$("#piline"+j).css("background-color",(wids[j] == def[1]) ? "#00a8ff" : "#e8e8e8");	// Make blue
 		for (j=0;j<4;++j) {														// For each arrow
-			$("#piarr"+j).css("background-color",(j == def[2]) ? "#00a8ff" : "#e8e8e8");	// Make blue
+			$("#piarr"+j).css("background-color",(j == def[3]) ? "#00a8ff" : "#e8e8e8");	// Make blue
 			if (j == 1)
-				$("#parr1").css("border-left","6px solid "+((j == def[2]) ? "#00a8ff" : "#e8e8e8"));	// Make blue
+				$("#parr1").css("border-left","6px solid "+((j == def[3]) ? "#00a8ff" : "#e8e8e8"));	// Make blue
 			if (j == 2)
-				$("#parr2").css("border-right","6px solid "+((j == def[2]) ? "#00a8ff" : "#e8e8e8"));	// Make blue
+				$("#parr2").css("border-right","6px solid "+((j == def[3]) ? "#00a8ff" : "#e8e8e8"));	// Make blue
 			if (j == 3) {
-				$("#parr3").css("border-right","6px solid "+((j == def[2]) ? "#00a8ff" : "#e8e8e8"));	// Make blue
-				$("#parr4").css("border-left","6px solid "+((j == def[2]) ? "#00a8ff" : "#e8e8e8"));	// Make blue
+				$("#parr3").css("border-right","6px solid "+((j == def[3]) ? "#00a8ff" : "#e8e8e8"));	// Make blue
+				$("#parr4").css("border-left","6px solid "+((j == def[3]) ? "#00a8ff" : "#e8e8e8"));	// Make blue
 				}
 			}
-		if (send) 
+		if (send){																// If sending s message
+			_this.ops.slices[num].def=def.toString();							// Set new defaults
 			_this.SendMessage(send,_this.curSlice+"|"+def.toString());			// Send event
+			}
 		}
 }
 

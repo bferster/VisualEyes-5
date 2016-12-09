@@ -11,9 +11,10 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	this.parent=parent;		this.dockSide=dockSide;	this.dockPos=dockPos;		// Save settings
 	this.cVolume=100;		this.gridSnap=0;									// Settings
 	this.curUndo=0;			this.curRedo=0;										// Undo/redo
-	this.curCol="#e6550d";	this.curEwid=1;		this.curEcol="#000000";			// Default settings
-	this.curEtip=0;			this.curShape=0;	this.curAlpha=100;
-	this.curTsiz=24;		this.curTdrop=0;	this.curTsty=0;		this.curTfon=0;		
+	this.curCol="#e6550d";														// Default settings
+	this.curDrop=0;		this.curShape=0;	this.curAlpha=100;					// Common options
+	this.curEwid=1;		this.curEcol="#000000";	this.curEtip=0;					// Edge options
+	this.curTsiz=24;	this.curTsty=0;			this.curTfon=0;					// Text options
 	this.segs=[];																// Drawing data
 	var str="<div id='pamenu' class='pa-main unselectable'>";					// Main shell
 	str+="<div id='pacoldot' class='pa-dot unselectable'>";						// Color dot
@@ -23,8 +24,8 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	ops.dial="img/piback.png";													// Dial background
 	ops.hilite="img/philite.png";												// Slice highlight
 	ops.slices[0]={ type:"but", ico:"img/gear-icon.png" };						// Center 
-	ops.slices[1]={ type:"col", ico:"img/color-icon.png", def:this.curCol };	// Color slice 
-	ops.slices[2]={ type:"edg", ico:"img/edge-icon.png", def:this.curEcol+","+this.curEwid+","+this.curEtip };	// Edge 
+	ops.slices[1]={ type:"col", ico:"img/color-icon.png", def:this.curCol+",0,"+this.curDrop };	// Color slice 
+	ops.slices[2]={ type:"edg", ico:"img/edge-icon.png", def:this.curEcol+","+this.curEwid+","+this.curDrop+","+this.curEtip };	// Edge 
 	ops.slices[3]={ type:"sli", ico:"img/alpha-icon.png", def:100 };			// Alpha slice 
 	ops.slices[4]={ type:"but", ico:"img/redo-icon.png", options:["Redo"]};		// Redo slice 
 	ops.slices[5]={ type:"but", ico:"img/undo-icon.png",options:["Undo"]};		// Undo slice 
@@ -154,9 +155,9 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 	if ((v[1] == "qdraw") && (v[0] == "click")) {								// A click in main menu
 		if (v[2] == 8) {														// Setting shape
 			if (v[3] == 5)														// If text
-				this.pie.SetSlice(2,{type:"edg", ico:"img/font-icon.png", def:this.curCol+","+this.curTsiz+","+this.curTsty+","+this.curTfon+","+this.curTdrop});// Text menu 
+				this.pie.SetSlice(2,{type:"edg", ico:"img/font-icon.png", def:this.curCol+","+this.curDrop+","+this.curTsiz+","+this.curTsty+","+this.curTfon});// Text menu 
 			else																// If shape
-				this.pie.SetSlice(2,{type:"edg", ico:"img/edge-icon.png", def:this.curEcol+","+this.curEwid+","+this.curEtip});	// Edge menu
+				this.pie.SetSlice(2,{type:"edg", ico:"img/edge-icon.png", def:this.curEcol+",0,"+this.curDrop+","+this.curEwid+","+this.curEtip});	// Edge menu
 			}
 		if (v[2])																// If not center
 			this.pie.ops.slices[v[2]].def=v[3];									// Set new default
@@ -170,14 +171,15 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 				if (this.curShape == 5) {										// If text
 					this.curCol=vv[0];											// Set color
 					this.curTsiz=vv[1];											// Set size
-					this.curTsty=vv[2];											// Set style
+					this.curDrop=vv[2];											// Set drop 
 					this.curTfon=vv[3];											// Set font
-					this.curTdrop=vv[4];										// Set drop 
+					this.curTsty=vv[4];											// Set style
 					}
 				else{															// Edge													
 					this.curEcol=vv[0];											// Set color
 					this.curEwid=vv[1];											// Set width
-					this.curEtip=vv[2];											// Set width
+					this.curDrop=vv[2];											// Set drop 
+					this.curEtip=vv[3];											// Set tip
 					}
 				break;
 			case 3:																// Alpha
@@ -195,7 +197,7 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 				if ((v[3] == 1) || ((v[3] == 0) && !_this.gd.lastId))	{		// Save to new file
 					if (this.GetTextBox("Type name of new drawing","","",function(name) {	// Type name
 							_this.gd.AccessAPI(function() {
-							 	_this.gd.CreateFolder("QDrawings",function(res) {		// Make sure there's a folder
+							 	_this.gd.CreateFolder(_this.gd.folderName,function(res) {	// Make sure there's a folder
 									_this.gd.Upload(name,data, null,function(res) {
 										 trace(res); 
 										 }); 
@@ -205,7 +207,7 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 					}
 				else if (v[3] == 0) {											// Save to existing file
 					this.gd.AccessAPI(function() {
-					 	_this.gd.CreateFolder("QDrawings",function(res) {		// Make sure there's a folder
+					 	_this.gd.CreateFolder(_this.gd.folderName,function(res) { // Make sure there's a folder
 								_this.gd.Upload($("#myName").val(),data,_this.gd.lastId ? _this.gd.lastId : "",function(res) {
 							 	 trace(res); 
 							 	 }); 
@@ -214,7 +216,7 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 					}
 				else if (v[3] == 2) {											// Load
 				 	 _this.gd.AccessAPI(function() {
-						 _this.gd.CreateFolder("QDrawings",function(res) {
+						 _this.gd.CreateFolder(_this.gd.folderName,function(res) {
 							 _this.gd.Picker(true,function(res) {
 									 	 _this.gd.AccessAPI(function() {
 									 	 	 _this.gd.Download(_this.gd.lastId,function(res) {
@@ -228,8 +230,9 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 				else if (v[3] == 3)	{											// Clear
 					if (this.ConfirmBox("Are you sure?", function() {			// Are you sure?
 							_this.gd.lastId=null;								// Clear last id
+							_this.gd.lastName="";								// Clear last name
 							Sound("delete");									// Delete sound
-						}));
+							}));
 					}
 				break;
 			case 7:																// Settings
@@ -247,14 +250,16 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 QDraw.prototype.Settings=function()											// SETTINGS MENU
 {
 	var _this=this;																// Save context
-	var str="<table style='font-size:10px'>";
-	str+="<tr style='height:18px'><td>Click volume &nbsp; </td>";
+	var str="<table style='font-size:10px;color:#666'>";
+	str+="<tr style='height:18px'><td><b>Click volume &nbsp; </b></td>";
 	str+="<td><div id='cvol' class='unselectable' style='width:80px;display:inline-block'></div>&nbsp;&nbsp;&nbsp;"
 	str+="<div id='cvolt' class='unselectable' style='display:inline-block'>"+this.cVolume+"</div></td></tr>";
-	str+="<tr style='height:18px'><td>Grid snap</td>";
+	str+="<tr style='height:18px'><td><b>Grid snap</b></td>";
 	str+="<td><div id='gsnap' class='unselectable' style='width:80px;display:inline-block'></div>&nbsp;&nbsp;&nbsp;"
 	str+="<div id='gsnapt' class='unselectable' style='display:inline-block'>"+this.gridSnap+"</div></td></tr>";
-	str+="<tr><td>Help</td><td><a href='https://docs.google.com/document/d/161td5ZuqKqT5R5r9z1P8AxBA6l9LaP-eYl_RvCyvw2g/edit?usp=sharing' target='_blank'>";
+	str+="<tr><td><b>This drawing</b></td><td>"+(this.gd.lastName ? this.gd.lastName : "")+"</td></tr>";
+	str+="<tr><td><br></td></tr>";
+	str+="<tr><td><b>Help</b></td><td><a href='https://docs.google.com/document/d/1oTbVfuBwFQvgo8EZogyuoXBu7ErCK0oAH3Ny8N_E_Mg/edit?usp=sharing' target='_blank'>";
 	str+="<img src='img/helpicon.gif' style='vertical-align:bottom' title='Show help'></a></td></tr>";
 	str+="</table>";
 
@@ -363,8 +368,10 @@ function Gdrive()															// CONSTRUCTOR
 	this.scope="https://www.googleapis.com/auth/drive";							// Scope of access
 	this.key="AIzaSyAVjuoRt0060MnK_5_C-xenBkgUaxVBEug";							// Google API key
 	this.contentType="image/svg+xml";											// SVG mime type
+	this.folderName="QDrawings";												// Name of drawings folder
 	this.folderId="";															// Id of drawings folder
 	this.lastId="";																// Id of last drawing saved/loaded
+	this.lastName="";															// Name of last file
 }
 
 Gdrive.prototype.AccessAPI=function(apiCall, callback)						// CHECK FOR AUTHORIZATION and ACCESS API
@@ -468,6 +475,7 @@ Gdrive.prototype.Upload=function(name, data, id, callback)					// UPLOAD DATA TO
   
    request.execute(function(arg) {												// Run request
        	_this.lastId=arg.id;													// Save last id set
+      	_this.lastName=arg.title;												// Save last name set
       	callback(arg);															// Run callback
     	});
 }
@@ -523,6 +531,7 @@ Gdrive.prototype.Picker=function(allFiles, callback)						// RUN G-DRIVE PICKER
 	        if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
          		var doc=data[google.picker.Response.DOCUMENTS][0];
 	      		_this.lastId=doc.id;
+		     	_this.lastName=doc.name;
 	      		callback(doc)
 	       		}
 			}
