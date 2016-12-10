@@ -9,9 +9,11 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	parent=parent ? parent : "body";											// If a parent div spec'd use it
 	if (parent != "body")  parent="#"+parent;									// Add #
 	this.parent=parent;		this.dockSide=dockSide;	this.dockPos=dockPos;		// Save settings
-	this.cVolume=100;		this.gridSnap=0;									// Settings
+
+	this.cVolume=100;		this.gridSnap=0;	this.simplify=0;				// General settings
 	this.curUndo=0;			this.curRedo=0;										// Undo/redo
-	this.curCol="#e6550d";														// Default settings
+
+	this.curCol="#e6550d";														// Default drawing settings
 	this.curDrop=0;		this.curShape=0;	this.curAlpha=100;					// Common options
 	this.curEwid=1;		this.curEcol="#000000";	this.curEtip=0;					// Edge options
 	this.curTsiz=24;	this.curTsty=0;			this.curTfon=0;					// Text options
@@ -155,9 +157,9 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 	if ((v[1] == "qdraw") && (v[0] == "click")) {								// A click in main menu
 		if (v[2] == 8) {														// Setting shape
 			if (v[3] == 5)														// If text
-				this.pie.SetSlice(2,{type:"edg", ico:"img/font-icon.png", def:this.curCol+","+this.curDrop+","+this.curTsiz+","+this.curTsty+","+this.curTfon});// Text menu 
+				this.pie.SetSlice(2,{type:"edg", ico:"img/font-icon.png", def:this.curCol+","+this.curTsiz+","+this.curDrop+","+this.curTfon+","+this.curTSty});// Text menu 
 			else																// If shape
-				this.pie.SetSlice(2,{type:"edg", ico:"img/edge-icon.png", def:this.curEcol+",0,"+this.curDrop+","+this.curEwid+","+this.curEtip});	// Edge menu
+				this.pie.SetSlice(2,{type:"edg", ico:"img/edge-icon.png", def:this.curEcol+","+this.curEwid+","+this.curDrop+","+this.curEtip});	// Edge menu
 			}
 		if (v[2])																// If not center
 			this.pie.ops.slices[v[2]].def=v[3];									// Set new default
@@ -251,19 +253,22 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 {
 	var _this=this;																// Save context
 	var str="<table style='font-size:10px;color:#666'>";
-	str+="<tr style='height:18px'><td><b>Click volume &nbsp; </b></td>";
-	str+="<td><div id='cvol' class='unselectable' style='width:80px;display:inline-block'></div>&nbsp;&nbsp;&nbsp;"
+	str+="<tr style='height:18px'><td><b>Click volume&nbsp;&nbsp;&nbsp;&nbsp;</b></td>";
+	str+="<td><div id='cvol' class='unselectable' style='width:80px;display:inline-block'></div>&nbsp;&nbsp;&nbsp;&nbsp;"
 	str+="<div id='cvolt' class='unselectable' style='display:inline-block'>"+this.cVolume+"</div></td></tr>";
 	str+="<tr style='height:18px'><td><b>Grid snap</b></td>";
 	str+="<td><div id='gsnap' class='unselectable' style='width:80px;display:inline-block'></div>&nbsp;&nbsp;&nbsp;"
 	str+="<div id='gsnapt' class='unselectable' style='display:inline-block'>"+this.gridSnap+"</div></td></tr>";
-	str+="<tr><td><b>This drawing</b></td><td>"+(this.gd.lastName ? this.gd.lastName : "")+"</td></tr>";
+	str+="<tr style='height:18px'><td><b>Line simplify</b></td>";
+	str+="<td><div id='gsimp' class='unselectable' style='width:80px;display:inline-block'></div>&nbsp;&nbsp;&nbsp;"
+	str+="<div id='gsimpt' class='unselectable' style='display:inline-block'>"+(this.simplify ? this.simplify : "Off")+"</div></td></tr>";
+	str+="<tr><td><b>This drawing</b></td><td>"+(this.gd.lastName ? this.gd.lastName : "None")+"</td></tr>";
 	str+="<tr><td><br></td></tr>";
 	str+="<tr><td><b>Help</b></td><td><a href='https://docs.google.com/document/d/1oTbVfuBwFQvgo8EZogyuoXBu7ErCK0oAH3Ny8N_E_Mg/edit?usp=sharing' target='_blank'>";
 	str+="<img src='img/helpicon.gif' style='vertical-align:bottom' title='Show help'></a></td></tr>";
 	str+="</table>";
 
-	this.Dialog("Settings",str,250, function() {
+	this.Dialog("Settings",str,270, function() {
 		_this.cVolume=$("#cvolt").text();
 		_this.gridSnap=$("#gsnapt").text();
 		});
@@ -275,6 +280,10 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 	$("#gsnap").slider({														// Init snap slider
 		min:0, max:100, step:5, value: _this.gridSnap,							// Params
 		slide: function(e,ui) { $("#gsnapt").text(ui.value)},					// On slide
+		});	
+	$("#gsimp").slider({														// Init simplify slider
+		min:0, max:100, value: _this.simplify,									// Params
+		slide: function(e,ui) { $("#gsimpt").text(ui.value ? ui.value : "Off" )}, // On slide
 		});	
 
 
