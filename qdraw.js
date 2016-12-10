@@ -258,7 +258,7 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 	str+="<div id='cvolt' class='unselectable' style='display:inline-block'>"+this.cVolume+"</div></td></tr>";
 	str+="<tr style='height:18px'><td><b>Grid snap</b></td>";
 	str+="<td><div id='gsnap' class='unselectable' style='width:80px;display:inline-block'></div>&nbsp;&nbsp;&nbsp;"
-	str+="<div id='gsnapt' class='unselectable' style='display:inline-block'>"+this.gridSnap+"</div></td></tr>";
+	str+="<div id='gsnapt' class='unselectable' style='display:inline-block'>"+(this.gridSnap ? this.gridSnap : "Off")+"</div></td></tr>";
 	str+="<tr style='height:18px'><td><b>Line simplify</b></td>";
 	str+="<td><div id='gsimp' class='unselectable' style='width:80px;display:inline-block'></div>&nbsp;&nbsp;&nbsp;"
 	str+="<div id='gsimpt' class='unselectable' style='display:inline-block'>"+(this.simplify ? this.simplify : "Off")+"</div></td></tr>";
@@ -279,14 +279,18 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 		});	
 	$("#gsnap").slider({														// Init snap slider
 		min:0, max:100, step:5, value: _this.gridSnap,							// Params
-		slide: function(e,ui) { $("#gsnapt").text(ui.value)},					// On slide
+		slide: function(e,ui) {													// On slide
+			$("#gsnapt").text(ui.value ? ui.value : "Off" );					// Set label 
+			_this.gridSnap=ui.value;												// Set value
+			}, 
 		});	
 	$("#gsimp").slider({														// Init simplify slider
-		min:0, max:100, value: _this.simplify,									// Params
-		slide: function(e,ui) { $("#gsimpt").text(ui.value ? ui.value : "Off" )}, // On slide
+		min:0, max:100, step:10, value: _this.simplify,							// Params
+		slide: function(e,ui) {													// On slide
+			$("#gsimpt").text(ui.value ? ui.value : "Off" );						// Set label 
+			_this.simplify=ui.value;												// Set value
+			}, 
 		});	
-
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
