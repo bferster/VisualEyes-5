@@ -91,6 +91,11 @@
 						border:1px solid #666;font-size:9px;height:14px;
 						}
 
+		.ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix { border:none }
+		.ui-dialog { border-radius:12px;box-shadow:2px 2px 6px #ccc }
+		.ui-button { border-radius:30px;outline:none }
+		.ui-dialog-titlebar { display:none }
+
  	</style>
 </head>
 <body>
@@ -138,6 +143,7 @@ $(document).ready(function() {												// ON PAGE LOADED
 			snd=new Audio("img/"+sound+".mp3");									// Use mp3
 		if (!mute)	{															// If not initing or muting	
 			snd.volume=qd.cVolume/100;											// Set volume
+			snd.play();															// Play it
 			}
 		}
 		

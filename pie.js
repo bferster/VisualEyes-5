@@ -65,9 +65,9 @@ function PieMenu(options, parObj)											// CONSTRUCTOR
 			if (cs >= 0) {														// A valid slice
    				$("#pihigh").css({"transform":"rotate("+(cs-1)*_this.ops.ang+"deg)"}); // Rotate highlight
 				var o=_this.ops.slices[cs];										// Point at slice
- 				if (o.type == "col")	   _this.ShowColorBars(cs,"color"); 	// Set color bars
-				else if (o.type == "edg")  _this.ShowColorBars(cs,"edge");  	// Set color and edge
-				else if (o.type == "txt")  _this.ShowColorBars(cs,"text");  	// Show text picker
+ 				if (o.type == "col")	   _this.ShowColorBars(cs,"color",o.def); 	// Set color bars
+				else if (o.type == "edg")  _this.ShowColorBars(cs,"edge",o.def);  	// Set color and edge
+				else if (o.type == "txt")  _this.ShowColorBars(cs,"text",o.def);  	// Show text picker
 				else if (o.type == "men")  _this.ShowMenuPick(cs,o.def);		// Show menu picker
 				else if (o.type == "typ")  _this.ShowTextType(cs,o.def);		// Show text picker
 				else if (o.type == "sli")  _this.ShowSlider(cs,o.def);			// Show slider
@@ -181,7 +181,7 @@ PieMenu.prototype.ShowMenuPick=function(num, def)							// SHOW TEXT PICK
 		}
 }
 
-PieMenu.prototype.ShowColorBars=function(num, mode)							// SET COLOR / EDGE / TYPE
+PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE / TYPE
 {
 	var x,y,i,n=4;
 	var _this=this;																// Save context
@@ -213,7 +213,6 @@ PieMenu.prototype.ShowColorBars=function(num, mode)							// SET COLOR / EDGE / 
 		}
 	$("#pimenu").append(str+"</div>");											// Add to menu														
 	$("#pichip9").text("X");													// None icon
-	var def=this.ops.slices[num].def;											// Get def
 	if (!def)	def=["#000000,0,0,0,0"];										// If no def defined, set default
 	def=def.split(",");															// Split int params
 	if (!def[1]) def[1]=0;														// Force to none
@@ -230,14 +229,14 @@ PieMenu.prototype.ShowColorBars=function(num, mode)							// SET COLOR / EDGE / 
 	if (ang2 > 180) ix-=58;														// Shift if on left side
 	str="<input type='text' class='pi-coltext' id='picoltext' "; 
 	str+="style='left:"+ix+"px;top:"+iy+"px'>";
-	str+="<div id='pitextcol' class='pi-colchip unselectable'";	
-	str+="style='left:"+(ix+49)+"px;top:"+(iy+3)+"px;height:9px;width:9px'></div>";
+	str+="<div id='pitextcol' class='pi-colchip unselectable' style='";	
+	str+="border:.5px solid #999;left:"+(ix+49)+"px;top:"+(iy+3)+"px;height:7px;width:8px'></div>";
 	if ((this.parObj.curShape == 5) && mode == "edge") {						// Text
 		str+="<select class='pi-select' id='pifont'";							// Add font selection
 		str+="style='position:absolute;width:64px;left:"+ix+"px;top:"+(iy-18)+"px'>";	
 		str+="<option value='0'>Arial</option>";
 		str+="<option value='1'>Times</option>";
-		str+="<option value='2'>Courier</option></select>"
+		str+="<option value='2'>Courier</option></select>";
 		str+="<div id='pibold' class='pi-fstyle unselectable' " ;				// Bold
 		str+="style='left:"+(ix+70)+"px;top:"+(iy-18)+"px'>B</div>";	
 		str+="<div id='piital' class='pi-fstyle unselectable' ";				// Ital
@@ -433,10 +432,8 @@ PieMenu.prototype.ShowColorBars=function(num, mode)							// SET COLOR / EDGE / 
 				$("#parr4").css("border-left","6px solid "+((j == def[3]) ? "#00a8ff" : "#e8e8e8"));	// Make blue
 				}
 			}
-		if (send){																// If sending s message
-			_this.ops.slices[num].def=def.toString();							// Set new defaults
+		if (send)																// If sending s message
 			_this.SendMessage(send,_this.curSlice+"|"+def.toString());			// Send event
-			}
 		}
 }
 

@@ -257,11 +257,11 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 	str+="<td><div id='cvol' class='unselectable' style='width:80px;display:inline-block'></div>&nbsp;&nbsp;&nbsp;&nbsp;"
 	str+="<div id='cvolt' class='unselectable' style='display:inline-block'>"+this.cVolume+"</div></td></tr>";
 	str+="<tr style='height:18px'><td><b>Grid snap</b></td>";
-	str+="<td><div id='gsnap' class='unselectable' style='width:80px;display:inline-block'></div>&nbsp;&nbsp;&nbsp;"
-	str+="<div id='gsnapt' class='unselectable' style='display:inline-block'>"+(this.gridSnap ? this.gridSnap : "Off")+"</div></td></tr>";
+	str+="<td><div id='csnap' class='unselectable' style='width:80px;display:inline-block'></div>&nbsp;&nbsp;&nbsp;"
+	str+="<div id='csnapt' class='unselectable' style='display:inline-block'>"+(this.gridSnap ? this.gridSnap : "Off")+"</div></td></tr>";
 	str+="<tr style='height:18px'><td><b>Line simplify</b></td>";
-	str+="<td><div id='gsimp' class='unselectable' style='width:80px;display:inline-block'></div>&nbsp;&nbsp;&nbsp;"
-	str+="<div id='gsimpt' class='unselectable' style='display:inline-block'>"+(this.simplify ? this.simplify : "Off")+"</div></td></tr>";
+	str+="<td><div id='csimp' class='unselectable' style='width:80px;display:inline-block'></div>&nbsp;&nbsp;&nbsp;"
+	str+="<div id='csimpt' class='unselectable' style='display:inline-block'>"+(this.simplify ? this.simplify : "Off")+"</div></td></tr>";
 	str+="<tr><td><b>This drawing</b></td><td>"+(this.gd.lastName ? this.gd.lastName : "None")+"</td></tr>";
 	str+="<tr><td><br></td></tr>";
 	str+="<tr><td><b>Help</b></td><td><a href='https://docs.google.com/document/d/1oTbVfuBwFQvgo8EZogyuoXBu7ErCK0oAH3Ny8N_E_Mg/edit?usp=sharing' target='_blank'>";
@@ -270,25 +270,24 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 
 	this.Dialog("Settings",str,270, function() {
 		_this.cVolume=$("#cvolt").text();
-		_this.gridSnap=$("#gsnapt").text();
+		_this.gridSnap=$("#csnap").slider("value");
+		_this.simplify=$("#csimp").slider("value");
 		});
 		
 	$("#cvol").slider({															// Init volume slider
 		min:0, max:100, value: _this.cVolume,									// Params
 		slide: function(e,ui) { $("#cvolt").text(ui.value)},					// On slide
 		});	
-	$("#gsnap").slider({														// Init snap slider
+	$("#csnap").slider({														// Init snap slider
 		min:0, max:100, step:5, value: _this.gridSnap,							// Params
 		slide: function(e,ui) {													// On slide
-			$("#gsnapt").text(ui.value ? ui.value : "Off" );					// Set label 
-			_this.gridSnap=ui.value;												// Set value
+			$("#csnapt").text(ui.value ? ui.value : "Off" );					// Set label 
 			}, 
 		});	
-	$("#gsimp").slider({														// Init simplify slider
+	$("#csimp").slider({														// Init simplify slider
 		min:0, max:100, step:10, value: _this.simplify,							// Params
 		slide: function(e,ui) {													// On slide
-			$("#gsimpt").text(ui.value ? ui.value : "Off" );						// Set label 
-			_this.simplify=ui.value;												// Set value
+			$("#csimpt").text(ui.value ? ui.value : "Off" );						// Set label 
 			}, 
 		});	
 }
@@ -348,7 +347,7 @@ QDraw.prototype.SetUndoStatus=function()									// SET UNDO/REDO ICONS
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// EVENTS
+// KEY EVENTS
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 QDraw.prototype.onKeyUp=function(e)											// KEY UP HANDLER
@@ -363,10 +362,10 @@ QDraw.prototype.onKeyUp=function(e)											// KEY UP HANDLER
 
 QDraw.prototype.onKeyDown=function(e)										// KEY DOWN HANDLER
 {
-	if ((e.keyCode == 8) &&													// Look for Del key
-        (e.target.tagName != "TEXTAREA") && 								// In text area
-        (e.target.tagName != "INPUT")) { 									// or input
-		e.stopPropagation();												// Trap it
+	if ((e.keyCode == 8) &&														// Look for deletes key
+        (e.target.tagName != "TEXTAREA") && 									// In text area
+        (e.target.tagName != "INPUT")) { 										// or input
+		e.stopPropagation();													// Trap it
      	return false;
     }
 }
@@ -569,11 +568,13 @@ QDraw.prototype.GetTextBox=function (title, content, def, callback)		// GET TEXT
 				            	"OK": 		function() { Sound("click");  callback($("#gtBoxTt").val()); $(this).remove(); },
 				            	"Cancel":  	function() { Sound("delete"); $(this).remove(); }
 								}});	
+		
 	$("#alertBoxDiv").dialog("option","position",{ my:"center", at:"center", of:this.parent });
-	$(".ui-dialog-titlebar").hide();
-	$(".ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix").css("border","none");
-	$(".ui-dialog").css({"border-radius":"14px", "box-shadow":"4px 4px 8px #ccc"});
-	$(".ui-button").css({"border-radius":"30px","outline":"none"});
+	
+	$("#gtBoxTt").on("change", function() {									// Handle change in text field (return)
+		callback($(this).val()); 											// Run callback
+		$("#alertBoxDiv").remove(); 										// Kill dialog
+		});
 }
 
 QDraw.prototype.Dialog=function (title, content, width, callback, callback2) // DIALOG BOX
@@ -594,10 +595,6 @@ QDraw.prototype.Dialog=function (title, content, width, callback, callback2) // 
 				            								$(this).remove(); }
 								}});	
 	$("#dialogDiv").dialog("option","position",{ my:"center", at:"center", of:this.parent });
-	$(".ui-dialog-titlebar").hide();
-	$(".ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix").css("border","none");
-	$(".ui-dialog").css({"border-radius":"14px", "box-shadow":"4px 4px 8px #ccc"});
-	$(".ui-button").css({"border-radius":"30px","outline":"none"});
 }
 
 QDraw.prototype.ConfirmBox=function(content, callback)					// CONFIRMATION BOX
@@ -613,8 +610,4 @@ QDraw.prototype.ConfirmBox=function(content, callback)					// CONFIRMATION BOX
 								}});	
 	Sound("ding");															
 	$("#confirmBoxDiv").dialog("option","position",{ my:"center", at:"center", of:this.parent });
-	$(".ui-dialog-titlebar").hide();
-	$(".ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix").css("border","none");
-	$(".ui-dialog").css({"border-radius":"14px", "box-shadow":"4px 4px 8px #ccc"});
-	$(".ui-button").css({"border-radius":"30px","outline":"none"});
 }
