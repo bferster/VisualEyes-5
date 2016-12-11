@@ -418,16 +418,18 @@ Popup.prototype.FormatTime=function(time, format) 						// FORMAT TIME TO DATE
 	var str;
 	var mos=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 	d=new Date(time*60000);													// Convert minutes to ms
+	var year=d.getFullYear();												// Get year
+	if (year < 0)	year=-(1*year)+" BCE";									// Show as BCE
 	if (format == "Mo/Year") 												// 1/1900
-		str=(d.getMonth()+1)+"/"+d.getFullYear();							// Set it
+		str=(d.getMonth()+1)+"/"+year;										// Set it
 	else if (format == "Mo/Day/Year") 										// 1/1/1900
-		str=(d.getMonth()+1)+"/"+d.getDate()+"/"+d.getFullYear();			// Set it
+		str=(d.getMonth()+1)+"/"+d.getDate()+"/"+year;						// Set it
 	else if (format == "Mon Year") 											// Jan 1900
-		str=mos[d.getMonth()]+" "+d.getFullYear();							// Set it
+		str=mos[d.getMonth()]+" "+year;										// Set it
 	else if (format == "Mon Day, Year") 									// Jan 1, 1900
-		str=mos[d.getMonth()]+" "+d.getDate()+", "+d.getFullYear();			// Set it
+		str=mos[d.getMonth()]+" "+d.getDate()+", "+year;					// Set it
 	else																	// Default to only year
-		str=d.getFullYear();												// Set it
+		str=year;															// Set it
   	return str;																// Return formatted date
 }
 
