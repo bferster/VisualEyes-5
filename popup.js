@@ -419,7 +419,7 @@ Popup.prototype.FormatTime=function(time, format) 						// FORMAT TIME TO DATE
 	var mos=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 	d=new Date(time*60000);													// Convert minutes to ms
 	var year=d.getFullYear();												// Get year
-	if (year < 0)	year=-(1*year)+" BCE";									// Show as BCE
+	if (year < 0)	year=(-1*year)+" BCE";									// Show as BCE
 	if (format == "Mo/Year") 												// 1/1900
 		str=(d.getMonth()+1)+"/"+year;										// Set it
 	else if (format == "Mo/Day/Year") 										// 1/1/1900
