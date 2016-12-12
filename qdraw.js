@@ -7,10 +7,11 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 {
 	var _this=this;																// Save context
 	parent=parent ? parent : "body";											// If a parent div spec'd use it
-	if (parent != "body")  parent="#"+parent;									// Add #
+	if (parent != "body")  	parent="#"+parent;									// Add #
 	this.parent=parent;		this.dockSide=dockSide;	this.dockPos=dockPos;		// Save settings
 
 	this.cVolume=100;		this.gridSnap=0;	this.simplify=0;				// General settings
+	this.showSnap=true;		this.showInfo=false;
 	this.curUndo=0;			this.curRedo=0;										// Undo/redo
 
 	this.curCol="#e6550d";														// Default drawing settings
@@ -42,6 +43,7 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	Sound("delete",true);														// Init sound
 
 	this.pie=new PieMenu(ops,this);												// Init pie menu
+	this.GraphicsInit();														// Init graphics
 	this.DrawMenu();															// Draw it
 	sessionStorage.clear();														// Clear session storage
 	this.Do();																	// Add starting undo
@@ -100,9 +102,9 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 			});
 	
 	$(parent).on("mousedown",function(e) { 										// CLICK ON BACKGROUND
-		if (e.target.id == "containerDiv")	{									// If on background
+		if (e.currentTarget.id == "containerDiv")	{							// If on background
 			_this.pie.ShowPieMenu(false);										// Hide it
-			_this.DrawMenu();	
+			_this.DrawMenu();													// Redraw dot
 			}
 		}); 
 }
@@ -262,6 +264,10 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 	str+="<tr style='height:18px'><td><b>Line simplify</b></td>";
 	str+="<td><div id='csimp' class='unselectable' style='width:80px;display:inline-block'></div>&nbsp;&nbsp;&nbsp;"
 	str+="<div id='csimpt' class='unselectable' style='display:inline-block'>"+(this.simplify ? this.simplify : "Off")+"</div></td></tr>";
+	str+="<tr style='height:18px'><td><b>See snap lines</b></td>";
+	str+="<td><input type=checkbox id='lsnap' class='unselectable'"+(this.showSnap ? " checked" :"")+"></td></tr>";
+	str+="<tr style='height:18px'><td><b>See x/y info</b></td>";
+	str+="<td><input type=checkbox id='sinfo' class='unselectable'"+(this.showinfo ? " checked" :"")+"></td></tr>";
 	str+="<tr><td><b>This drawing</b></td><td>"+(this.gd.lastName ? this.gd.lastName : "None")+"</td></tr>";
 	str+="<tr><td><br></td></tr>";
 	str+="<tr><td><b>Help</b></td><td><a href='https://docs.google.com/document/d/1oTbVfuBwFQvgo8EZogyuoXBu7ErCK0oAH3Ny8N_E_Mg/edit?usp=sharing' target='_blank'>";
@@ -274,6 +280,12 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 		_this.simplify=$("#csimp").slider("value");
 		});
 		
+	$("#lsnap").on("click", function() {										// Line snap
+		_this.showSnap=!_this.showSnap;											// Toggle state
+		});
+	$("#sinfo").on("click", function() {										// See info
+		_this.showInfo=!_this.showInfo;											// Toggle state
+		});
 	$("#cvol").slider({															// Init volume slider
 		min:0, max:100, value: _this.cVolume,									// Params
 		slide: function(e,ui) { $("#cvolt").text(ui.value)},					// On slide
