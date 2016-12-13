@@ -12,7 +12,7 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 
 	this.cVolume=100;		this.gridSnap=0;	this.simplify=0;				// General settings
 	this.showSnap=true;		this.showInfo=false;
-	this.curUndo=0;			this.curRedo=0;										// Undo/redo
+	this.curUndo=0;			this.curRedo=0;		this.changed=false;				// Undo/redo
 
 	this.curCol="#e6550d";														// Default drawing settings
 	this.curDrop=0;		this.curShape=0;	this.curAlpha=100;					// Common options
@@ -170,6 +170,7 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 		switch(v[2]-0) {														// Route on slice
 			case 1:																// Color
 				this.curCol=vv[0];												// Set color
+				this.StyleSelectedSegs();										// Style all selected segs
 				break;
 			case 2:																// Edge or text styling 
 				if (this.curShape == 5) {										// If text
@@ -185,9 +186,11 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 					this.curDrop=vv[2];											// Set drop 
 					this.curEtip=vv[3];											// Set tip
 					}
+				this.StyleSelectedSegs();										// Style all selected segs
 				break;
 			case 3:																// Alpha
 				this.curAlpha=vv[0];											// Set alpha
+				this.StyleSelectedSegs();										// Style all selected segs
 				break;
 			case 4:																// Redo
 				this.ReDo();													// Do it
@@ -320,6 +323,7 @@ QDraw.prototype.Do=function()												// SAVE DRAWING IN SESSION STORAGE
 	o.script=this.segs;															// Get drawing data
 	sessionStorage.setItem("do-"+this.curUndo++,JSON.stringify(o));				// Add new do												
 	this.curRedo=0;																// Stop any redos
+	this.changed=false;															// Reset changed flag
 	this.SetUndoStatus();														// Set undo/reco icons
 //	trace("do",this.segs,this.curUndo);
 }

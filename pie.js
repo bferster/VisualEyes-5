@@ -437,7 +437,7 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 		}
 }
 
-PieMenu.prototype.ShowSlider=function(num, def)								// SHOW COLOR BARS
+PieMenu.prototype.ShowSlider=function(num)									// SHOW SLIDER
 {
 	var x,y,i;
 	var _this=this;																// Save context
@@ -455,7 +455,7 @@ PieMenu.prototype.ShowSlider=function(num, def)								// SHOW COLOR BARS
 	str="<input type='text' class='pi-coltext' id='pislitext' "; 				// Make angle input
 	str+="style='left:"+x+"px;top:"+y+"px;width:16px;text-align:center'>";		// Style it
 	$("#pisubback").append(str);												// Add to submenu														
-	setDot(def);																// Put up dot
+	setDot(this.parObj.alpha);													// Put up dot
 
 	$("#pislidot").draggable({
 		drag:function(e,ui) {
