@@ -95,6 +95,7 @@ QDraw.prototype.StyleSeg=function(segNum)								// STYLE SEGMENT
 	if (s.ecol)		o.style.stroke=s.ecol;  								// Stroke color
 	else			o.style.stroke="none";									// No stroke	
 }
+
 QDraw.prototype.SelectSeg=function(segNum, mode)						// SELECT A SEG
 {
 	var s=this.segs[segNum];												// Point at seg data
