@@ -173,6 +173,7 @@ QDraw.prototype.AddWireframe=function(segNum, col)						// ADD WIREFRAME TO DRAW
 		d.setAttribute("x",x-3);		d.setAttribute("y",y-3);			// Pos		
 		d.style.fill=col;													// Fill	
 		d.setAttribute("id","QWireDot-"+num);								// Id
+		d.setAttribute("cursor","ne-resize");								// Set cursor
 	
 		d.addEventListener("mousedown", function(e) {						// ON MOUSE DOWN
 			_this.drawMode="ds-"+segNum+"-"+num;							// Set mode
@@ -207,6 +208,7 @@ QDraw.prototype.AddSeg=function(segNum)									// ADD NEW SEGMENT TO DRAWING
 		s.svg=document.createElementNS(this.NS,type);						// Create element
 		this.svg.appendChild(s.svg);										// Add element to DOM
 		s.svg.setAttribute("id","QSeg-"+segNum);							// Id
+		s.svg.setAttribute("cursor","pointer");								// Hand cursor
 		s.svg.addEventListener("mouseout", function()  { _this.AddWireframe(segNum); } );			// Mouse out
 		s.svg.addEventListener("mouseover", function() { 					// ON MOUSE OVER
 				if (_this.drawMode.substr(0,2) != "ds") 					// Not while dragging
