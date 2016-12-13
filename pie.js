@@ -437,7 +437,7 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 		}
 }
 
-PieMenu.prototype.ShowSlider=function(num)									// SHOW SLIDER
+PieMenu.prototype.ShowSlider=function(num, def)								// SHOW SLIDER
 {
 	var x,y,i;
 	var _this=this;																// Save context

@@ -16,8 +16,10 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
    	this.svg.setAttribute("height","100%");									// Height
 
 	this.svg.addEventListener("click", function(e) { 						// Mouse click
-   			if ((_this.curShape == 0) && (e.target.id == "QWire-SVG"))		// If in pointer
+     			if ((_this.curShape == 0) && (e.target.id == "QWire-SVG"))	// If in container
 				_this.DeselectSegs(),Sound("click");						// Deselect all segs
+  				else if (e.target.id.substr(0,5) != "QSeg-")				// If not on seg
+					_this.curShape=0;										// Pointer
 			});
  
  	this.svg.addEventListener("mousemove", function(e) { 					// Mouse click
@@ -76,13 +78,18 @@ QDraw.prototype.StyleSeg=function(segNum)								// STYLE SEGMENT
 	var s=this.segs[segNum];												// Point at seg data
 	var o=s.svg;															// Point at SVG element
 	if (s.type == "3") {													// A rect
+		var tip=0;
 		o.setAttribute("height",Math.abs(s.y[2]-s.y[0]));					// Height
 		o.setAttribute("width",Math.abs(s.x[2]-s.x[0]));					// Width
 		o.setAttribute("x",s.x[0]);											// X
 		o.setAttribute("y",s.y[0]);											// Y
+		if (s.etip == 1)													// If rounded
+			tip=Math.abs(s.x[2]-s.x[0])/10;									// Set value based on size
+		o.setAttribute("rx",tip);											// Set X radius
+		o.setAttribute("ry",tip);											// Y
 		}
 	o.setAttribute("stroke-width",s.ewid);									// Stroke width
-	o.setAttribute("opacity",s.alpha/100);										// Opacity
+	o.setAttribute("opacity",s.alpha/100);									// Opacity
 	if (s.col)		o.style.fill=s.col;										// Fill color
 	else			o.style.fill="none";									// No fill	
 	if (s.ecol)		o.style.stroke=s.ecol;  								// Stroke color
@@ -97,7 +104,7 @@ QDraw.prototype.SelectSeg=function(segNum, mode)						// SELECT A SEG
 		this.curAlpha=s.alpha;	this.curEwid=s.ewid;
 		this.curEcol=s.ecol;	this.curEtip=s.etip;
 		this.curTsiz=s.tsiz;	this.curTsty=s.tsty;
-		this.curTfon=s.tfon;
+		this.curTfon=s.tfon;	this.curShape=s.type;
 		}
 	this.AddWireframe(segNum);												// Draw selected wireframe	
 }
@@ -123,7 +130,7 @@ QDraw.prototype.StyleSelectedSegs=function()							// STYLE SELECTED SEGS
 			s.alpha=this.curAlpha;	s.ewid=this.curEwid;
 			s.ecol=this.curEcol;	s.etip=this.curEtip;
 			s.tsiz=this.curTsiz;	s.tsty=this.curTsty;
-			s.tfon=this.curTfon;
+			s.tfon=this.curTfon;	
 			this.StyleSeg(i);												// Style it
 			this.changed=true;												// Set changed flag
 			}
@@ -161,8 +168,8 @@ QDraw.prototype.AddWireframe=function(segNum, col)						// ADD WIREFRAME TO DRAW
 	function AddDot(x, y, par, num) {
 		var d=document.createElementNS(_this.NS,"rect");					// Create element
 		group.appendChild(d);												// Add dot to group
-		d.setAttribute("height",4);		d.setAttribute("width",4);			// Size
-		d.setAttribute("x",x-2);		d.setAttribute("y",y-2);			// Pos		
+		d.setAttribute("height",6);		d.setAttribute("width",6);			// Size
+		d.setAttribute("x",x-3);		d.setAttribute("y",y-3);			// Pos		
 		d.style.fill=col;													// Fill	
 		d.setAttribute("id","QWireDot-"+num);								// Id
 	
@@ -199,11 +206,15 @@ QDraw.prototype.AddSeg=function(segNum)									// ADD NEW SEGMENT TO DRAWING
 		s.svg=document.createElementNS(this.NS,type);						// Create element
 		this.svg.appendChild(s.svg);										// Add element to DOM
 		s.svg.setAttribute("id","QSeg-"+segNum);							// Id
-		s.svg.addEventListener("mouseover", function() { _this.AddWireframe(segNum,"#ff0000");} );	// Mouse over
-		s.svg.addEventListener("mouseout", function()  { _this.AddWireframe(segNum);} );			// Mouse out
+		s.svg.addEventListener("mouseout", function()  { _this.AddWireframe(segNum); } );			// Mouse out
+		s.svg.addEventListener("mouseover", function() { 					// ON MOUSE OVER
+				if (_this.drawMode.substr(0,2) != "ds") 					// Not while dragging
+					_this.AddWireframe(segNum,"#ff0000");					// Highlight it
+				});	
 		
 		s.svg.addEventListener("mousedown", function(e) { 					// ON MOUSE DOWN
-				if (e.shiftKey)
+				var s=_this.segs[segNum];									// Point at seg data
+				if (e.shiftKey)												// If shift key is down
 					_this.SelectSeg(segNum,!s.select);						// Toggle selection state
 				else{														// Multiple selection
 					_this.DeselectSegs();									// Deselect segs
@@ -212,7 +223,6 @@ QDraw.prototype.AddSeg=function(segNum)									// ADD NEW SEGMENT TO DRAWING
 				Sound("click");												// Click
 				_this.AddWireframe(segNum);									// Draw selected wireframe	
 				_this.drawMode="ds-"+segNum+"-0";							// Set mode to drag all
-				var s=_this.segs[segNum];									// Point at seg data
 				_this.mouseX=e.clientX; _this.mouseY=e.clientY;				// Save clicked spot
 				_this.mouseDX=e.clientX-s.x[0];								// Delta X from first point
 				_this.mouseDY=e.clientY-s.y[0];								// DY
