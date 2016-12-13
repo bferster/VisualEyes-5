@@ -126,7 +126,6 @@ QDraw.prototype.StyleSelectedSegs=function()							// STYLE SELECTED SEGS
 			s.tfon=this.curTfon;
 			this.StyleSeg(i);												// Style it
 			this.changed=true;												// Set changed flag
-			trace(s)
 			}
 	if (this.changed)														// If changing something
 		this.Do();															// Save an undo
@@ -170,7 +169,6 @@ QDraw.prototype.AddWireframe=function(segNum, col)						// ADD WIREFRAME TO DRAW
 		d.addEventListener("mousedown", function(e) {						// ON MOUSE DOWN
 			_this.drawMode="ds-"+segNum+"-"+num;							// Set mode
 			_this.mouseX=e.clientX; _this.mouseX=e.clientY;					// Save clicked spot
-			trace(_this.drawMode)
 			});
 		}
 }
@@ -218,7 +216,6 @@ QDraw.prototype.AddSeg=function(segNum)									// ADD NEW SEGMENT TO DRAWING
 				_this.mouseX=e.clientX; _this.mouseY=e.clientY;				// Save clicked spot
 				_this.mouseDX=e.clientX-s.x[0];								// Delta X from first point
 				_this.mouseDY=e.clientY-s.y[0];								// DY
-				trace(_this.drawMode)
 			});
 		}
 }
