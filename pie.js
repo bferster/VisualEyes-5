@@ -455,7 +455,7 @@ PieMenu.prototype.ShowSlider=function(num)									// SHOW SLIDER
 	str="<input type='text' class='pi-coltext' id='pislitext' "; 				// Make angle input
 	str+="style='left:"+x+"px;top:"+y+"px;width:16px;text-align:center'>";		// Style it
 	$("#pisubback").append(str);												// Add to submenu														
-	setDot(this.parObj.alpha);													// Put up dot
+	setDot(def);																// Put up dot
 
 	$("#pislidot").draggable({
 		drag:function(e,ui) {
