@@ -256,6 +256,14 @@ QDraw.prototype.AddSeg=function(segNum)									// ADD NEW SEGMENT TO DRAWING
 				if (_this.drawMode.substr(0,2) != "ds") 					// Not while dragging
 					_this.AddWireframe(segNum,"#ff0000");					// Highlight it
 				});	
+
+		s.svg.addEventListener("contextmenu", function(e) { 				// ON RIGHT CLICK
+				var w=_this.pie.ops.wid/2;									// Get width/2
+				_this.pie.ops.x=e.clientX-w;								// Position
+				_this.pie.ops.y=e.clientY-w;								// Position
+				_this.pie.ShowPieMenu(!_this.pie.active);					// Toggle
+				_this.DrawMenu();											// Draw dot
+				});	
 		
 		s.svg.addEventListener("mousedown", function(e) { 					// ON MOUSE DOWN
 				var s=_this.segs[segNum];									// Point at seg data
