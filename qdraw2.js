@@ -14,8 +14,10 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
  	this.svg=document.createElementNS(this.NS,"svg");						// Create SVG object
    	this.svg.setAttribute("width","100%");									// Width
    	this.svg.setAttribute("height","100%");									// Height
-
-	this.svg.addEventListener("click", function(e) { 						// Mouse click
+	this.AddDropFilter("QdropFilterB","#000000",4);							// Add black SVG filter for drop shadows
+	this.AddDropFilter("QdropFilterW","#ffffff",4);							// Add white 
+ 	
+ 	this.svg.addEventListener("click", function(e) { 						// Mouse click
      			if ((_this.curShape == 0) && (e.target.id == "QWire-SVG"))	// If in container
 				_this.DeselectSegs(),Sound("click");						// Deselect all segs
   				else if (e.target.id.substr(0,5) != "QSeg-")				// If not on seg
@@ -94,6 +96,12 @@ QDraw.prototype.StyleSeg=function(segNum)								// STYLE SEGMENT
 	else			o.style.fill="none";									// No fill	
 	if (s.ecol)		o.style.stroke=s.ecol;  								// Stroke color
 	else			o.style.stroke="none";									// No stroke	
+	if (s.drop == 1)														// White drop
+		o.setAttribute("filter","url(#QdropFilterW)");						// Set white filter
+	else if (s.drop == 2)													// Black drop
+		o.setAttribute("filter","url(#QdropFilterB)");						// Set black filter
+	else																	// No drop
+		o.setAttribute("filter","");										// Remove filter
 }
 
 QDraw.prototype.SelectSeg=function(segNum, mode)						// SELECT A SEG
@@ -173,7 +181,7 @@ QDraw.prototype.AddWireframe=function(segNum, col)						// ADD WIREFRAME TO DRAW
 		d.setAttribute("x",x-3);		d.setAttribute("y",y-3);			// Pos		
 		d.style.fill=col;													// Fill	
 		d.setAttribute("id","QWireDot-"+num);								// Id
-		d.setAttribute("cursor","ne-resize");								// Set cursor
+		d.setAttribute("cursor","alias");									// Set cursor
 	
 		d.addEventListener("mousedown", function(e) {						// ON MOUSE DOWN
 			_this.drawMode="ds-"+segNum+"-"+num;							// Set mode
@@ -192,6 +200,40 @@ QDraw.prototype.Draw=function(e)										// DRAW
 
 QDraw.prototype.RubberBox=function(x1, y1, x2, y2, width, mode)			// DRAW RUBBER LINE/BOX
 {
+}
+
+QDraw.prototype.AddDropFilter=function(id, col, spread)					// ADD DROPSHADOW SVG FILTER
+{
+   	var filter=document.createElementNS(this.NS,"filter");					// Create filter
+   	filter.setAttribute("id",id);								
+   	filter.setAttribute("width","200%");									
+   	filter.setAttribute("height","200%");									
+    var off=document.createElementNS(this.NS,"feOffset");					// Create feOffset
+   	off.setAttribute("result","offOut");									
+ 	off.setAttribute("in","SourceGraphic");									
+ 	off.setAttribute("dx","1");			
+ 	off.setAttribute("dy","1");						
+   	var blur=document.createElementNS(this.NS,"feGaussianBlur");			// Create feGaussianBlur
+   	blur.setAttribute("result","blurOut");									
+ 	blur.setAttribute("in","matrixOut");									
+ 	blur.setAttribute("stdDeviation",spread);									
+   	var blend=document.createElementNS(this.NS,"feBlend");					// Create feBlend
+   	blend.setAttribute("in","SourceGraphic");									
+ 	blend.setAttribute("in2","blurOut");									
+	blend.setAttribute("mode","normal");									
+ 	var mat=document.createElementNS(this.NS,"feColorMatrix");				// Create feColorMatrix
+ 	mat.setAttribute("in","offOut");									
+ 	mat.setAttribute("result","matrixOut");									
+ 	mat.setAttribute("type","matrix");									
+ 	if (col ==  "#ffffff")
+ 		mat.setAttribute("values","-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0");
+ 	else									
+  		mat.setAttribute("values","0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0");
+	filter=this.svg.appendChild(filter)										// Add filter to DOM
+ 	filter.appendChild(off);												// Add feoffset to filter
+ 	filter.appendChild(mat);												// Add feColorMatrix to filter
+	filter.appendChild(blur);												// Add feGaussianBlur to filter
+	filter.appendChild(blend);												// Add feBlend to filter
 }
 
 QDraw.prototype.AddSeg=function(segNum)									// ADD NEW SEGMENT TO DRAWING
