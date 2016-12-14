@@ -8,14 +8,12 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
 	var i;
 	var _this=this;															// Context
 	this.segs=[];															// Init segment list
-	this.controlKey=false;													// Init key flags
 	this.drawMode="";														// Current drawing mode
 	this.NS="http://www.w3.org/2000/svg";									// Name space
- 	this.svg=document.createElementNS(this.NS,"svg");						// Create SVG object
+	this.svg=document.createElementNS(this.NS,"svg");						// Create SVG object
+  	this.svg.setAttribute("id","Q-SVG");									// ID
    	this.svg.setAttribute("width","100%");									// Width
    	this.svg.setAttribute("height","100%");									// Height
-	this.AddDropFilter("QdropFilterB","#000000",4);							// Add black SVG filter for drop shadows
-	this.AddDropFilter("QdropFilterW","#ffffff",4);							// Add white 
  	
  	this.svg.addEventListener("click", function(e) { 						// Mouse click
      			if ((_this.curShape == 0) && (e.target.id == "QWire-SVG"))	// If in container
@@ -27,6 +25,7 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
  	this.svg.addEventListener("mousemove", function(e) { 					// Mouse click
  			var v=_this.drawMode.split("-");								// Get parts
   			if ((v[0] == "ds") && (v[2] == 0)) {							// If full seg drag start
+				_this.Do(true);												// Save tempseg as undo
 				var s=_this.segs[v[1]];										// Point at seg
 				var n=s.x.length;											// Length of coords
 				var dy=e.clientY-s.y[0]-_this.mouseDY;						// Delta y to move
@@ -39,6 +38,7 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
 				_this.AddWireframe(v[1]);									// Redraw select
 				}
 			else if ((v[0] == "ds") && (v[2])) {							// If point seg drag start
+				_this.Do(true);												// Save tempseg as undo
 				var s=_this.segs[v[1]];										// Point at seg
 				s.x[v[2]-1]=e.clientX;										// Set x pos
 				s.y[v[2]-1]=e.clientY;										// Set Y pos
@@ -60,8 +60,9 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
 			});
 
   	document.getElementById("containerDiv").appendChild(this.svg);			// Add to DOM
-	this.svg.setAttribute("id","QWire-SVG");								// Id
-	for (i=0;i<10;i++) {
+	this.RefreshSVG();														// Refresh SVG space
+	 	
+ 	for (i=0;i<10;i++) {
 	c=i*30;
 	this.segs[i]={ type:3,col:"#cccccc",ewid:1,ecol:"#990000",alpha:100,drop:0,select:false,
 	x:[20+c,120+c,120+c,20+c],y:[50+c,50+c,250+c,250+c]}
@@ -69,6 +70,20 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
 this.AddSeg(i)
 this.StyleSeg(i)
 }
+}
+
+QDraw.prototype.RefreshSVG=function()									// REFRESH SVG 
+{
+	var i,n=this.segs.length;
+ 	this.tempSeg=null;														// Clear temp 
+	$("#Q-SVG").empty();													// Remove all segs
+	this.AddDropFilter("QdropFilterB","#000000",4);							// Add black SVG filter for drop shadows
+	this.AddDropFilter("QdropFilterW","#ffffff",4);							// Add white 
+	for (i=0;i<n;++i) {														// For each seg
+		this.segs[i].svg=null;												// Clear so a new geg will be added
+		this.AddSeg(i);														// Add it
+		this.StyleSeg(i);													// Style it
+		}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -273,6 +288,7 @@ QDraw.prototype.AddSeg=function(segNum)									// ADD NEW SEGMENT TO DRAWING
 					_this.DeselectSegs();									// Deselect segs
 					_this.SelectSeg(segNum,true);							// Toggle selection state
 					}
+				_this.tempSeg=JSON.parse(JSON.stringify(_this.segs));		// Unlink and copy segs
 				Sound("click");												// Click
 				_this.AddWireframe(segNum);									// Draw selected wireframe	
 				_this.drawMode="ds-"+segNum+"-0";							// Set mode to drag all

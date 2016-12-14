@@ -315,15 +315,20 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-QDraw.prototype.Do=function()												// SAVE DRAWING IN SESSION STORAGE
+QDraw.prototype.Do=function(useTempData)									// SAVE DRAWING IN SESSION STORAGE
 {
 	var o={};
 	o.date=new Date().toString().substr(0,21);									// Get date
 	o.script=this.segs;															// Get drawing data
+	if (useTempData)															// If saving temp data
+		o.script=this.tempSeg;													// Use it
+	if (!o.script)																// No data there
+		return false;															// Quit
 	sessionStorage.setItem("do-"+this.curUndo++,JSON.stringify(o));				// Add new do												
 	this.curRedo=0;																// Stop any redos
 	this.changed=false;															// Reset changed flag
 	this.SetUndoStatus();														// Set undo/reco icons
+	this.tempSeg=null;															// Kill temp data
 }
 	
 QDraw.prototype.UnDo=function()												// GET DRAWING FROM SESSION STORAGE
@@ -333,6 +338,7 @@ QDraw.prototype.UnDo=function()												// GET DRAWING FROM SESSION STORAGE
 	var key=sessionStorage.key(this.curUndo-2);									// Get key for undo
 	var o=$.parseJSON(sessionStorage.getItem(key));								// Get undo from local storage
 	this.segs=o.script;															// Get data
+	this.RefreshSVG();															// Restore SVG
 	Sound("delete");															// Delete
 	this.curRedo++;																// Inc redo count
 	this.curUndo--;																// Dec undo count
@@ -346,6 +352,7 @@ QDraw.prototype.ReDo=function()												// REDO DRAWING FROM UNDO
 	var key=sessionStorage.key(this.curUndo);									// Get key for redo
 	var o=$.parseJSON(sessionStorage.getItem(key));								// Get undo from local storage
 	this.segs=o.script;															// Get data
+	this.RefreshSVG();															// Restore SVG
 	Sound("ding");																// Click
 	this.curUndo++;																// Inc undo count
 	this.curRedo--;																// Dec redo count
