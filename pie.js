@@ -10,6 +10,7 @@ function PieMenu(options, parObj)											// CONSTRUCTOR
 	this.ops=options;															// Save options
 	this.parObj=parObj;															// Save calling context
 	this.active=false;															// Inactive
+	this.ops.segMode=false;														// Assume full menu
 	var w=this.ops.wid/2;														// Center
 	var iw=(this.ops.wid/200*24).toFixed(4);									// Calc scale
 	var r=w-(w/4);																// Radius
@@ -98,6 +99,8 @@ PieMenu.prototype.ShowPieMenu=function(mode)								// SHOW PIE MENU
 		$("#pamenu").animate({ top:o.y+w, left:o.x+w });						// Zoom on
 		}
 	else{																		// If hiding
+		this.ops.segMode=false;													// Full drawing mode
+		this.parObj.curShape=0;													// Pointer shape					
 		this.HideSubMenus(true);												// Hide submenus										
 		$("#pimenu").animate({ width:0, height:0,top:o.sy,left:o.sx, opacity:0},0);	// Zoom off
 		}	
@@ -116,7 +119,7 @@ PieMenu.prototype.SetSlice=function(num, obj)								// SET SLICE INFO
 	this.ops.slices[num]=obj;													// Set data
 }
 
-PieMenu.prototype.ShowTextType=function(num, def)								// TYPE IN A VALUE
+PieMenu.prototype.ShowTextType=function(num, def)							// TYPE IN A VALUE
 {
 	var _this=this;																// Save context
 	var ang=(num)*this.ops.ang-22.5;											// Start angle
@@ -163,7 +166,7 @@ PieMenu.prototype.ShowMenuPick=function(num, def)							// SHOW TEXT PICK
 			t=0;																// No shift
 		x=Math.floor(w+(Math.sin((ang)*0.0174533)*r-t-7));						// Calc x
 		y=Math.floor((w-Math.cos((ang)*0.0174533)*r)-7);						// Y
-		ang+=18;																// Next angle
+		ang+=20;																// Next angle
 		
 		$("#pitext"+i).css({"left":x+"px","top":y+"px"});						// Position
 		

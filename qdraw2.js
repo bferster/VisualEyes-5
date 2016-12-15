@@ -16,7 +16,7 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
    	this.svg.setAttribute("height","100%");									// Height
  	
  	this.svg.addEventListener("click", function(e) { 						// Mouse click
-     			if ((_this.curShape == 0) && (e.target.id == "QWire-SVG"))	// If in container
+      			if ((_this.curShape == 0) && (e.target.id == "Q-SVG"))		// If in container
 				_this.DeselectSegs(),Sound("click");						// Deselect all segs
   				else if (e.target.id.substr(0,5) != "QSeg-")				// If not on seg
 					_this.curShape=0;										// Pointer
@@ -33,6 +33,10 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
 				for (i=0;i<n;++i) {											// For each coord
 					s.x[i]+=dx;												// Set x pos
 					s.y[i]+=dy;												// Set Y pos
+					if (_this.gridSnap) {									// If snapping
+						s.x[i]-=s.x[i]%_this.gridSnap;						// Snap x								
+						s.y[i]-=s.y[i]%_this.gridSnap;						// Snap y								
+						}			
 					}
 				_this.StyleSeg(v[1]);										// Move it
 				_this.AddWireframe(v[1]);									// Redraw select
@@ -40,8 +44,12 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
 			else if ((v[0] == "ds") && (v[2])) {							// If point seg drag start
 				_this.Do(true);												// Save tempseg as undo
 				var s=_this.segs[v[1]];										// Point at seg
-				s.x[v[2]-1]=e.clientX;										// Set x pos
-				s.y[v[2]-1]=e.clientY;										// Set Y pos
+				var x=e.clientX, y=e.clientY;								// Get current pos
+				if (_this.gridSnap) {										// If snapping
+					x-=x%_this.gridSnap;									// Snap x								
+					y-=y%_this.gridSnap;									// Snap y								
+					}			
+				s.x[v[2]-1]=x;			s.y[v[2]-1]=y;						// Set pos
 				if ((s.type == 3) || (s.type == 4)) {						// Box or circle
 					if (v[2] == 1)		s.y[1]=s.y[0],s.x[3]=s.x[0];		// TL
 					else if (v[2] == 2)	s.y[0]=s.y[1],s.x[2]=s.x[1];		// TR
@@ -60,6 +68,7 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
 			});
 
   	document.getElementById("containerDiv").appendChild(this.svg);			// Add to DOM
+	$(this.svg).on("contextmenu", function() { return false; });			// Inhibit default right-click menu
 	this.RefreshSVG();														// Refresh SVG space
 	 	
  	for (i=0;i<10;i++) {
@@ -128,7 +137,7 @@ QDraw.prototype.SelectSeg=function(segNum, mode)						// SELECT A SEG
 		this.curAlpha=s.alpha;	this.curEwid=s.ewid;
 		this.curEcol=s.ecol;	this.curEtip=s.etip;
 		this.curTsiz=s.tsiz;	this.curTsty=s.tsty;
-		this.curTfon=s.tfon;	this.curShape=s.type;
+		this.curTfon=s.tfon;	
 		}
 	this.AddWireframe(segNum);												// Draw selected wireframe	
 }
@@ -273,9 +282,15 @@ QDraw.prototype.AddSeg=function(segNum)									// ADD NEW SEGMENT TO DRAWING
 				});	
 
 		s.svg.addEventListener("contextmenu", function(e) { 				// ON RIGHT CLICK
-				var w=_this.pie.ops.wid/2;									// Get width/2
-				_this.pie.ops.x=e.clientX-w;								// Position
+				var i,w=_this.pie.ops.wid/2;								// Get width/2
+				_this.pie.ops.segMode=true;									// Show seg menu
+				_this.pie.ops.x=(e.clientX-w);								// Position
 				_this.pie.ops.y=e.clientY-w;								// Position
+				for (i=0;i<_this.segs.length;++i)							// For each seg
+					if (_this.segs[i].select) {								// If selected
+						_this.curShape=_this.segs[i].type;					// Set type
+						break;												// Quit looking
+						}
 				_this.pie.ShowPieMenu(!_this.pie.active);					// Toggle
 				_this.DrawMenu();											// Draw dot
 				});	
@@ -295,12 +310,15 @@ QDraw.prototype.AddSeg=function(segNum)									// ADD NEW SEGMENT TO DRAWING
 				_this.mouseX=e.clientX; _this.mouseY=e.clientY;				// Save clicked spot
 				_this.mouseDX=e.clientX-s.x[0];								// Delta X from first point
 				_this.mouseDY=e.clientY-s.y[0];								// DY
+			
+			
 			});
 		}
 }
 
-
-
+QDraw.prototype.DeleteSeg=function(segNum, id)							// REMOVE SEGMENT FROM DRAWING
+{
+}
 
 
 

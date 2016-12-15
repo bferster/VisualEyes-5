@@ -10,9 +10,10 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	if (parent != "body")  	parent="#"+parent;									// Add #
 	this.parent=parent;		this.dockSide=dockSide;	this.dockPos=dockPos;		// Save settings
 
-	this.cVolume=100;		this.gridSnap=0;	this.simplify=0;				// General settings
+	this.cVolume=33;		this.gridSnap=0;	this.simplify=0;				// General settings
 	this.showSnap=true;		this.showInfo=false;
 	this.curUndo=0;			this.curRedo=0;		this.changed=false;				// Undo/redo
+	this.clipboard=[];															// Holds cut and paste segs
 
 	this.curCol="#e6550d";														// Default drawing settings
 	this.curDrop=0;		this.curShape=0;		this.curAlpha=100;				// Common options
@@ -123,9 +124,13 @@ QDraw.prototype.DrawMenu=function()											// SHOW DRAWING TOOL MENU
 	ops.slices[1]={ type:"col", ico:"img/color-icon.png", def:this.curCol+",0,"+this.curDrop };	// Color slice 
 	if (this.curShape == 5)														// If text
 		this.pie.SetSlice(2,{type:"edg", ico:"img/font-icon.png", def:this.curCol+","+this.curTsiz+","+this.curDrop+","+this.curTfon+","+this.curTSty});// Text menu 
-	else																// If shape
+	else																		// If shape
 		this.pie.SetSlice(2,{type:"edg", ico:"img/edge-icon.png", def:this.curEcol+","+this.curEwid+","+this.curDrop+","+this.curEtip});	// Edge menu
 	ops.slices[3]={ type:"sli", ico:"img/alpha-icon.png", def:this.curAlpha };	// Alpha slice 
+	if (ops.segMode)
+		this.pie.SetSlice(6,{ type:"men", ico:"img/align-icon.png", options:["Align","Back","Backward","Forward","Front"]});	// Align menu 
+	else
+		this.pie.SetSlice(6,{ type:"men", ico:"img/save-icon.png", options:["Save","Save-As","Load","Clear"]});	// Save menu 
 	ops.slices[8]={ type:"ico", ico:"img/draw-icon.png", def:this.curShape };	// Blank slice 
 	ops.slices[8].options=["img/point-icon.png","img/line-icon.png","img/curve-icon.png","img/box-icon.png","img/circle-icon.png","img/text-icon.png"] ;
 	
@@ -202,6 +207,10 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 				this.UnDo();													// Undo it
 				break;
 			case 6:
+				if (this.pie.ops.segMode) {										// If working on a seg level
+					break;
+				}
+				
 				var data="<!-- This is the raw seg data -->\n";
 				data+='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle r="32" cx="35" cy="65" fill="#F00" opacity="0.5"/><circle r="32" cx="65" cy="65" fill="#0F0" opacity="0.5"/><circle r="32" cx="50" cy="35" fill="#00F" opacity="0.5"/></svg>'
 				if ((v[3] == 1) || ((v[3] == 0) && !_this.gd.lastId))	{		// Save to new file
@@ -311,7 +320,7 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// UNDO / REDO
+// UNDO / REDO / CUT /PASTE
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -365,6 +374,19 @@ QDraw.prototype.SetUndoStatus=function()									// SET UNDO/REDO ICONS
 	$("#sliceicon4").css("opacity",(this.curRedo > 0) ? 1 : .33);
 }
 
+
+QDraw.prototype.ClipboardCut=function()										// CLIPBOARD CUT
+{
+}
+
+QDraw.prototype.ClipboardCopy=function()									// CLIPBOARD COPY
+{
+}
+
+QDraw.prototype.ClipboardPaste=function()									// CLIPBOARD PASTE
+{
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // KEY EVENTS
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -377,6 +399,12 @@ QDraw.prototype.onKeyUp=function(e)											// KEY UP HANDLER
 		this.ReDo();															// Undo
 	else if ((e.key == "y") && e.ctrlKey)										// Control y
 		this.ReDo();															// Redo
+	else if ((e.key == "c") && e.ctrlKey)										// Control c
+		this.ClipboardCopy();													// Copy
+	else if ((e.key == "v") && e.ctrlKey)										// Control v
+		this.ClipboardPaste();													// Paste
+	else if ((e.key == "x") && e.ctrlKey)										// Control x
+		this.ClipboardCut();													// Cut
 }
 
 QDraw.prototype.onKeyDown=function(e)										// KEY DOWN HANDLER
