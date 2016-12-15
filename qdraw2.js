@@ -221,7 +221,7 @@ QDraw.prototype.AddWireframe=function(segNum, col)						// ADD WIREFRAME TO DRAW
 		d.setAttribute("height",6);		d.setAttribute("width",6);			// Size
 		d.setAttribute("x",x-3);		d.setAttribute("y",y-3);			// Pos		
 		d.style.fill=col;													// Fill	
-		d.setAttribute("id","QWireDot-"+num);								// Id
+		d.setAttribute("id","QWireDot-"+segNum+"-"+num);					// Id
 		d.setAttribute("cursor","alias");									// Set cursor
 	
 		d.addEventListener("mousedown", function(e) {						// ON MOUSE DOWN
@@ -331,8 +331,6 @@ QDraw.prototype.AddSeg=function(segNum)									// ADD NEW SEGMENT TO DRAWING
 				_this.mouseX=e.clientX; _this.mouseY=e.clientY;				// Save clicked spot
 				_this.mouseDX=e.clientX-s.x[0];								// Delta X from first point
 				_this.mouseDY=e.clientY-s.y[0];								// DY
-			
-			
 			});
 		}
 }
