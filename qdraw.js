@@ -378,17 +378,44 @@ QDraw.prototype.SetUndoStatus=function()									// SET UNDO/REDO ICONS
 	$("#sliceicon4").css("opacity",(this.curRedo > 0) ? 1 : .33);
 }
 
-
 QDraw.prototype.ClipboardCut=function()										// CLIPBOARD CUT
 {
+	this.Do();																	// Save undo
+	this.ClipboardCopy();														// Copy selected segs
+	for (i=this.segs.length-1;i>=0;--i) 										// For each seg, backwards
+		if (this.segs[i].select) {												// If selected
+			$("#QWire-"+i).remove();											// Remove wireframe
+			$("#QSeg-"+i).remove();												// Remove SVG
+			this.segs.splice(i,1);												// Remove from seg list
+			}																	// Add to clipboard
+	this.RefreshIds();															// Refresh SVG ids to match seg order
+	Sound("delete");															// Delete
 }
 
 QDraw.prototype.ClipboardCopy=function()									// CLIPBOARD COPY
 {
+	var i;
+	this.clipboard=[];															// Clear clipboard
+	for (i=0;i<this.segs.length;++i) 											// For each seg
+		if (this.segs[i].select) 												// If selected
+			this.clipboard.push(JSON.parse(JSON.stringify(this.segs[i])));		// Unlink and copy seg to clipboard
+	if (this.clipboard.length)													// If something copied
+		Sound("click");															// Click
 }
 
 QDraw.prototype.ClipboardPaste=function()									// CLIPBOARD PASTE
 {
+	var i;
+	this.Do();																	// Save undo
+	this.DeselectSegs();														// Deselect all oder sects
+	for (i=0;i<this.clipboard.length;++i) {										// For each seg
+		this.clipboard[i].svg=null;												// Clear old svg
+		this.segs.push(this.clipboard[i]);										// Add seg in
+		this.AddSeg(this.segs.length-1);										// Add it in
+		this.StyleSeg(this.segs.length-1);										// Add it in
+		}
+	if (this.clipboard.length)													// If pasted something
+		Sound("ding");															// Ding
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
