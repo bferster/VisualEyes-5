@@ -284,7 +284,7 @@ QDraw.prototype.AddSeg=function(segNum)									// ADD NEW SEGMENT TO DRAWING
 		s.svg.addEventListener("contextmenu", function(e) { 				// ON RIGHT CLICK
 				var i,w=_this.pie.ops.wid/2;								// Get width/2
 				_this.pie.ops.segMode=true;									// Show seg menu
-				_this.pie.ops.x=(e.clientX-w);								// Position
+				_this.pie.ops.x=e.clientX-w;								// Position
 				_this.pie.ops.y=e.clientY-w;								// Position
 				for (i=0;i<_this.segs.length;++i)							// For each seg
 					if (_this.segs[i].select) {								// If selected

@@ -66,9 +66,11 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 			else if (e.clientY < t)		_this.dockSide="top";					// Top
 			else if (e.clientY > b)		_this.dockSide="bottom";				// Bottom
 			else						_this.dockSide="float";					// Float
+			_this.pie.ops.sx=e.clientX;	_this.pie.ops.sy=e.clientY;				// Start point
 			_this.dockPos=null;													// Set y
 			_this.DrawMenu();													// Redraw it
 			Sound("click");														// Click
+	
 			}
 		});
 
@@ -96,7 +98,6 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 				_this.pie.ops.y=y-w;											// Center
 				_this.pie.ops.x=x-w;											// Center
 				}
-			_this.pie.ops.sx=x;		_this.pie.ops.sy=y;							// Start point
 			_this.pie.ShowPieMenu(!_this.pie.active);							// Toggle
 			_this.DrawMenu();	
 			});
@@ -143,26 +144,29 @@ QDraw.prototype.DrawMenu=function()											// SHOW DRAWING TOOL MENU
 		if (this.dockSide == "left")
 			$("#pamenu").css({"border-radius":"0px","left":"0px",
 				"border-top-right-radius":"100px",
-				"border-bottom-right-radius":"100px"
+				"border-bottom-right-radius":"100px",
+				"top":this.dockPos+"%"
 				});								
 		else if (this.dockSide == "right")
 			$("#pamenu").css({"border-radius":"0px","left":x+"px",
 				"border-top-left-radius":"100px",
-				"border-bottom-left-radius":"100px"
+				"border-bottom-left-radius":"100px",
+				"top":this.dockPos+"%"
 				});								
 		else if (this.dockSide == "top")
 			$("#pamenu").css({"border-radius":"0px","top":"0px",
 				"border-bottom-left-radius":"100px",
-				"border-bottom-right-radius":"100px"
+				"border-bottom-right-radius":"100px",
+				"left":this.dockPos+"%"
 				});								
 		else if (this.dockSide == "bottom")
 			$("#pamenu").css({"border-radius":"0px","top":y+"px",
 				"border-top-left-radius":"100px",
-				"border-top-right-radius":"100px"
+				"border-top-right-radius":"100px",
+				"left":this.dockPos+"%"
 				});								
-		$("#pamenu").css({"top":this.dockPos+"%"});
-		this.pie.sx=$("#pamenu").position().left;
-		this.pie.sy=$("#pamenu").position().top;
+		else if (this.dockSide == "float")
+			$("#pamenu").css({"top":this.sx+"px","left":this.sy+"px" });								
 	}
 }
 

@@ -103,6 +103,7 @@ PieMenu.prototype.ShowPieMenu=function(mode)								// SHOW PIE MENU
 		this.parObj.curShape=0;													// Pointer shape					
 		this.HideSubMenus(true);												// Hide submenus										
 		$("#pimenu").animate({ width:0, height:0,top:o.sy,left:o.sx, opacity:0},0);	// Zoom off
+		$("#pamenu").animate({ top:o.sy-25, left:o.sx-25 },0);						// Zoom off
 		}	
 }
 
