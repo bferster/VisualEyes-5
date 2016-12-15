@@ -182,7 +182,7 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 		switch(v[2]-0) {														// Route on slice
 			case 1:																// Color
 				this.curCol=vv[0];												// Set color
-				this.StyleSelectedSegs();										// Style all selected segs
+				this.StyleSelectedSegs(this.changed=true);						// Style all selected segs
 				break;
 			case 2:																// Edge or text styling 
 				if (this.curShape == 5) {										// If text
@@ -198,11 +198,11 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 					this.curDrop=vv[2];											// Set drop 
 					this.curEtip=vv[3];											// Set tip
 					}
-				this.StyleSelectedSegs();										// Style all selected segs
+				this.StyleSelectedSegs(this.changed=true);						// Style all selected segs
 				break;
 			case 3:																// Alpha
 				this.curAlpha=vv[0];											// Set alpha
-				this.StyleSelectedSegs();										// Style all selected segs
+				this.StyleSelectedSegs(this.changed=true);						// Style all selected segs
 				break;
 			case 4:																// Redo
 				this.ReDo();													// Do it
