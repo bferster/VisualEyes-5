@@ -32,7 +32,7 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	ops.slices[3]={ type:"sli", ico:"img/alpha-icon.png", def:100 };			// Alpha slice 
 	ops.slices[4]={ type:"but", ico:"img/redo-icon.png", options:["Redo"]};		// Redo slice 
 	ops.slices[5]={ type:"but", ico:"img/undo-icon.png",options:["Undo"]};		// Undo slice 
-	ops.slices[6]={ type:"men", ico:"img/save-icon.png", options:["Save","Save-As","Load","Clear"]};	// Save slice 
+	ops.slices[6]={ type:"men", ico:"img/align-icon.png", options:["hey","Align:Top:Middle:Bottom:Left:Center:Right","Distribute:Top:Middle:Bottom:Left:Center:Right","Arrange:To back:Backward:Frontward:To front"]};	// Align  
 	ops.slices[7]={ type:"but", ico:"img/gear-icon.png" };						// Center 
 	ops.slices[8]={ type:"ico", ico:"img/draw-icon.png", def:this.curShape };	// Blank slice 
 	ops.slices[8].options=["img/point-icon.png","img/line-icon.png","img/curve-icon.png","img/box-icon.png","img/circle-icon.png","img/text-icon.png"] ;
@@ -128,10 +128,6 @@ QDraw.prototype.DrawMenu=function()											// SHOW DRAWING TOOL MENU
 	else																		// If shape
 		this.pie.SetSlice(2,{type:"edg", ico:"img/edge-icon.png", def:this.curEcol+","+this.curEwid+","+this.curDrop+","+this.curEtip});	// Edge menu
 	ops.slices[3]={ type:"sli", ico:"img/alpha-icon.png", def:this.curAlpha };	// Alpha slice 
-	if (ops.segMode)
-		this.pie.SetSlice(6,{ type:"men", ico:"img/align-icon.png", options:["Align","Back","Backward","Forward","Front"]});	// Align menu 
-	else
-		this.pie.SetSlice(6,{ type:"men", ico:"img/save-icon.png", options:["Save","Save-As","Load","Clear"]});	// Save menu 
 	ops.slices[8]={ type:"ico", ico:"img/draw-icon.png", def:this.curShape };	// Blank slice 
 	ops.slices[8].options=["img/point-icon.png","img/line-icon.png","img/curve-icon.png","img/box-icon.png","img/circle-icon.png","img/text-icon.png"] ;
 	
@@ -211,52 +207,6 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 				this.UnDo();													// Undo it
 				break;
 			case 6:
-				if (this.pie.ops.segMode) {										// If working on a seg level
-					break;
-				}
-				
-				var data="<!-- This is the raw seg data -->\n";
-				data+='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle r="32" cx="35" cy="65" fill="#F00" opacity="0.5"/><circle r="32" cx="65" cy="65" fill="#0F0" opacity="0.5"/><circle r="32" cx="50" cy="35" fill="#00F" opacity="0.5"/></svg>'
-				if ((v[3] == 1) || ((v[3] == 0) && !_this.gd.lastId))	{		// Save to new file
-					if (this.GetTextBox("Type name of new drawing","","",function(name) {	// Type name
-							_this.gd.AccessAPI(function() {
-							 	_this.gd.CreateFolder(_this.gd.folderName,function(res) {	// Make sure there's a folder
-									_this.gd.Upload(name,data, null,function(res) {
-										 trace(res); 
-										 }); 
-									});
-								});
-						}));
-					}
-				else if (v[3] == 0) {											// Save to existing file
-					this.gd.AccessAPI(function() {
-					 	_this.gd.CreateFolder(_this.gd.folderName,function(res) { // Make sure there's a folder
-								_this.gd.Upload($("#myName").val(),data,_this.gd.lastId ? _this.gd.lastId : "",function(res) {
-							 	 trace(res); 
-							 	 }); 
-						 	 }); 
-						 });
-					}
-				else if (v[3] == 2) {											// Load
-				 	 _this.gd.AccessAPI(function() {
-						 _this.gd.CreateFolder(_this.gd.folderName,function(res) {
-							 _this.gd.Picker(true,function(res) {
-									 	 _this.gd.AccessAPI(function() {
-									 	 	 _this.gd.Download(_this.gd.lastId,function(res) {
-									 	 	 	 trace(res); 
-									 	 	 	 }); 
-									 	 	 }); 
-									 	 }); 
-						 	 	 	 }); 
-						 	 	 }); 
-						}
-				else if (v[3] == 3)	{											// Clear
-					if (this.ConfirmBox("Are you sure?", function() {			// Are you sure?
-							_this.gd.lastId=null;								// Clear last id
-							_this.gd.lastName="";								// Clear last name
-							Sound("delete");									// Delete sound
-							}));
-					}
 				break;
 			case 7:																// Settings
 				this.Settings();
@@ -287,6 +237,10 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 	str+="<td><input type=checkbox id='lsnap' class='unselectable'"+(this.showSnap ? " checked" :"")+"></td></tr>";
 	str+="<tr style='height:18px'><td><b>See x/y info</b></td>";
 	str+="<td><input type=checkbox id='sinfo' class='unselectable'"+(this.showinfo ? " checked" :"")+"></td></tr>";
+	str+="<tr style='height:18px'><td><b>Save/load</b></td>";
+	str+="<td><select class='pi-select' style='padding-top:0px;' id='csave'><option></option>";
+	str+="<option>Load</option><option>Save</option>";
+	str+="<option>Save As...</option><option>Clear</option></select></td></tr>";
 	str+="<tr><td><b>This drawing</b></td><td>"+(this.gd.lastName ? this.gd.lastName : "None")+"</td></tr>";
 	str+="<tr><td><br></td></tr>";
 	str+="<tr><td><b>Help</b></td><td><a href='https://docs.google.com/document/d/1oTbVfuBwFQvgo8EZogyuoXBu7ErCK0oAH3Ny8N_E_Mg/edit?usp=sharing' target='_blank'>";
@@ -318,9 +272,56 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 	$("#csimp").slider({														// Init simplify slider
 		min:0, max:100, step:10, value: _this.simplify,							// Params
 		slide: function(e,ui) {													// On slide
-			$("#csimpt").text(ui.value ? ui.value : "Off" );						// Set label 
+			$("#csimpt").text(ui.value ? ui.value : "Off" );					// Set label 
 			}, 
 		});	
+	$("#csave").on("change", function() {										// On save menu change
+		var op=$(this).val();													// Get option chosen
+		$(this).val("");														// Reset option
+		var data="<!-- This is the raw seg data -->\n";
+		data+='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle r="32" cx="35" cy="65" fill="#F00" opacity="0.5"/><circle r="32" cx="65" cy="65" fill="#0F0" opacity="0.5"/><circle r="32" cx="50" cy="35" fill="#00F" opacity="0.5"/></svg>'
+		if ((op == "Save As...") || ((op == "Save") && !_this.gd.lastId)) {		// Save to new file
+			if (_this.GetTextBox("Type name of new drawing","","",function(name) {	// Type name
+					_this.gd.AccessAPI(function() {
+					 	_this.gd.CreateFolder(_this.gd.folderName,function(res) {	// Make sure there's a folder
+							_this.gd.Upload(name,data, null,function(res) {
+								 trace(res); 
+								 }); 
+							});
+						});
+				}));
+			}
+		else if (op == "Save") {												// Save to existing file
+			_this.gd.AccessAPI(function() {
+			 	_this.gd.CreateFolder(_this.gd.folderName,function(res) { 		// Make sure there's a folder
+						_this.gd.Upload($("#myName").val(),data,_this.gd.lastId ? _this.gd.lastId : "",function(res) {
+					 	 trace(res); 
+					 	 }); 
+				 	 }); 
+				 });
+			}
+		else if (op == "Load") {												// Load
+		 	 _this.gd.AccessAPI(function() {
+				 _this.gd.CreateFolder(_this.gd.folderName,function(res) {
+					 _this.gd.Picker(true,function(res) {
+							 	 _this.gd.AccessAPI(function() {
+							 	 	 _this.gd.Download(_this.gd.lastId,function(res) {
+							 	 	 	 trace(res); 
+							 	 	 	 }); 
+							 	 	 }); 
+							 	 }); 
+				 	 	 	 }); 
+				 	 	 }); 
+				}
+		else if (op == "Clear")	{												// Clear
+			if (_this.ConfirmBox("Are you sure?", function() {					// Are you sure?
+					_this.gd.lastId=null;										// Clear last id
+					_this.gd.lastName="";										// Clear last name
+					Sound("delete");											// Delete sound
+					}));
+			}
+
+		});
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

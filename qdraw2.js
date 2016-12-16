@@ -15,28 +15,25 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
    	this.svg.setAttribute("width","100%");									// Width
    	this.svg.setAttribute("height","100%");									// Height
  	
- 	this.svg.addEventListener("click", function(e) { 						// Mouse click
+ 	this.svg.addEventListener("click", function(e) { 						// ON CLICK
       			if ((_this.curShape == 0) && (e.target.id == "Q-SVG"))		// If in container
 				_this.DeselectSegs(),Sound("click");						// Deselect all segs
   				else if (e.target.id.substr(0,5) != "QSeg-")				// If not on seg
 					_this.curShape=0;										// Pointer
 			});
  
- 	this.svg.addEventListener("mousemove", function(e) { 					// Mouse click
- 			var i,j,s,n,dx,dy=-99999;
+ 	this.svg.addEventListener("mousemove", function(e) { 					// ON MOVE
+ 			var i,j,s,n,dx,dy;
  			var v=_this.drawMode.split("-");								// Get parts
   			if ((v[0] == "ds") && (v[2] == 0)) {							// If full seg drag start
 				_this.Do(true);												// Save temp seg as undo
-					s=_this.segs[j];										// Point at seg
-
+				s=_this.segs[v[1]];											// Point at seg
+				dy=e.clientY-s.y[0]-_this.mouseDY;							// Delta y to move
+				dx=e.clientX-s.x[0]-_this.mouseDX;							// Delta x
 				for (j=0;j<_this.segs.length;++j) {							// for each selected seg
 					if (!_this.segs[j].select)								// Not selected
 						continue;											// Skip it
 					s=_this.segs[j];										// Point at seg
-					if (dy == -99999) {										// Just 1st selected point
-						dy=e.clientY-s.y[0]-_this.mouseDY;					// Delta y to move
-						dx=e.clientX-s.x[0]-_this.mouseDX;					// Delta x
-						}
 					n=s.x.length;											// Length of coords
 					for (i=0;i<n;++i) {										// For each coord
 						s.x[i]+=dx;											// Set x pos

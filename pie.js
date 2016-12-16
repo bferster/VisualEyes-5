@@ -143,17 +143,22 @@ PieMenu.prototype.ShowTextType=function(num, def)							// TYPE IN A VALUE
 
 PieMenu.prototype.ShowMenuPick=function(num, def)							// SHOW TEXT PICK
 {
-	var x,y,i,t,str;
+	var x,y,i,j,t,str;
 	var _this=this;																// Save context
 	var o=this.ops.slices[num];													// Point at data
 	var n=o.options.length;														// Number of options
 	var ang=(num)*this.ops.ang-11.5-(n*11);										// Angle
 	var w=this.ops.wid/2;														// Center
 	var r=w+16;																	// Radius
+	inSub=false;
+
 	var str="<div id='pisubback' class='pi-subbar unselectable'>";				// Main shell
 	for (i=0;i<n;++i) {															// For each option
 		str+="<div class='pi-textopt' id='pitext"+i+"'>"; 						// Add div
-		str+=o.options[i]+"</div>";												// Add label
+		t="";																	// Assume nothing
+		if (o.options[i])														// If an option spec'd
+			t=o.options[i].split(":")[0];										// Use first level
+		str+=t+"</div>";														// Add label
 		}
 	$("#pimenu").append(str+"</div>");											// Add to menu														
 	
@@ -167,22 +172,50 @@ PieMenu.prototype.ShowMenuPick=function(num, def)							// SHOW TEXT PICK
 			t=0;																// No shift
 		x=Math.floor(w+(Math.sin((ang)*0.0174533)*r-t-7));						// Calc x
 		y=Math.floor((w-Math.cos((ang)*0.0174533)*r)-7);						// Y
-		ang+=20;																// Next angle
+		ang+=18;																// Next angle
 		
 		$("#pitext"+i).css({"left":x+"px","top":y+"px"});						// Position
 		
-		$("#pitext"+i).on("mouseover", function() {								// OVER ITEM
-			$(this).css({"opacity":1});											// Highlight
+		$("#pitext"+i).on("mouseover", function(e) {							// OVER ITEM
+			$(this).css({opacity:1});											// Highlight
+			if (inSub)	return;													// Ignore if in submenu already
+			inSub=true;															// In submenu
+			var id=e.currentTarget.id.substr(6)-0;								// Extract id
+			var v=o.options[id].split(":");										// Split out sub options
+			if (v.length > 1)													// If multi-level
+				$(this).css({"border-radius":"4px",height:"auto"});				// Smaller radius, auto scale
+			var str="<div id='pitextsub-0' style='padding-bottom:.5em;font-weight:bold'>"+v[0]+"</div>";	 // Add title
+			for (i=1;i<v.length;++i)											// For each sub
+				str+="<div id='pitextsub-"+i+"'>"+v[i]+"</div>";				// Add submenu as a span
+			$(this).html(str);													// Set menu up
+			for (j=1;j<v.length;++j) {
+				$("#pitextsub-"+j).on("mouseover", function(e) {				// OVER SUBITEM
+					$(this).css({"color":"#00a8ff"});							// Highlight
+					});
+				$("#pitextsub-"+j).on("mouseout", function(e) {					// OUT OF SUBITEM
+					$(this).css({color:"#666"});								// Restore  color
+					});
+				}
 			});
-		$("#pitext"+i).on("mouseout", function() {								// OUT OF ITEM
-			$(this).css({"opacity":.75});										// Restore 
+	
+		$("#pitext"+i).on("mouseout", function(e) {								// OUT OF ITEM
+			if (e.relatedTarget && (e.relatedTarget.id.substr(0,10) == "pitextsub-"))	// If a submenu
+				return;															// Not out
+			inSub=false;														// Out of submenu
+			var id=e.currentTarget.id.substr(6)-0;								// Extract id
+			$(this).css({"opacity":.75,"border-radius":"16px"});				// Restore 
+			$(this).html(o.options[id].split(":")[0]);							// Only title	
 			});
+
 		$("#pitext"+i).on("click", function(e) {								// CLICK ITEM
 			var id=e.currentTarget.id.substr(6)-0;								// Extract id
+			if (e.target.id == "pitextsub-0")	;								// Main menu uses id of main option
+			else id=(id*10)+(e.target.id.substr(10)-0);							// Extract sub id
 			_this.SendMessage("click",_this.curSlice+"|"+id);					// Send event
 			Sound("click");														// Click
 			});
 		}
+		
 }
 
 PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE / TYPE
