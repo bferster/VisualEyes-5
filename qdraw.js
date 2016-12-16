@@ -241,7 +241,7 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 	str+="<td><select class='pi-select' style='padding-top:0px;' id='csave'><option></option>";
 	str+="<option>Load</option><option>Save</option>";
 	str+="<option>Save As...</option><option>Clear</option></select></td></tr>";
-	str+="<tr><td><b>This drawing</b></td><td>"+(this.gd.lastName ? this.gd.lastName : "None")+"</td></tr>";
+	str+="<tr><td><b>This drawing</b></td><td id='sfname'>"+(this.gd.lastName ? this.gd.lastName : "None")+"</td></tr>";
 	str+="<tr><td><br></td></tr>";
 	str+="<tr><td><b>Help</b></td><td><a href='https://docs.google.com/document/d/1oTbVfuBwFQvgo8EZogyuoXBu7ErCK0oAH3Ny8N_E_Mg/edit?usp=sharing' target='_blank'>";
 	str+="<img src='img/helpicon.gif' style='vertical-align:bottom' title='Show help'></a></td></tr>";
@@ -285,6 +285,7 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 					_this.gd.AccessAPI(function() {
 					 	_this.gd.CreateFolder(_this.gd.folderName,function(res) {	// Make sure there's a folder
 							_this.gd.Upload(name,data, null,function(res) {
+								 $("#sfname").text(_this.gd.lastName ? _this.gd.lastName : "None");
 								 trace(res); 
 								 }); 
 							});
@@ -294,7 +295,8 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 		else if (op == "Save") {												// Save to existing file
 			_this.gd.AccessAPI(function() {
 			 	_this.gd.CreateFolder(_this.gd.folderName,function(res) { 		// Make sure there's a folder
-						_this.gd.Upload($("#myName").val(),data,_this.gd.lastId ? _this.gd.lastId : "",function(res) {
+					_this.gd.Upload($("#myName").val(),data,_this.gd.lastId ? _this.gd.lastId : "",function(res) {
+						 $("#sfname").text(_this.gd.lastName ? _this.gd.lastName : "None");
 					 	 trace(res); 
 					 	 }); 
 				 	 }); 
@@ -306,6 +308,7 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 					 _this.gd.Picker(true,function(res) {
 							 	 _this.gd.AccessAPI(function() {
 							 	 	 _this.gd.Download(_this.gd.lastId,function(res) {
+										 $("#sfname").text(_this.gd.lastName ? _this.gd.lastName : "None");
 							 	 	 	 trace(res); 
 							 	 	 	 }); 
 							 	 	 }); 
