@@ -342,7 +342,7 @@ QDraw.prototype.ShowInfoBox=function(setting)								// SHOW/HIDE INFO BOX
 			$("#infoboxDiv").draggable({ containment: "parent" });					// Make it draggable
 			}
 		}
-	str="&nbsp;"+this.mx+","+this.my+"&nbsp;";									// Update position into
+	str="&nbsp;"+this.mx+","+this.my+"&nbsp;";										// Update position into
 	$("#infoboxDiv").html(str);														// Set position
 }
 
@@ -360,9 +360,10 @@ QDraw.prototype.Do=function(useTempData)									// SAVE DRAWING IN SESSION STOR
 		o.script=this.tempSeg;													// Use it
 	if (!o.script)																// No data there
 		return false;															// Quit
-	sessionStorage.setItem("do-"+this.curUndo++,JSON.stringify(o));				// Add new do												
+	sessionStorage.setItem("do-"+this.curUndo,JSON.stringify(o));				// Add new do												
 	this.curRedo=0;																// Stop any redos
 	this.changed=false;															// Reset changed flag
+	this.curUndo++;																// Inc undo count
 	this.SetUndoStatus();														// Set undo/reco icons
 	this.tempSeg=null;															// Kill temp data
 }
@@ -371,7 +372,7 @@ QDraw.prototype.UnDo=function()												// GET DRAWING FROM SESSION STORAGE
 {
 	if (this.curUndo < 2)														// Nothing to undo
 		return;																	// Quit
-	var key=sessionStorage.key(this.curUndo-2);									// Get key for undo
+	var key=sessionStorage.key(this.curUndo-1);									// Get key for undo
 	var o=$.parseJSON(sessionStorage.getItem(key));								// Get undo from local storage
 	this.segs=o.script;															// Get data
 	this.RefreshSVG();															// Restore SVG
