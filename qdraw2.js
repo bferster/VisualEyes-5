@@ -25,6 +25,8 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
  	this.svg.addEventListener("mousemove", function(e) { 					// ON MOVE
  			var i,j,s,n,dx,dy;
  			var v=_this.drawMode.split("-");								// Get parts
+  			_this.mx=e.clientX;		_this.my=e.clientY;						// Current pos
+  			_this.ShowInfoBox();											// Show xy pos
   			if ((v[0] == "ds") && (v[2] == 0)) {							// If full seg drag start
 				_this.Do(true);												// Save temp seg as undo
 				s=_this.segs[v[1]];											// Point at seg

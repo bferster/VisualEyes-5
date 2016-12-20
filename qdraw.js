@@ -236,7 +236,7 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 	str+="<tr style='height:18px'><td><b>See snap lines</b></td>";
 	str+="<td><input type=checkbox id='lsnap' class='unselectable'"+(this.showSnap ? " checked" :"")+"></td></tr>";
 	str+="<tr style='height:18px'><td><b>See x/y info</b></td>";
-	str+="<td><input type=checkbox id='sinfo' class='unselectable'"+(this.showinfo ? " checked" :"")+"></td></tr>";
+	str+="<td><input type=checkbox id='sinfo' class='unselectable'"+(this.showInfo ? " checked" :"")+"></td></tr>";
 	str+="<tr style='height:18px'><td><b>Save/load</b></td>";
 	str+="<td><select class='pi-select' style='padding-top:0px;' id='csave'><option></option>";
 	str+="<option>Load</option><option>Save</option>";
@@ -258,6 +258,7 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 		});
 	$("#sinfo").on("click", function() {										// See info
 		_this.showInfo=!_this.showInfo;											// Toggle state
+		_this.ShowInfoBox(true);												// Hide or show it
 		});
 	$("#cvol").slider({															// Init volume slider
 		min:0, max:100, value: _this.cVolume,									// Params
@@ -320,11 +321,29 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 			if (_this.ConfirmBox("Are you sure?", function() {					// Are you sure?
 					_this.gd.lastId=null;										// Clear last id
 					_this.gd.lastName="";										// Clear last name
+					_this.Do();													// Save undo
+					_this.segs=[];												// Erase all segs
+					_this.RefreshSVG();											// Reset SVG
 					Sound("delete");											// Delete sound
 					}));
 			}
 
 		});
+}
+
+QDraw.prototype.ShowInfoBox=function(setting)								// SHOW/HIDE INFO BOX
+{
+	var str;
+	if (setting) {																	// If hiding or adding
+		$("#infoboxDiv").remove();													// Remove old one
+		if (this.showInfo) {														// If adding
+			str="<div class='pi-infobox' id='infoboxDiv'></div>";					// Add div
+			$(this.parent).append(str);												// Add to parent
+			$("#infoboxDiv").draggable({ containment: "parent" });					// Make it draggable
+			}
+		}
+	str="&nbsp;"+this.mx+","+this.my+"&nbsp;";									// Update position into
+	$("#infoboxDiv").html(str);														// Set position
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
