@@ -46,7 +46,6 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	this.GraphicsInit();														// Init graphics
 	this.DrawMenu();															// Draw it
 	sessionStorage.clear();														// Clear session storage
-	this.Do();																	// Add starting undo
 	document.onkeyup=$.proxy(this.onKeyUp,this);								// Keyup listener
 	document.onkeydown==$.proxy(this.onKeyDown,this);							// Keydown listener
 	
@@ -366,7 +365,7 @@ QDraw.prototype.Do=function(useTempData)									// SAVE DRAWING IN SESSION STOR
 		o.script=this.tempSeg;													// Use it
 	if (!o.script)																// No data there
 		return false;															// Quit
-	sessionStorage.setItem("do-"+this.curUndo,JSON.stringify(o));				// Add new do												
+	trace("do-"+this.curUndo,this.curUndo+1)
 	this.curRedo=0;																// Stop any redos
 	this.changed=false;															// Reset changed flag
 	this.curUndo++;																// Inc undo count
@@ -376,8 +375,12 @@ QDraw.prototype.Do=function(useTempData)									// SAVE DRAWING IN SESSION STOR
 	
 QDraw.prototype.UnDo=function()												// GET DRAWING FROM SESSION STORAGE
 {
-	if (this.curUndo < 2)														// Nothing to undo
+	var o={};
+	if (this.curUndo < 1)														// Nothing to undo
 		return;																	// Quit
+	o.date=new Date().toString().substr(0,21);									// Get date
+	o.script=this.segs;															// Get drawing data
+	sessionStorage.setItem("do-"+this.curUndo,JSON.stringify(o));				// Add new do												
 	var key=sessionStorage.key(this.curUndo-1);									// Get key for undo
 	var o=$.parseJSON(sessionStorage.getItem(key));								// Get undo from local storage
 	this.segs=o.script;															// Get data
@@ -392,7 +395,7 @@ QDraw.prototype.ReDo=function()												// REDO DRAWING FROM UNDO
 {
 	if (!this.curRedo)															// Nothing to redo
 		return;																	// Quit
-	var key=sessionStorage.key(this.curUndo);									// Get key for redo
+	var key=sessionStorage.key(this.curUndo+1);									// Get key for redo
 	var o=$.parseJSON(sessionStorage.getItem(key));								// Get undo from local storage
 	this.segs=o.script;															// Get data
 	this.RefreshSVG();															// Restore SVG
