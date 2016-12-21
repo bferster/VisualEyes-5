@@ -57,12 +57,25 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
 					x-=x%_this.gridSnap;									// Snap x								
 					y-=y%_this.gridSnap;									// Snap y								
 					}			
-				s.x[v[2]-1]=x;			s.y[v[2]-1]=y;						// Set pos
+				if (s.type < 3) {											// Box or circle
+					s.x[v[2]]=x;			s.y[v[2]]=y;					// Set pos
+					}
 				if ((s.type == 3) || (s.type == 4)) {						// Box or circle
-					if (v[2] == 1)		s.y[1]=s.y[0],s.x[3]=s.x[0];		// TL
-					else if (v[2] == 2)	s.y[0]=s.y[1],s.x[2]=s.x[1];		// TR
-					else if (v[2] == 3)	s.y[3]=s.y[2],s.x[1]=s.x[2];		// BR
-					else if (v[2] == 4)	s.y[2]=s.y[3],s.x[0]=s.x[3];		// BL
+					s.x[v[2]-1]=x;			s.y[v[2]-1]=y;					// Set pos
+					if (e.shiftKey)	{										// If shift key is down
+						var w=Math.abs(s.x[1]-s.x[0]);						// Original wid
+						var h=Math.abs(s.y[2]-s.y[1]);						// Original hgt
+						if (v[2] == 1)		s.y[1]=s.y[0]=s.y[2]-w,s.x[3]=s.x[0];	// TL
+						else if (v[2] == 2)	s.y[0]=s.y[1]=s.y[2]-w,s.x[2]=s.x[1];	// TR
+						else if (v[2] == 3)	s.y[3]=s.y[2]=s.y[1]+w,s.x[1]=s.x[2];	// BR
+						else if (v[2] == 4)	s.y[2]=s.y[3]=s.y[1]+w,s.x[0]=s.x[3];	// BL
+						}
+					else{
+						if (v[2] == 1)		s.y[1]=s.y[0],s.x[3]=s.x[0];	// TL
+						else if (v[2] == 2)	s.y[0]=s.y[1],s.x[2]=s.x[1];	// TR
+						else if (v[2] == 3)	s.y[3]=s.y[2],s.x[1]=s.x[2];	// BR
+						else if (v[2] == 4)	s.y[2]=s.y[3],s.x[0]=s.x[3];	// BL
+						}
 					}
 				_this.StyleSeg(v[1]);										// Move it
 				_this.AddWireframe(v[1]);									// Redraw select
@@ -78,15 +91,23 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
   	document.getElementById("containerDiv").appendChild(this.svg);			// Add to DOM
 	$(this.svg).on("contextmenu", function() { return false; });			// Inhibit default right-click menu
 	this.RefreshSVG();														// Refresh SVG space
-	 	
- 	for (i=0;i<10;i++) {
-	c=i*30;
-	this.segs[i]={ type:3,col:"#cccccc",ewid:1,ecol:"#990000",alpha:100,drop:0,select:false,
-	x:[20+c,120+c,120+c,20+c],y:[50+c,50+c,250+c,250+c]}
+	
+	var c;	
+ 	for (i=0;i<9;i++) {
+		c=i*30;
+		this.segs[i]={ type:3,col:"#cccccc",ewid:1,ecol:"#990000",alpha:100,drop:0,select:false,
+		x:[20+c,120+c,120+c,20+c],y:[50+c,50+c,250+c,250+c]}
+		this.AddSeg(i);this.StyleSeg(i)
+		}
+	c+=30;
+	this.segs[i]={ type:4,col:"#cccccc",ewid:1,ecol:"#000099",alpha:100,drop:0,select:false,
+	x:[20+c,120+c,120+c,20+c],y:[50+c,50+c,150+c,150+c]}
+	this.AddSeg(i);this.StyleSeg(i++);
+	c+=30;
+	this.segs[i]={ type:1,col:"#cccccc",ewid:1,ecol:"#990000",alpha:100,drop:0,select:false,
+	x:[20+c,120+c,120+c],y:[50+c,50+c,250+c]}
+	this.AddSeg(i);this.StyleSeg(i++)
 
-this.AddSeg(i)
-this.StyleSeg(i)
-}
 }
 
 QDraw.prototype.RefreshSVG=function()									// REFRESH SVG 
@@ -111,7 +132,14 @@ QDraw.prototype.StyleSeg=function(segNum)								// STYLE SEGMENT
 {
 	var s=this.segs[segNum];												// Point at seg data
 	var o=s.svg;															// Point at SVG element
-	if (s.type == "3") {													// A rect
+	if (s.type < 3) {														// A line or curve
+		var str="M"+s.x[0]+" "+s.y[0];										// Start
+		for (i=1;i<s.x.length;++i)											// For each point
+			str+="L"+s.x[i]+" "+s.y[i];										// Start
+		if (s.col && (s.col != "None"))	str+=" Z";							// Close it if filled
+		o.setAttribute("d",str);											// Add coords
+		}
+	else if (s.type == "3") {												// A rect
 		var tip=0;
 		o.setAttribute("height",Math.abs(s.y[2]-s.y[0]));					// Height
 		o.setAttribute("width",Math.abs(s.x[2]-s.x[0]));					// Width
@@ -121,6 +149,12 @@ QDraw.prototype.StyleSeg=function(segNum)								// STYLE SEGMENT
 			tip=Math.abs(s.x[2]-s.x[0])/10;									// Set value based on size
 		o.setAttribute("rx",tip);											// Set X radius
 		o.setAttribute("ry",tip);											// Y
+		}
+	else if (s.type == "4") {												// An ellipse
+		var w=Math.abs(s.x[2]-s.x[0])/2;	o.setAttribute("rx",w);			// Width
+		var h=Math.abs(s.y[2]-s.y[0])/2;	o.setAttribute("ry",h);			// Height
+		o.setAttribute("cx",s.x[0]+w);										// X
+		o.setAttribute("cy",s.y[0]+h);										// Y
 		}
 	o.setAttribute("stroke-width",s.ewid);									// Stroke width
 	o.setAttribute("opacity",s.alpha/100);									// Opacity
@@ -218,8 +252,6 @@ QDraw.prototype.ArrangeSegs=function(how)								// ARRANGE SEGS
 	Sound("ding");															// Ding
 }
 
-
-
 QDraw.prototype.AlignSegs=function(how)									// ALIGN SEGS
 {
 }
@@ -265,10 +297,24 @@ QDraw.prototype.AddWireframe=function(segNum, col)						// ADD WIREFRAME TO DRAW
 	var group=document.createElementNS(this.NS,"g");						// Create element
 	this.svg.appendChild(group);											// Add element to DOM
 	group.setAttribute("id","QWire-"+segNum);								// Id
-	var o=document.createElementNS(this.NS,"rect");							// Create element
-	group.appendChild(o);													// Add element to DOM
 	
-	if (s.type == "3") {													// A rect
+	if (s.type < 3) {														// A l1ne or curve
+		var o=document.createElementNS(this.NS,"path");						// Create element
+		group.appendChild(o);												// Add element to DOM
+		var str="M"+s.x[0]+" "+s.y[0];										// Start
+		for (i=1;i<s.x.length;++i)											// For each point
+			str+="L"+s.x[i]+" "+s.y[i];										// Start
+		if (s.col && (s.col != "None"))	str+=" Z";							// Close it if filled
+		o.setAttribute("d",str);											// Add coords
+		o.style.fill="none";												// No fill	
+		o.style.stroke=col;  												// No color 
+		o.setAttribute("stroke-width",.5);									// Stroke width
+		for (i=0;i<s.x.length;++i)											// For each coord
+			AddDot(s.x[i],s.y[i],o,i);										// Add dot
+		}
+	else if (s.type == "3") {												// A rect
+		var o=document.createElementNS(this.NS,"rect");						// Create element
+		group.appendChild(o);												// Add element to DOM
 		o.setAttribute("height",Math.abs(s.y[2]-s.y[0]));					// Height
 		o.setAttribute("width",Math.abs(s.x[2]-s.x[0]));					// Width
 		o.setAttribute("x",s.x[0]);											// X
@@ -281,7 +327,21 @@ QDraw.prototype.AddWireframe=function(segNum, col)						// ADD WIREFRAME TO DRAW
 		AddDot(s.x[2],s.y[2],o,3);											// Add dot
 		AddDot(s.x[3],s.y[3],o,4);											// Add dot
 		}
-
+	else if (s.type == "4") {												// An ellipse
+		var o=document.createElementNS(this.NS,"ellipse");					// Create element
+		group.appendChild(o);												// Add element to DOM
+		var w=Math.abs(s.x[2]-s.x[0])/2;	o.setAttribute("rx",w);			// Width
+		var h=Math.abs(s.y[2]-s.y[0])/2;	o.setAttribute("ry",h);			// Height
+		o.setAttribute("cx",s.x[0]+w);										// X
+		o.setAttribute("cy",s.y[0]+h);										// Y
+		o.style.fill="none";												// No fill	
+		o.style.stroke=col;  												// No color 
+		o.setAttribute("stroke-width",.5);									// Stroke width
+		AddDot(s.x[0],s.y[0],o,1);											// Add dot
+		AddDot(s.x[1],s.y[1],o,2);											// Add dot
+		AddDot(s.x[2],s.y[2],o,3);											// Add dot
+		AddDot(s.x[3],s.y[3],o,4);											// Add dot
+		}
 	function AddDot(x, y, par, num) {
 		var d=document.createElementNS(_this.NS,"rect");					// Create element
 		group.appendChild(d);												// Add dot to group
