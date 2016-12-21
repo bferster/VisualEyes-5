@@ -32,7 +32,7 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	ops.slices[3]={ type:"sli", ico:"img/alpha-icon.png", def:100 };			// Alpha slice 
 	ops.slices[4]={ type:"but", ico:"img/redo-icon.png", options:["Redo"]};		// Redo slice 
 	ops.slices[5]={ type:"but", ico:"img/undo-icon.png",options:["Undo"]};		// Undo slice 
-	ops.slices[6]={ type:"men", ico:"img/align-icon.png", options:["hey","Align:Top:Middle:Bottom:Left:Center:Right","Distribute:Top:Middle:Bottom:Left:Center:Right","Arrange:To back:Backward:Frontward:To front"]};	// Align  
+	ops.slices[6]={ type:"men", ico:"img/align-icon.png", options:["Align:Top:Middle:Bottom:Left:Center:Right","Distribute:Top:Middle:Bottom:Left:Center:Right","Arrange:To back:Backward:Frontward:To front"]};	// Align  
 	ops.slices[7]={ type:"but", ico:"img/gear-icon.png" };						// Center 
 	ops.slices[8]={ type:"ico", ico:"img/draw-icon.png", def:this.curShape };	// Blank slice 
 	ops.slices[8].options=["img/point-icon.png","img/line-icon.png","img/curve-icon.png","img/box-icon.png","img/circle-icon.png","img/text-icon.png"] ;
@@ -207,6 +207,12 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 				this.UnDo();													// Undo it
 				break;
 			case 6:
+				if (vv[0] < 11)													// Align
+					this.AlignSegs(vv[0]%10);									// Align segs
+				else if (vv[0] < 21)											// Distribute
+					this.DistributeSegs(vv[0]%10);								// Distribute widths
+				else if (vv[0] < 31)											// Arrange
+					this.ArrangeSegs(vv[0]%10);									// Arrange Z-order
 				break;
 			case 7:																// Settings
 				this.Settings();

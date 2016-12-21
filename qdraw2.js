@@ -138,8 +138,15 @@ QDraw.prototype.StyleSeg=function(segNum)								// STYLE SEGMENT
 
 QDraw.prototype.SelectSeg=function(segNum, mode)						// SELECT A SEG
 {
+	var i,sel=0
 	var s=this.segs[segNum];												// Point at seg data
-	s.select=mode;															// Toggle selection state
+	var n=this.segs.length;													// Number of segs
+	s.select=0;																// Start with none
+	if (mode) {																// If selecting
+		for (i=0;i<n;++i) 													// For each other seg
+			if (this.segs[i].select)	sel++;								// Add to count if selected
+		s.select=sel+1;														// Add this one too
+		}
 	if (mode) {																// If selected
 		this.curCol=s.col;		this.curDrop=s.drop;						// Set parameters
 		this.curAlpha=s.alpha;	this.curEwid=s.ewid;
@@ -155,9 +162,70 @@ QDraw.prototype.DeselectSegs=function()									// DESELECT ALL SEGS
 	var i;
 	var n=this.segs.length;													// Number of segs
 	for (i=0;i<n;++i) {														// For each seg
-		this.segs[i].select=false;											// Unselect them
+		this.segs[i].select=0;												// Unselect them
 		$("#QWire-"+i).remove();											// Remove old one
 		}
+}
+
+QDraw.prototype.DeselectSegs=function()									// DESELECT ALL SEGS
+{
+	var i;
+	var n=this.segs.length;													// Number of segs
+	for (i=0;i<n;++i) {														// For each seg
+		this.segs[i].select=0;												// Unselect them
+		$("#QWire-"+i).remove();											// Remove old one
+		}
+}
+
+QDraw.prototype.ArrangeSegs=function(how)								// ARRANGE SEGS
+{
+	var i,first=-1;
+	var tsegs=[];
+	this.Do();																// Set up for undo
+	for (i=0;i<this.segs.length;++i)										// For each seg
+		if (this.segs[i].select) {											// If selected
+			if (first < 0)	first=i;										// Set first selected seg index
+			tsegs.push(JSON.parse(JSON.stringify(this.segs[i])));			// Unlink and copy seg to array
+			this.segs.splice(i,1);											// Remove from seg list
+			--i;															// Don't skip next one
+			}
+	
+	tsegs.sort(function(a,b) { return a.select < b.select ? -1 : 1 } );		// Sort by select order
+	switch(how) {
+		case 1:																// To back
+			for (i=0;i<tsegs.length;++i)									// For each selected seg
+				this.segs.unshift(tsegs[i]);								// Add it back from the start
+				break;
+		case 2:																// Backward
+			first--;														// Before
+			for (i=0;i<tsegs.length;++i)									// For each selected seg
+				this.segs.splice(first,0,tsegs[i]);							// Add it back from the start
+				break;
+		case 3:																// Forward
+			first++;														// After
+			for (i=0;i<tsegs.length;++i)									// For each selected seg
+				this.segs.splice(first,0,tsegs[i]);							// Add it back from the start
+				break;
+		case 4:																// To front
+			for (i=0;i<tsegs.length;++i)									// For each selected seg
+				this.segs.push(tsegs[i]);									// Add it back from the end
+				break;
+		}
+	this.RefreshSVG();														// Rebuild SVG
+	for (i=0;i<this.segs.length;++i)										// For each seg
+		if (this.segs[i].select) 											// If selected
+			this.AddWireframe(i);											// Draw selected wireframe	
+	Sound("ding");															// Ding
+}
+
+
+
+QDraw.prototype.AlignSegs=function(how)									// ALIGN SEGS
+{
+}
+
+QDraw.prototype.DistribueSegs=function(how)								// DISTRIBUTE SEGS
+{
 }
 
 QDraw.prototype.RefreshIds=function()									// UPDATE ALL SVG IDS TO MATCH SEG ORGER
