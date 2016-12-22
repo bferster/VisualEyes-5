@@ -33,7 +33,7 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	ops.slices[3]={ type:"sli", ico:"img/alpha-icon.png", def:100 };			// Alpha slice 
 	ops.slices[4]={ type:"but", ico:"img/redo-icon.png", options:["Redo"]};		// Redo slice 
 	ops.slices[5]={ type:"but", ico:"img/undo-icon.png",options:["Undo"]};		// Undo slice 
-	ops.slices[6]={ type:"men", ico:"img/align-icon.png", options:["Align:Top:Middle:Bottom:Left:Center:Right","Distribute:Top:Middle:Bottom:Left:Center:Right","Arrange:To back:Backward:Frontward:To front"]};	// Align  
+	ops.slices[6]={ type:"men", ico:"img/align-icon.png", options:["Align:Top:Middle:Bottom:Left:Center:Right","Distribute:Top:Middle:Bottom:Left:Center:Right","Arrange:To back:Backward:Forward:To front"]};	// Align  
 	ops.slices[7]={ type:"but", ico:"img/gear-icon.png" };						// Center 
 	ops.slices[8]={ type:"ico", ico:"img/draw-icon.png", def:this.curShape };	// Blank slice 
 	ops.slices[8].options=["img/point-icon.png","img/line-icon.png","img/poly-icon.png","img/box-icon.png","img/circle-icon.png","img/text-icon.png"] ;

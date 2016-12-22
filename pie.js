@@ -232,6 +232,8 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
   		str+="<div id='pichip"+i+"' class='pi-colchip'></div>";					// Make color chip
  	if (mode == "edge") {														// If setting edge
 		str+="<div id='pilinback' class='pi-subbar unselectable' style='width:50px;height:72px'>";			// Line shell
+		if (this.parObj.curShape < 3)											// Line or poly
+			str+="<div id='picurve' class='pi-fdrop unselectable'>Line</div>";	// Add curve
 		if (this.parObj.curShape < 5)											// Not text
 			for (i=0;i<wids.length;++i)											// For each width
   				str+="<div id='piline"+i+"' class='pi-linechip'></div>";		// Make width chip
@@ -244,7 +246,7 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 			for (i=0;i<4;++i)													// For each width
   				str+="<div id='piarr"+i+"' class='pi-arrow'></div>";			// Make arrow chip
 		
-		if (this.parObj.curShape < 5)											// Not text
+		if (this.parObj.curShape < 5) 											// Not text
 			str+="<div id='pidrop' class='pi-fdrop unselectable'>Drop</div>";	// Add drop
 		str+="</div>";
 		}
@@ -393,6 +395,7 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 		$("#piarr3").append("<div id='parr3' class='pi-larr' style='left:-2px;top:-5px'</div>");
 		$("#piarr3").append("<div id='parr4' class='pi-rarr' style='left:16px;top:-5px'</div>")
 		$("#pidrop").css({ "height":"12px","left":"-5px","top":"84px" })
+		$("#picurve").css({ "height":"12px","left":"5px","top":"-20px" })
 		}
 	$("#pilinback").css({														// Set b/g for lines
 		"left":ix+"px","top":iy-4-(12*wids.length)+"px",						// Position
@@ -431,6 +434,12 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 		Sound("click");															// Click
 		});
 
+	$("#picurve").on("click", function() {										// ON CURVE CLICK
+		def[4]=def[4] ? 0 : 1;													// Toggle state
+		updateColor("click");													// Update menu
+		Sound("click");															// Click
+		});
+
 	$("#pisiztxt").on("change", function(e) {									// ON FONT SIZECHANGE
 		def[1]=$(this).val();													// Get font
 		updateColor("click");													// Update menu
@@ -444,6 +453,8 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 		$("#pidrop").css("color",(def[2]>1) ? "#000" : "#fff");					// Color drop text
 		$("#pibold").css("background-color",(def[4]&1) ? "#00a8ff" : "#999");	// Color bold
 		$("#piital").css("background-color",(def[4]&2) ? "#00a8ff" : "#999");	// Color ital
+		$("#picurve").text((def[4] > 0) ? "Curve" : "Line");					// Show curve status
+	
 		var font="Sans-serif";													// Assume sans
 		if (def[3] == 1)		font="Serif";									// Serif
 		else if (def[3] == 2)	font="Courier";									// Fixed

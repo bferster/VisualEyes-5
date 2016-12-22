@@ -58,7 +58,7 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
 					y-=y%_this.gridSnap;									// Snap y								
 					}			
 				if (s.type < 3) {											// Box or circle
-					s.x[v[2]]=x;			s.y[v[2]]=y;					// Set pos
+					s.x[v[2]-1]=x;			s.y[v[2]-1]=y;					// Set pos
 					}
 				if ((s.type == 3) || (s.type == 4)) {						// Box or circle
 					s.x[v[2]-1]=x;			s.y[v[2]-1]=y;					// Set pos
@@ -104,6 +104,10 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
 	x:[20+c,120+c,120+c,20+c],y:[50+c,50+c,150+c,150+c]}
 	this.AddSeg(i);this.StyleSeg(i++);
 	c+=30;
+	this.segs[i]={ type:2,col:"#cccccc",ewid:1,ecol:"#990000",alpha:100,drop:0,select:false,
+	x:[20+c,120+c,120+c],y:[50+c,50+c,250+c]}
+	this.AddSeg(i);this.StyleSeg(i++)
+	c+=30;
 	this.segs[i]={ type:1,col:"#cccccc",ewid:1,ecol:"#990000",alpha:100,drop:0,select:false,
 	x:[20+c,120+c,120+c],y:[50+c,50+c,250+c]}
 	this.AddSeg(i);this.StyleSeg(i++)
@@ -134,7 +138,7 @@ QDraw.prototype.StyleSeg=function(segNum)								// STYLE SEGMENT
 	var o=s.svg;															// Point at SVG element
 	if (s.type < 3) {														// A line or curve
 		var str="M"+s.x[0]+" "+s.y[0];										// Start
-		if (s.curCurve) {													// If cuved
+		if (s.curve) {														// If curved
 			var open=true;													// Assume open
 			if ((Math.abs(s.x[0]-s.x[s.x.length-1]) < 3) && (Math.abs(s.y[0]-s.y[s.y.length-1]) < 3)) {
 					s.x[x.length-1]=s.x[0];
@@ -189,7 +193,7 @@ QDraw.prototype.StyleSeg=function(segNum)								// STYLE SEGMENT
 		o.setAttribute("cx",s.x[0]+w);										// X
 		o.setAttribute("cy",s.y[0]+h);										// Y
 		}
-	o.setAttribute("stroke-width",s.ewid);									// Stroke width
+	o.setAttribute("stroke-width",((s.type < 3)? s.ewid*2 : s.ewid)+"px");	// Stroke width (double for lines)
 	o.setAttribute("opacity",s.alpha/100);									// Opacity
 	if (s.col)		o.style.fill=s.col;										// Fill color
 	else			o.style.fill="none";									// No fill	
@@ -219,7 +223,7 @@ QDraw.prototype.SelectSeg=function(segNum, mode)						// SELECT A SEG
 		this.curAlpha=s.alpha;	this.curEwid=s.ewid;
 		this.curEcol=s.ecol;	this.curEtip=s.etip;
 		this.curTsiz=s.tsiz;	this.curTsty=s.tsty;
-		this.curTfon=s.tfon;	
+		this.curTfon=s.tfon;	this.curCurve=s.curve;	
 		}
 	this.AddWireframe(segNum);												// Draw selected wireframe	
 }
@@ -312,7 +316,7 @@ QDraw.prototype.StyleSelectedSegs=function()							// STYLE SELECTED SEGS
 			s.alpha=this.curAlpha;	s.ewid=this.curEwid;
 			s.ecol=this.curEcol;	s.etip=this.curEtip;
 			s.tsiz=this.curTsiz;	s.tsty=this.curTsty;
-			s.tfon=this.curTfon;	
+			s.tfon=this.curTfon;	s.curve=this.curCurve;
 			this.StyleSeg(i);												// Style it
 			this.changed=true;												// Set changed flag
 			}
@@ -341,9 +345,9 @@ QDraw.prototype.AddWireframe=function(segNum, col)						// ADD WIREFRAME TO DRAW
 		o.setAttribute("d",str);											// Add coords
 		o.style.fill="none";												// No fill	
 		o.style.stroke=col;  												// No color 
-		o.setAttribute("stroke-width",.5);									// Stroke width
+		o.setAttribute("stroke-width","1px");								// Stroke width
 		for (i=0;i<s.x.length;++i)											// For each coord
-			AddDot(s.x[i],s.y[i],o,i);										// Add dot
+			AddDot(s.x[i],s.y[i],o,i+1);									// Add dot
 		}
 	else if (s.type == "3") {												// A rect
 		var o=document.createElementNS(this.NS,"rect");						// Create element
@@ -354,7 +358,7 @@ QDraw.prototype.AddWireframe=function(segNum, col)						// ADD WIREFRAME TO DRAW
 		o.setAttribute("y", s.y[0]);										// Y
 		o.style.fill="none";												// No fill	
 		o.style.stroke=col;  												// No color 
-		o.setAttribute("stroke-width",.5);									// Stroke width
+		o.setAttribute("stroke-width","1px");								// Stroke width
 		AddDot(s.x[0],s.y[0],o,1);											// Add dot
 		AddDot(s.x[1],s.y[1],o,2);											// Add dot
 		AddDot(s.x[2],s.y[2],o,3);											// Add dot
@@ -369,7 +373,7 @@ QDraw.prototype.AddWireframe=function(segNum, col)						// ADD WIREFRAME TO DRAW
 		o.setAttribute("cy",s.y[0]+h);										// Y
 		o.style.fill="none";												// No fill	
 		o.style.stroke=col;  												// No color 
-		o.setAttribute("stroke-width",.5);									// Stroke width
+		o.setAttribute("stroke-width","1px");								// Stroke width
 		AddDot(s.x[0],s.y[0],o,1);											// Add dot
 		AddDot(s.x[1],s.y[1],o,2);											// Add dot
 		AddDot(s.x[2],s.y[2],o,3);											// Add dot
