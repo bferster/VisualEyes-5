@@ -111,7 +111,6 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
 	this.segs[i]={ type:1,col:"#cccccc",ewid:1,ecol:"#990000",alpha:100,drop:0,select:false,
 	x:[20+c,120+c,120+c],y:[50+c,50+c,250+c]}
 	this.AddSeg(i);this.StyleSeg(i++)
-
 }
 
 QDraw.prototype.RefreshSVG=function()									// REFRESH SVG 
