@@ -15,10 +15,11 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	this.curUndo=0;			this.curRedo=0;		this.changed=false;				// Undo/redo
 	this.clipboard=[];															// Holds cut and paste segs
 
-	this.curCol="#e6550d";														// Default drawing settings
+	this.curCurve=0;	this.curCol="#e6550d";									// Default drawing settings
 	this.curDrop=0;		this.curShape=0;		this.curAlpha=100;				// Common options
 	this.curEwid=1;		this.curEcol="#000000";	this.curEtip=0;					// Edge options
 	this.curTsiz=24;	this.curTsty=0;			this.curTfon=0;					// Text options
+	
 	this.segs=[];																// Drawing data
 	var str="<div id='pamenu' class='pa-main unselectable'>";					// Main shell
 	str+="<div id='pacoldot' class='pa-dot unselectable'>";						// Color dot
@@ -28,14 +29,14 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	ops.dial="img/piback.png";													// Dial background
 	ops.hilite="img/philite.png";												// Slice highlight
 	ops.slices[1]={ type:"col", ico:"img/color-icon.png", def:this.curCol+",0,"+this.curDrop };	// Color slice 
-	ops.slices[2]={ type:"edg", ico:"img/edge-icon.png", def:this.curEcol+","+this.curEwid+","+this.curDrop+","+this.curEtip };	// Edge 
+	ops.slices[2]={ type:"edg", ico:"img/edge-icon.png", def:this.curEcol+","+this.curEwid+","+this.curDrop+","+this.curEtip+","+this.curCurve };	// Edge 
 	ops.slices[3]={ type:"sli", ico:"img/alpha-icon.png", def:100 };			// Alpha slice 
 	ops.slices[4]={ type:"but", ico:"img/redo-icon.png", options:["Redo"]};		// Redo slice 
 	ops.slices[5]={ type:"but", ico:"img/undo-icon.png",options:["Undo"]};		// Undo slice 
 	ops.slices[6]={ type:"men", ico:"img/align-icon.png", options:["Align:Top:Middle:Bottom:Left:Center:Right","Distribute:Top:Middle:Bottom:Left:Center:Right","Arrange:To back:Backward:Frontward:To front"]};	// Align  
 	ops.slices[7]={ type:"but", ico:"img/gear-icon.png" };						// Center 
 	ops.slices[8]={ type:"ico", ico:"img/draw-icon.png", def:this.curShape };	// Blank slice 
-	ops.slices[8].options=["img/point-icon.png","img/line-icon.png","img/curve-icon.png","img/box-icon.png","img/circle-icon.png","img/text-icon.png"] ;
+	ops.slices[8].options=["img/point-icon.png","img/line-icon.png","img/poly-icon.png","img/box-icon.png","img/circle-icon.png","img/text-icon.png"] ;
 
 	this.gd=new Gdrive();														// Google drive access
 	Sound("click",true);														// Init sound
@@ -112,7 +113,7 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 QDraw.prototype.DrawMenu=function()											// SHOW DRAWING TOOL MENU
 {
 	var col=this.curCol;														// Set color
-	var icons=["point","line","curve","box","circle","text"];					// Names of icons
+	var icons=["point","line","poly","box","circle","text"];					// Names of icons
 	var x=$(this.parent).position().left+$(this.parent).width()-50;				// Right side
 	var y=$(this.parent).position().top+$(this.parent).height()-50;				// Bottom side
 	if (!col || (col == "None"))												// If a null color
@@ -125,10 +126,10 @@ QDraw.prototype.DrawMenu=function()											// SHOW DRAWING TOOL MENU
 	if (this.curShape == 5)														// If text
 		this.pie.SetSlice(2,{type:"edg", ico:"img/font-icon.png", def:this.curCol+","+this.curTsiz+","+this.curDrop+","+this.curTfon+","+this.curTSty});// Text menu 
 	else																		// If shape
-		this.pie.SetSlice(2,{type:"edg", ico:"img/edge-icon.png", def:this.curEcol+","+this.curEwid+","+this.curDrop+","+this.curEtip});	// Edge menu
+		this.pie.SetSlice(2,{type:"edg", ico:"img/edge-icon.png", def:this.curEcol+","+this.curEwid+","+this.curDrop+","+this.curEtip+","+this.curCurve});	// Edge menu
 	ops.slices[3]={ type:"sli", ico:"img/alpha-icon.png", def:this.curAlpha };	// Alpha slice 
 	ops.slices[8]={ type:"ico", ico:"img/draw-icon.png", def:this.curShape };	// Blank slice 
-	ops.slices[8].options=["img/point-icon.png","img/line-icon.png","img/curve-icon.png","img/box-icon.png","img/circle-icon.png","img/text-icon.png"] ;
+	ops.slices[8].options=["img/point-icon.png","img/line-icon.png","img/poly-icon.png","img/box-icon.png","img/circle-icon.png","img/text-icon.png"] ;
 	
 	col=(this.curEcol == "None") ? this.curCol : this.curEcol					// Set edge
 	$("#pacoldot").css({"border":"2px solid "+col} );							// Edge color
@@ -192,6 +193,7 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 					this.curEwid=vv[1];											// Set width
 					this.curDrop=vv[2];											// Set drop 
 					this.curEtip=vv[3];											// Set tip
+					this.curCurve=vv[4];										// Set curve
 					}
 				this.StyleSelectedSegs(this.changed=true);						// Style all selected segs
 				break;
@@ -365,11 +367,11 @@ QDraw.prototype.Do=function(useTempData)									// SAVE DRAWING IN SESSION STOR
 		o.script=this.tempSeg;													// Use it
 	if (!o.script)																// No data there
 		return false;															// Quit
-	trace("do-"+this.curUndo,this.curUndo+1)
+	sessionStorage.setItem("do-"+this.curUndo,JSON.stringify(o));				// Add new do												
 	this.curRedo=0;																// Stop any redos
 	this.changed=false;															// Reset changed flag
 	this.curUndo++;																// Inc undo count
-	this.SetUndoStatus();														// Set undo/reco icons
+	this.SetUndoStatus();														// Set undo/redo icons
 	this.tempSeg=null;															// Kill temp data
 }
 	

@@ -134,9 +134,42 @@ QDraw.prototype.StyleSeg=function(segNum)								// STYLE SEGMENT
 	var o=s.svg;															// Point at SVG element
 	if (s.type < 3) {														// A line or curve
 		var str="M"+s.x[0]+" "+s.y[0];										// Start
-		for (i=1;i<s.x.length;++i)											// For each point
-			str+="L"+s.x[i]+" "+s.y[i];										// Start
-		if (s.col && (s.col != "None"))	str+=" Z";							// Close it if filled
+		if (s.curCurve) {													// If cuved
+			var open=true;													// Assume open
+			if ((Math.abs(s.x[0]-s.x[s.x.length-1]) < 3) && (Math.abs(s.y[0]-s.y[s.y.length-1]) < 3)) {
+					s.x[x.length-1]=s.x[0];
+					s.y[y.length-1]=s.y[0];
+					open=false;
+					}
+				x=s.x[0]-0+((s.x[1]-s.x[0])/2)-0;
+				y=s.y[0]-0+((s.y[1]-s.y[0])/2)-0;
+				if (open) {
+					str+="L"+x+",";											// Pos x
+					str+=y+" ";												// Pos y
+			 		}			
+				for (j=1;j<s.x.length-1;++j) {								// For each coord
+					x=s.x[j]-0+((s.x[j+1]-s.x[j])/2)-0;						// Mid x										
+					y=s.y[j]-0+((s.y[j+1]-s.y[j])/2)-0;						// Mid y										
+					str+="Q";												// Line to
+					str+=s.x[j]+",";										// Pos x
+					str+=s.y[j]+" ";										// Pos y
+					str+=x+",";												// Control x
+					str+=y+" ";												// Control y
+					}
+				if (open) {
+					str+="L"+s.x[j]+",";									// Pos x
+					str+=s.y[j]+" ";										// Pos y
+			 		}			
+				}
+			else{
+				for (j=1;j<s.x.length;++j) {								// For each coord
+					str+="L";												// Line to
+					str+=s.x[j]+",";										// Pos x
+					str+=s.y[j]+" ";										// Pos y
+					}
+				}
+		if (s.type == 2)	str+=" Z";										// Close it if filled
+		else				s.col="";
 		o.setAttribute("d",str);											// Add coords
 		}
 	else if (s.type == "3") {												// A rect
