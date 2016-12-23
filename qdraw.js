@@ -105,7 +105,6 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	
 	$(parent).on("mouseup",function(e) { 										// CLICK ON BACKGROUND
 		if (e.target.id == "Q-SVG")	{											// If on background
-	trace(e)
 			_this.pie.ShowPieMenu(false);										// Hide it
 			_this.DrawMenu();													// Redraw dot
 			}
