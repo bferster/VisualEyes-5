@@ -434,7 +434,7 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 		});
 
 	$("#picurve").on("click", function() {										// ON CURVE CLICK
-		def[4]=(def[4]-0+1)%2;													// Force number and step 0-1
+		def[4]=(def[4]-0+1)%2;													// Force number and step 0-2
 		updateColor("click");													// Update menu
 		Sound("click");															// Click
 		});

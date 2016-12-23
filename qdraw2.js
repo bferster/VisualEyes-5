@@ -111,6 +111,10 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
 	this.segs[i]={ type:1,col:"#cccccc",ewid:1,ecol:"#990000",alpha:100,drop:0,select:false,curve:0,
 	x:[20+c,120+c,120+c],y:[50+c,50+c,250+c]}
 	this.AddSeg(i);this.StyleSeg(i++)
+	c+=30;
+	this.segs[i]={ type:5,col:"#009900",tsiz:60,tsty:0,tfon:0,alpha:100,drop:0,select:false,text:"ABC",
+	x:[20+c],y:[50+c]}
+	this.AddSeg(i);this.StyleSeg(i++)
 }
 
 QDraw.prototype.RefreshSVG=function()									// REFRESH SVG 
@@ -192,12 +196,29 @@ QDraw.prototype.StyleSeg=function(segNum)								// STYLE SEGMENT
 		o.setAttribute("cx",s.x[0]+w);										// X
 		o.setAttribute("cy",s.y[0]+h);										// Y
 		}
-	o.setAttribute("stroke-width",((s.type < 3)? s.ewid*2 : s.ewid)+"px");	// Stroke width (double for lines)
+	else if (s.type == "5") {												// Text
+		var fam=["sans-serif","serif","courier"];							// Font
+		o.setAttribute("x",s.x[0]);											// X
+		o.setAttribute("y",s.y[0]);											// Y
+		o.setAttribute("fill",s.col);										// Col
+		o.setAttribute("font-size",s.tsiz);									// Size
+		o.setAttribute("font-family",fam[s.tfon]);							// Font
+		o.setAttribute("font-style",s.tsty&2 ? "italic" : "normal");		// Italics
+		o.setAttribute("font-weight",s.tsty&1 ? "bold" : "normal");			// Bold
+		
+		
+		$(o).text(s.text);													// Text
+		
+		
+		}
 	o.setAttribute("opacity",s.alpha/100);									// Opacity
-	if (s.col)		o.style.fill=s.col;										// Fill color
-	else			o.style.fill="none";									// No fill	
-	if (s.ecol)		o.style.stroke=s.ecol;  								// Stroke color
-	else			o.style.stroke="none";									// No stroke	
+	if (s.type != "5") {													// Text
+		o.setAttribute("stroke-width",((s.type < 3)? s.ewid*2 : s.ewid)+"px");	// Stroke width (double for lines)
+		if (s.col)		o.style.fill=s.col;									// Fill color
+		else			o.style.fill="none";								// No fill	
+		if (s.ecol)		o.style.stroke=s.ecol;  							// Stroke color
+		else			o.style.stroke="none";								// No stroke	
+		}
 	if (s.drop == 1)														// White drop
 		o.setAttribute("filter","url(#QdropFilterW)");						// Set white filter
 	else if (s.drop == 2)													// Black drop
@@ -205,6 +226,7 @@ QDraw.prototype.StyleSeg=function(segNum)								// STYLE SEGMENT
 	else																	// No drop
 		o.setAttribute("filter","");										// Remove filter
 }
+
 
 QDraw.prototype.SelectSeg=function(segNum, mode)						// SELECT A SEG
 {
@@ -338,8 +360,40 @@ QDraw.prototype.AddWireframe=function(segNum, col)						// ADD WIREFRAME TO DRAW
 		var o=document.createElementNS(this.NS,"path");						// Create element
 		group.appendChild(o);												// Add element to DOM
 		var str="M"+s.x[0]+" "+s.y[0];										// Start
-		for (i=1;i<s.x.length;++i)											// For each point
-			str+="L"+s.x[i]+" "+s.y[i];										// Start
+		if (s.curve > 0) {													// If curved
+			var open=true;													// Assume open
+			if ((Math.abs(s.x[0]-s.x[s.x.length-1]) < 3) && (Math.abs(s.y[0]-s.y[s.y.length-1]) < 3)) {
+					s.x[x.length-1]=s.x[0];
+					s.y[y.length-1]=s.y[0];
+					open=false;
+					}
+				x=s.x[0]-0+((s.x[1]-s.x[0])/2)-0;
+				y=s.y[0]-0+((s.y[1]-s.y[0])/2)-0;
+				if (open) {
+					str+="L"+x+",";											// Pos x
+					str+=y+" ";												// Pos y
+			 		}			
+				for (j=1;j<s.x.length-1;++j) {								// For each coord
+					x=s.x[j]-0+((s.x[j+1]-s.x[j])/2)-0;						// Mid x										
+					y=s.y[j]-0+((s.y[j+1]-s.y[j])/2)-0;						// Mid y										
+					str+="Q";												// Line to
+					str+=s.x[j]+",";										// Pos x
+					str+=s.y[j]+" ";										// Pos y
+					str+=x+",";												// Control x
+					str+=y+" ";												// Control y
+					}
+				if (open) {
+					str+="L"+s.x[j]+",";									// Pos x
+					str+=s.y[j]+" ";										// Pos y
+			 		}			
+				}
+			else{
+				for (j=1;j<s.x.length;++j) {								// For each coord
+					str+="L";												// Line to
+					str+=s.x[j]+",";										// Pos x
+					str+=s.y[j]+" ";										// Pos y
+					}
+				}
 		if (s.col && (s.col != "None"))	str+=" Z";							// Close it if filled
 		o.setAttribute("d",str);											// Add coords
 		o.style.fill="none";												// No fill	
