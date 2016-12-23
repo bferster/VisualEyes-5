@@ -205,11 +205,12 @@ QDraw.prototype.StyleSeg=function(segNum)								// STYLE SEGMENT
 		o.setAttribute("font-family",fam[s.tfon]);							// Font
 		o.setAttribute("font-style",s.tsty&2 ? "italic" : "normal");		// Italics
 		o.setAttribute("font-weight",s.tsty&1 ? "bold" : "normal");			// Bold
-		
-		
 		$(o).text(s.text);													// Text
-		
-		
+		o.addEventListener('focus', function() {							// ON FOCUS
+		    this.addEventListener('keyup',function(e) {						// On key up
+		        console.log(e.keyCode);
+		    	});
+  			})
 		}
 	o.setAttribute("opacity",s.alpha/100);									// Opacity
 	if (s.type != "5") {													// Text
@@ -237,9 +238,7 @@ QDraw.prototype.SelectSeg=function(segNum, mode)						// SELECT A SEG
 	if (mode) {																// If selecting
 		for (i=0;i<n;++i) 													// For each other seg
 			if (this.segs[i].select)	sel++;								// Add to count if selected
-		s.select=sel+1;														// Add this one too
-		}
-	if (mode) {																// If selected
+		this.numSelect=s.select=sel+1;										// Add this one too
 		this.curCol=s.col;		this.curDrop=s.drop;						// Set parameters
 		this.curAlpha=s.alpha;	this.curEwid=s.ewid;
 		this.curEcol=s.ecol;	this.curEtip=s.etip;
@@ -253,16 +252,7 @@ QDraw.prototype.DeselectSegs=function()									// DESELECT ALL SEGS
 {
 	var i;
 	var n=this.segs.length;													// Number of segs
-	for (i=0;i<n;++i) {														// For each seg
-		this.segs[i].select=0;												// Unselect them
-		$("#QWire-"+i).remove();											// Remove old one
-		}
-}
-
-QDraw.prototype.DeselectSegs=function()									// DESELECT ALL SEGS
-{
-	var i;
-	var n=this.segs.length;													// Number of segs
+	this.numSelect=0;														// Nothing selected
 	for (i=0;i<n;++i) {														// For each seg
 		this.segs[i].select=0;												// Unselect them
 		$("#QWire-"+i).remove();											// Remove old one
@@ -432,6 +422,19 @@ QDraw.prototype.AddWireframe=function(segNum, col)						// ADD WIREFRAME TO DRAW
 		AddDot(s.x[2],s.y[2],o,3);											// Add dot
 		AddDot(s.x[3],s.y[3],o,4);											// Add dot
 		}
+	else if (s.type == "15") {												// text
+		var o=document.createElementNS(this.NS,"rect");						// Create element
+		group.appendChild(o);												// Add element to DOM
+		var w=s.svg.getBBox().width;
+		var h=s.svg.getBBox().height;
+		o.setAttribute("height",h);											// Height
+		o.setAttribute("width",w);											// Width
+		o.setAttribute("x",s.x[0]);											// X
+		o.setAttribute("y", s.y[0]-h);										// Y
+		o.style.fill="none";												// No fill	
+		o.style.stroke=col;  												// No color 
+	}
+	
 	function AddDot(x, y, par, num) {
 		var d=document.createElementNS(_this.NS,"rect");					// Create element
 		group.appendChild(d);												// Add dot to group

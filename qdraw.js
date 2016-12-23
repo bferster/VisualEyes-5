@@ -14,6 +14,7 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	this.showSnap=true;		this.showInfo=false;
 	this.curUndo=0;			this.curRedo=0;		this.changed=false;				// Undo/redo
 	this.clipboard=[];															// Holds cut and paste segs
+	this.numSelect=0;
 
 	this.curCurve=0;	this.curCol="#e6550d";									// Default drawing settings
 	this.curDrop=0;		this.curShape=0;		this.curAlpha=100;				// Common options
