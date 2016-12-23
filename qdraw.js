@@ -103,8 +103,9 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 			_this.DrawMenu();	
 			});
 	
-	$(parent).on("mousedown",function(e) { 										// CLICK ON BACKGROUND
-		if (e.currentTarget.id == "containerDiv")	{							// If on background
+	$(parent).on("mouseup",function(e) { 										// CLICK ON BACKGROUND
+		if (e.target.id == "Q-SVG")	{											// If on background
+	trace(e)
 			_this.pie.ShowPieMenu(false);										// Hide it
 			_this.DrawMenu();													// Redraw dot
 			}

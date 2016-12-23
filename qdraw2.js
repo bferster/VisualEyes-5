@@ -58,6 +58,15 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
 					y-=y%_this.gridSnap;									// Snap y								
 					}			
 				if (s.type < 3) {											// Box or circle
+					if (e.shiftKey && (v[2] > 0)) {							// If snapping to 90 degrees
+						dx=x-s.x[v[2]-2];		dy=y-s.y[v[2]-2];			// Make vector
+						a=180-Math.atan2(dx,dy)*(180/Math.PI);				// Get angle from last
+						if (a < 45)			x=s.x[v[2]-2];					// Force vert
+						else if (a < 135)	y=s.y[v[2]-2];					// Force horz
+						else if (a < 225)	x=s.x[v[2]-2];					// Force vert
+						else if (a < 315)	y=s.y[v[2]-2];					// Force horz
+						else				x=s.x[v[2]-2];					// Force vert
+						}
 					s.x[v[2]-1]=x;			s.y[v[2]-1]=y;					// Set pos
 					}
 				if ((s.type == 3) || (s.type == 4)) {						// Box or circle
@@ -207,8 +216,10 @@ QDraw.prototype.StyleSeg=function(segNum)								// STYLE SEGMENT
 		o.setAttribute("font-weight",s.tsty&1 ? "bold" : "normal");			// Bold
 		$(o).text(s.text);													// Text
 		o.addEventListener('focus', function() {							// ON FOCUS
+	        o.setAttribute("contentEditable","true");
+
 		    this.addEventListener('keyup',function(e) {						// On key up
-		        console.log(e.keyCode);
+			        console.log(e.keyCode);
 		    	});
   			})
 		}
@@ -445,8 +456,15 @@ QDraw.prototype.AddWireframe=function(segNum, col)						// ADD WIREFRAME TO DRAW
 		d.setAttribute("cursor","alias");									// Set cursor
 	
 		d.addEventListener("mousedown", function(e) {						// ON MOUSE DOWN
-			var segNum=e.target.id.substr(9);								// Get seg
-			_this.drawMode="ds-"+segNum+"-"+num;							// Set mode
+			var vv=e.target.id.split("-");
+			if (e.altKey && (_this.segs[vv[1]].type < 3) && (_this.segs[vv[1]].x.length > 2)) {	// If deleting point in line or curve
+				_this.segs[vv[1]].x.splice(vv[2]-1,1);						// Remove x coord
+				_this.segs[vv[1]].y.splice(vv[2]-1,1);						// y 
+				_this.RefreshSVG();											// Remake SVG
+				Sound("delete");											// Delete
+				return;														// Quit
+				}			
+			_this.drawMode="ds-"+vv[1]+"-"+num;								// Set mode
 			_this.mouseX=e.clientX; _this.mouseX=e.clientY;					// Save clicked spot
 			});
 		}
