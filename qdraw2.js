@@ -93,7 +93,7 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
 	this.RefreshSVG();														// Refresh SVG space
 	
 	var c;	
- 	for (i=0;i<9;i++) {
+ 	for (i=0;i<4;i++) {
 		c=i*30;
 		this.segs[i]={ type:3,col:"#cccccc",ewid:1,ecol:"#990000",alpha:100,drop:0,select:false,
 		x:[20+c,120+c,120+c,20+c],y:[50+c,50+c,250+c,250+c]}
@@ -104,11 +104,11 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
 	x:[20+c,120+c,120+c,20+c],y:[50+c,50+c,150+c,150+c]}
 	this.AddSeg(i);this.StyleSeg(i++);
 	c+=30;
-	this.segs[i]={ type:2,col:"#cccccc",ewid:1,ecol:"#990000",alpha:100,drop:0,select:false,
+	this.segs[i]={ type:2,col:"#cccccc",ewid:1,ecol:"#990000",alpha:100,drop:0,select:false,curve:0,
 	x:[20+c,120+c,120+c],y:[50+c,50+c,250+c]}
 	this.AddSeg(i);this.StyleSeg(i++)
 	c+=30;
-	this.segs[i]={ type:1,col:"#cccccc",ewid:1,ecol:"#990000",alpha:100,drop:0,select:false,
+	this.segs[i]={ type:1,col:"#cccccc",ewid:1,ecol:"#990000",alpha:100,drop:0,select:false,curve:0,
 	x:[20+c,120+c,120+c],y:[50+c,50+c,250+c]}
 	this.AddSeg(i);this.StyleSeg(i++)
 }
@@ -137,7 +137,7 @@ QDraw.prototype.StyleSeg=function(segNum)								// STYLE SEGMENT
 	var o=s.svg;															// Point at SVG element
 	if (s.type < 3) {														// A line or curve
 		var str="M"+s.x[0]+" "+s.y[0];										// Start
-		if (s.curve) {														// If curved
+		if (s.curve > 0) {													// If curved
 			var open=true;													// Assume open
 			if ((Math.abs(s.x[0]-s.x[s.x.length-1]) < 3) && (Math.abs(s.y[0]-s.y[s.y.length-1]) < 3)) {
 					s.x[x.length-1]=s.x[0];

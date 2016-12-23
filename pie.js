@@ -233,7 +233,7 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
  	if (mode == "edge") {														// If setting edge
 		str+="<div id='pilinback' class='pi-subbar unselectable' style='width:50px;height:72px'>";			// Line shell
 		if (this.parObj.curShape < 3)											// Line or poly
-			str+="<div id='picurve' class='pi-fdrop unselectable'>Line</div>";	// Add curve
+			str+="<div id='picurve' class='pi-fdrop unselectable'></div>";		// Add curve
 		if (this.parObj.curShape < 5)											// Not text
 			for (i=0;i<wids.length;++i)											// For each width
   				str+="<div id='piline"+i+"' class='pi-linechip'></div>";		// Make width chip
@@ -258,7 +258,6 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 	if (!def[2]) def[2]=0;														// Force to none
 	if (!def[3]) def[3]=0;														// Force to none
 	if (!def[4]) def[4]=0;														// Force to none
-
 	var ang=(num)*this.ops.ang-82.5;											// Start of colors angle
 	var w=this.ops.wid/2;														// Center
 	var r=w+32;																	// Radius
@@ -333,7 +332,7 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 			$(this).css("opacity",.5);											// Darken
 			if (mode == "color") {												// If just setting color
 				def[0]=cols[id];												// Get color
-				updateColor("hover");											// Update menu
+				updateColor();													// Update menu
 				}
 			});
 	
@@ -435,7 +434,7 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 		});
 
 	$("#picurve").on("click", function() {										// ON CURVE CLICK
-		def[4]=def[4] ? 0 : 1;													// Toggle state
+		def[4]=(def[4]-0+1)%2;													// Force number and step 0-1
 		updateColor("click");													// Update menu
 		Sound("click");															// Click
 		});
@@ -454,7 +453,7 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 		$("#pibold").css("background-color",(def[4]&1) ? "#00a8ff" : "#999");	// Color bold
 		$("#piital").css("background-color",(def[4]&2) ? "#00a8ff" : "#999");	// Color ital
 		$("#picurve").text((def[4] > 0) ? "Curve" : "Line");					// Show curve status
-	
+
 		var font="Sans-serif";													// Assume sans
 		if (def[3] == 1)		font="Serif";									// Serif
 		else if (def[3] == 2)	font="Courier";									// Fixed
@@ -519,7 +518,6 @@ PieMenu.prototype.ShowSlider=function(num, def)								// SHOW SLIDER
 			ui.position.left=x;		ui.position.top=y;							// Position dot
 			var val=Math.round(a/.6);											// Convert to 0-100
 			$("#pislitext").val(val);											// Set text
-			_this.SendMessage("hover",_this.curSlice+"|"+val);					// Send event
 			},
 		stop:function(event,ui) {
 			var val=$("#pislitext").val();										// Get val
@@ -533,7 +531,6 @@ PieMenu.prototype.ShowSlider=function(num, def)								// SHOW SLIDER
 		var val=$(this).val();													// Get val
 		val=val ? val : 0;														// Fix if null
 		val=Math.max(0,Math.min(val,100));										// Cap 0-100
-		_this.SendMessage("hover",_this.curSlice+"|"+val);						// Send event
 		setDot(val);
 		});
 

@@ -120,7 +120,6 @@ QDraw.prototype.DrawMenu=function()											// SHOW DRAWING TOOL MENU
 		col="transparent";														// Make transparent
 	$("#pacoldot").css({"background":col+" url('img/"+icons[this.curShape]+"-icon.png') no-repeat center center" });
 	$("#pacoldot").css({"background-size":"20px 20px","opacity":this.curAlpha/100});// Size it
-
 	var ops=this.pie.ops;
 	ops.slices[1]={ type:"col", ico:"img/color-icon.png", def:this.curCol+",0,"+this.curDrop };	// Color slice 
 	if (this.curShape == 5)														// If text
@@ -170,6 +169,7 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 {
 	var _this=this;																// Save context
 	var vv,v=msg.split("|");													// Split into parts
+	
 	if ((v[1] == "qdraw") && (v[0] == "click")) {								// A click in main menu
 		if (v[2])																// If not center
 			this.pie.ops.slices[v[2]].def=v[3];									// Set new default
@@ -284,17 +284,24 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 			}, 
 		});	
 	$("#csave").on("change", function() {										// On save menu change
+		var i;
 		var op=$(this).val();													// Get option chosen
 		$(this).val("");														// Reset option
-		var data="<!-- This is the raw seg data -->\n";
-		data+='<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle r="32" cx="35" cy="65" fill="#F00" opacity="0.5"/><circle r="32" cx="65" cy="65" fill="#0F0" opacity="0.5"/><circle r="32" cx="50" cy="35" fill="#00F" opacity="0.5"/></svg>'
+		x=new XMLSerializer();													// Create XML serializer
+		var data="<!-- "+JSON.stringify(_this.segs)+" -->\n";					// Add raw data
+		var w=$(_this.parent).width();											// Container wid
+		var h=$(_this.parent).height();											// Container hgt
+		data+='<svg viewBox="0 0 '+w+' '+h+'" xmlns="http://www.w3.org/2000/svg">\n';// SVG header
+		for (i=0;i<_this.segs.length;++i)										// For each seg
+			data+=x.serializeToString(_this.segs[i].svg)+"\n";					// Add seg's SVG
+		data+='</svg>';															// Close SVG
 		if ((op == "Save As...") || ((op == "Save") && !_this.gd.lastId)) {		// Save to new file
 			if (_this.GetTextBox("Type name of new drawing","","",function(name) {	// Type name
 					_this.gd.AccessAPI(function() {
 					 	_this.gd.CreateFolder(_this.gd.folderName,function(res) {	// Make sure there's a folder
 							_this.gd.Upload(name,data, null,function(res) {
 								 $("#sfname").text(_this.gd.lastName ? _this.gd.lastName : "None");
-								 trace(res); 
+								// trace(res); 
 								 }); 
 							});
 						});
@@ -304,8 +311,9 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 			_this.gd.AccessAPI(function() {
 			 	_this.gd.CreateFolder(_this.gd.folderName,function(res) { 		// Make sure there's a folder
 					_this.gd.Upload($("#myName").val(),data,_this.gd.lastId ? _this.gd.lastId : "",function(res) {
-						 $("#sfname").text(_this.gd.lastName ? _this.gd.lastName : "None");
-					 	 trace(res); 
+						$("#sfname").text(_this.gd.lastName ? _this.gd.lastName : "None");
+					 	Sound("ding");											// Ding
+					 	 //trace(res); 
 					 	 }); 
 				 	 }); 
 				 });
@@ -316,8 +324,13 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 					 _this.gd.Picker(true,function(res) {
 							 	 _this.gd.AccessAPI(function() {
 							 	 	 _this.gd.Download(_this.gd.lastId,function(res) {
-										 $("#sfname").text(_this.gd.lastName ? _this.gd.lastName : "None");
-							 	 	 	 trace(res); 
+										$("#sfname").text(_this.gd.lastName ? _this.gd.lastName : "None");
+								 	 	var data=res.match(/<!-- (.+) -->/)[1];	// Extract raw seg data
+						 	 	 		_this.Do();								// Save undo		
+							 	 	 	_this.segs=$.parseJSON(data);			// Set it
+							 	 	 	_this.RefreshSVG();						// Remake SVG
+									 	Sound("ding");							// Ding
+							 	 	 	//trace(res); 
 							 	 	 	 }); 
 							 	 	 }); 
 							 	 }); 
