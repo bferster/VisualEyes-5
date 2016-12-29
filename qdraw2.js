@@ -59,13 +59,14 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
 					}			
 				if (s.type < 3) {											// Box or circle
 					if (e.shiftKey && (v[2] > 0)) {							// If snapping to 90 degrees
-						dx=x-s.x[v[2]-2];		dy=y-s.y[v[2]-2];			// Make vector
+						var p=(v[2] == 1) ? v[2] : v[2]-2;					// Account for fist point
+						dx=x-s.x[p];		dy=y-s.y[p];					// Make vector
 						a=180-Math.atan2(dx,dy)*(180/Math.PI);				// Get angle from last
-						if (a < 45)			x=s.x[v[2]-2];					// Force vert
-						else if (a < 135)	y=s.y[v[2]-2];					// Force horz
-						else if (a < 225)	x=s.x[v[2]-2];					// Force vert
-						else if (a < 315)	y=s.y[v[2]-2];					// Force horz
-						else				x=s.x[v[2]-2];					// Force vert
+						if (a < 45)			x=s.x[p];						// Force vert
+						else if (a < 135)	y=s.y[p];						// Force horz
+						else if (a < 225)	x=s.x[p];						// Force vert
+						else if (a < 315)	y=s.y[p];						// Force horz
+						else				x=s.x[p];						// Force vert
 						}
 					s.x[v[2]-1]=x;			s.y[v[2]-1]=y;					// Set pos
 					}
@@ -117,7 +118,7 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
 	x:[20+c,120+c,120+c],y:[50+c,50+c,250+c]}
 	this.AddSeg(i);this.StyleSeg(i++)
 	c+=30;
-	this.segs[i]={ type:1,col:"#cccccc",ewid:1,ecol:"#990000",alpha:100,drop:0,select:false,curve:0,
+	this.segs[i]={ type:1,col:"#cccccc",ewid:4,ecol:"#990000",alpha:100,drop:0,select:false,curve:0,
 	x:[20+c,120+c,120+c],y:[50+c,50+c,250+c]}
 	this.AddSeg(i);this.StyleSeg(i++)
 	c+=30;
@@ -148,7 +149,46 @@ QDraw.prototype.StyleSeg=function(segNum)								// STYLE SEGMENT
 {
 	var s=this.segs[segNum];												// Point at seg data
 	var o=s.svg;															// Point at SVG element
-	if (s.type < 3) {														// A line or curve
+	if (s.type < 3) {														// A line or polygon
+
+	if ((s.type == 1) && (s.etip > 0)) {									// If an arrow tip on a line											
+		var aa;
+		var hh=s.ewid*4;													// Set size
+		var xx=[],yy=[];													// Arrow arrays
+		o.childNodes[1].setAttribute("d","");								// Remove starting tip
+		o.childNodes[2].setAttribute("d","");								// Remove ending tip
+		if (s.etip&2) {														// A starting arrow
+			aa=Math.atan2(s.y[0]-s.y[0+1],s.x[0]-s.x[0+1]);					// Angle of line
+			xx[0]=s.x[0]-hh*Math.cos(aa-Math.PI/6),
+			yy[0]=s.y[0]-hh*Math.sin(aa-Math.PI/6);			
+			xx[1]=s.x[0];	yy[1]=s.y[0];									// Tip point
+			xx[2]=s.x[0]-hh*Math.cos(aa+Math.PI/6),
+			yy[2]=s.y[0]-hh*Math.sin(aa+Math.PI/6);			
+	
+			var str="M"+xx[0]+" "+yy[0];									// Start
+		 	str+=" L"+xx[1]+" "+yy[1];										// Tip
+		 	str+=" L"+xx[2]+" "+yy[2];										// End
+		 	str+=" Z";														// End of arrow
+			o.childNodes[1].setAttribute("d",str);							// Add starting tip
+			o.childNodes[1].style.fill=s.col;								// Set fill color
+			}
+		if (s.etip&1) {														// An ending arrow
+			var n=s.x.length-1;												// Last point
+			aa=Math.atan2(s.y[n]-s.y[n-1],s.x[n]-s.x[n-1]);					// Angle of line
+			xx[0]=s.x[n]-hh*Math.cos(aa-Math.PI/6),
+			yy[0]=s.y[n]-hh*Math.sin(aa-Math.PI/6);			
+			xx[1]=s.x[n];	yy[1]=s.y[n];									// Tip point
+			xx[2]=s.x[n]-hh*Math.cos(aa+Math.PI/6),
+			yy[2]=s.y[n]-hh*Math.sin(aa+Math.PI/6);			
+			str="M"+xx[0]+" "+yy[0];										// Start
+		 	str+=" L"+xx[1]+" "+yy[1];										// Tip
+		 	str+=" L"+xx[2]+" "+yy[2];										// End
+		 	str+=" Z";														// End of arrow arrow
+			o.childNodes[2].setAttribute("d",str);							// Add  ending tip
+			o.childNodes[2].style.fill=s.col;								// Set fill color
+			}
+		}
+	
 		var str="M"+s.x[0]+" "+s.y[0];										// Start
 		if (s.curve > 0) {													// If curved
 			var open=true;													// Assume open
@@ -172,7 +212,7 @@ QDraw.prototype.StyleSeg=function(segNum)								// STYLE SEGMENT
 					str+=x+",";												// Control x
 					str+=y+" ";												// Control y
 					}
-				if (open) {
+				if (open){													// If not closed
 					str+="L"+s.x[j]+",";									// Pos x
 					str+=s.y[j]+" ";										// Pos y
 			 		}			
@@ -186,7 +226,8 @@ QDraw.prototype.StyleSeg=function(segNum)								// STYLE SEGMENT
 				}
 		if (s.type == 2)	str+=" Z";										// Close it if filled
 		else				s.col="";
-		o.setAttribute("d",str);											// Add coords
+		if (s.type == 1)	o.childNodes[0].setAttribute("d",str);			// Add coords to line
+		else				o.setAttribute("d",str);						// Add coords to polygon				
 		}
 	else if (s.type == "3") {												// A rect
 		var tip=0;
@@ -214,6 +255,7 @@ QDraw.prototype.StyleSeg=function(segNum)								// STYLE SEGMENT
 		o.setAttribute("font-family",fam[s.tfon]);							// Font
 		o.setAttribute("font-style",s.tsty&2 ? "italic" : "normal");		// Italics
 		o.setAttribute("font-weight",s.tsty&1 ? "bold" : "normal");			// Bold
+		$(o).css("user-select","none");										// No select
 		$(o).text(s.text);													// Text
 		o.addEventListener('focus', function() {							// ON FOCUS
 	        o.setAttribute("contentEditable","true");
@@ -357,7 +399,7 @@ QDraw.prototype.AddWireframe=function(segNum, col)						// ADD WIREFRAME TO DRAW
 	this.svg.appendChild(group);											// Add element to DOM
 	group.setAttribute("id","QWire-"+segNum);								// Id
 	
-	if (s.type < 3) {														// A l1ne or curve
+	if (s.type < 3) {														// A l1ne or polygon
 		var o=document.createElementNS(this.NS,"path");						// Create element
 		group.appendChild(o);												// Add element to DOM
 		var str="M"+s.x[0]+" "+s.y[0];										// Start
@@ -514,19 +556,37 @@ QDraw.prototype.AddDropFilter=function(id, col, spread)					// ADD DROPSHADOW SV
 
 QDraw.prototype.AddSeg=function(segNum)									// ADD NEW SEGMENT TO DRAWING
 {
-	var i;
+	var i,o;
 	var _this=this;															// Context
 	var s=this.segs[segNum];												// Point at seg data
 	if (!s.svg) {															// A new SVG object
-		if (s.type == 1) 		type="path";								// A path
+		if (s.type == 1) {													// Line or curve
+			type="path";													// A path
+			s.svg=document.createElementNS(this.NS,"g");					// Create group to hold line and tip(s)
+			this.svg.appendChild(s.svg);									// Add element to DOM
+			}
 		else if (s.type == 2) 	type="path";								// An path
 		else if (s.type == 3) 	type="rect";								// An rect
 		else if (s.type == 4) 	type="ellipse";								// An ellipse
 		else if (s.type == 5) 	type="text";								// An text
-		s.svg=document.createElementNS(this.NS,type);						// Create element
-		this.svg.appendChild(s.svg);										// Add element to DOM
-		s.svg.setAttribute("id","QSeg-"+segNum);							// Id
-		s.svg.setAttribute("cursor","pointer");								// Hand cursor
+		if (s.type  == 1) {													// Line
+			o=document.createElementNS(this.NS,type);						// Create element
+			s.svg.appendChild(o);											// Add element to group
+			o.setAttribute("id","QSeg-"+segNum);							// Id
+			o=document.createElementNS(this.NS,type);						// Create element for starting tip
+			o.setAttribute("id","QTps-"+segNum);							// Id
+			s.svg.appendChild(o);											// Add element to group
+			o=document.createElementNS(this.NS,type);						// Create element for ending tip
+			o.setAttribute("id","QTpe-"+segNum);							// Id
+			s.svg.appendChild(o);											// Add element to group
+			o.setAttribute("cursor","pointer");								// Hand cursor
+			}
+		else{
+			s.svg=document.createElementNS(this.NS,type);					// Create element
+			this.svg.appendChild(s.svg);									// Add element to DOM
+			s.svg.setAttribute("id","QSeg-"+segNum);						// Id
+			s.svg.setAttribute("cursor","pointer");							// Hand cursor
+			}
 
 		s.svg.addEventListener("mouseout", function(e)  { 					// Mouse out
 				var s=e.target.id.substr(5);								// Get seg
