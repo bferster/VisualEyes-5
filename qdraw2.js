@@ -16,10 +16,14 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
    	this.svg.setAttribute("height","100%");									// Height
  	
  	this.svg.addEventListener("click", function(e) { 						// ON CLICK
-      			if ((_this.curShape == 0) && (e.target.id == "Q-SVG"))		// If in container
+      		if (e.altKey) {													// Adding a point
+       			_this.AddPointToSeg(e.clientX,e.clientY);					// Add point to first selected seg
+       			return;														// Quit
+       			}
+      		if ((_this.curShape == 0) && (e.target.id == "Q-SVG"))			// If in container
 				_this.DeselectSegs(),Sound("click");						// Deselect all segs
-  				else if (e.target.id.substr(0,5) != "QSeg-")				// If not on seg
-					_this.curShape=0;										// Pointer
+  			else if (e.target.id.substr(0,5) != "QSeg-")					// If not on seg
+				_this.curShape=0;											// Pointer
 			});
  
  	this.svg.addEventListener("mousemove", function(e) { 					// ON MOVE
@@ -301,6 +305,45 @@ QDraw.prototype.SelectSeg=function(segNum, mode)						// SELECT A SEG
 	this.AddWireframe(segNum);												// Draw selected wireframe	
 }
 
+
+QDraw.prototype.AddPointToSeg=function(x, y)							// ADD POINT TO FIRST SELECTED SEG
+{
+	var i,a,b;
+	var c={x:x,y:y}
+	var n=this.segs.length;													// Number of segs
+	for (i=0;i<n;++i) {														// For each seg
+		if (this.segs[i].select)											// If selected
+			break;															// Stop looking
+		}
+	if (i == n)																// Didn't find one
+		return;																// Quit
+	var xs=this.segs[i].x;													// Point x data
+	var ys=this.segs[i].y;													// Point i data
+	for (i=0;i<xs.length-1;++i) {											// For each point
+		a={ x:xs[i], y:ys[i] };												// First point
+		b={ x:xs[i+1],y:ys[i+1] };											// Second point
+		if (isBetween(a,b,c,10))											// See if its in this seg
+			break;															// Quit looking
+		}
+	xs.splice(++i,0,x);														// Add x coord
+	ys.splice(i,0,y);														// y 
+	this.RefreshSVG();														// Remake SVG
+	Sound("click");															// Click
+
+	function isBetween(a, b, c, tolerance){
+	  	//test if the point c is inside a pre-defined distance (tolerance) from the line
+	    var distance = Math.abs((c.y - b.y)*a.x - (c.x - b.x)*a.y + c.x*b.y - c.y*b.x) / Math.sqrt(Math.pow((c.y-b.y),2) + Math.pow((c.x-b.x),2));
+	    if (distance > tolerance){ return false; }
+	    //test if the point c is between a and b
+	    var dotproduct = (c.x - a.x) * (b.x - a.x) + (c.y - a.y)*(b.y - a.y)
+	    if(dotproduct < 0){ return false; }
+	    var squaredlengthba = (b.x - a.x)*(b.x - a.x) + (b.y - a.y)*(b.y - a.y);
+	    if (dotproduct > squaredlengthba){ return false; }
+	    return true;
+		}
+	}
+
+
 QDraw.prototype.DeselectSegs=function()									// DESELECT ALL SEGS
 {
 	var i;
@@ -572,21 +615,20 @@ QDraw.prototype.AddSeg=function(segNum)									// ADD NEW SEGMENT TO DRAWING
 		if (s.type  == 1) {													// Line
 			o=document.createElementNS(this.NS,type);						// Create element
 			s.svg.appendChild(o);											// Add element to group
-			o.setAttribute("id","QSeg-"+segNum);							// Id
+			o.setAttribute("id","QPth-"+segNum);							// Id
 			o=document.createElementNS(this.NS,type);						// Create element for starting tip
 			o.setAttribute("id","QTps-"+segNum);							// Id
 			s.svg.appendChild(o);											// Add element to group
 			o=document.createElementNS(this.NS,type);						// Create element for ending tip
 			o.setAttribute("id","QTpe-"+segNum);							// Id
 			s.svg.appendChild(o);											// Add element to group
-			o.setAttribute("cursor","pointer");								// Hand cursor
 			}
 		else{
 			s.svg=document.createElementNS(this.NS,type);					// Create element
 			this.svg.appendChild(s.svg);									// Add element to DOM
-			s.svg.setAttribute("id","QSeg-"+segNum);						// Id
-			s.svg.setAttribute("cursor","pointer");							// Hand cursor
 			}
+		s.svg.setAttribute("id","QSeg-"+segNum);							// Id
+		s.svg.setAttribute("cursor","pointer");								// Hand cursor
 
 		s.svg.addEventListener("mouseout", function(e)  { 					// Mouse out
 				var s=e.target.id.substr(5);								// Get seg
