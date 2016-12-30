@@ -301,6 +301,7 @@ QDraw.prototype.SelectSeg=function(segNum, mode)						// SELECT A SEG
 		this.curEcol=s.ecol;	this.curEtip=s.etip;
 		this.curTsiz=s.tsiz;	this.curTsty=s.tsty;
 		this.curTfon=s.tfon;	this.curCurve=s.curve;	
+		this.curText=s.text;
 		}
 	this.AddWireframe(segNum);												// Draw selected wireframe	
 }
@@ -311,11 +312,14 @@ QDraw.prototype.AddPointToSeg=function(x, y)							// ADD POINT TO FIRST SELECTE
 	var i,a,b;
 	var c={x:x,y:y}
 	var n=this.segs.length;													// Number of segs
+	this.Do();																// Set up for undo
 	for (i=0;i<n;++i) {														// For each seg
 		if (this.segs[i].select)											// If selected
 			break;															// Stop looking
 		}
 	if (i == n)																// Didn't find one
+		return;																// Quit
+	if (this.segs[i].type > 2)												// Not a lone or polygon
 		return;																// Quit
 	var xs=this.segs[i].x;													// Point x data
 	var ys=this.segs[i].y;													// Point i data
@@ -328,7 +332,7 @@ QDraw.prototype.AddPointToSeg=function(x, y)							// ADD POINT TO FIRST SELECTE
 	xs.splice(++i,0,x);														// Add x coord
 	ys.splice(i,0,y);														// y 
 	this.RefreshSVG();														// Remake SVG
-	Sound("click");															// Click
+	Sound("ding");															// Ding
 
 	function isBetween(a, b, c, tolerance){
 	  	//test if the point c is inside a pre-defined distance (tolerance) from the line
@@ -424,6 +428,7 @@ QDraw.prototype.StyleSelectedSegs=function()							// STYLE SELECTED SEGS
 			s.ecol=this.curEcol;	s.etip=this.curEtip;
 			s.tsiz=this.curTsiz;	s.tsty=this.curTsty;
 			s.tfon=this.curTfon;	s.curve=this.curCurve;
+			s.text=this.curText;
 			this.StyleSeg(i);												// Style it
 			this.changed=true;												// Set changed flag
 			}
@@ -542,7 +547,9 @@ QDraw.prototype.AddWireframe=function(segNum, col)						// ADD WIREFRAME TO DRAW
 	
 		d.addEventListener("mousedown", function(e) {						// ON MOUSE DOWN
 			var vv=e.target.id.split("-");
-			if (e.altKey && (_this.segs[vv[1]].type < 3) && (_this.segs[vv[1]].x.length > 2)) {	// If deleting point in line or curve
+			trace(e)
+			if (e.ctrlKey && (_this.segs[vv[1]].type < 3) && (_this.segs[vv[1]].x.length > 2)) {	// If deleting point in line or polygon
+				_this.Do();													// Set up for undo
 				_this.segs[vv[1]].x.splice(vv[2]-1,1);						// Remove x coord
 				_this.segs[vv[1]].y.splice(vv[2]-1,1);						// y 
 				_this.RefreshSVG();											// Remake SVG
@@ -603,7 +610,7 @@ QDraw.prototype.AddSeg=function(segNum)									// ADD NEW SEGMENT TO DRAWING
 	var _this=this;															// Context
 	var s=this.segs[segNum];												// Point at seg data
 	if (!s.svg) {															// A new SVG object
-		if (s.type == 1) {													// Line or curve
+		if (s.type == 1) {													// Line
 			type="path";													// A path
 			s.svg=document.createElementNS(this.NS,"g");					// Create group to hold line and tip(s)
 			this.svg.appendChild(s.svg);									// Add element to DOM
