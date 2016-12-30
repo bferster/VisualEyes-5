@@ -261,13 +261,6 @@ QDraw.prototype.StyleSeg=function(segNum)								// STYLE SEGMENT
 		o.setAttribute("font-weight",s.tsty&1 ? "bold" : "normal");			// Bold
 		$(o).css("user-select","none");										// No select
 		$(o).text(s.text);													// Text
-		o.addEventListener('focus', function() {							// ON FOCUS
-	        o.setAttribute("contentEditable","true");
-
-		    this.addEventListener('keyup',function(e) {						// On key up
-			        console.log(e.keyCode);
-		    	});
-  			})
 		}
 	o.setAttribute("opacity",s.alpha/100);									// Opacity
 	if (s.type != "5") {													// Text
@@ -523,7 +516,7 @@ QDraw.prototype.AddWireframe=function(segNum, col)						// ADD WIREFRAME TO DRAW
 		AddDot(s.x[2],s.y[2],o,3);											// Add dot
 		AddDot(s.x[3],s.y[3],o,4);											// Add dot
 		}
-	else if (s.type == "15") {												// text
+	else if (s.type == "5") {												// text
 		var o=document.createElementNS(this.NS,"rect");						// Create element
 		group.appendChild(o);												// Add element to DOM
 		var w=s.svg.getBBox().width;
