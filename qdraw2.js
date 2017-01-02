@@ -413,6 +413,7 @@ QDraw.prototype.StyleSelectedSegs=function()							// STYLE SELECTED SEGS
 {
 	var i,s;
 	var n=this.segs.length;													// Number of segs
+	this.Do();																// Save an undo
 	for (i=0;i<n;++i) 														// For each seg
 		if (this.segs[i].select) {											// If selected
 			s=this.segs[i];													// Point at seg
@@ -425,8 +426,6 @@ QDraw.prototype.StyleSelectedSegs=function()							// STYLE SELECTED SEGS
 			this.StyleSeg(i);												// Style it
 			this.changed=true;												// Set changed flag
 			}
-	if (this.changed)														// If changing something
-		this.Do();															// Save an undo
 }
 
 QDraw.prototype.AddWireframe=function(segNum, col)						// ADD WIREFRAME TO DRAWING
@@ -540,7 +539,7 @@ QDraw.prototype.AddWireframe=function(segNum, col)						// ADD WIREFRAME TO DRAW
 	
 		d.addEventListener("mousedown", function(e) {						// ON MOUSE DOWN
 			var vv=e.target.id.split("-");
-			trace(e)
+			_this.tempSeg=JSON.parse(JSON.stringify(_this.segs));		// Unlink and copy segs
 			if (e.ctrlKey && (_this.segs[vv[1]].type < 3) && (_this.segs[vv[1]].x.length > 2)) {	// If deleting point in line or polygon
 				_this.Do();													// Set up for undo
 				_this.segs[vv[1]].x.splice(vv[2]-1,1);						// Remove x coord
@@ -590,7 +589,14 @@ QDraw.prototype.AddDropFilter=function(id, col, spread)					// ADD DROPSHADOW SV
  		mat.setAttribute("values","-1 0 0 0 1 0 -1 0 0 1 0 0 -1 0 1 0 0 0 1 0");
  	else									
   		mat.setAttribute("values","0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0");
-	filter=this.svg.appendChild(filter)										// Add filter to DOM
+   
+	var defs=document.getElementById("SVG-defs");							// Get defs container
+   	if (!defs) {															// Not defined yet
+   		defs=document.createElementNS(this.NS,"defs");						// Create defs container
+		defs.setAttribute("id","SVG-defs");									// Set id
+		defs=this.svg.appendChild(defs)										// Add defs to DOM
+ 		}
+  	filter=defs.appendChild(filter)											// Add filter to defs
  	filter.appendChild(off);												// Add feoffset to filter
  	filter.appendChild(mat);												// Add feColorMatrix to filter
 	filter.appendChild(blur);												// Add feGaussianBlur to filter

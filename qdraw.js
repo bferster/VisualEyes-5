@@ -222,7 +222,6 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 				break;
 			case 8:																// Shape
 				this.curShape=vv[0];											// Set shape
-				this.Do();
 				break;
 			}
 		this.DrawMenu();														// Redraw menu
