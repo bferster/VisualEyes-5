@@ -355,12 +355,14 @@ QDraw.prototype.CalMiniMax=function(segNum)								// CALC MINIMAX OF SEG
 		}
 	if (this.segs[segNum].type == 5) {										// Text
 		o.maxx=o.minx+this.segs[segNum].svg.getBBox().width;				// Text width
+		o.miny=o.miny-(this.segs[segNum].svg.getBBox().height*.66);			// Text height, accomodating for accents
 		o.maxy=o.miny+(this.segs[segNum].svg.getBBox().height*.66);			// Text height, accomodating for accents
 		}
 	o.dx=o.maxx-o.minx;														// Width	
 	o.dy=o.maxy-o.miny;														// Height	
 	o.cx=o.minx+(o.dx/2);													// Center x		
 	o.cy=o.miny+(o.dy/2);													// Y	
+	return(o);																// Return minimax object
 }
 
 QDraw.prototype.DeselectSegs=function()									// DESELECT ALL SEGS
@@ -417,8 +419,24 @@ QDraw.prototype.ArrangeSegs=function(how)								// ARRANGE SEGS
 
 QDraw.prototype.AlignSegs=function(how)									// ALIGN SEGS
 {
-for (i=0;i<this.segs.length;++i)										// For each seg
-	this.CalMiniMax(i)
+	var i,first;
+	var mins=[];
+	
+	for (i=0;i<this.segs.length;++i)										// For each seg
+		if (this.segs[i].select) {											// If selected
+			mins[i]=this.CalMiniMax(i);										// Get minimax
+			if (!first)	first=mins[i];										// Use first one as ref
+			}
+	if (how == 1) {	
+		for (i=0;i<this.segs.length;++i)									// For each seg
+			if (this.segs[i].select) {										// If selected
+				dy=first.miny-mins[i].miny;									// Amount to move
+				for (j=0;j<this.segs[i].x.length;++j)						// For each point
+					this.segs[i].y[j]+=dy;									// Shift
+				}
+			}	
+	this.RefreshSVG();														// Rebuild SVG
+	Sound("ding");															// Ding
 }
 
 QDraw.prototype.DistributeSegs=function(how)								// DISTRIBUTE SEGS
