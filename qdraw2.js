@@ -341,6 +341,28 @@ QDraw.prototype.AddPointToSeg=function(x, y)							// ADD POINT TO FIRST SELECTE
 	}
 
 
+QDraw.prototype.CalMiniMax=function(segNum)								// CALC MINIMAX OF SEG
+{
+	var i;
+	var o={minx:999999,maxx:-999999,miny:999999,maxy:-999999};				// Default to extemes
+	var xs=this.segs[segNum].x;												// Point at x coord	
+	var ys=this.segs[segNum].y;												// Point at x coord	
+	for (i=0;i<xs.length;++i) {												// For each coord	
+		if (xs[i] < o.minx)	o.minx=xs[i];									// New minx
+		if (ys[i] < o.miny)	o.miny=ys[i];									// New miny
+		if (xs[i] > o.maxx)	o.maxx=xs[i];									// New maxx
+		if (ys[i] > o.maxy)	o.maxy=ys[i];									// New maxy
+		}
+	if (this.segs[segNum].type == 5) {										// Text
+		o.maxx=o.minx+this.segs[segNum].svg.getBBox().width;				// Text width
+		o.maxy=o.miny+(this.segs[segNum].svg.getBBox().height*.66);			// Text height, accomodating for accents
+		}
+	o.dx=o.maxx-o.minx;														// Width	
+	o.dy=o.maxy-o.miny;														// Height	
+	o.cx=o.minx+(o.dx/2);													// Center x		
+	o.cy=o.miny+(o.dy/2);													// Y	
+}
+
 QDraw.prototype.DeselectSegs=function()									// DESELECT ALL SEGS
 {
 	var i;
@@ -395,10 +417,13 @@ QDraw.prototype.ArrangeSegs=function(how)								// ARRANGE SEGS
 
 QDraw.prototype.AlignSegs=function(how)									// ALIGN SEGS
 {
+for (i=0;i<this.segs.length;++i)										// For each seg
+	this.CalMiniMax(i)
 }
 
-QDraw.prototype.DistribueSegs=function(how)								// DISTRIBUTE SEGS
+QDraw.prototype.DistributeSegs=function(how)								// DISTRIBUTE SEGS
 {
+
 }
 
 QDraw.prototype.RefreshIds=function()									// UPDATE ALL SVG IDS TO MATCH SEG ORGER
@@ -518,8 +543,8 @@ QDraw.prototype.AddWireframe=function(segNum, col)						// ADD WIREFRAME TO DRAW
 	else if (s.type == "5") {												// text
 		var o=document.createElementNS(this.NS,"rect");						// Create element
 		group.appendChild(o);												// Add element to DOM
-		var w=s.svg.getBBox().width;
-		var h=s.svg.getBBox().height;
+		var w=s.svg.getBBox().width;										// Text width
+		var h=s.svg.getBBox().height*.66;									// Account for accents
 		o.setAttribute("height",h);											// Height
 		o.setAttribute("width",w);											// Width
 		o.setAttribute("x",s.x[0]);											// X
