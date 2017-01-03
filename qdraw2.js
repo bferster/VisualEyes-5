@@ -417,31 +417,58 @@ QDraw.prototype.ArrangeSegs=function(how)								// ARRANGE SEGS
 	Sound("ding");															// Ding
 }
 
-QDraw.prototype.AlignSegs=function(how)									// ALIGN SEGS
+QDraw.prototype.AlignSegs=function(how)									// ALIGN OR DISTRIBUTE SELECTED SEGS
 {
-	var i,first;
-	var mins=[];
-	
+	var mins=[],sels=[];
+	var i,j,k,l,first,dx,dy;
+	var minx=999999,miny=999999,maxx=-999999,maxy=-999999;
+	this.Do();																// Setup for undo
 	for (i=0;i<this.segs.length;++i)										// For each seg
 		if (this.segs[i].select) {											// If selected
 			mins[i]=this.CalMiniMax(i);										// Get minimax
-			if (!first)	first=mins[i];										// Use first one as ref
+			sels.push({ ind: i, pos:mins[i]} );								// Add to list
+			if (!first)	first=mins[i];										// Use first one as reference
 			}
-	if (how == 1) {	
-		for (i=0;i<this.segs.length;++i)									// For each seg
-			if (this.segs[i].select) {										// If selected
-				dy=first.miny-mins[i].miny;									// Amount to move
-				for (j=0;j<this.segs[i].x.length;++j)						// For each point
-					this.segs[i].y[j]+=dy;									// Shift
-				}
-			}	
+	if (how == 11)
+		sels.sort(function(a,b) { return a.pos.minx < b.pos.minx ? -1 : 1 } );	// Sort left-right
+	if (how == 12)
+		sels.sort(function(a,b) { return a.pos.miny < b.pos.miny ? -1 : 1 } );	// Sort top-bottom
+	var n=sels.length;
+	if (how > 9) {															// Distribute
+		var ox=0,oy=0,sel=0;
+		for (j=0;j<n;++j) {													// For each selected seg
+			i=sels[j].ind;													// Point at selected segment
+			if (mins[i].minx < minx)	minx=mins[i].minx;					// New minx
+			if (mins[i].miny < miny)	miny=mins[i].miny;					// New miny
+			if (mins[i].maxx > maxx)	maxx=mins[i].maxx;					// New maxx
+			if (mins[i].maxy > maxy)	maxy=mins[i].maxy;					// New maxy
+			ox+=mins[i].dx;													// Add to overall width
+			oy+=mins[i].dy;													// Add to overall height
+			}
+		ox=((maxx-minx)-ox)/Math.max(n-1,1);								// X space 
+		oy=((maxy-miny)-oy)/Math.max(n-1,1);								// Y
+		--n;																// Dont move last one
+		}
+	for (j=1;j<n;++j) {														// For each selected seg
+		i=sels[j].ind;														// Point at selected segment
+		l=sels[j-1].ind;													// Previous seg
+		dx=dy=0;															// Assume no shift
+		if (how == 1) 	  	dy=first.miny-mins[i].miny;						// Align top
+		else if (how == 2) 	dy=first.cy-mins[i].cy;							// Middle
+		else if (how == 3) 	dy=first.maxy-mins[i].maxy;						// Bottom
+		else if (how == 4) 	dx=first.minx-mins[i].minx;						// Left
+		else if (how == 5) 	dx=first.cx-mins[i].cx;							// Center
+		else if (how == 6) 	dx=first.maxx-mins[i].maxx;						// Right
+		else if (how == 11) dx=(mins[l].maxx+ox)-mins[i].minx;				// Distribute widths
+		else if (how == 12) dy=(mins[l].maxy+oy)-mins[i].miny;				// Distribute heights
+		
+		for (k=0;k<this.segs[i].x.length;++k) {								// For each point
+			this.segs[i].x[k]+=dx;											// Shift x
+			this.segs[i].y[k]+=dy;											// Y
+			}
+		}	
 	this.RefreshSVG();														// Rebuild SVG
 	Sound("ding");															// Ding
-}
-
-QDraw.prototype.DistributeSegs=function(how)								// DISTRIBUTE SEGS
-{
-
 }
 
 QDraw.prototype.RefreshIds=function()									// UPDATE ALL SVG IDS TO MATCH SEG ORGER

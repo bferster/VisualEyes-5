@@ -34,7 +34,7 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	ops.slices[3]={ type:"sli", ico:"img/alpha-icon.png", def:100 };			// Alpha slice 
 	ops.slices[4]={ type:"but", ico:"img/redo-icon.png", options:["Redo"]};		// Redo slice 
 	ops.slices[5]={ type:"but", ico:"img/undo-icon.png",options:["Undo"]};		// Undo slice 
-	ops.slices[6]={ type:"men", ico:"img/align-icon.png", options:["Align:Top:Middle:Bottom:Left:Center:Right","Distribute:Widths:Heights","Arrange:To back:Backward:Forward:To front"]};	// Align  
+	ops.slices[6]={ type:"men", ico:"img/align-icon.png", options:["Align:Top:Middle:Bottom:Left:Center:Right","Distribute:Horiz:Vert","Arrange:To back:Backward:Forward:To front"]};	// Align  
 	ops.slices[7]={ type:"but", ico:"img/gear-icon.png" };						// Center 
 	ops.slices[8]={ type:"ico", ico:"img/draw-icon.png", def:this.curShape };	// Blank slice 
 	ops.slices[8].options=["img/point-icon.png","img/line-icon.png","img/poly-icon.png","img/box-icon.png","img/circle-icon.png","img/text-icon.png"] ;
@@ -203,7 +203,7 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 				this.curAlpha=vv[0];											// Set alpha
 				this.StyleSelectedSegs(this.changed=true);						// Style all selected segs
 				break;
-			case 4:																// Redo
+			case 4:																// Red
 				this.ReDo();													// Do it
 				break;
 			case 5:																// Undo
@@ -213,7 +213,7 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 				if (vv[0] < 11)													// Align
 					this.AlignSegs(vv[0]%10);									// Align segs
 				else if (vv[0] < 21)											// Distribute
-					this.DistributeSegs(vv[0]%10);								// Distribute widths
+					this.AlignSegs(vv[0]%10+10);								// Distribute widths
 				else if (vv[0] < 31)											// Arrange
 					this.ArrangeSegs(vv[0]%10);									// Arrange Z-order
 				break;
