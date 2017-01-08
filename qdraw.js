@@ -16,7 +16,7 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	this.clipboard=[];															// Holds cut and paste segs
 	this.numSelect=0;
 
-	this.curCurve=0;	this.curCol="#e6550d";	this.curText="Text";				// Default drawing settings
+	this.curCurve=0;	this.curCol="#e6550d";	this.curText="Text";			// Default drawing settings
 	this.curDrop=0;		this.curShape=0;		this.curAlpha=100;				// Common options
 	this.curEwid=1;		this.curEcol="#000000";	this.curEtip=0;					// Edge options
 	this.curTsiz=24;	this.curTsty=0;			this.curTfon=0;					// Text options
@@ -124,7 +124,7 @@ QDraw.prototype.DrawMenu=function()											// SHOW DRAWING TOOL MENU
 	var ops=this.pie.ops;
 	ops.slices[1]={ type:"col", ico:"img/color-icon.png", def:this.curCol+",0,"+this.curDrop };	// Color slice 
 	if (this.curShape == 5)														// If text
-		this.pie.SetSlice(2,{type:"edg", ico:"img/font-icon.png", def:this.curCol+","+this.curTsiz+","+this.curDrop+","+this.curTfon+","+this.curTSty+","+this.curText});// Text menu 
+		this.pie.SetSlice(2,{type:"edg", ico:"img/font-icon.png", def:this.curCol+","+this.curTsiz+","+this.curDrop+","+this.curTfon+","+this.curTsty+","+this.curText});// Text menu 
 	else																		// If shape
 		this.pie.SetSlice(2,{type:"edg", ico:"img/edge-icon.png", def:this.curEcol+","+this.curEwid+","+this.curDrop+","+this.curEtip+","+this.curCurve});	// Edge menu
 	ops.slices[3]={ type:"sli", ico:"img/alpha-icon.png", def:this.curAlpha };	// Alpha slice 
@@ -222,6 +222,7 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 				break;
 			case 8:																// Shape
 				this.curShape=vv[0];											// Set shape
+				this.DrawShape(this.curShape);									// Start drawing process
 				break;
 			}
 		this.DrawMenu();														// Redraw menu
@@ -387,6 +388,7 @@ QDraw.prototype.Do=function(useTempData)									// SAVE DRAWING IN SESSION STOR
 	this.curUndo++;																// Inc undo count
 	this.SetUndoStatus();														// Set undo/redo icons
 	this.tempSeg=null;															// Kill temp data
+	trace("do",useTempData,this.curUndo)
 }
 	
 QDraw.prototype.UnDo=function()												// GET DRAWING FROM SESSION STORAGE

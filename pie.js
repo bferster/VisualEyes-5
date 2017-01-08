@@ -25,10 +25,10 @@ function PieMenu(options, parObj)											// CONSTRUCTOR
 	$(this.ops.parent).append(str);												// Add to DOM														
 	str="<img id='piback' class='pi-slice' src='"+this.ops.dial+"'/>";			// Menu back			
 	str+="<img id='pihigh' class='pi-slice' style='pointer-events: none' src='"+this.ops.hilite+"'/>";	// Slice highlight				
-	str+="<div>"
+	str+="<div id='piicons'>";
 	if (this.ops.slices[0]) {													// If a center slice defined
 		str+="<img id='sliceicon0' src='"+this.ops.slices[0].ico+"' style='position:absolute;";	// Center Icon
-		str+="left:"+(w-iw/2)+"px;top:"+(w-iw/2)+"px;width:"+iw+"px'/>";			// Position
+		str+="left:"+(w-iw/2)+"px;top:"+(w-iw/2)+"px;width:"+iw+"px'/>";		// Position
 		}
 	for (i=1;i<9;++i) {															// For each option
 		if (!this.ops.slices[i])	this.ops.slices[i]={ type:"" };				// Make blank object
@@ -37,7 +37,7 @@ function PieMenu(options, parObj)											// CONSTRUCTOR
 		ang=(45*i)-22.5;														// Next angle
 		x=Math.floor(w+(Math.sin((ang)*0.0174533)*r-iw/2));						// Calc x
 		y=Math.floor((w-Math.cos((ang)*0.0174533)*r)-iw/2);						// Y
-		str+="<img id='sliceicon"+i+"' src='"+this.ops.slices[i].ico+"' style='position:absolute;";	// Icon
+			str+="<img id='sliceicon"+i+"' src='"+this.ops.slices[i].ico+"' style='position:absolute;";	// Icon
 		str+="left:"+x+"px;top:"+y+"px;width:"+iw+"px'/>";						// Position
 		}
 	str+="</div>"
@@ -97,13 +97,16 @@ PieMenu.prototype.ShowPieMenu=function(mode)								// SHOW PIE MENU
 		$("#pimenu").css({"top":o.sy+"px","left":o.sx+"px"});					// Position
 		$("#pimenu").animate({ width:o.wid, height:o.wid,top:o.y, left:o.x,opacity:1});	// Zoom on
 		$("#pamenu").animate({ top:o.y+w, left:o.x+w });						// Zoom on
+		$("#piicons").animate({ width:o.wid, height:o.wid});					// Zoom on
+		$("#piicons").css({ display:"initial"});								// Show
 		}
 	else{																		// If hiding
 		this.ops.segMode=false;													// Full drawing mode
 		this.parObj.curShape=0;													// Pointer shape					
 		this.HideSubMenus(true);												// Hide submenus										
-		$("#pimenu").animate({ width:0, height:0,top:o.sy,left:o.sx, opacity:0},0);	// Zoom off
-		$("#pamenu").animate({ top:o.sy-25, left:o.sx-25 },0);						// Zoom off
+		$("#piicons").css({ display:"none"});									// Hide
+		$("#pimenu").animate({ width:0, height:0,top:o.sy,left:o.sx, opacity:1},0);	// Zoom off
+		$("#pamenu").animate({ top:o.sy-25, left:o.sx-25 },0);					// Zoom off
 		}	
 }
 
@@ -258,7 +261,7 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 	if (!def[2]) def[2]=0;														// Force to none
 	if (!def[3]) def[3]=0;														// Force to none
 	if (!def[4]) def[4]=0;														// Force to none
-	if (!def[5]) def[4]="";														// Force to none
+	if (!def[5]) def[5]="";														// Force to none
 	var ang=(num)*this.ops.ang-82.5;											// Start of colors angle
 	var w=this.ops.wid/2;														// Center
 	var r=w+32;																	// Radius

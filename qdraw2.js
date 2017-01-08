@@ -9,6 +9,7 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
 	var _this=this;															// Context
 	this.segs=[];															// Init segment list
 	this.drawMode="";														// Current drawing mode
+	this.drawX=0;	this.drawY=0;											// Last point drawn
 	this.NS="http://www.w3.org/2000/svg";									// Name space
 	this.svg=document.createElementNS(this.NS,"svg");						// Create SVG object
   	this.svg.setAttribute("id","Q-SVG");									// ID
@@ -16,7 +17,9 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
    	this.svg.setAttribute("height","100%");									// Height
  	
  	this.svg.addEventListener("click", function(e) { 						// ON CLICK
-      		if (e.altKey) {													// Adding a point
+       		if (_this.drawMode && _this.drawMode.match(/newxy/)) 			// Drawing points
+       			return;														// Quit
+       		if (e.altKey) {													// Adding a point
        			_this.AddPointToSeg(e.clientX,e.clientY);					// Add point to first selected seg
        			return;														// Quit
        			}
@@ -31,7 +34,9 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
  			var v=_this.drawMode.split("-");								// Get parts
   			_this.mx=e.clientX;		_this.my=e.clientY;						// Current pos
   			_this.ShowInfoBox();											// Show xy pos
-  			if ((v[0] == "ds") && (v[2] == 0)) {							// If full seg drag start
+     		if ((v[0] == "newxy") && (v[1] == 1))							// Rubbering to next point
+				_this.Rubberband(v[2],_this.drawX,_this.drawY,e.clientX,e.clientY,e.shiftKey);	// Rubber band
+  			else if ((v[0] == "ds") && (v[2] == 0)) {						// If full seg drag start
 				_this.Do(true);												// Save temp seg as undo
 				s=_this.segs[v[1]];											// Point at seg
 				dy=e.clientY-s.y[0]-_this.mouseDY;							// Delta y to move
@@ -97,9 +102,55 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
  	
  			});
  	 
+
+ 		this.svg.addEventListener("mousedown", function(e) {				// ON MOUSE DOWN
+	 		var v=_this.drawMode.split("-");								// Get parts
+     		if ((v[0] == "newxy") && (v[1] == 0)) {							// Drawing first point
+				if (v[2] == 5) {											// Text
+					_this.GetTextBox("Type Text","","",function(txt) {		// Type name
+		   				_this.Do();											// Save undo
+		     			_this.drawMode="";									// Finished drawing
+		       			_this.segs.push({ type:v[2],col:_this.curCol,		// Add seg
+		     					tsiz:_this.curTsiz,tsty:_this.curTsty,
+		     					alpha:_this.curAlpha,drop:_this.curDrop,
+		     					select:false,tfon:_this.curTfon,text:txt,
+		     					x:[e.clientX],y:[e.clientY]});
+						_this.AddSeg(_this.segs.length-1);					// Add to SVG
+						_this.StyleSeg(_this.segs.length-1);				// Set style
+						Sound("ding");										// Ding
+						});
+						$("#Q-SVG").attr("cursor","default");				// Crosshair cursor
+						return;
+					}
+          		_this.drawX=e.clientX;										// Save first coord X	
+     			_this.drawY=e.clientY;										// Y
+     			_this.drawMode="newxy-1-"+v[2]								// Change mode to drawing next point
+ 				}		
+			});
+	
  		this.svg.addEventListener("mouseup", function(e) {					// ON MOUSE UP
 	 		var v=_this.drawMode.split("-");								// Get parts
-			_this.drawMode="de-"+v[1]+"-"+v[2];								// Set mode
+     		if ((v[0] == "newxy") && (v[1] == 1)) {							// Drawing next point(s)
+     			if ((v[2] == 3 || v[2] == 4)) {								// Box / circle
+     				var x1=_this.drawX,y1=_this.drawY;						// TL
+    				var x2=e.clientX,y2=e.clientY;							// BR
+      				if (e.shiftKey)	y2=y1+Math.abs(x2-x1);					// Make it square/circle		
+	   				_this.Do();												// Save undo
+     				_this.Rubberband(0);									// Kill rubber box
+     				_this.drawMode="";										// Finished drawing
+       				_this.segs.push({ type:v[2],col:_this.curCol,			// Add seg
+     					ewid:_this.curEwid,ecol:_this.curEcol,
+     					alpha:_this.curAlpha,drop:_this.curDrop,
+     					select:false,etip:_this.curEtip,
+     					x:[x1,x2,x2,x1],y:[y1,y1,y2,y2]});
+					_this.AddSeg(_this.segs.length-1);						// Add to SVG
+					_this.StyleSeg(_this.segs.length-1);					// Set style
+					$("#Q-SVG").attr("cursor","default");					// Crosshair cursor
+					Sound("ding");											// Ding
+     				}
+     			}
+	   		else if (v[0] == "ds")											// If dragging
+ 				_this.drawMode="de-"+v[1]+"-"+v[2];							// Set mode
 			});
 
   	document.getElementById("containerDiv").appendChild(this.svg);			// Add to DOM
@@ -138,6 +189,7 @@ QDraw.prototype.RefreshSVG=function()									// REFRESH SVG
 	$("#Q-SVG").empty();													// Remove all segs
 	this.AddDropFilter("QdropFilterB","#000000",4);							// Add black SVG filter for drop shadows
 	this.AddDropFilter("QdropFilterW","#ffffff",4);							// Add white 
+	this.AddDropFilter("QdropFilterR","#ffffff",2);							// Add rubber 
 	for (i=0;i<n;++i) {														// For each seg
 		this.segs[i].svg=null;												// Clear so a new geg will be added
 		this.AddSeg(i);														// Add it
@@ -289,12 +341,12 @@ QDraw.prototype.SelectSeg=function(segNum, mode)						// SELECT A SEG
 		for (i=0;i<n;++i) 													// For each other seg
 			if (this.segs[i].select)	sel++;								// Add to count if selected
 		this.numSelect=s.select=sel+1;										// Add this one too
+		this.curAlpha=(s.alpha == undefined ) ? 100 : s.alpha;				// Alpha
 		this.curCol=s.col;		this.curDrop=s.drop;						// Set parameters
-		this.curAlpha=s.alpha;	this.curEwid=s.ewid;
 		this.curEcol=s.ecol;	this.curEtip=s.etip;
 		this.curTsiz=s.tsiz;	this.curTsty=s.tsty;
 		this.curTfon=s.tfon;	this.curCurve=s.curve;	
-		this.curText=s.text;
+		this.curText=s.text;	this.curEwid=s.ewid;
 		}
 	this.AddWireframe(segNum);												// Draw selected wireframe	
 }
@@ -628,8 +680,55 @@ QDraw.prototype.AddWireframe=function(segNum, col)						// ADD WIREFRAME TO DRAW
 // DRAWING
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-QDraw.prototype.RubberBox=function(x1, y1, x2, y2, width, mode)			// DRAW RUBBER LINE/BOX
+QDraw.prototype.DrawShape=function(shape)								// BEGIN DRAWING
 {
+	if (!shape)																// If not a shape
+		return;																// Quit
+	this.drawMode="newxy-0-"+shape;											// Set mode
+	this.pie.ShowPieMenu(false);											// Hide it
+	this.curShape=shape;													// Set shape
+	this.DrawMenu();														// Redraw dot
+	Sound("click");															// Click
+	$("#Q-SVG").attr("cursor","crosshair");									// Crosshair cursor
+}
+
+
+QDraw.prototype.Rubberband=function(shape, x1, y1, x2, y2, shift )		// DRAW RUBBER LINE/BOX/CIRCLE
+{
+	var o;
+	$("#QRubber").remove();													// Remove old one
+	if ((shape < 1) || (shape > 4)) 										// No rubber box needed
+		return;																// Quit
+	var h=Math.abs(y2-y1)/2;												// Calc height
+	var w=Math.abs(x2-x1)/2;												// Width
+	if (shift)	h=w;														// Make it square/circle		
+	if (shape == 3) {														// Box
+		o=document.createElementNS(this.NS,"rect");							// Create element
+		o.setAttribute("height",h+h);										// Height
+		o.setAttribute("width",w+w);										// Width
+		o.setAttribute("x",x1);												// X
+		o.setAttribute("y",y1);												// Y
+		}
+	else if (shape == 4) {													// Circle
+		o=document.createElementNS(this.NS,"ellipse");						// Create element
+		o.setAttribute("ry",h);												// Height
+		o.setAttribute("rx",w);												// Width
+		o.setAttribute("cx",x1+w);											// X
+		o.setAttribute("cy",y1+h);											// Y
+		}
+	else if (shape == 5) {													// Box
+		o=document.createElementNS(this.NS,"text");							// Create element
+		o.setAttribute("height",h+h);										// Height
+		o.setAttribute("width",w+w);										// Width
+		o.setAttribute("x",x1);												// X
+		o.setAttribute("y",y1);												// Y
+		}
+	this.svg.appendChild(o);												// Add element to DOM
+	o.setAttribute("id","QRubber");											// Id
+	o.style.fill="none";													// No fill	
+	o.style.stroke="#000000";  												// No color 
+	o.setAttribute("stroke-width","2px");									// Stroke width
+	o.setAttribute("filter","url(#QdropFilterR)");							// Set white filter
 }
 
 QDraw.prototype.AddDropFilter=function(id, col, spread)					// ADD DROPSHADOW SVG FILTER
@@ -750,31 +849,6 @@ QDraw.prototype.AddSeg=function(segNum)									// ADD NEW SEGMENT TO DRAWING
 			});
 		}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
