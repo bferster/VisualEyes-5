@@ -22,6 +22,7 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	this.curTsiz=24;	this.curTsty=0;			this.curTfon=0;					// Text options
 	
 	this.segs=[];																// Drawing data
+	this.undos=[];																// Undo data
 	var str="<div id='pamenu' class='pa-main unselectable'>";					// Main shell
 	str+="<div id='pacoldot' class='pa-dot unselectable'>";						// Color dot
 	$(parent).append(str);														// Add to DOM														
@@ -47,7 +48,6 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	this.pie=new PieMenu(ops,this);												// Init pie menu
 	this.GraphicsInit();														// Init graphics
 	this.DrawMenu();															// Draw it
-	sessionStorage.clear();														// Clear session storage
 	document.onkeyup=$.proxy(this.onKeyUp,this);								// Keyup listener
 	document.onkeydown==$.proxy(this.onKeyDown,this);							// Keydown listener
 	
@@ -75,6 +75,11 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 			}
 		});
 
+		$("#pamenu").on("contextmenu", function(e) {							// RIGHT CLICK
+			$(this).trigger("click");											// Treat as a click
+			return false;														// Don't pull up context menu
+		});
+
 		$("#pamenu").on("click", function(e) {									// CLICK ITEM
 			var x=$("#pamenu").position().left+25;								// Get cx
 			var y=$("#pamenu").position().top+25;								// Get cy
@@ -99,8 +104,16 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 				_this.pie.ops.y=y-w;											// Center
 				_this.pie.ops.x=x-w;											// Center
 				}
-			_this.pie.ShowPieMenu(!_this.pie.active);							// Toggle
-			_this.DrawMenu();	
+			if (_this.drawMode && _this.drawMode.match(/newxy/)) {				// If needing to stop drawing
+				_this.drawMode="";												// Reset draw mode
+				_this.Rubberband(0);											// Kill rubber box
+				Sound("click");													// Done
+				$("#Q-SVG").attr("cursor","default");							// Normal cursor
+				}
+			else{																// Regular click
+				_this.pie.ShowPieMenu(!_this.pie.active);						// Toggle
+				_this.DrawMenu();												// Draw menu dot
+				}	
 			});
 	
 	$(parent).on("mouseup",function(e) { 										// CLICK ON BACKGROUND
@@ -382,13 +395,12 @@ QDraw.prototype.Do=function(useTempData)									// SAVE DRAWING IN SESSION STOR
 		o.script=this.tempSeg;													// Use it
 	if (!o.script)																// No data there
 		return false;															// Quit
-	sessionStorage.setItem("do-"+this.curUndo,JSON.stringify(o));				// Add new do												
+	this.undos[this.curUndo]=$.parseJSON(JSON.stringify(o));					// Save undo
 	this.curRedo=0;																// Stop any redos
 	this.changed=false;															// Reset changed flag
 	this.curUndo++;																// Inc undo count
 	this.SetUndoStatus();														// Set undo/redo icons
 	this.tempSeg=null;															// Kill temp data
-	trace("do",useTempData,this.curUndo)
 }
 	
 QDraw.prototype.UnDo=function()												// GET DRAWING FROM SESSION STORAGE
@@ -398,9 +410,8 @@ QDraw.prototype.UnDo=function()												// GET DRAWING FROM SESSION STORAGE
 		return;																	// Quit
 	o.date=new Date().toString().substr(0,21);									// Get date
 	o.script=this.segs;															// Get drawing data
-	sessionStorage.setItem("do-"+this.curUndo,JSON.stringify(o));				// Add new do												
-	var key=sessionStorage.key(this.curUndo-1);									// Get key for undo
-	var o=$.parseJSON(sessionStorage.getItem(key));								// Get undo from local storage
+	this.undos[this.curUndo]=$.parseJSON(JSON.stringify(o));					// Save undo
+	var o=this.undos[this.curUndo-1];											// Get undo
 	this.segs=o.script;															// Get data
 	this.RefreshSVG();															// Restore SVG
 	Sound("delete");															// Delete
@@ -413,8 +424,7 @@ QDraw.prototype.ReDo=function()												// REDO DRAWING FROM UNDO
 {
 	if (!this.curRedo)															// Nothing to redo
 		return;																	// Quit
-	var key=sessionStorage.key(this.curUndo+1);									// Get key for redo
-	var o=$.parseJSON(sessionStorage.getItem(key));								// Get undo from local storage
+	var o=this.undos[this.curUndo+1];											// Get redo data
 	this.segs=o.script;															// Get data
 	this.RefreshSVG();															// Restore SVG
 	Sound("ding");																// Click

@@ -106,7 +106,17 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
  		this.svg.addEventListener("mousedown", function(e) {				// ON MOUSE DOWN
 	 		var v=_this.drawMode.split("-");								// Get parts
      		if ((v[0] == "newxy") && (v[1] == 0)) {							// Drawing first point
-				if (v[2] == 5) {											// Text
+				if ((v[2] == 1) || (v[2] == 2)) {							// Line / polygon
+	    			_this.Do();												// Save undo
+       				_this.segs.push({ type:v[2],col:_this.curCol,			// Add seg
+     					ewid:_this.curEwid,ecol:_this.curEcol,
+     					alpha:_this.curAlpha,drop:_this.curDrop,
+     					select:false,etip:_this.curEtip,
+     					curve:_this.curCurve,x:[],y:[]});
+					_this.AddSeg(_this.segs.length-1);						// Add to SVG
+					_this.StyleSeg(_this.segs.length-1);					// Set style
+	   				}
+				else if (v[2] == 5) {										// Text
 					_this.GetTextBox("Type Text","","",function(txt) {		// Type name
 		   				_this.Do();											// Save undo
 		     			_this.drawMode="";									// Finished drawing
@@ -119,22 +129,51 @@ QDraw.prototype.GraphicsInit=function()									// INIT GRAPHICS
 						_this.StyleSeg(_this.segs.length-1);				// Set style
 						Sound("ding");										// Ding
 						});
-						$("#Q-SVG").attr("cursor","default");				// Crosshair cursor
-						return;
+					$("#Q-SVG").attr("cursor","default");					// Normal cursor
+					return;
 					}
           		_this.drawX=e.clientX;										// Save first coord X	
      			_this.drawY=e.clientY;										// Y
      			_this.drawMode="newxy-1-"+v[2]								// Change mode to drawing next point
  				}		
+    		if (v[0] == "newxy") {											// Drawing any point
+          		_this.drawX=e.clientX;										// Save first coord X	
+     			_this.drawY=e.clientY;										// Y
+     			_this.drawMode="newxy-1-"+v[2]								// Change mode to drawing next point
+				}
 			});
 	
  		this.svg.addEventListener("mouseup", function(e) {					// ON MOUSE UP
 	 		var v=_this.drawMode.split("-");								// Get parts
-     		if ((v[0] == "newxy") && (v[1] == 1)) {							// Drawing next point(s)
-     			if ((v[2] == 3 || v[2] == 4)) {								// Box / circle
-     				var x1=_this.drawX,y1=_this.drawY;						// TL
-    				var x2=e.clientX,y2=e.clientY;							// BR
-      				if (e.shiftKey)	y2=y1+Math.abs(x2-x1);					// Make it square/circle		
+			var x1=_this.drawX,y1=_this.drawY;								// Last point
+			var x2=e.clientX,y2=e.clientY;									// This point
+			if (_this.gridSnap) {											// If snapping
+				x1-=x1%_this.gridSnap;										// Snap x1								
+				y1-=y1%_this.gridSnap;										// Y1								
+				x2-=x2%_this.gridSnap;										// X2								
+				y2-=y2%_this.gridSnap;										// Y2							
+				}			
+ 			if ((v[0] == "newxy") && (v[1] == 1)) {							// Drawing next point(s)
+	   			if ((v[2] == 1 || v[2] == 2)) {								// Line / polygon
+       				var i=_this.segs.length-1;								// Point at seg
+			 		if (e.shiftKey) {										// If snapping to 90 degrees
+						var n=_this.segs[i].x.length-1;						// Point at last coord
+						x1=_this.segs[i].x[n];								// Last coord x
+						y1=_this.segs[i].y[n];								// Y
+						dx=x2-x1;		dy=y2-y1;							// Make vector
+						a=180-Math.atan2(dx,dy)*(180/Math.PI);				// Get angle from last
+						if (a < 45)			x2=x1;							// Force vert
+						else if (a < 135)	y2=y1;							// Force horz
+						else if (a < 225)	x2=x1;							// Force vert
+						else if (a < 315)	y2=y1;							// Force horz
+						else				x2=x1;							// Force vert
+						}
+      				_this.segs[i].x.push(x2);								// Add x
+      				_this.segs[i].y.push(y2);								// Y
+  					_this.StyleSeg(i);										// Show new point
+     				}
+	   			else if ((v[2] == 3 || v[2] == 4)) {						// Box / circle
+       				if (e.shiftKey)	y2=y1+Math.abs(x2-x1);					// Make it square/circle		
 	   				_this.Do();												// Save undo
      				_this.Rubberband(0);									// Kill rubber box
      				_this.drawMode="";										// Finished drawing
@@ -205,7 +244,7 @@ QDraw.prototype.StyleSeg=function(segNum)								// STYLE SEGMENT
 {
 	var s=this.segs[segNum];												// Point at seg data
 	var o=s.svg;															// Point at SVG element
-	if (s.type < 3) {														// A line or polygon
+	if ((s.type < 3) && (s.x.length > 1)) {									// A line or polygon with at leaat 2 points
 
 	if ((s.type == 1) && (s.etip > 0)) {									// If an arrow tip on a line											
 		var aa;
@@ -695,14 +734,36 @@ QDraw.prototype.DrawShape=function(shape)								// BEGIN DRAWING
 
 QDraw.prototype.Rubberband=function(shape, x1, y1, x2, y2, shift )		// DRAW RUBBER LINE/BOX/CIRCLE
 {
-	var o;
+	var o,dx,dy;
 	$("#QRubber").remove();													// Remove old one
 	if ((shape < 1) || (shape > 4)) 										// No rubber box needed
 		return;																// Quit
 	var h=Math.abs(y2-y1)/2;												// Calc height
 	var w=Math.abs(x2-x1)/2;												// Width
-	if (shift)	h=w;														// Make it square/circle		
+	if (this.gridSnap) {													// If snapping
+		x1-=x1%this.gridSnap;												// Snap x1								
+		y1-=y1%this.gridSnap;												// Y1								
+		x2-=x2%this.gridSnap;												// X2								
+		y2-=y2%this.gridSnap;												// Y2							
+		}			
+	if (shape < 3) {														// Line
+		if (shift) {														// If snapping to 90 degrees
+			dx=x2-x1;		dy=y2-y1;										// Make vector
+			a=180-Math.atan2(dx,dy)*(180/Math.PI);							// Get angle from last
+			if (a < 45)			x2=x1+1;									// Force vert
+			else if (a < 135)	y2=y1+1;									// Force horz
+			else if (a < 225)	x2=x1+1;									// Force vert
+			else if (a < 315)	y2=y1+1;									// Force horz
+			else				x2=x1+1;									// Force vert
+			}
+		o=document.createElementNS(this.NS,"line");							// Create element
+		o.setAttribute("x1",x1);											// X1
+		o.setAttribute("y1",y1);											// Y1
+		o.setAttribute("x2",x2);											// X2
+		o.setAttribute("y2",y2);											// Y2
+		}
 	if (shape == 3) {														// Box
+		if (shift)	h=w;													// Make it a square		
 		o=document.createElementNS(this.NS,"rect");							// Create element
 		o.setAttribute("height",h+h);										// Height
 		o.setAttribute("width",w+w);										// Width
@@ -710,13 +771,14 @@ QDraw.prototype.Rubberband=function(shape, x1, y1, x2, y2, shift )		// DRAW RUBB
 		o.setAttribute("y",y1);												// Y
 		}
 	else if (shape == 4) {													// Circle
+		if (shift)	h=w;													// Make it a perfect circle		
 		o=document.createElementNS(this.NS,"ellipse");						// Create element
 		o.setAttribute("ry",h);												// Height
 		o.setAttribute("rx",w);												// Width
 		o.setAttribute("cx",x1+w);											// X
 		o.setAttribute("cy",y1+h);											// Y
 		}
-	else if (shape == 5) {													// Box
+	else if (shape == 5) {													// Text
 		o=document.createElementNS(this.NS,"text");							// Create element
 		o.setAttribute("height",h+h);										// Height
 		o.setAttribute("width",w+w);										// Width
@@ -818,14 +880,15 @@ QDraw.prototype.AddSeg=function(segNum)									// ADD NEW SEGMENT TO DRAWING
 
 		s.svg.addEventListener("contextmenu", function(e) { 				// ON RIGHT CLICK
 				var i,w=_this.pie.ops.wid/2;								// Get width/2
-				_this.pie.ops.segMode=true;									// Show seg menu
-				_this.pie.ops.x=e.clientX-w;								// Position
-				_this.pie.ops.y=e.clientY-w;								// Position
 				for (i=0;i<_this.segs.length;++i)							// For each seg
 					if (_this.segs[i].select) {								// If selected
 						_this.curShape=_this.segs[i].type;					// Set type
 						break;												// Quit looking
 						}
+				var o=_this.CalMiniMax(i);									// Get minimax
+				_this.pie.ops.segMode=true;									// Show seg menu
+				_this.pie.ops.x=o.cx-w;										// Position x
+				_this.pie.ops.y=o.cy-w;										// Y
 				_this.pie.ShowPieMenu(!_this.pie.active);					// Toggle
 				_this.DrawMenu();											// Draw dot
 				});	

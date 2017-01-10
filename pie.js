@@ -218,7 +218,6 @@ PieMenu.prototype.ShowMenuPick=function(num, def)							// SHOW TEXT PICK
 			Sound("click");														// Click
 			});
 		}
-		
 }
 
 PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE / TYPE
@@ -287,14 +286,13 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 		str+="style='left:"+(ix+70)+"px;top:"+(iy)+"px'>Drop</div>";	
 		str+="<div id='pifsize' class='pi-fstyle unselectable' ";				// Size
 		str+="style='width:50px;height:0px;left:"+(ix+5)+"px;top:"+(iy-32)+"px'></div>";	
-		str+="<input type='text' class='pi-txt' id='pisiztxt' "; 
+		str+="<input type='text' class='pi-coltext' id='pisiztxt' "; 
 		str+="style='text-align:center;width:19px;height:9px;left:"+(ix+70)+"px;top:"+(iy-36)+"px'>";	
-	
-		str+="<input type='text' class='pi-coltext' id='pitxt' "; 
+			str+="<input type='text' class='pi-coltext' id='pitxt' "; 
 		str+="style='width:89px;height:9px;left:"+ix+"px;top:"+(iy+18)+"px'>";	
 
-		str+="<div id='pifdemo' class='pi-fdemo unselectable' " ;				// Demo letter
-		str+="style='left:"+ix+"px;top:"+(iy+36)+"px'>A</div>";	
+//		str+="<div id='pifdemo' class='pi-fdemo unselectable' " ;				// Demo letter
+//		str+="style='left:"+ix+"px;top:"+(iy+36)+"px'>A</div>";	
 		}
 	$("#pisubback").append(str);												// Add to color bar														
 	$("#pitextcol").css("background-color",def[0]);								// Def col
@@ -448,7 +446,7 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 		Sound("click");															// Click
 		});
 
-	$("#pisiztxt").on("change", function(e) {									// ON FONT SIZECHANGE
+	$("#pisiztxt").on("change", function(e) {									// ON FONT SIZE CHANGE
 		def[1]=$(this).val();													// Get font
 		updateColor("click");													// Update menu
 		Sound("click");															// Click
@@ -468,8 +466,8 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 		$("#pibold").css("background-color",(def[4]&1) ? "#00a8ff" : "#999");	// Color bold
 		$("#piital").css("background-color",(def[4]&2) ? "#00a8ff" : "#999");	// Color ital
 		$("#picurve").text((def[4] > 0) ? "Curve" : "Line");					// Show curve status
-
-		var font="Sans-serif";													// Assume sans
+		$("#pifsize").slider("value",def[1]);									// Set font size
+/*		var font="Sans-serif";													// Assume sans
 		if (def[3] == 1)		font="Serif";									// Serif
 		else if (def[3] == 2)	font="Courier";									// Fixed
 		var drop="transparent";													// Assume no drop
@@ -480,7 +478,7 @@ PieMenu.prototype.ShowColorBars=function(num, mode, def)					// SET COLOR / EDGE
 			"font-style":def[4]&2 ? "italic" : "normal",						// Italic
 			"font-family":font,"text-shadow":"4px 4px 16px "+drop				// Drop													// Font
 			});
-		
+*/		
 		for (j=0;j<wids.length;++j) 											// For each width
 			$("#piline"+j).css("background-color",(wids[j] == def[1]) ? "#00a8ff" : "#e8e8e8");	// Make blue
 		for (j=0;j<4;++j) {														// For each arrow
@@ -555,6 +553,11 @@ PieMenu.prototype.ShowSlider=function(num, def)								// SHOW SLIDER
 		y=(w-Math.cos(ang2*0.0174533)*r).toFixed(4);							// Y
 		$("#piarc"+i).css({"transform":"translate("+x+"px,"+y+"px) rotate("+ang+"deg)"}); // Rotate 
 		ang2+=1;																// Next angle for arc
+
+		$("#piarc"+i).on("click",function(e) {									// CLICK ON ARC SECTION
+			var id=e.currentTarget.id.substr(5)-0;								// Extract id
+			setDot(Math.floor(id*1.666));										// Move dot there
+			});
 		}
 
 	function setDot(val) {
