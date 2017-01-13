@@ -788,7 +788,7 @@ QDraw.prototype.Rubberband=function(shape, x1, y1, x2, y2, shift )		// DRAW RUBB
 	this.svg.appendChild(o);												// Add element to DOM
 	o.setAttribute("id","QRubber");											// Id
 	o.style.fill="none";													// No fill	
-	o.style.stroke="#000000";  												// No color 
+	o.style.stroke="#3399ff";  												// Blue 
 	o.setAttribute("stroke-width","2px");									// Stroke width
 	o.setAttribute("filter","url(#QdropFilterR)");							// Set white filter
 }
@@ -913,6 +913,33 @@ QDraw.prototype.AddSeg=function(segNum)									// ADD NEW SEGMENT TO DRAWING
 		}
 }
 
+QDraw.prototype.EndDrawing=function()									// STOP DRAWING
+{
+	if (this.drawMode && this.drawMode.match(/newxy/)) {					// If needing to stop drawing
+		this.drawMode="";													// Reset draw mode
+		this.Rubberband(0);													// Kill rubber box
+		Sound("click");														// Done
+		$("#Q-SVG").attr("cursor","default");								// Normal cursor
+		if (this.segs[this.segs.length-1].x.length < 2) {					// Invalid seg
+			this.segs.pop();												// Remove it
+			this.RefreshSVG();												// Remake svg
+			}
+		}
+}
 
-
+QDraw.prototype.RemoveLastPoint=function()								// REMOVE LAST POINT DRAWN
+{
+	if (this.drawMode && this.drawMode.match(/newxy/)) {					// If needing to stop drawing
+		if (this.segs[this.segs.length-1].x.length > 1) {					// If something to delete
+			Sound("delete");												// Delete soubd
+			var i=this.segs.length-1;										// Last seg
+			this.segs[i].x.pop();											// Remove x
+			this.segs[i].y.pop();											// Y
+			var j=this.segs[i].x.length-1;									// Last coord
+			this.drawX=this.segs[i].x[j];									// Penultimate x
+			this.drawY=this.segs[i].y[j];									// Y
+			this.RefreshSVG();												// Remake svg
+			}
+		}
+}
 

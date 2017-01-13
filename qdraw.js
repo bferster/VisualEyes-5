@@ -10,11 +10,10 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	if (parent != "body")  	parent="#"+parent;									// Add #
 	this.parent=parent;		this.dockSide=dockSide;	this.dockPos=dockPos;		// Save settings
 
-	this.cVolume=33;		this.gridSnap=0;	this.simplify=0;				// General settings
+	this.cVolume=33;		this.gridSnap=0;	this.numSelect=0;				// General settings
 	this.showSnap=true;		this.showInfo=false;
 	this.curUndo=0;			this.curRedo=0;		this.changed=false;				// Undo/redo
 	this.clipboard=[];															// Holds cut and paste segs
-	this.numSelect=0;
 
 	this.curCurve=0;	this.curCol="#e6550d";	this.curText="Text";			// Default drawing settings
 	this.curDrop=0;		this.curShape=0;		this.curAlpha=100;				// Common options
@@ -48,6 +47,11 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 	this.pie=new PieMenu(ops,this);												// Init pie menu
 	this.GraphicsInit();														// Init graphics
 	this.DrawMenu();															// Draw it
+	this.cVolume=this.GetCookie("volume")    ? this.GetCookie("volume")-0 : 33;	// Get cookies
+	this.gridSnap=this.GetCookie("gridSnap") ? this.GetCookie("gridSnap")-0 : 0;								
+	this.showSnap=this.GetCookie("showSnap")-0 ? true : false;							
+	this.showInfo=this.GetCookie("showInfo")-0 ? true : false;								
+	this.ShowInfoBox(true);														// Hide or show info box
 	document.onkeyup=$.proxy(this.onKeyUp,this);								// Keyup listener
 	document.onkeydown==$.proxy(this.onKeyDown,this);							// Keydown listener
 	
@@ -104,12 +108,8 @@ function QDraw(dockSide, dockPos, parent)									// CONSTRUCTOR
 				_this.pie.ops.y=y-w;											// Center
 				_this.pie.ops.x=x-w;											// Center
 				}
-			if (_this.drawMode && _this.drawMode.match(/newxy/)) {				// If needing to stop drawing
-				_this.drawMode="";												// Reset draw mode
-				_this.Rubberband(0);											// Kill rubber box
-				Sound("click");													// Done
-				$("#Q-SVG").attr("cursor","default");							// Normal cursor
-				}
+			if (_this.drawMode && _this.drawMode.match(/newxy/)) 				// If needing to stop drawing
+				_this.EndDrawing();												// End current drawing
 			else{																// Regular click
 				_this.pie.ShowPieMenu(!_this.pie.active);						// Toggle
 				_this.DrawMenu();												// Draw menu dot
@@ -208,7 +208,7 @@ QDraw.prototype.HandleMessage=function(msg)									// REACT TO DRAW EVENT
 					this.curEwid=vv[1];											// Set width
 					this.curDrop=vv[2];											// Set drop 
 					this.curEtip=vv[3];											// Set tip
-					this.curCurve=vv[4];										// Set curve
+					this.curCurve=(vv[4] == undefined) ? 0 : vv[4];				// Set curve
 					}
 				this.StyleSelectedSegs(this.changed=true);						// Style all selected segs
 				break;
@@ -252,9 +252,6 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 	str+="<tr style='height:18px'><td><b>Grid snap</b></td>";
 	str+="<td><div id='csnap' class='unselectable' style='width:80px;display:inline-block'></div>&nbsp;&nbsp;&nbsp;"
 	str+="<div id='csnapt' class='unselectable' style='display:inline-block'>"+(this.gridSnap ? this.gridSnap : "Off")+"</div></td></tr>";
-	str+="<tr style='height:18px'><td><b>Line simplify</b></td>";
-	str+="<td><div id='csimp' class='unselectable' style='width:80px;display:inline-block'></div>&nbsp;&nbsp;&nbsp;"
-	str+="<div id='csimpt' class='unselectable' style='display:inline-block'>"+(this.simplify ? this.simplify : "Off")+"</div></td></tr>";
 	str+="<tr style='height:18px'><td><b>See snap lines</b></td>";
 	str+="<td><input type=checkbox id='lsnap' class='unselectable'"+(this.showSnap ? " checked" :"")+"></td></tr>";
 	str+="<tr style='height:18px'><td><b>See x/y info</b></td>";
@@ -272,7 +269,10 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 	this.Dialog("Settings",str,270, function() {
 		_this.cVolume=$("#cvolt").text();
 		_this.gridSnap=$("#csnap").slider("value");
-		_this.simplify=$("#csimp").slider("value");
+		_this.SetCookie("volume",_this.cVolume,365);							// Save cookies
+		_this.SetCookie("gridSnap",_this.gridSnap,365);							
+		_this.SetCookie("showSnap",_this.showSnap ? 1 : 0,365);							
+		_this.SetCookie("showInfo",_this.showInfo ? 1 : 0,365);							
 		});
 		
 	$("#lsnap").on("click", function() {										// Line snap
@@ -290,12 +290,6 @@ QDraw.prototype.Settings=function()											// SETTINGS MENU
 		min:0, max:100, step:5, value: _this.gridSnap,							// Params
 		slide: function(e,ui) {													// On slide
 			$("#csnapt").text(ui.value ? ui.value : "Off" );					// Set label 
-			}, 
-		});	
-	$("#csimp").slider({														// Init simplify slider
-		min:0, max:100, step:10, value: _this.simplify,							// Params
-		slide: function(e,ui) {													// On slide
-			$("#csimpt").text(ui.value ? ui.value : "Off" );					// Set label 
 			}, 
 		});	
 	$("#csave").on("change", function() {										// On save menu change
@@ -375,6 +369,7 @@ QDraw.prototype.ShowInfoBox=function(setting)								// SHOW/HIDE INFO BOX
 			str="<div class='pi-infobox' id='infoboxDiv'></div>";					// Add div
 			$(this.parent).append(str);												// Add to parent
 			$("#infoboxDiv").draggable({ containment: "parent" });					// Make it draggable
+			this.mx=this.my=0;														// Init
 			}
 		}
 	str="&nbsp;"+this.mx+","+this.my+"&nbsp;";										// Update position into
@@ -396,6 +391,7 @@ QDraw.prototype.Do=function(useTempData)									// SAVE DRAWING IN SESSION STOR
 	if (!o.script)																// No data there
 		return false;															// Quit
 	this.undos[this.curUndo]=$.parseJSON(JSON.stringify(o));					// Save undo
+	this.undos[this.curUndo].svg=null;											// Remove svg from seg
 	this.curRedo=0;																// Stop any redos
 	this.changed=false;															// Reset changed flag
 	this.curUndo++;																// Inc undo count
@@ -411,6 +407,7 @@ QDraw.prototype.UnDo=function()												// GET DRAWING FROM SESSION STORAGE
 	o.date=new Date().toString().substr(0,21);									// Get date
 	o.script=this.segs;															// Get drawing data
 	this.undos[this.curUndo]=$.parseJSON(JSON.stringify(o));					// Save undo
+	this.undos[this.curUndo].svg=null;											// Remove svg from seg
 	var o=this.undos[this.curUndo-1];											// Get undo
 	this.segs=o.script;															// Get data
 	this.RefreshSVG();															// Restore SVG
@@ -497,6 +494,10 @@ QDraw.prototype.onKeyUp=function(e)											// KEY UP HANDLER
 		this.ClipboardPaste();													// Paste
 	else if ((e.key == "x") && e.ctrlKey)										// Control x
 		this.ClipboardCut();													// Cut
+	else if (e.keyCode == 27)													// Esc
+		this.EndDrawing();														// End drawing
+	else if (e.keyCode == 8)													// Delete
+		this.RemoveLastPoint();													// Remove last point drawn
 }
 
 QDraw.prototype.onKeyDown=function(e)										// KEY DOWN HANDLER
@@ -693,6 +694,25 @@ Gdrive.prototype.Picker=function(allFiles, callback)						// RUN G-DRIVE PICKER
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // HELPERS
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+QDraw.prototype.SetCookie=function(cname, cvalue, exdays)				// SET COOKIE
+{
+	var d=new Date();
+	d.setTime(d.getTime()+(exdays*24*60*60*1000));
+	var expires = "expires="+d.toGMTString();
+	document.cookie = cname + "=" + cvalue + "; " + expires;
+}
+
+QDraw.prototype.GetCookie=function(cname) {								// GET COOKIE
+	var name=cname+"=",c;
+	var ca=document.cookie.split(';');
+	for (var i=0;i<ca.length;i++)  {
+	  c=ca[i].trim();
+	  if (c.indexOf(name) == 0) 
+	  	return c.substring(name.length,c.length);
+	  }
+	return "";
+}
 
 QDraw.prototype.GetTextBox=function (title, content, def, callback)		// GET TEXT LINE BOX
 {
