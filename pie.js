@@ -91,7 +91,7 @@ PieMenu.prototype.ShowPieMenu=function(mode)								// SHOW PIE MENU
 {
 	var o=this.ops;																// Point at ops
 	this.active=mode;															// Set active status
-	var w=o.wid/2-25;
+	var w=o.wid/2-27;
 	if (mode) {																	// If showing
 		$("#pimenu").css({"width":"0px","height":"0px"});						// Hide
 		$("#pimenu").css({"top":o.sy+"px","left":o.sx+"px"});					// Position
