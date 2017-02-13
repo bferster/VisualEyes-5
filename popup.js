@@ -58,8 +58,10 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 		pic=ConvertFromGoogleDrive(pic);									// Convert pic
 		str+="<td style='vertical-align:top'><img id='poppic' src='"+pic+"' class='popup-pic'></td>";	// Add image
 		}
-	if (desc)																// If desc set
+	if (desc) {																// If desc set
+		desc=this.ExpandMacros(desc);										// Expand macros, if any
 		str+="<td class='popup-desc' id='popdesc'>"+desc+"</div></td>";		// Add it
+		}
 	$("body").append("</tr></table>"+str);									// Add popup
 	if (x < 0) {															// Bigger 
 		$("#poppic").css("cursor","");										// Normal cursor
@@ -155,12 +157,11 @@ Popup.prototype.FileSelect=function (files, callback)					// SELECT FILE FROM LI
 			});
 		}
 
-	$("#fsCancel").click(function() {									// CANCEL BUTTON
+	$("#fsCancel").click(function(e) {									// CANCEL BUTTON
 		$("#lightBoxDiv").remove();										// Close
 		});
 
 }
-
 
 Popup.prototype.Dialog=function (title, content, callback, callback2) // DIALOG BOX
 {
@@ -369,6 +370,49 @@ Popup.prototype.ShowWebPage=function(div, url, title)						// SHOW WEB PAGE
 	$("#st-webpage").fadeIn(1000);											// Fade in
 	$("#st-close").click(function() { $("#st-webpage").remove(); });		// Remove on click of close but
 }
+
+Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
+{
+	if (!desc) return null;
+
+	if (desc.match(/where\(/)) {											// If where macro
+		v=(desc+" ").match(/where\(.*?\)/ig);								// Extract where(s)
+		for (i=0;i<v.length;++i) {											// For each macro
+			vv=v[i].match(/where\(([^,]+),(.+)\)/i);						// Get parts
+			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:mps.Goto(\""+vv[2].replace(/<.*?>/g,"")+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+			}	
+		}
+	if (desc.match(/link\(/)) {												// If link macro
+		v=(desc+" ").match(/link\(.*?\)/ig);								// Extract links(s)
+		for (i=0;i<v.length;++i) {											// For each macro
+			vv=v[i].match(/link\(([^,]+),(.+)\)/i);							// Get parts
+			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a  onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:ShowIframe(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+			}	
+		}
+	if (desc.match(/show\(/)) {												// If show macro
+		v=(desc+" ").match(/show\(.*?\)/ig);								// Extract show(s)
+		for (i=0;i<v.length;++i) {											// For each macro
+			vv=v[i].match(/show\(([^,]+),(.+)\)/i);							// Get parts
+			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:toggleLayers(\""+vv+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+			}	
+		}
+	if (desc && desc.match(/foot\(/)) {										// If foot macro
+		v=(desc+" ").match(/foot\(.*?\)/ig);								// Extract footnotes(s)
+		for (i=0;i<v.length;++i) {											// For each url
+			title=v[i].substr(5,v[i].length-6);								// Extract actual note
+			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&"))," <a href='#' title='"+title+"'><b><sup></ul>"+(i+1)+"</b></sup></a> ");	// Replace with anchor tag
+			}	
+	if (desc.match(/zoomer\(/)) {											// If zoomer macro
+		v=(desc+" ").match(/zoomer\(.*?\)/ig);								// Extract zoomer(s)
+		for (i=0;i<v.length;++i) {											// For each macro
+			vv=v[i].match(/zoomer\(([^,]+),(.+)\)/i);						// Get parts
+			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.ShowWebPage(\"#leftDiv\",\""+vv[2]+"\",\"zoomer\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+			}	
+		}
+	}
+	return desc;															// Return expanded html
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //  HELPERS

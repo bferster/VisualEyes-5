@@ -116,35 +116,7 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 			str+="/>";
 			}
 		if (mob.desc) {														// If a desc
-			desc=mob.desc;													// Make local copy
-			if (desc.match(/where\(/)) {									// If where macro
-				v=(desc+" ").match(/where\(.*?\)/ig);						// Extract where(s)
-				for (i=0;i<v.length;++i) {									// For each macro
-					vv=v[i].match(/where\(([^,]+),(.+)\)/i);				// Get parts
-					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:mps.Goto(\""+vv[2].replace(/<.*?>/g,"")+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
-					}	
-				}
-			if (desc.match(/link\(/)) {										// If link macro
-				v=(desc+" ").match(/link\(.*?\)/ig);						// Extract links(s)
-				for (i=0;i<v.length;++i) {									// For each macro
-					vv=v[i].match(/link\(([^,]+),(.+)\)/i);					// Get parts
-					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a  onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:ShowIframe(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
-					}	
-				}
-			if (desc.match(/show\(/)) {										// If show macro
-				v=(desc+" ").match(/show\(.*?\)/ig);						// Extract show(s)
-				for (i=0;i<v.length;++i) {									// For each macro
-					vv=v[i].match(/show\(([^,]+),(.+)\)/i);					// Get parts
-					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:toggleLayers(\""+vv+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
-					}	
-				}
-			if (desc && desc.match(/foot\(/)) {								// If foot macro
-				v=(desc+" ").match(/foot\(.*?\)/ig);						// Extract footnotes(s)
-				for (i=0;i<v.length;++i) {									// For each url
-					title=v[i].substr(5,v[i].length-6);						// Extract actual note
-					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&"))," <a href='#' title='"+title+"'><b><sup></ul>"+(i+1)+"</b></sup></a> ");	// Replace with anchor tag
-					}	
-				}
+			desc=this.pop.ExpandMacros(mob.desc);							// Ecpand macros and make local copy
 			str+="<div>"
 			if (desc && desc.match(/pic\(/)) {								// If pic macro
 				v=(desc+" ").match(/pic\(.*?\)/ig);							// Extract pic(s)
@@ -155,13 +127,6 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 					title="<img class='story-pic' style='display:inline-block;max-width:"+vv[2]+"px' src='"+vv[1]+"' ";
 					title+="onclick='javascript:$(this).css(\"max-width\") == \""+vv[2]+"px\" ? $(this).css(\"max-width\",500) : $(this).css(\"max-width\","+vv[2]+")'>";
 					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),title);	// Replace with image
-					}	
-				}
-			if (desc.match(/zoomer\(/)) {									// If zoomer macro
-				v=(desc+" ").match(/zoomer\(.*?\)/ig);						// Extract zoomer(s)
-				for (i=0;i<v.length;++i) {									// For each macro
-					vv=v[i].match(/zoomer\(([^,]+),(.+)\)/i);				// Get parts
-					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.ShowWebPage(\"#leftDiv\",\""+vv[2]+"\",\"zoomer\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 					}	
 				}
 			str+="<div class='story-desc'>"+desc+"</div>";					// Add in
