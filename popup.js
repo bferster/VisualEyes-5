@@ -43,8 +43,9 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 		return;																// We're just removing
 
 	var str="<div id='st-popup' class='popup-main'>";						// Add message
+	str+="<div class='popup-title'>";										// Title div
 	if (title)																// If title set
-		str+="<div class='popup-title'><b>"+title+"</b>";					// Add it
+		str+="<b>"+title+"</b>";											// Add it
 	if (date) {																// If date set
 		date=this.FormatTime(date,timeFormat);								// Format time to date
 		str+="<span class='popup-date'>&nbsp;&nbsp;"+date+"</span>";		// Add it
