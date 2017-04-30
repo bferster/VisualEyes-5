@@ -341,10 +341,13 @@
 	$(document).ready(function() {												// When loaded
 		var i;
 		if (window.addEventListener) 											// If supported this way
-			window.addEventListener("message",shivaEventHandler,false);			// Add event handler
+			window.addEventListener("message",shivaEventHandler,true);			// Add event handler
 		else																	// Use other method
 			window.attachEvent("message",shivaEventHandler);					// Add handler
 		
+		
+
+
 		isMobile=navigator.userAgent.match(/(ipad|iphone|ipod|android)/i) ? true : false; // Set mobile flag
 		var url=window.location.search.substring(1);							// Get query string
 		qmf=new QmediaFile("//qmediaplayer.com/",4);							// Alloc file system
