@@ -5,7 +5,7 @@
 // Calls global functions: Draw(), ClearPopUps()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function Timeline(div, pop)												// CONSTRUCTOR
+function Timeline(div, pop, defaultSpeed)								// CONSTRUCTOR
 {
 
 /* 
@@ -13,6 +13,8 @@ function Timeline(div, pop)												// CONSTRUCTOR
  	Init library and connect to div
   	@param {string} div div to draw timeline into
 	@param {object} pop	Points to popup library in popup.js.
+	@param {number} defaultSpeed from 0-100
+	
 */
 
 	var sd={};
@@ -22,6 +24,7 @@ function Timeline(div, pop)												// CONSTRUCTOR
 	this.curEnd=this.end;													// Set end
 	this.lastViewLeft=0;													// Saves scroll of timelime
 	this.timeViewScale=1;													// Scale of timeview
+	this.defaultSpeed=50;													// Default speed
 }
 
 
@@ -354,11 +357,11 @@ Timeline.prototype.AddPlayer=function() 								// ADD TIME PLAYER
  		}
 
 	$("#playerSlider").slider({												// Init slider
-		value:50,
+		value:_this.defaultSpeed,											// Set speed
 		create: function(event,ui) {										// On create
-     		var x=$(this).offset().left+10;									// Start
-	     	ShowSpeed(x,50);												// Show time			
- 			},
+   			var x=$($(this).children('.ui-slider-handle')).offset().left-$(this).offset().left;	// Get pos       			
+	     	ShowSpeed(x,_this.defaultSpeed);								// Show time			
+			},
 		slide: function(event,ui) {											// On slide
 			var x=$($(this).children('.ui-slider-handle')).offset().left-$(this).offset().left;	// Get pos       			
 	     	ShowSpeed(x,ui.value);											// Show time			

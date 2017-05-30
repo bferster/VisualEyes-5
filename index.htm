@@ -320,6 +320,8 @@
 		}
 
 		mps.SetBaseMap(curJson.baseMap);										// Set basemap layer
+		if (curJson.defaultSpeed)
+			tln.defaultSpeed=Math.min(Math.max(curJson.defaultSpeed,1),100);	// Default speed, capped 0-100
 		tln.InitTimeline(curJson);												// Initialize timeline
 		mps.MarkerLayerToTop();													// Make marker layer the top-most layer
 		sto.InitStory(curJson);													// Initialize story
@@ -388,8 +390,8 @@
 			drag: function(event, ui) {											// On drag
 				var hgt=$("#showDiv").height();									// Max height
 			 	curJson.upDownSplit=Math.max(0,Math.min(1,(event.clientY-8)/hgt));	// Set ratio between windows
-				if (Math.abs(curJson.upDownSplit-.75) < .015) 						// If close to center
-					curJson.upDownSplit=.75;											// Snap it there
+				if (Math.abs(curJson.upDownSplit-.75) < .015) 					// If close to center
+					curJson.upDownSplit=.75;									// Snap it there
 				ResizePanes();													// Resize panes
 				}
 			});
@@ -519,6 +521,7 @@
 		str+="<tr><td>Map start</td><td><input id='setstartpos' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td>Map&nbsp;base </td><td>"+MakeSelect("setbase",false,["Satellite","Terrain","Earth","Watercolor","B&W","Roadmap"],curJson.baseMap);
 		str+="<tr><td>Map&nbsp;pan&nbsp;time</td><td><input id='setpan' class='ve-is' style='width:80px' type='input'>&nbsp;<i>(in seconds)</i></td></tr>";
+		str+="<tr><td>Timeline&nbsp;speed&nbsp;</td><td><input id='setspeed' class='ve-is' style='width:80px' type='input'>&nbsp;<i>(1-100)</i></td></tr>";
 		str+="<tr><td>Map&nbsp;location</td><td><input id='setwhere' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td>Map&nbsp;point</td><td><input id='setpoint' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td colspan=2><br></td> <tr>";
@@ -540,6 +543,7 @@
 			});
 						
  		$("#setpan").val(curJson.panTime);										// Set pan time
+		$("#setspeed").val(curJson.defaultSpeed);								// Set timeline speed default
  		$("#setbase").val(curJson.baseMap);										// Set base
 		$("#settime").val(curJson.timeFormat);									// Set timeformat
 		$("#setstart").val(curJson.start);										// Set start
@@ -555,6 +559,7 @@
 	
 		function getDataFromInputs() {											// GET DATA FROM DIALOG ELEMENTS
 			curJson.panTime=$("#setpan").val();									// Set map pan time
+			curJson.defaultSpeed=$("#setspeed").val();							// Timeline speed
 			curJson.mapTextCol=$("#setstcol").val();							// Set map label color
 			curJson.mapTextFont=$("#setstfont").val();							// Set map label font
 			curJson.start=$("#setstart").val();									// Set start
