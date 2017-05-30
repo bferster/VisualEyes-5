@@ -81,7 +81,6 @@ Space.prototype.DrawMapLayers=function(indices, mode)					// DRAW OVERLAY LAYERS
            		}
    
     		if (!dtl.ShowElement(o))	vis=false;							// If not being shown, hide it
- 
             if (vis && (o.type == "image"))	{								// If a visible image 
            		(o.alpha == undefined) ? a=1 : a=o.alpha;					// Let alpha control opacity if defined
            		if (!vis) a=0;												// Hide if invisible
@@ -554,6 +553,7 @@ Space.prototype.AddMarkerLayer=function(pos, style, id, start, end, show) 	// AD
 						t: {string} label
 						tc: {string} text color
 						ts: {string} text format
+	@param {number} id 		Mob id
 	@param {number} start 	Starting time of marker in number of mins += 1/1/1970
 	@param {number} end 	Ending time of marker in number of mins += 1/1/1970
 	@param {string} show 	Show status of marker
