@@ -8,6 +8,11 @@ function DataLoad()
 {
 }
 
+DataLoad.prototype.ShowElement=function(mob)							// DETERMINE IF SHOWING MOB ELEMENT
+{
+	return true;
+}
+
 DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendError) 	//	GET GOOGLE DOCS SPREADSHEET
 {
 	this.spreadsheetError=null;

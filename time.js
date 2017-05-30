@@ -193,6 +193,8 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 				continue;													// Skip
 			x=(o.start-s)/dur;												// Percent in timeline
 			x=(x*w)+ew+m-offx;												// Percent in div
+			if (!dtl.ShowElement(o))										// If not being shown
+				x=-1000;													// Shove to left													
 			y=h-rowHgt;														// Default to 1st row
 			if (o.pos)														// If a row spec'd
 				y=h-(o.pos*rowHgt+(o.pos-1)*rowPad);						// Position it

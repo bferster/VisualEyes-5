@@ -26,13 +26,14 @@ Story.prototype.InitStory=function(data)								// INIT STORY
 	Init library and set data
 	@param {object} data	Points to mobs
 */
-
 	var i,str="",ind=0;
 	if (data)	this.sd=data;												// Point at data
 	var _this=this;															// Save context for callback
 	if (this.sd.title)	str+="<div class='story-title'>"+this.sd.title+"</div>";
 	for (i=0;i<this.sd.mobs.length;++i) 									// For each mob
 		if (this.sd.mobs[i].marker && (this.sd.mobs[i].marker.toLowerCase() == "story")) { 	// If  a story item
+			if (!dtl.ShowElement(this.sd.mobs[i]))							// If not being shown
+				continue;													// Skip it	
 			if (this.sd.mobs[i].open == undefined) {						// If first time
 				if (this.sd.mobs[i].show && this.sd.mobs[i].show.match(/open/i))			// If set to open
 					this.sd.mobs[i].open=true;								// Set true

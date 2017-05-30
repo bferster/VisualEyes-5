@@ -60,12 +60,11 @@ Space.prototype.DrawMapLayers=function(indices, mode)					// DRAW OVERLAY LAYERS
 		this.canvasContext.clearRect(0,0,this.canvasWidth,this.canvasHeight); // Clear canvas
    		for (i=0;i<this.overlays.length;i++) {								// For each overlay layer
             o=this.overlays[i];												// Get ptr  to layer
-    		
     		if (!o.start && !o.end)	vis=true;								// Both start/end 0, make it visible
     		else if (o.start) 		vis=false;								// If only a start set, hide until it comes up
     		else if (o.end) 		vis=true;								// If only an end set, show until until it comes down
     		else 					vis=false;								// Both set, hide until it comes up
- 
+	
 	      	if (o.start && (this.curTime >= o.start))	vis=true;			// If past start and start defined, show it
 	      	if (o.end && (this.curTime > o.end))		vis=false;			// If past end and end defined, hide it
 			if (o.show && o.show.match(/g/i)) {								// If only showing if timeline segment is active
@@ -80,6 +79,9 @@ Space.prototype.DrawMapLayers=function(indices, mode)					// DRAW OVERLAY LAYERS
             		if (i == indices[j])									// This is one to set
             			vis=mode;											// Hide or show it
            		}
+   
+    		if (!dtl.ShowElement(o))	vis=false;							// If not being shown, hide it
+ 
             if (vis && (o.type == "image"))	{								// If a visible image 
            		(o.alpha == undefined) ? a=1 : a=o.alpha;					// Let alpha control opacity if defined
            		if (!vis) a=0;												// Hide if invisible
@@ -96,7 +98,7 @@ Space.prototype.DrawMapLayers=function(indices, mode)					// DRAW OVERLAY LAYERS
 				sty.getText().setScale(vis ? 1 : 0);						// Set text opacity
               	}
 	       	else if (o.type == "path") 										// If a path
-         		this.DrawPath(i,this.curTime)								// Show it
+   				this.DrawPath(i,this.curTime)								// Show it
 	       	else if (o.type == "choro") 									// If a shoro
          		this.DrawChoropleth(i,this.curTime)							// Show it
 			}
@@ -501,6 +503,7 @@ Space.prototype.DrawPath=function(num, time) 						// DRAW PATH
 	
 	var s,e,pct,v=[],i=0,last,animate=false;
 	var o=this.overlays[num];											// Point at overlay
+	var vis=dtl.ShowElement(o) ? 1 : 0;									// Hide if hidden element
 	if (o.show && o.show.match(/a/i))	animate=true;					// Set animation mode
 	if (!o.dots.length)													// No dots
 		return;															// Quit
@@ -523,11 +526,12 @@ Space.prototype.DrawPath=function(num, time) 						// DRAW PATH
 				v[last][1]=o.dots[s][1]+((o.dots[e][1]-o.dots[s][1])*pct);	// Interpolate y
 				if (head && sty && (pct < 1))	{						// If a header defined
 					head.setGeometry(new ol.geom.Point(v[last]));		// Move it
-					sty.getImage().setOpacity(1);						// Show it
+					sty.getImage().setOpacity(vis);						// Show it
 					}
 				}
 			}
 		}
+	if (!dtl.ShowElement(o)) 	v=[];									// If hidden, hide it									
 	o.src.setGeometry(new ol.geom.LineString(v));						// Set new dots
 }
 
