@@ -9,13 +9,12 @@ function DataLoad()
 	this.tagMask=new RegExp("xxx","i");
 }
 
-DataLoad.prototype.ShowElement=function(mob)							// DETERMINE IF SHOWING MOB ELEMENT
+DataLoad.prototype.ShowElement=function(tag)							// DETERMINE IF SHOWING MOB ELEMENT
 {
-//	if (mob && mob.tag && mob.tag.match(this.tagMask))	
-		return true;
-//	else
-		return false
-	
+	if (tag && !(""+tag).match(this.tagMask))								// If a match
+		return true;														// Let it through
+	else																	// No match
+		return false;														// Hide it
 }
 
 DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendError) 	//	GET GOOGLE DOCS SPREADSHEET

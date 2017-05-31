@@ -80,8 +80,9 @@ Space.prototype.DrawMapLayers=function(indices, mode)					// DRAW OVERLAY LAYERS
             			vis=mode;											// Hide or show it
            		}
    
-    		if (!dtl.ShowElement(o))	vis=false;							// If not being shown, hide it
-            if (vis && (o.type == "image"))	{								// If a visible image 
+	   		if (!dtl.ShowElement(o.tag))	vis=false;						// If not being shown, hide it
+
+ 		    if (vis && (o.type == "image"))	{								// If a visible image 
            		(o.alpha == undefined) ? a=1 : a=o.alpha;					// Let alpha control opacity if defined
            		if (!vis) a=0;												// Hide if invisible
             		o.src.drawMapImage(a,this);   							// Draw it   
@@ -340,7 +341,7 @@ Space.prototype.MarkerLayerToTop=function()								// MOVE MARKER LAYER ON TOP O
 }
 
 
-Space.prototype.AddChoroplethLayer=function(col, ecol, ewid,opacity, base, where, start, end)	// ADD CHORPLETH LAYER
+Space.prototype.AddChoroplethLayer=function(col, ecol, ewid,opacity, base, where, start, end, id)	// ADD CHORPLETH LAYER
 {
 		
 /* 	
@@ -353,6 +354,7 @@ Space.prototype.AddChoroplethLayer=function(col, ecol, ewid,opacity, base, where
  	@param {string} 	where 	Conditions (id:featureId[,featureId,...]
  	@param {number} 	start 	Starting time of marker in number of mins += 1/1/1970
 	@param {number} 	end 	Ending time of marker in number of mins += 1/1/1970
+	@param {number} 	id 		Mob id
 	@return {number} 	index	Index of layer added
 */
 
@@ -361,6 +363,7 @@ Space.prototype.AddChoroplethLayer=function(col, ecol, ewid,opacity, base, where
 	o.type="choro";															// Path
   	o.start=start;	o.end=end;		o.col=col; 	  	o.opacity=opacity;		// Save parameters
   	o.ecol=ecol;	o.ewid=ewid;	o.where=where; 	o.base=base;			// Save parameters
+	o.tag=curJson.mobs[id].tag;												// Add id into tag
 	o.styles=[];															// Alloc orginal style array
 	var index=this.overlays.length;											// Get index
 	this.overlays.push(o);													// Add to overlay
@@ -454,7 +457,7 @@ Space.prototype.DrawChoropleth=function(num, time) 						// DRAW CHOROPLETH
 }
 
 
-Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show, header) 	// ADD PATH LAYER TO MAP						
+Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show, header, id) 	// ADD PATH LAYER TO MAP						
 {
 
 /* 	Add path to marker layer.
@@ -464,6 +467,8 @@ Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show,
  	@param {number} 	opacity Opacity of path 0-1
  	@param {number} 	start 	Starting time of marker in number of mins += 1/1/1970
 	@param {number} 	end 	Ending time of marker in number of mins += 1/1/1970
+	@param {number} 	header 	Header
+	@param {number} 	id 		Mob id	
 	@return {number} 	index	Index of layer added
 */
 
@@ -471,6 +476,7 @@ Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show,
 	var index=this.overlays.length;											// Get index
 	o.type="path";															// Path
   	o.start=start;	o.end=end;	o.show=show; o.header=header				// Save start, end, show, and header
+	o.tag=curJson.mobs[id].id;												// Add id into tag
 	this.overlays.push(o);													// Add to overlay
   	o.src=new ol.Feature({ geometry: new ol.geom.LineString(dots)});		// Create line
   	o.id="Path-"+this.markerLayer.getSource().getFeatures().length;			// Make path id
@@ -502,7 +508,7 @@ Space.prototype.DrawPath=function(num, time) 						// DRAW PATH
 	
 	var s,e,pct,v=[],i=0,last,animate=false;
 	var o=this.overlays[num];											// Point at overlay
-	var vis=dtl.ShowElement(o) ? 1 : 0;									// Hide if hidden element
+	var vis=dtl.ShowElement(o.tag) ? 0 : 1;								// Hide if hidden element
 	if (o.show && o.show.match(/a/i))	animate=true;					// Set animation mode
 	if (!o.dots.length)													// No dots
 		return;															// Quit
@@ -530,7 +536,7 @@ Space.prototype.DrawPath=function(num, time) 						// DRAW PATH
 				}
 			}
 		}
-	if (!dtl.ShowElement(o)) 	v=[];									// If hidden, hide it									
+	if (!dtl.ShowElement(o.tag)) 	v=[];								// If hidden, hide it									
 	o.src.setGeometry(new ol.geom.LineString(v));						// Set new dots
 }
 
@@ -564,6 +570,8 @@ Space.prototype.AddMarkerLayer=function(pos, style, id, start, end, show) 	// AD
 	var o={};
 	o.type="icon";															// Icon
   	o.start=start;	o.end=end; 	o.show=show;								// Save start, end, show
+	o.tag=curJson.mobs[id].id;												// Add id into tag
+
 	var index=this.overlays.length;											// Get index
 	this.overlays.push(o);													// Add to overlay
   	var v=(""+pos).split(",");												// Split into parts
@@ -695,6 +703,7 @@ Space.prototype.AddKMLLayer=function(url, opacity, id, start, end) 		// ADD KML 
  	o.type="kml";															// KML
   	o.start=start;	o.end=end;												// Save start, end
 	o.opacity=opacity;														// Initial opacity
+	o.tag=curJson.mobs[id].id;												// Add id into tag
 	
 	o.src=new ol.layer.Vector({  source: new ol.source.Vector({				// New layer
 							title: "LAYER-"+this.overlays.length,			// Set name
@@ -781,7 +790,7 @@ Space.prototype.StyleKMLFeatures=function(num, styles)					// STYLE KML FEATURE(
 }
 
 
-Space.prototype.AddImageLayer=function(url, geoRef, alpha, start, end) 	// ADD MAP IMAGE TO PROJECT
+Space.prototype.AddImageLayer=function(url, geoRef, alpha, start, end, id) 	// ADD MAP IMAGE TO PROJECT
 {    
 
 /* 
@@ -790,6 +799,7 @@ Space.prototype.AddImageLayer=function(url, geoRef, alpha, start, end) 	// ADD M
   							Rotation is optional and defaults to 0 degrees.				
  	@param {number} start 	Starting time of marker in number of mins += 1/1/1970
 	@param {number} end 	Ending time of marker in number of mins += 1/1/1970
+	@param {number} id 		Mob id
  	@return {number}		index of new layer added to overlays array.
 */
 
@@ -797,6 +807,7 @@ Space.prototype.AddImageLayer=function(url, geoRef, alpha, start, end) 	// ADD M
 	var index=this.overlays.length;											// Get index
  	o.type="image";															// Image
  	o.start=start;	o.end=end;												// Save start, end
+  	o.tag=curJson.mobs[id].id;												// Add id into tag
     o.src=new MapImage(url,geoRef,this);									// Alloc mapimage obj
 	o.alpha=alpha;															// Save alpha
 	this.overlays.push(o);													// Add layer

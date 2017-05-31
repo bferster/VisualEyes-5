@@ -374,6 +374,7 @@ Popup.prototype.ShowWebPage=function(div, url, title)						// SHOW WEB PAGE
 
 Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 {
+	var v,v,vvv,str="";
 	if (!desc) return null;
 
 	if (desc.match(/where\(/)) {											// If where macro
@@ -403,6 +404,7 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 			title=v[i].substr(5,v[i].length-6);								// Extract actual note
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&"))," <a href='#' title='"+title+"'><b><sup></ul>"+(i+1)+"</b></sup></a> ");	// Replace with anchor tag
 			}	
+		}
 	if (desc.match(/zoomer\(/)) {											// If zoomer macro
 		v=(desc+" ").match(/zoomer\(.*?\)/ig);								// Extract zoomer(s)
 		for (i=0;i<v.length;++i) {											// For each macro
@@ -410,7 +412,18 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.ShowWebPage(\"#leftDiv\",\""+vv[2]+"\",\"zoomer\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 			}	
 		}
-	}
+	if (desc.match(/button\(/)) {											// If button macro
+		v=(desc+" ").match(/button\(.*?\)/ig);								// Extract button
+		for (i=0;i<v.length;++i) {											// For each macro
+			vv=v[i].match(/button\(([^,]+),(.+)\)/i);						// Get macro (x,title,params)
+			vvv=vv[2].split(",");											// Get params
+			str="<button class='ve-is' style='width:auto' onclick="; 		// Header
+			str+="'SetTagMask(\""+vvv[0]+"\")'";							// Set regex and refresh
+			str+=">"+vv[1]+"</button>";
+			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),str);	// Replace with anchor tag
+			}	
+		}
+	
 	return desc;															// Return expanded html
 }
 

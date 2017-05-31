@@ -117,7 +117,7 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 			str+="/>";
 			}
 		if (mob.desc) {														// If a desc
-			desc=this.pop.ExpandMacros(mob.desc);							// Ecpand macros and make local copy
+			desc=this.pop.ExpandMacros(mob.desc);							// Expand macros and make local copy
 			str+="<div>"
 			if (desc && desc.match(/pic\(/)) {								// If pic macro
 				v=(desc+" ").match(/pic\(.*?\)/ig);							// Extract pic(s)

@@ -193,7 +193,7 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 				continue;													// Skip
 			x=(o.start-s)/dur;												// Percent in timeline
 			x=(x*w)+ew+m-offx;												// Percent in div
-			if (!dtl.ShowElement(o))										// If not being shown
+			if (!dtl.ShowElement(o.id))										// If not being shown
 				x=-1000;													// Shove to left													
 			y=h-rowHgt;														// Default to 1st row
 			if (o.pos)														// If a row spec'd
@@ -691,6 +691,8 @@ Timeline.prototype.Goto=function(time, segment)							// SET TIME AND [SEGMENT]
  	@param {number} time time to goto mumber of mins += 1/1/1970
 */
 	
+	if (time == undefined) 		time=this.curTime;							// Set to current time if undefined							
+	
 	if (segment != undefined && this.timeSegments) {						// If setting a segment
 		if (segment < 0)													// If all button
 			segment=this.timeSegments.length+1;								// Set to last
@@ -700,7 +702,7 @@ Timeline.prototype.Goto=function(time, segment)							// SET TIME AND [SEGMENT]
 		return;																// Quit
 	$("#timeSlider").slider("option","value",time);							// Trigger slider
 	var x=$($("#timeSlider").children('.ui-slider-handle')).offset().left;	// Get pos       			
-	this.curTime=time														// Set now
+	this.curTime=time;														// Set now
 	this.SendMessage("time",this.curTime+"|goto");							// Send new time
 	if ((this.sliderTime == "Top") || (this.sliderTime == "Bottom")){ 		// If showing date
 		var y=(this.sliderTime == "Top") ? -22 : 26;						// Top or bottom
