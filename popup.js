@@ -417,9 +417,20 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/button\(([^,]+),(.+)\)/i);						// Get macro (x,title,params)
 			vvv=vv[2].split(",");											// Get params
-			str="<button class='ve-is' style='width:auto' onclick="; 		// Header
-			str+="'SetTagMask(\""+vvv[0]+"\")'";							// Set regex and refresh
+			str="<button class='ve-is' style='width:auto;margin-bottom:4px;' onclick="; 		// Header
+			str+="'dtl.SetTagMask(\""+vvv[0]+"\")'";						// Set regex and refresh
 			str+=">"+vv[1]+"</button>";
+			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),str);	// Replace with anchor tag
+			}	
+		}
+	if (desc.match(/radio\(/)) {											// If radio macro
+		var name="name='rad-"+Math.floor(Math.random()*1000000)+"' ";		// Set unique group name
+		v=(desc+" ").match(/radio\(.*?\)/ig);								// Extract radio
+		for (i=0;i<v.length;++i) {											// For each macro
+			vv=v[i].match(/radio\(([^,]+),(.+)\)/i);						// Get macro (x,title,params)
+			vvv=vv[2].split(",");											// Get params
+			str="<input type='radio'"+name;									// Header
+			str+="onclick='dtl.SetTagMask(\""+vvv[0]+"\")'>"+vv[1];			// Set regex and refresh
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),str);	// Replace with anchor tag
 			}	
 		}

@@ -6,7 +6,13 @@
 
 function DataLoad() 
 {
-	this.tagMask=new RegExp("xxx","i");
+	this.tagMask=new RegExp("1234567890","i");
+}
+
+DataLoad.prototype.SetTagMask=function(tag)								// SET ELEMENT MASK
+{
+	this.tagMask=new RegExp(tag,"i");										// Set mask
+	tln.UpdateTimeline();													// Update project
 }
 
 DataLoad.prototype.ShowElement=function(tag)							// DETERMINE IF SHOWING MOB ELEMENT

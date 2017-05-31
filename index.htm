@@ -173,12 +173,6 @@
 		tln.UpdateTimeline();													// Update timeline to div size
 	}		
 
-	function SetTagMask(tag)												// RESET MASK 
-	{
-		dtl.tagMask=new RegExp(tag,"i");
-		tln.UpdateTimeline(curTime)
-	}
-	
 	function LoadShow(data)													// LOAD A SHOW
 	{
    		if (data.qmfmsg == "private") {											// If a private file		
@@ -334,10 +328,10 @@
 		ResizePanes();															// Resize panes
 		if (curJson.mapStartPos)		mps.Goto(curJson.mapStartPos);			// Position map
 	}
-		
-
+	
 	function Draw(time)														// DRAW PROJECT
 	{
+		if (time == undefined)	time=curTime;									// Use curtime if undefined 
 		mps.UpdateMap(time,curJson.timeFormat,curJson.panTime);					// Update map layers
 //		sto.UpdateStory(time,curJson.timeFormat);								// Update story pane
 	}
