@@ -6,18 +6,19 @@
 
 function DataLoad() 
 {
-	this.tagMask=new RegExp("1234567890","i");
+	this.tagMask=new RegExp(".","i");
 }
 
 DataLoad.prototype.SetTagMask=function(tag)								// SET ELEMENT MASK
 {
+	if (!tag)	tag=".";													// If nothing set show all
 	this.tagMask=new RegExp(tag,"i");										// Set mask
 	tln.UpdateTimeline();													// Update project
 }
 
 DataLoad.prototype.ShowElement=function(tag)							// DETERMINE IF SHOWING MOB ELEMENT
 {
-	if (tag && !(""+tag).match(this.tagMask))								// If a match
+	if (tag && (""+tag).match(this.tagMask))								// If a match
 		return true;														// Let it through
 	else																	// No match
 		return false;														// Hide it
