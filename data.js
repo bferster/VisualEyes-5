@@ -18,6 +18,8 @@ DataLoad.prototype.SetTagMask=function(tag)								// SET ELEMENT MASK
 
 DataLoad.prototype.ShowElement=function(tag)							// DETERMINE IF SHOWING MOB ELEMENT
 {
+	if (!tag)																// If no id
+		return true;														// Let it through
 	if (tag && (""+tag).match(this.tagMask))								// If a match
 		return true;														// Let it through
 	else																	// No match
