@@ -570,7 +570,8 @@ Space.prototype.AddMarkerLayer=function(pos, style, id, start, end, show) 	// AD
 	var o={};
 	o.type="icon";															// Icon
   	o.start=start;	o.end=end; 	o.show=show;								// Save start, end, show
-	o.tag=curJson.mobs[id].id;												// Add id into tag
+
+	if (!isNaN(id))	o.tag=curJson.mobs[id].id;								// Add id into tag, if not a header
 
 	var index=this.overlays.length;											// Get index
 	this.overlays.push(o);													// Add to overlay
