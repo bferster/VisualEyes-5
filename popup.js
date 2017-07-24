@@ -665,11 +665,12 @@ Popup.prototype.DrawZoomerOverview=function(url) 						// DRAW ZOOMER OVERVIEW
 									}
 								}); 
 			}
+
 		var x=$("#zoomerDiv").css("left").replace(/px/,"");					// Get x pos
-		if (x == "auto")	x=-$("#zoomerOuterDiv").width()/2;				// Center it
+		x=-$("#zoomerOuterDiv").width()/2;									// Center it
 		x=-x/w/this.zoomerOverviewSize*w/this.zoomerScale;					// Scale to fit
 		var y=$("#zoomerDiv").css("top").replace(/px/,"");					// Get y pos
-		if (y == "auto")	y=-$("#zoomerOuterDiv").height()/2;				// Center it
+		y=-$("#zoomerOuterDiv").height()/2;									// Center it
 		y=-y/h/this.zoomerOverviewSize*h/this.zoomerScale;					// Scale to fit
 		$("#zoomerOverBox").width(w/this.zoomerScale).height(h/this.zoomerScale);	// Set size
 		$("#zoomerOverBox").css({"left":x+"px","top":y+"px"});				// Position control box		
