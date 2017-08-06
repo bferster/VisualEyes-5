@@ -430,7 +430,11 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 			vv=v[i].match(/radio\(([^,]+),(.+)\)/i);						// Get macro (x,title,params)
 			vvv=vv[2].split(",");											// Get params
 			str="<input type='radio'"+name;									// Header
-			str+="onclick='dtl.SetTagMask(\""+vvv[0]+"\")'>"+vv[1];			// Set regex and refresh
+			if ((vvv.length > 1) && (vvv[1] == "on")) {						// If turning it on
+				dtl.tagMask=new RegExp(vvv[0],"i");							// Set mask
+				str+=" checked ";											// Check it
+				}
+			str+=" onclick='dtl.SetTagMask(\""+vvv[0]+"\")'>"+vv[1];		// Set regex and refresh
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),str);	// Replace with anchor tag
 			}	
 		}
