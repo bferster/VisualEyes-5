@@ -206,7 +206,8 @@
 		if (data)							curJson=data;						// If data, set it
 		if (!curJson.mobs)					curJson.mobs=[];					// Alloc if empty
 		if (curJson.panTime == undefined)	curJson.panTime=.5;					// Default to 500ms
-		mps.ClearLayers();														// Clear all layera
+		if (curJson.storyMode == undefined)	curJson.storyMode="Scrolled";		// Default to scrolled
+		mps.ClearLayers();														// Clear all layers
 		if (!data) {			
 			curJson.sheet="";
 			curJson.upDownSplit=.75;
@@ -332,7 +333,6 @@
 	{
 		if (time == undefined)	time=curTime;									// Use curtime if undefined 
 		mps.UpdateMap(time,curJson.timeFormat,curJson.panTime);					// Update map layers
-//		sto.UpdateStory(time,curJson.timeFormat);								// Update story pane
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -521,6 +521,8 @@
 		str+="<tr><td>Map&nbsp;base </td><td>"+MakeSelect("setbase",false,["Satellite","Terrain","Earth","Watercolor","B&W","Roadmap"],curJson.baseMap);
 		str+="<tr><td>Map&nbsp;pan&nbsp;time</td><td><input id='setpan' class='ve-is' style='width:80px' type='input'>&nbsp;<i>(in seconds)</i></td></tr>";
 		str+="<tr><td>Timeline&nbsp;speed&nbsp;</td><td><input id='setspeed' class='ve-is' style='width:80px' type='input'>&nbsp;<i>(1-100)</i></td></tr>";
+		str+="<tr><td>Story mode</td><td>";
+		str+=MakeSelect("setstory",false,["Scrolled", "Stepped"],curJson.storyMode)+"</td></tr>";
 		str+="<tr><td>Map&nbsp;location</td><td><input id='setwhere' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td>Map&nbsp;point</td><td><input id='setpoint' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td colspan=2><br></td> <tr>";
@@ -545,6 +547,7 @@
 		$("#setspeed").val(curJson.defaultSpeed);								// Set timeline speed default
  		$("#setbase").val(curJson.baseMap);										// Set base
 		$("#settime").val(curJson.timeFormat);									// Set timeformat
+		$("#setstory").val(curJson.storyMode);									// Set story mode
 		$("#setstart").val(curJson.start);										// Set start
 		$("#setend").val(curJson.end);											// Set end
 		$("#setstcol").val(curJson.mapTextCol);									// Set map label color
@@ -569,6 +572,7 @@
 			curJson.title=$("#settitle").val();									// Set sheet
 			curJson.sheet=$("#setsheet").val();									// Set sheet
 			tln.timeFormat=curJson.timeFormat=$("#settime").val();				// Get timeformat
+			sto.storyMode=curJson.storyMode=$("#setstory").val();				// Get story mode
 			curJson.baseMap=$("#setbase").val();								// Get base
 			mps.SetBaseMap(curJson.baseMap);									// Set basemap layer
 			curJson.muteSound=$("#setmute").prop("checked");					// Set mute
