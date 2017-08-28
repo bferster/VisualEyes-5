@@ -85,7 +85,7 @@
 		.story-pic { 		margin-left:16px;vertical-align:top;cursor:zoom-in;margin-right:12px;
 							border:1px solid #999;max-width:100px;width:50%;float:left;
 							}				
-		.story-desc { 		margin-left:16px;color:#333;font-size:11px;margin-right:12px;margin-bottom:10px
+		.story-desc { 		margin-left:16px;color:#333;margin-right:12px;margin-bottom:10px
 							}				
 		.story-header {		margin-left:4px;font-size:12px;color:#555;font-weight:bold;margin-bottom:8px;
 							}
@@ -503,7 +503,8 @@
 			pop.Sound("ding");													// Ding
 	 		return;																// Quit
 	 		}
-		var str="<table><tr height='18'>";
+		var str="<div style='max-height:60vh;overflow-y:auto'>";
+		str+="<table><tr height='18'>";
 		str+="<tr><td>Mute clicks?</td><td><input id='setmute' type='checkbox'></td></tr>";
 		str+="<tr><td>Title</td><td><input id='settitle' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td>Spreadsheet</td><td><input id='setsheet' class='ve-is' style='width:220px' type='input'></td></tr>";
@@ -530,7 +531,7 @@
 		str+="&nbsp;&nbsp;&nbsp<i>"+(_this.curShow ? "#"+_this.curShow : '')+"</i>&nbsp;&nbsp;&nbsp;"
 		str+="Help <a href='https://docs.google.com/document/d/161td5ZuqKqT5R5r9z1P8AxBA6l9LaP-eYl_RvCyvw2g/edit?usp=sharing' target='_blank'>";
 		str+="<img src='img/helpicon.gif' style='vertical-align:bottom' title='Show help'></a></td>";
-		str+="</tr></table>";
+		str+="</tr></table></div>";
 		pop.Dialog("VisualEyes settings",str, function() {
 				getDataFromInputs();											// Get data from inputs										
 				if (curJson.sheet) {											// If a sheet spec'd
@@ -766,6 +767,12 @@
 			console.log(msg);
 	}
 
+	function ShortenString(str, len)										// SHORTEN A STRING TO LENGTH
+	{
+		if (str && str.length > len)											// Too long
+			str=str.substr(0,(len-3)/2)+"..."+str.slice((len-3)/-2);			// Shorten	
+		return str;																// Return string
+	}
 
 	function FindMobByID(id)												// FIND MOB BY ITS ID
 	{

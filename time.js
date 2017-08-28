@@ -7,16 +7,6 @@
 
 function Timeline(div, pop, defaultSpeed)								// CONSTRUCTOR
 {
-
-/* 
-  	@constructor
- 	Init library and connect to div
-  	@param {string} div div to draw timeline into
-	@param {object} pop	Points to popup library in popup.js.
-	@param {number} defaultSpeed from 0-100
-	
-*/
-
 	var sd={};
 	this.div="#"+div;														// Current div selector
 	this.pop=pop;															// Point at popup lib
@@ -30,12 +20,6 @@ function Timeline(div, pop, defaultSpeed)								// CONSTRUCTOR
 
 Timeline.prototype.InitTimeline=function(data)							// INIT TIMELINE
 {
-	
-/* 
-	Init library and set data
-	@param {object} data	Points to mobs
-*/
-
 	this.margin=18;
 	this.curSeg=-1;															// Assume all segs
 	if (data)	this.sd=data;												// Point at setting and data
@@ -79,11 +63,6 @@ Timeline.prototype.InitTimeline=function(data)							// INIT TIMELINE
 
 Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 {
-	
-/* 
-	Resize timeline to fit container div
-*/
-
 	var s,e,x,y,dur,tmp;
 	var i,w2,m=this.margin;
 	var w=$(this.div).width()-m-m;											// Width of time area
@@ -249,9 +228,6 @@ Timeline.prototype.Draw=function() 										// DRAW TIMELINE
 
 Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
 {
-/* 	
-	Add timebar to div
-*/
 	var i,str;
 	var _this=this;															// Save context for callback
 	str="<div id='timeBar' class='time-timebar'>";							// Add timebar div
@@ -387,12 +363,6 @@ Timeline.prototype.AddPlayer=function() 								// ADD TIME PLAYER
 
 Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 {
-	
-/* 	
-	Add time segments to div.
-	Looks through sd.mobs for segments and adds them if there.
-*/
-
 	var i,o,oo,str;
 	var _this=this;															// Save context for callback
 	var dur=this.end-this.start;											// Calc duration
@@ -414,7 +384,7 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 		return;																// Quit
 	str="<div id='segmentBar' style='position:absolute;height:16px;'>"		// Enclosing div
 	var hasAll=false;														// Assume no all button
-	for (i=0;i<ts.length;++i) { 												// For each tick
+	for (i=0;i<ts.length;++i) { 											// For each tick
 		if (!ts[i].start) {													// No start time
 			ts[i].all=true													// Flag it as show all button
 			hasAll=true;													// Set local flag

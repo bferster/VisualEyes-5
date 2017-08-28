@@ -912,7 +912,9 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
  	 						}
  	 					}
  	 				}
-     			if (id.match(/Mob-/)) {										// If a mob
+				  if (!id) 
+						return;	
+				  if (id.match(/Mob-/)) {										// If a mob
   					var i=id.substr(4);										// Strip off header
   					o=curJson.mobs[i];										// Point at mob data
  					if (o.title) 		var title=o.title;					// Lead with title
