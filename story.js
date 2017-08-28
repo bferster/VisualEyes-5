@@ -147,7 +147,7 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 		fs=13;																// Larger font
 		maxPix=175;															// Larger pic	
 		if (mob.where)	mps.Goto(mob.where);								// Go there
-//		if (mob.start)	tln.Goto(mob.start);								// Go then
+		if (mob.start)	tln.Goto(mob.start);								// Go then
 		}
 	if (mob.title)															// If a title
 		str+="<div class='story-header' style='display:inline-block;color:"+col+"'>"+mob.title+"</div><br>";
