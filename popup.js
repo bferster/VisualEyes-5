@@ -396,7 +396,7 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/show\(([^,]+),(.+)\)/i);							// Get parts
 			if (vv)															// If multi-part show with no visible part
-				desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:toggleLayers(\""+vv+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+				desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:toggleLayer(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 			}	
 		}
 	if (desc && desc.match(/foot\(/)) {										// If foot macro

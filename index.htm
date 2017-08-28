@@ -843,7 +843,8 @@
 		$("#st-popup").remove();												// Remove old popup
 		$("#colorPickerDiv").remove();											// Remove old colorpicker
 		AnimatePanes("map",origLR,undefined, function() {						// Animate pane back
-			sto.UpdateStory(curTime,curJson.timeFormat);						// Update story pane
+			if (curJson.storyMode != "Stepped")									// Not for stepped
+				sto.UpdateStory(curTime,curJson.timeFormat);					// Update story pane
 			});												
 	}
 

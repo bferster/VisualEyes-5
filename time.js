@@ -613,7 +613,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 						v=(str+" ").match(/show\(.*?\)/ig);					// Extract show(s)
 						for (i=0;i<v.length;++i) {							// For each macro
 							vv=v[i].match(/show\(([^,]+),(.+)\)/i);			// Get parts
-							str=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:toggleLayers(\""+vv+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+							str=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:toggleLayers(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 							}	
 						}
 					if (str.match(/zoomer\(/)) {							// If zoomer macro

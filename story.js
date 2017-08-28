@@ -146,6 +146,8 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 	else{																	// Stepped mode
 		fs=13;																// Larger font
 		maxPix=175;															// Larger pic	
+		if (mob.where)	mps.Goto(mob.where);								// Go there
+//		if (mob.start)	tln.Goto(mob.start);								// Go then
 		}
 	if (mob.title)															// If a title
 		str+="<div class='story-header' style='display:inline-block;color:"+col+"'>"+mob.title+"</div><br>";
@@ -188,11 +190,6 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 		}
 	if (mob.open || (this.storyMode == "Stepped")) 							// If open or stepped
 		str+="<div style='clear:both'></div><br>";							// Clear float
-	
-	if (this.storyMode == "Stepped") { 										// If stepped
-		if (mob.where)	mps.Goto(mob.where);								// Go there
-		if (mob.start)	tln.Goto(mob.start);								// Go then
-		}
 	return str;																// Return story item html
 }
 
@@ -206,17 +203,6 @@ function toggleLayer(id)												// TOGGLE LAYER
 	var j;
 	if ((j=FindMobByID(id)) != -1)											// Get mob index
 		mps.DrawMapLayers([curJson.mobs[j].lid],true);						// Show them
-}
-
-function toggleLayers(id)												// TOGGLE LAYER(s)
-{
-	var i,j;
-	var ids=id.split(",");													// Divide into parts
-	ids.splice(0,3);														// Remove debris from match()
-	for (i=0;i<ids.length;++i) 												// For each part
-		if ((j=FindMobByID(ids[i])) != -1)									// Get mob index
-			ids[i]=curJson.mobs[j].lid;										// Get layer index					
-	mps.DrawMapLayers(ids,true);											// Show them
 }
 
 Story.prototype.SendMessage=function(cmd, msg) 							// SEND MESSAGE
