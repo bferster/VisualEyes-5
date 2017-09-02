@@ -37,13 +37,13 @@ Space.prototype.UpdateMap=function(curTime, timeFormat, panTime)		// UPDATE MAP
 */
 
 	this.timeFormat=timeFormat;												// Set format
-	this.curTime=curTime-0;													// Set current timet
+	this.curTime=curTime-0;													// Set current time
 	this.DrawMapLayers();													// Redraw map
 	this.panTime=panTime;													// Time to pan to position
 }
 
 
-Space.prototype.DrawMapLayers=function(indices, mode)					// DRAW OVERLAY LAYERS							
+Space.prototype.DrawMapLayers=function()								// DRAW OVERLAY LAYERS							
 {
 
 /* 
@@ -73,15 +73,13 @@ Space.prototype.DrawMapLayers=function(indices, mode)					// DRAW OVERLAY LAYERS
 					vis=true;												// Show it
 				}
 	        a=(o.opacity != undefined) ? o.opacity : 1						// Use defined opacity or 1
-             if (indices) {													// If indices spec'd
-            	if (mode == undefined)	mode=true;							// Default to showing marker
-              	for (j=0;j<indices.length;++j) 								// For each index					
-            		if (i == indices[j])									// This is one to set
-            			vis=mode;											// Hide or show it
-           		}
-   
-	   		if (!dtl.ShowElement(o.tag))	vis=false;						// If not being shown, hide it
+	
+			if (o.show == "off")		vis=false;							// If hidde in spreadsheet, hide it
+			if (o.vis == "off")			vis=false;							// If toggled hidden, hide it
+			else if (o.vis == "on")		vis=true;							// If toggled showing, show it
 
+			if (!dtl.ShowElement(o.tag))	vis=false;						// If not being shown, hide it
+			
  		    if (vis && (o.type == "image"))	{								// If a visible image 
            		(o.alpha == undefined) ? a=1 : a=o.alpha;					// Let alpha control opacity if defined
            		if (!vis) a=0;												// Hide if invisible
@@ -363,7 +361,7 @@ Space.prototype.AddChoroplethLayer=function(col, ecol, ewid,opacity, base, where
 	o.type="choro";															// Path
   	o.start=start;	o.end=end;		o.col=col; 	  	o.opacity=opacity;		// Save parameters
   	o.ecol=ecol;	o.ewid=ewid;	o.where=where; 	o.base=base;			// Save parameters
-	o.tag=curJson.mobs[id].tag;												// Add id into tag
+	o.tag=curJson.mobs[id].tag;		o.show=curJson.mobs[id].show;			// Add id into tag
 	o.styles=[];															// Alloc orginal style array
 	var index=this.overlays.length;											// Get index
 	this.overlays.push(o);													// Add to overlay
@@ -705,7 +703,8 @@ Space.prototype.AddKMLLayer=function(url, opacity, id, start, end) 		// ADD KML 
   	o.start=start;	o.end=end;												// Save start, end
 	o.opacity=opacity;														// Initial opacity
 	o.tag=curJson.mobs[id].id;												// Add id into tag
-	
+	o.show=curJson.mobs[id].show;											// Add show tag
+
 	o.src=new ol.layer.Vector({  source: new ol.source.Vector({				// New layer
 							title: "LAYER-"+this.overlays.length,			// Set name
 				   			projection: ol.proj.get(this.curProjection),	// Set KML projection
@@ -742,7 +741,6 @@ Space.prototype.AddKMLLayer=function(url, opacity, id, start, end) 		// ADD KML 
 		});
 
 }
-
 
 Space.prototype.StyleKMLFeatures=function(num, styles)					// STYLE KML FEATURE(s)		  
 { 
@@ -809,7 +807,8 @@ Space.prototype.AddImageLayer=function(url, geoRef, alpha, start, end, id) 	// A
  	o.type="image";															// Image
  	o.start=start;	o.end=end;												// Save start, end
   	o.tag=curJson.mobs[id].id;												// Add id into tag
-    o.src=new MapImage(url,geoRef,this);									// Alloc mapimage obj
+  	o.show=curJson.mobs[id].show;											// Add show tag
+	o.src=new MapImage(url,geoRef,this);									// Alloc mapimage obj
 	o.alpha=alpha;															// Save alpha
 	this.overlays.push(o);													// Add layer
 	this.loadCounter++;														// Add to count
@@ -931,7 +930,7 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
 					if (o.start)											// If a time defined
 						_this.SendMessage("time",o.start);					// Send new time
 					if (o.click) {											// If a click defined
-						v=o.click.split("|");								// Divide into individual actions
+						v=o.click.split("+");								// Divide into individual actions
 						for (j=0;j<v.length;++j) {							// For each action
 							a=v[j].split(":");								// Opcode, payload split
 							if (a[0])										// At least a command
@@ -946,7 +945,7 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
 
 	this.map.on('pointermove', function(e) {								// ON MOUSE MOVE
 		if (e.dragging) {													// If dragging
-			ClearPopUps();													// Clear any existing pop
+			ClearPopUps(true);												// Clear any existing pops, but don't reset storypane
 	    	return;															// Quit
 	  		}
 	  	var pixel=_this.map.getEventPixel(e.originalEvent);					// Get pos

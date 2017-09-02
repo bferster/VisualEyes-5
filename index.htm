@@ -441,6 +441,8 @@
 				tln.Goto(v[1]);													// Move timeline
 			if (e.data.match(/=where/i))										// Set position
 				mps.Goto(v[1])													// Move map
+			if (e.data.match(/=story/i))										// Set story item
+				sto.Open(v[1]);													// Open or goto this story line
 			if (e.data.match(/=zoom/i))	{										// Set position
 				$("#rightDiv").html("");										// Clear div
 				var vv=v[1].split(",");											// Divide param									
@@ -468,6 +470,8 @@
 				mps.Goto(v[1])													// Move map
 			else if (e.data.match(/=time/i))									// New time
 				Draw(v[1])														// Redraw
+			if (e.data.match(/=story/i))										// Set story item
+				sto.Open(v[1]);													// Open or goto this story line
 			if (e.data.match(/=zoom/i)) {										// Set position
 				$("#rightDiv").html("");										// Clear div
 				var vv=v[1].split(",");											// Divide param									
@@ -736,7 +740,7 @@
 
 	$("body").keyup(function(e) {											// KEY DOWN HANDLER
 		if (e.altKey && (e.keyCode == 82))	{									// Alt-R
-	   		if (curJson.sheet) 												// If a spreadsheet spec'd
+	   		if (curJson.sheet) 													// If a spreadsheet spec'd
 			 	dtl.GetSpreadsheet(curJson.sheet,true,null,function(mobs) {		// Get spreadsheet data
 					curJson.mobs=mobs;											// Set mobs
 					InitProject(curJson);										// Re-init project
@@ -833,19 +837,16 @@
 		return pop.FormatTime(time,"Mo/Day/Year");
 	}
 	
-	function ClearPopUps()													// CLOSE ALL OPEN POPUPS
+	function ClearPopUps(popupsOnly)										// CLOSE ALL OPEN POPUPS
 	{
-	/* 
-	 	Close any open popups zoomers, webpages, or alerts.  
-	*/
 		$("#st-webpage").remove();												// Remove old page popup
 		$("#alertBoxDiv").remove();												// Remove oldalert boxe
 		$("#st-popup").remove();												// Remove old popup
 		$("#colorPickerDiv").remove();											// Remove old colorpicker
-		AnimatePanes("map",origLR,undefined, function() {						// Animate pane back
-			if (curJson.storyMode != "Stepped")									// Not for stepped
+		if (!popupsOnly)														// If only clearing popups
+			AnimatePanes("map",origLR,undefined, function() {					// Animate pane back
 				sto.UpdateStory(curTime,curJson.timeFormat);					// Update story pane
-			});												
+				});												
 	}
 
 	function ShowIframe(url)													// SHOW IFRAME AND RETURN BUTTON

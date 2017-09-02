@@ -35,6 +35,7 @@ Story.prototype.InitStory=function(data)								// INIT STORY
 	if (data)	this.sd=data;												// Point at data
 	var _this=this;	
 	this.pages=[];															// Save context for callback
+	clearToggledLayers();													// Clear any layers toggled
 	this.storyMode=this.sd.storyMode;										// Set mode
 	if (this.sd.storyMode == "Stepped") 									// If stepped
 		str+="<div style='text-align:center'>";								// Center div
@@ -78,7 +79,8 @@ Story.prototype.InitStory=function(data)								// INIT STORY
 						this.sd.mobs[i].open=true;							// Set true
 					else													// Otherwise, must be closed
 						this.sd.mobs[i].open=false;							// Set false
-					}
+				this.pages.push(i);											// Save index to move
+				}
 				if (this.sd.mobs[i].pos)	ind=this.sd.mobs[i].pos;		// If a pos set, use it
 				str+="<div id='story"+i+"' style='margin-left:"+(ind*18+12)+"px'>"; // Container div
 				str+=this.DrawStoryItem(i)+"</div>";						// Add it to html
@@ -87,25 +89,18 @@ Story.prototype.InitStory=function(data)								// INIT STORY
 		}
 	}
 
-
 Story.prototype.UpdateStory=function(curTime, timeFormat) 				// UPDATE STORY PANE
 {
-	
-/*
-	Update the current time and set layer visibilities accordingly.
-	@param {number} curTime 	Current project time in mumber of mins += 1/1/1970
-	@param {string} timeFormat	Format to use when making time human readable	
-*/
-
 	this.timeFormat=timeFormat;												// Set format
 	this.curTime=curTime-0;													// Set current timet
 	this.InitStory();														// Re-build page
 }
 
-function onStoryClick(e,mode) 											// TOGGLE STORY ITEM
+function onStoryClick(e) 												// TOGGLE STORY ITEM
 {
 	var i,hide=99,pos;
 	var id=e.substr(8);														// Get ID
+	clearToggledLayers();													// Clear any layers toggled
 	curJson.mobs[id].open=!curJson.mobs[id].open;							// Toggle closure state						
 	pop.Sound("click",curJson.muteSound);									// Click sound
 	if (curJson.mobs[id].where)												// If a where
@@ -124,6 +119,24 @@ function onStoryClick(e,mode) 											// TOGGLE STORY ITEM
 		else																// Open or unset
 			curJson.mobs[i].open=true;										// Don't hide
 		$("#story"+i).html(sto.DrawStoryItem(i)); 							// Redraw 
+	}
+}
+
+Story.prototype.Open=function(id) 										// OPEN STORY ITEM OR GO TO PAGE
+{
+	var j;
+	if ((j=FindMobByID(id)) == -1) 											// Get mob index from 2nd param
+		return;																// Quit if not found
+	pop.Sound("click",curJson.muteSound);									// Click sound
+	if (this.storyMode == "Stepped") {										// Stepped mode
+		for (i=0;i<this.pages.length;++i)									// For each page
+			if (this.pages[i] == j) 										// A match
+				this.curPage=i;												// Set curPagr						
+		$("#storyDiv").html(this.DrawStoryItem(j));							// Set new page
+		}
+	else{
+		curJson.mobs[j].open=false;											// Force closure state						
+		$("#storyBut"+j).trigger("click");									// Trigger open button click
 		}
 }
 
@@ -176,7 +189,7 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 				v=(desc+" ").match(/show\(.*?\)/ig);						// Extract show(s)
 				for (i=0;i<v.length;++i) {									// For each one
 					vv=v[i].match(/show\(([^,\)]*),*(.*)\)/i);				// Get parts
-					toggleLayer(vv[1]);												
+					toggleLayer(vv[1],true);																			
 					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"");	
 					}
 				}
@@ -198,11 +211,22 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-function toggleLayer(id)												// TOGGLE LAYER
+function toggleLayer(id, mode)											// TOGGLE LAYER
 {
 	var j;
-	if ((j=FindMobByID(id)) != -1)											// Get mob index
-		mps.DrawMapLayers([curJson.mobs[j].lid],true);						// Show them
+	mode=mode ? "on" : "off";												// Set as on/off
+	if ((j=FindMobByID(id)) != -1) {										// Get mob index
+		mps.overlays[curJson.mobs[j].lid].vis=mode;							// Show or hide layer
+		mps.DrawMapLayers();												// Redraw map
+		}
+}
+
+function clearToggledLayers()											// CLEAR ALL TOGGLED LAYERS
+{
+	var i;
+	for (i=0;i<mps.overlays.length;++i)										// For each layer
+		mps.overlays[i].vis=null;											// Hide layer toggling
+	mps.DrawMapLayers();													// Redraw map
 }
 
 Story.prototype.SendMessage=function(cmd, msg) 							// SEND MESSAGE
