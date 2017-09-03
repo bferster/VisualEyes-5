@@ -159,6 +159,7 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 	else{																	// Stepped mode
 		fs=13;																// Larger font
 		maxPix=175;															// Larger pic	
+		clearToggledLayers();												// Clear any layers toggled
 		if (mob.where)	mps.Goto(mob.where);								// Go there
 		if (mob.start)	tln.Goto(mob.start);								// Go then
 		}
@@ -189,11 +190,17 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 				v=(desc+" ").match(/show\(.*?\)/ig);						// Extract show(s)
 				for (i=0;i<v.length;++i) {									// For each one
 					vv=v[i].match(/show\(([^,\)]*),*(.*)\)/i);				// Get parts
-					toggleLayer(vv[1],true);																			
-					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"");	
+					toggleLayer(vv[1],true);								// Show layer																		
+					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"");	// Remove macro
 					}
 				}
-			str+="<div class='story-desc' style='font-size:"+fs+"px'>"+desc+"</div>";	// Add in
+			if (desc && desc.match(/segment\(/)) {							// If segment macro
+				v=(desc+" ").match(/segment\(.*?\)/ig);						// Extract segment
+				vv=v[0].match(/segment\(([^,\)]*),*(.*)\)/i);				// Get parts
+				$("#timeseg"+(vv[1]-1)).trigger("click");					// Trigger segment
+				desc=desc.replace(RegExp(v[0].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"");		// Remove macro
+				}
+				str+="<div class='story-desc' style='font-size:"+fs+"px'>"+desc+"</div>";	// Add in
 			str+="</div>"
 			}
 		if (mob.citation) {													// If a citation
