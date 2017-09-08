@@ -333,6 +333,7 @@
 	{
 		if (time == undefined)	time=curTime;									// Use curtime if undefined 
 		mps.UpdateMap(time,curJson.timeFormat,curJson.panTime);					// Update map layers
+		$("#showInd").text( "#"+curShow);									// Show new ID if a save as...
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -532,7 +533,7 @@
 		str+="<tr><td>Map&nbsp;point</td><td><input id='setpoint' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td colspan=2><br></td> <tr>";
 		str+="<tr><td>Options</td><td>"+MakeSelect("setfile",false,["Choose","Load","Save","Save as...","Delete","Undelete","Drawing","Geo-reference"],"Save/Load");
-		str+="&nbsp;&nbsp;&nbsp<i>"+(_this.curShow ? "#"+_this.curShow : '')+"</i>&nbsp;&nbsp;&nbsp;"
+		str+="&nbsp;&nbsp;&nbsp<i><span id='showInd'>"+(curShow ? "#"+curShow : '')+"</span></i></span>&nbsp;&nbsp;&nbsp;"
 		str+="Help <a href='https://docs.google.com/document/d/161td5ZuqKqT5R5r9z1P8AxBA6l9LaP-eYl_RvCyvw2g/edit?usp=sharing' target='_blank'>";
 		str+="<img src='img/helpicon.gif' style='vertical-align:bottom' title='Show help'></a></td>";
 		str+="</tr></table></div>";
@@ -601,7 +602,11 @@
 					getDataFromInputs();										// Get data from inputs										
 					qmf.Save(0);												// Save data
 					break;						
-				case "Save as...": 		qmf.Save(1);		break;				// Save as..
+				case "Save as...": 												// Save as..
+					getDataFromInputs();										// Get data from inputs										
+					ConfirmBox("This will create a new project, with a new project number. If you want to save into an existing project, pick the \"Save\" option instead.",
+						function() {	qmf.Save(1); });		
+					break;			
 				case "Delete": 			qmf.Delete(0);		break;				// Delete
 				case "Undelete": 		qmf.Delete(1);		break;				// Undelete
 				case "Drawing": 		mps.DrawingTool();	break;				// Run KML drawing tool
