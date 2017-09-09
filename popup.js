@@ -413,7 +413,14 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.ShowWebPage(\"#leftDiv\",\""+vv[2]+"\",\"zoomer\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 			}	
 		}
-	if (desc.match(/button\(/)) {											// If button macro
+	if (desc.match(/story\(/)) {											// If story macro
+		v=(desc+" ").match(/story\(.*?\)/ig);								// Extract story element(s)
+		for (i=0;i<v.length;++i) {											// For each macro
+			vv=v[i].match(/story\(([^,]+),(.+)\)/i);						// Get parts
+			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:sto.Open(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+			}	
+		}
+		if (desc.match(/button\(/)) {											// If button macro
 		v=(desc+" ").match(/button\(.*?\)/ig);								// Extract button
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/button\(([^,]+),(.+)\)/i);						// Get macro (x,title,params)

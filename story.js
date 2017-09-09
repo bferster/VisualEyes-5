@@ -186,7 +186,16 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),title);	// Replace with image
 					}
 				}	
-			if (desc && desc.match(/show\(/)) {								// If show macro
+			if (desc && desc.match(/iframe\(/)) {							// If iframe macro
+				v=(desc+" ").match(/iframe\(.*?\)/ig);						// Extract iframes(s)
+				for (i=0;i<v.length;++i) {									// For each url
+					vv=v[i].match(/iframe\(([^,\)]*),*(.*)\)/i);			// Get parts
+					if (!vv[2])	vv[2]=400;									// Default to 400px high
+					title="<iframe src='"+vv[1]+"' frameborder=0 style='width:100%;height:"+vv[2]+"px'></iframe></div>";	// iframe
+					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),title);	// Replace with image
+					}
+				}	
+				if (desc && desc.match(/show\(/)) {								// If show macro
 				v=(desc+" ").match(/show\(.*?\)/ig);						// Extract show(s)
 				for (i=0;i<v.length;++i) {									// For each one
 					vv=v[i].match(/show\(([^,\)]*),*(.*)\)/i);				// Get parts
