@@ -102,7 +102,7 @@ function onStoryClick(e) 												// TOGGLE STORY ITEM
 	var id=e.substr(8);														// Get ID
 	clearToggledLayers();													// Clear any layers toggled
 	curJson.mobs[id].open=!curJson.mobs[id].open;							// Toggle closure state						
-	pop.Sound("click",curJson.muteSound);									// Click sound
+//	pop.Sound("click",curJson.muteSound);									// Click sound
 	if (curJson.mobs[id].where)												// If a where
 		mps.Goto(curJson.mobs[id].where);									// Got there
 	if (curJson.mobs[id].start)												// If a start
@@ -127,7 +127,6 @@ Story.prototype.Open=function(id) 										// OPEN STORY ITEM OR GO TO PAGE
 	var j;
 	if ((j=FindMobByID(id)) == -1) 											// Get mob index from 2nd param
 		return;																// Quit if not found
-//	pop.Sound("click",curJson.muteSound);									// Click sound
 	if (this.storyMode == "Stepped") {										// Stepped mode
 		for (i=0;i<this.pages.length;++i)									// For each page
 			if (this.pages[i] == j) 										// A match
