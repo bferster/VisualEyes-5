@@ -127,13 +127,14 @@ Story.prototype.Open=function(id) 										// OPEN STORY ITEM OR GO TO PAGE
 	var j;
 	if ((j=FindMobByID(id)) == -1) 											// Get mob index from 2nd param
 		return;																// Quit if not found
-	pop.Sound("click",curJson.muteSound);									// Click sound
+//	pop.Sound("click",curJson.muteSound);									// Click sound
 	if (this.storyMode == "Stepped") {										// Stepped mode
 		for (i=0;i<this.pages.length;++i)									// For each page
 			if (this.pages[i] == j) 										// A match
-				this.curPage=i;												// Set curPagr						
+				this.curPage=i;												// Set curPage						
 		$("#storyDiv").html(this.DrawStoryItem(j));							// Set new page
-		}
+		$("#pageSel").prop("selectedIndex",this.curPage);					// Set select
+	}
 	else{
 		curJson.mobs[j].open=false;											// Force closure state						
 		$("#storyBut"+j).trigger("click");									// Trigger open button click

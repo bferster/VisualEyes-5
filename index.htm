@@ -281,8 +281,10 @@
 					o.type="segment";											// Set type
 				else if (marker.toLowerCase() == "init") 						// An init
 					o.type="init";												// Set type
-				else if (marker.toLowerCase() == "story") 						// An init
+				else if (marker.toLowerCase() == "story") 						// An time
 					o.type="init";												// Set type
+					else if (marker.toLowerCase() == "time") 					// An init
+					o.type="time";												// Set type
 				else if (o.marker && (o.marker.toLowerCase() == "label")) 		// A label
 					o.type="label";												// Set type
 				else if (marker.toLowerCase() == "data") {						// Data
@@ -331,10 +333,24 @@
 	
 	function Draw(time)														// DRAW PROJECT
 	{
+		var i,o;
 		if (time == undefined)	time=curTime;									// Use curtime if undefined 
 		mps.UpdateMap(time,curJson.timeFormat,curJson.panTime);					// Update map layers
-		$("#showInd").text( "#"+curShow);									// Show new ID if a save as...
-	}
+		$("#showInd").text( "#"+curShow);										// Show new ID if a save as...
+		for (i=0;i<curJson.mobs.length;++i) {									// For each mob
+			o=curJson.mobs[i];													// Point at it
+			if ((o.type == "time") && (time >= o.start) && (time < o.end) && o.click) { // Got one
+				var v,a,j;
+				v=o.click.split("+");											// Divide into individual actions
+				for (j=0;j<v.length;++j) {										// For each action
+					a=v[j].split(":");											// Opcode, payload split
+					if (a[0])													// At least a command
+					tln.SendMessage(a[0].trim(),v[j].substr(a[0].length+1));	// Execute actions message
+					}
+				break;
+				}
+			}
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // EVENTS

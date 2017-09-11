@@ -79,8 +79,8 @@ Space.prototype.DrawMapLayers=function()								// DRAW OVERLAY LAYERS
 			else if (o.vis == "on")		vis=true;							// If toggled showing, show it
 
 			if (!dtl.ShowElement(o.tag))	vis=false;						// If not being shown, hide it
-			
- 		    if (vis && (o.type == "image"))	{								// If a visible image 
+
+			if (vis && (o.type == "image"))	{								// If a visible image 
            		(o.alpha == undefined) ? a=1 : a=o.alpha;					// Let alpha control opacity if defined
            		if (!vis) a=0;												// Hide if invisible
             		o.src.drawMapImage(a,this);   							// Draw it   
@@ -362,6 +362,7 @@ Space.prototype.AddChoroplethLayer=function(col, ecol, ewid,opacity, base, where
   	o.start=start;	o.end=end;		o.col=col; 	  	o.opacity=opacity;		// Save parameters
   	o.ecol=ecol;	o.ewid=ewid;	o.where=where; 	o.base=base;			// Save parameters
 	o.tag=curJson.mobs[id].tag;		o.show=curJson.mobs[id].show;			// Add id into tag
+	o.mob=id;																// Save original mob id
 	o.styles=[];															// Alloc orginal style array
 	var index=this.overlays.length;											// Get index
 	this.overlays.push(o);													// Add to overlay
@@ -475,6 +476,7 @@ Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show,
 	o.type="path";															// Path
   	o.start=start;	o.end=end;	o.show=show; o.header=header				// Save start, end, show, and header
 	o.tag=curJson.mobs[id].id;												// Add id into tag
+	o.mob=id;																// Save original mob id
 	this.overlays.push(o);													// Add to overlay
   	o.src=new ol.Feature({ geometry: new ol.geom.LineString(dots)});		// Create line
   	o.id="Path-"+this.markerLayer.getSource().getFeatures().length;			// Make path id
@@ -568,7 +570,8 @@ Space.prototype.AddMarkerLayer=function(pos, style, id, start, end, show) 	// AD
 	var o={};
 	o.type="icon";															// Icon
   	o.start=start;	o.end=end; 	o.show=show;								// Save start, end, show
-
+  	o.mob=id;																// Save original mob id
+	  
 	if (!isNaN(id))	o.tag=curJson.mobs[id].id;								// Add id into tag, if not a header
 
 	var index=this.overlays.length;											// Get index
@@ -704,7 +707,8 @@ Space.prototype.AddKMLLayer=function(url, opacity, id, start, end) 		// ADD KML 
 	o.opacity=opacity;														// Initial opacity
 	o.tag=curJson.mobs[id].id;												// Add id into tag
 	o.show=curJson.mobs[id].show;											// Add show tag
-
+	o.mob=id;																// Save original mob id
+	
 	o.src=new ol.layer.Vector({  source: new ol.source.Vector({				// New layer
 							title: "LAYER-"+this.overlays.length,			// Set name
 				   			projection: ol.proj.get(this.curProjection),	// Set KML projection
@@ -807,6 +811,7 @@ Space.prototype.AddImageLayer=function(url, geoRef, alpha, start, end, id) 	// A
  	o.type="image";															// Image
  	o.start=start;	o.end=end;												// Save start, end
   	o.tag=curJson.mobs[id].id;												// Add id into tag
+	o.mob=id;																// Save original mob id
   	o.show=curJson.mobs[id].show;											// Add show tag
 	o.src=new MapImage(url,geoRef,this);									// Alloc mapimage obj
 	o.alpha=alpha;															// Save alpha
