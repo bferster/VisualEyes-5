@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="img/shanti.ico">
+	<title>VisualEyes</title>
+ 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>	
+</head>
+<body>
+Hello
+<script>
+
+
+	$.ajax({
+		url: 'SAD.xml',  dataType: 'xml',
+		success: function(data) { parseXML(data) },
+		error: function(data) {  console.log('Error loading XML data');	}
+		});
+	
+	function parseXML(xml) {
+		var x,a;
+		var s=MakeLine(["id","name","altName","start","end","ethnicity","structure","place","occupation","note"])+"\n";
+
+		$(xml).find("person").each(function(index, elem) {				// For each person
+			var els=[];													// Start fresh
+			els.push($(elem).attr("key"));								// Get id
+			x=$(elem).find("nameGrp");									// Outer element
+			els.push($(x).find("name:first").text());					// Get name
+			x=$(elem).find("altNameGrp");								// Outer element
+			els.push($(x).find("name:first").text());					// Get first name
+			x=$(elem).find("existDates");								// Outer element
+			els.push($(x).find("beginDate").text());					// Get start
+			els.push($(x).find("endDate").text());						// Get end
+			els.push($(elem).find("ethnicity").text());					// Get ethnicity
+			a=$(elem).find("structureRef").attr("keyRef") ? $(elem).find("structureRef").attr("keyRef") : "";
+			a+=$(elem).find("structureRef").attr("role")  ? ":"+$(elem).find("structureRef").attr("role") : "";
+			els.push(a);												// Get structure
+			a=$(elem).find("geogPlaceRef").attr("keyRef") ? $(elem).find("geogPlaceRef").attr("keyRef") : "";
+			a+=$(elem).find("geogPlaceRef").attr("role")  ? ":"+$(elem).find("geogPlaceRef").attr("role") : "";
+			els.push(a);												// Get place
+			els.push($(elem).find("occupation").text());				// Get occupation
+			els.push($(elem).find("note").text());						// Get note
+			s+=MakeLine(els)+"\n";
+		});	
+		$(xml).find("deity").each(function(index, elem) {				// For each deity
+			var els=[];													// Start fresh
+			els.push($(elem).attr("key"));								// Get id
+			x=$(elem).find("nameGrp");									// Outer element
+			els.push($(x).find("name:first").text());					// Get name
+			x=$(elem).find("altNameGrp");								// Outer element
+			els.push($(x).find("name:first").text());					// Get first name
+			x=$(elem).find("existDates");								// Outer element
+			els.push($(x).find("beginDate").text());					// Get start
+			els.push($(x).find("endDate").text());						// Get end
+			els.push($(elem).find("ethnicity").text());					// Get ethnicity
+			a=$(elem).find("structureRef").attr("keyRef") ? $(elem).find("structureRef").attr("keyRef") : "";
+			a+=$(elem).find("structureRef").attr("role")  ? ":"+$(elem).find("structureRef").attr("role") : "";
+			els.push(a);												// Get structure
+			a=$(elem).find("geogPlaceRef").attr("keyRef") ? $(elem).find("geogPlaceRef").attr("keyRef") : "";
+			a+=$(elem).find("geogPlaceRef").attr("role")  ? ":"+$(elem).find("geogPlaceRef").attr("role") : "";
+			els.push(a);												// Get place
+			els.push($(elem).find("type").text());						// Get type
+			els.push($(elem).find("note").text());						// Get note
+			s+=MakeLine(els)+"\n";
+		});	
+		trace(s)
+	}
+
+
+	function MakeLine(els)
+	{
+		var i,str="";
+		for (i=0;i<els.length;++i) {
+			if (els[i]) {
+				els[i]=els[i].replace(/[\n|\r|\n\r]/g,"");
+				els[i]=els[i].replace(/[^\x00-\x7F]/g,"");
+			}
+			str+="\""+els[i]+"\","
+			}
+		return (str.substr(0,str.length-1))
+	}
+
+	function trace(msg, p1, p2, p3, p4)										// CONSOLE 
+	{
+		if (p4 != undefined)
+			console.log(msg,p1,p2,p3,p4);
+		else if (p3 != undefined)
+			console.log(msg,p1,p2,p3);
+		else if (p2 != undefined)
+			console.log(msg,p1,p2);
+		else if (p1 != undefined)
+			console.log(msg,p1);
+		else
+			console.log(msg);
+	}
+</script>
+</body></html>
+
