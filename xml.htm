@@ -63,18 +63,143 @@ Hello
 			els.push($(elem).find("note").text());						// Get note
 			s+=MakeLine(els)+"\n";
 		});	
+	
+/*	
+		var s=MakeLine(["id","name","altName","start","end","type","latLon","note"])+"\n";
+		$(xml).find("structure").each(function(index, elem) {			// For each structure
+			var els=[];													// Start fresh
+			els.push($(elem).attr("key"));								// Get id
+			x=$(elem).find("nameGrp");									// Outer element
+			els.push($(x).find("name:first").text());					// Get name
+			x=$(elem).find("altNameGrp");								// Outer element
+			els.push($(x).find("name:first").text());					// Get first name
+			x=$(elem).find("existDates");								// Outer element
+			els.push($(x).find("beginDate").text());					// Get start
+			els.push($(x).find("endDate").text());						// Get end
+			els.push($(elem).find("type").text());						// Get type
+			els.push("");												// Space for lat lom
+			els.push($(elem).find("note").text());						// Get note
+			s+=MakeLine(els)+"\n";
+		});	
+		$(xml).find("geogPlace").each(function(index, elem) {			// For each place
+			var els=[];													// Start fresh
+			els.push($(elem).attr("key"));								// Get id
+			x=$(elem).find("nameGrp");									// Outer element
+			els.push($(x).find("name:first").text());					// Get name
+			x=$(elem).find("altNameGrp");								// Outer element
+			els.push($(x).find("name:first").text());					// Get first name
+			x=$(elem).find("existDates");								// Outer element
+			els.push($(x).find("beginDate").text());					// Get start
+			els.push($(x).find("endDate").text());						// Get end
+			els.push($(elem).find("type").text());						// Get type
+			els.push("");												// Space for lat lom
+			els.push($(elem).find("note").text());						// Get note
+			s+=MakeLine(els)+"\n";
+		});	
+*/
+		var s=MakeLine(["id","type","participants","start","end","structure","place","latLon","text","desc"])+"\n";
+		var id=1;
+		
+		$(xml).find("episode").each(function(index, elem) {			// For each place
+			var start="",end="",struc="",id=1,text="",p;
+			x=$(elem).find("date");									// Outer element
+			start=CDate($(x).find("beginDate").text());				// Get start
+			end=CDate($(x).find("endDate").text());					// Get end
+			struc=$(elem).find("structureRef").attr("keyRef");		// Get struct
+			$(elem).find("socialEvent").each(function(index, elem){	// For each social event
+				var els=[];											// Start fresh
+				els.push(id++);										// Add id and inc
+				els.push("social");									// Add type
+				p="";
+				$(elem).find("participantNamed").each(function(index, elem) {	// For each name participant
+					if (p)	p+=","									// Add comma
+					p+=$(elem).attr("keyRef");						// Add id
+					});
+				$(elem).find("participantPersonUnnamed").each(function(index, elem) {	// For each name participant
+					if (p)	p+=","									// Add comma
+					p+=$(elem).find("occupation").text();			// Get occupation
+					});
+				els.push(p);										// Add participants
+				els.push(start);									// Add start
+				els.push(end);										// Add end
+				els.push(struc);									// Add struc
+				els.push($(elem).find("geogPlaceRef").attr("keyRef"));	// Add place
+				desc="";											// Clar desc
+				$(elem).find("note").each(function(index, elem) {	// For each note
+					if ($(elem).attr("type") == "text")				// A text
+						text=$(elem).text();						// Get it
+					if ($(elem).attr("type") == "general")			// A desc
+						desc=$(elem).text();						// Get it
+					});
+				els.push(text);										// Add text
+				els.push(desc);										// Add desc
+				s+=MakeLine(els)+"\n";								// Make line
+				});
+			$(elem).find("event").each(function(index, elem){		// For each event
+				var els=[];											// Start fresh
+				els.push(id++);										// Add id and inc
+				els.push($(elem).find("class").text());				// Add class as type
+				p="";
+				$(elem).find("participantNamed").each(function(index, elem) {	// For each name participant
+					if (p)	p+=","									// Add comma
+					p+=$(elem).attr("keyRef");						// Add id
+					});
+				$(elem).find("participantPersonUnnamed").each(function(index, elem) {	// For each name participant
+					if (p)	p+=","									// Add comma
+					p+=$(elem).find("occupation").text();			// Get occupation
+					});
+				els.push(p);										// Add participants
+				els.push(start);									// Add start
+				els.push(end);										// Add end
+				els.push(struc);									// Add struc
+				els.push($(elem).find("geogPlaceRef").attr("keyRef"));	// Add place
+				els.push("");										// Add latLon
+				desc="";											// Clar desc
+				
+				$(elem).find("note").each(function(index, elem) {	// For each note
+					if ($(elem).attr("type") == "text")				// A text
+						text=$(elem).text();						// Get it
+					if ($(elem).attr("type") == "general")			// A desc
+						desc=$(elem).text();						// Get it
+					});
+				els.push(text);										// Add text
+				els.push(desc);										// Add desc
+				s+=MakeLine(els)+"\n";								// Make line
+				});
+			});
 		trace(s)
 	}
+
+	function CDate(d)
+	{
+	
+		var v=d.split(".")
+		v.length=Math.min(v.length,3)
+		if (!d)				return "";
+		if (v[1] == "winter")	v[1]=1; 
+		if (v[1] == "spring")	v[1]=4; 
+		if (v[1] == "summer")	v[1]=8; 
+		if (v[1] == "fall")		v[1]=11; 
+		if (v[1])	v[1]=Math.min(Math.max(1,v[1]),12)
+		if (v[2])	v[2]=Math.min(Math.max(1,v[1]),28)
+		if (v.length == 1)	return v[0];
+		if (v.length == 2)	return v[1]+"/"+v[0];
+		if (v.length == 3)	return v[2]+"/"+v[1]+"/"+v[0];
+	}		
 
 
 	function MakeLine(els)
 	{
 		var i,str="";
 		for (i=0;i<els.length;++i) {
+			if (els[i] == undefined) 	els[i]="";
+			if (els[i] == "undefined") 	els[i]="";
 			if (els[i]) {
+				els[i]=""+els[i];
 				els[i]=els[i].replace(/[\n|\r|\n\r]/g,"");
 				els[i]=els[i].replace(/[^\x00-\x7F]/g,"");
-			}
+				els[i]=els[i].replace(/"/g,"\"");
+				}
 			str+="\""+els[i]+"\","
 			}
 		return (str.substr(0,str.length-1))
