@@ -20,6 +20,7 @@ function Timeline(div, pop, defaultSpeed)								// CONSTRUCTOR
 
 Timeline.prototype.InitTimeline=function(data)							// INIT TIMELINE
 {
+	var i,o;
 	this.margin=18;
 	this.curSeg=-1;															// Assume all segs
 	if (data)	this.sd=data;												// Point at setting and data
@@ -44,6 +45,9 @@ Timeline.prototype.InitTimeline=function(data)							// INIT TIMELINE
 	this.hasBackBut=this.sd.hasBackBut ? this.sd.hasBackBut : true; 		// Has forward/back buttons?
 	this.muteSound=this.sd.muteSound ? this.sd.muteSound : false; 			// Sound  muted?
 	this.timeViewTextColor=this.sd.timeViewTextColor ? this.sd.timeViewTextColor : "#666"; 	//Timeview text color
+	
+	for (i=0;i<this.sd.mobs.length;++i) 									// For each mob
+		data.mobs[i].tpos=data.mobs[i].pos;									// Save original pos setting
 
 	$("#timeBar").remove();													// Remove old
 	$("#segmentBar").remove();												// Remove old
@@ -175,8 +179,8 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 			if (!dtl.ShowElement(o.id))										// If not being shown
 				x=-1000;													// Shove to left													
 			y=h-rowHgt;														// Default to 1st row
-			if (o.pos)														// If a row spec'd
-				y=h-(o.pos*rowHgt+(o.pos-1)*rowPad);						// Position it
+			if (o.tpos)														// If a row spec'd
+				y=h-(o.tpos*rowHgt+(o.tpos-1)*rowPad);						// Position it
 			$("#svgMarker"+i).attr("transform","translate("+x+","+y+")");	// Move marker
 			if (o.marker) tmp=o.marker.toLowerCase();						// Marker type as lc
 				if (o.end && ((tmp == "line") || (tmp == "bar"))) {			// If a spanned event
@@ -212,14 +216,23 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 		}
 }
 
+Timeline.prototype.SetDotPositions=function()							// SET DOT POSITIONS
+{
+	var i,k=-1,o;
+	var top=($("#timeViewBar").height()-32)/16;								// Top line
+	for (i=0;i<this.sd.mobs.length;++i) {									// For each mob
+		o=this.sd.mobs[i];													// Point at mob
+		if (!o.marker || (o.type != "icon"))								// No marker set, or not a type shown on timeline
+			continue;														// Skip
+		if (!o.pos) 				o.tpos=(++k%top);						// Auto set								
+		else if (o.pos == "top")	o.tpos=top;								// Put on top
+		else						o.tpos=o.pos;							// Use original
+	}
+}
 
 Timeline.prototype.Draw=function() 										// DRAW TIMELINE
 {
-
-/* 
-*/
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CREATION 
