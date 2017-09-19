@@ -270,7 +270,7 @@ Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 	if ((Math.abs(fc[0]-c[0]) < 2) && (Math.abs(fc[1]-c[1]) < 2) &&			// Center match
 		(Math.abs(fs-v[2]) < 2) && (Math.abs(fs-v[2]) < 2))					// Resolution  match
 		return;																// Quit
-	
+	if (!v[2])	v[2]=fs;													// If no res set, use current one
 	if (v[3])  	duration=v[3]*1000;											// Set duration from pos
 	else		duration=this.panTime*1000;									// Use global duration
 
