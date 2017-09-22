@@ -359,6 +359,7 @@
 
 	$(document).ready(function() {												// When loaded
 		var i;
+		var noSplash=false;  													// Assume splash screen shonw
 		if (window.addEventListener) 											// If supported this way
 			window.addEventListener("message",shivaEventHandler,false);			// Add event handler
 		else																	// Use other method
@@ -373,8 +374,9 @@
 			url=456;															// Use default
 		if (drupalMan)	url="";													// If drupal, kill url
 		if (url && !isNaN(url)) {												// If a number
-			curShow=url;														// Save show number											
-			url="//www.stagetools.com/qmedia/loadshow.php?id="+url;				// Get from db
+			if (url < 0)    noSplash=true,$("#splashDiv").hide(0);			 	// Inhibit splash
+			curShow=Math.abs(url);                                              // Save show number
+            url="//www.stagetools.com/qmedia/loadshow.php?id="+curShow;			// Get from db
 			}	
 		else if ((url) && (!url.match(/\./)))									// No file extension
 			url+=".json";														// Add txt
@@ -421,11 +423,10 @@
 			function(){ $(this).css("background-color","#acc3db")},				// Highlight
 			function(){ $(this).css("background-color","transparent")			// Hide
 			});
-	
-		$("#splashDiv").delay(1000).animate({ opacity:0},500);					// Hide logo
-		$("#showDiv").animate({ opacity:1},5000, function() {					// Show interface
-				ResizePanes();													// Resize panes
-				});				
+		$("#splashDiv").delay(noSplash?1:1000).animate({ opacity:0},noSplash?1:500);    // Hide logo
+        $("#showDiv").animate({ opacity:1},noSplash?500:5000, function() {      // Show interface
+                ResizePanes();                                                  // Resize panes
+                });             
 		$(window).resize(ResizePanes);											// Dynamic resizing
 		pop=new Popup("leftDiv");												// Alloc popup module
 		mps=new Space("leftDiv",pop);											// Alloc map module
