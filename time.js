@@ -72,6 +72,12 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 	var w=$(this.div).width()-m-m;											// Width of time area
 	var t=$(this.div).height()-$("#timeBar").height()-20-m;					// Top position
 
+	if (($(this.div).width() < 20) || ($(this.div).height() < 20)) {		// Too small
+		$(this.div).hide(0);												// Hide it
+		return;																// Don't draw
+		}
+	else	$(this.div).show(0)												// Show it
+
 	var dur=this.end-this.start;											// Timeline 
 	this.timeFormat=this.sd.timeFormat;										// Set date format
 	if (this.segmentPos == "Bottom")										// If putting segments below timebar
@@ -693,7 +699,6 @@ Timeline.prototype.Goto=function(time, segment)							// SET TIME AND [SEGMENT]
 		$("#sliderTime").css({top:y+"px",left:x-66+"px"})					// Position text
 		}
 }
-
 
 Timeline.prototype.Play=function(start) 								// PLAY TIMELINE
 {
