@@ -420,7 +420,7 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:sto.Open(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 			}	
 		}
-		if (desc.match(/button\(/)) {											// If button macro
+	if (desc.match(/button\(/)) {											// If button macro
 		v=(desc+" ").match(/button\(.*?\)/ig);								// Extract button
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/button\(([^,]+),(.+)\)/i);						// Get macro (x,title,params)
@@ -446,6 +446,12 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),str);	// Replace with anchor tag
 			}	
 		}
+	if (desc && desc.match(/mask\(/)) {                                   	// If mask macro
+        v=(desc+" ").match(/mask\(.*?\)/ig);                       			// Extract segment
+        vv=v[0].match(/mask\(([^,\)]*),*(.*)\)/i);                  		// Get parts
+        dtl.SetTagMask(vv[1]);                                      		// Set mask
+        desc=desc.replace(RegExp(vv[0].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"");      // Remove macro
+		}                   
 	
 	return desc;															// Return expanded html
 }
