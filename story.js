@@ -214,7 +214,7 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 			}
 		if (mob.citation) {													// If a citation
 			str+="<div class='story-cite' style='cursor:pointer'><br><a onclick='$(\"#cite"+num+"\").fadeIn()'>";
-			str+="<u>Citation</u><br><span style='display:none' id='cite"+num+"'><br>"+mob.citation+"</span></div>";
+			str+="<u>Citation</u><br><div style='display:none' id='cite"+num+"'>"+mob.citation+"</div></div>";
 			}
 		}
 	if (mob.open || (this.storyMode == "Stepped")) 							// If open or stepped
