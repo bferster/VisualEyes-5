@@ -44,8 +44,10 @@ Story.prototype.InitStory=function(data)								// INIT STORY
 		str+="<select id='pageSel' class='ve-bs' style='vertical-align:5px;text-align:center'>"; // Selector
 		for (i=0;i<this.sd.mobs.length;++i) 								// For each mob
 			if (this.sd.mobs[i].marker && (this.sd.mobs[i].marker.toLowerCase() == "story")) { 	// If  a story item
-				str+="<option value='"+i+"'>"+(k++)+". "+ShortenString(this.sd.mobs[i].title,70)+"</option>";		// Add option
-				this.pages.push(i);											// Save index to move
+				if (this.sd.mobs[i].show != "hide")	{					// If not hidden
+					str+="<option value='"+i+"'>"+(k++)+". "+ShortenString(this.sd.mobs[i].title,70)+"</option>";		// Add option
+					this.pages.push(i);										// Save index to move
+					}
 				}
 		str+="</select>&nbsp;&nbsp;<img src='img/playbut.png' id='nextPage' style='cursor:pointer'>";	// Forward button
 		str+="</div>";														// End center div
@@ -102,7 +104,6 @@ function onStoryClick(e) 												// TOGGLE STORY ITEM
 	var id=e.substr(8);														// Get ID
 	clearToggledLayers();													// Clear any layers toggled
 	curJson.mobs[id].open=!curJson.mobs[id].open;							// Toggle closure state						
-//	pop.Sound("click",curJson.muteSound);									// Click sound
 	if (curJson.mobs[id].where)												// If a where
 		mps.Goto(curJson.mobs[id].where);									// Got there
 	if (curJson.mobs[id].start)												// If a start
