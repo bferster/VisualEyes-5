@@ -379,7 +379,6 @@ Timeline.prototype.AddPlayer=function() 								// ADD TIME PLAYER
 
 }
 
-
 Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 {
 	var i,o,oo,str;
@@ -674,14 +673,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 
 Timeline.prototype.Goto=function(time, segment)							// SET TIME AND [SEGMENT]
 {
-	
-/* 	
-	Got to time and maybe change segment
- 	@param {number} time time to goto mumber of mins += 1/1/1970
-*/
-	
 	if (time == undefined) 		time=this.curTime;							// Set to current time if undefined							
-	
 	if (segment != undefined && this.timeSegments) {						// If setting a segment
 		if (segment < 0)													// If all button
 			segment=this.timeSegments.length+1;								// Set to last
@@ -700,7 +692,7 @@ Timeline.prototype.Goto=function(time, segment)							// SET TIME AND [SEGMENT]
 		}
 }
 
-Timeline.prototype.Play=function(start) 								// PLAY TIMELINE
+Timeline.prototype.Play=function(start, end) 							// PLAY TIMELINE
 {
 	var _this=this;															// Save context for callback
 	clearInterval(this.interval);											// Clear timer
@@ -713,12 +705,29 @@ Timeline.prototype.Play=function(start) 								// PLAY TIMELINE
 			var speed=_this.playerSpeed*100/Math.max($("#playerSlider").slider("option","value"),5);
 			var pct=(new Date().getTime()-_this.startPlay)/speed; 			// Get percentage
 			pct+=off;														// Add starting offset
+			if ((end != undefined) && (_this.curTime > end)) 	pct=99;		// Past end point, force quit
 			if (pct > 1)													// If done
 				_this.Play();												// Stop playing
-			_this.Goto((pct*_this.curDur)+_this.curStart);					// Go there
+			if (pct != 99)													// If a regular stop
+				_this.Goto((pct*_this.curDur)+_this.curStart);				// Go there
 			}
 		,42);																// ~24fps
 		}
+}
+
+Timeline.prototype.PlaySeg=function(start, end, segment, speed) 		// PLAY A PORTION OF THE TIMELINE
+{
+	if ((speed == "undefined") || !speed)									// No speed
+		speed=this.playerSpeed/100;											// Use default
+	this.curTime=pop.DateToTime(start);										// Get start
+	end=pop.DateToTime(end);												// Get end in secs
+	if ((segment != undefined) && this.timeSegments) 						// If setting a segment
+		$("#timeseg"+segment).trigger("click")				// Trigger click
+	$("#playerSlider").slider("option","value",speed);						// Set speed
+	var x=$($("#timeSlider").children('.ui-slider-handle')).offset().left;	// Get pos       			
+	$("#playerSpeed").html(speed);											// Show value
+	$("#playerSpeed").css({top:"-5px",left:x+9+"px"})						// Position text
+   	this.Play(this.curTime,end);											// Start playing	
 }
 
 
