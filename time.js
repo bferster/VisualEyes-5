@@ -719,7 +719,6 @@ Timeline.prototype.PlaySeg=function(start, end, segment, speed) 		// PLAY A PORT
 {
 	if ((speed == "undefined") || !speed)									// No speed
 		speed=this.playerSpeed/100;											// Use default
-	this.curTime=pop.DateToTime(start);										// Get start
 	end=pop.DateToTime(end);												// Get end in secs
 	if ((segment != undefined) && this.timeSegments) 						// If setting a segment
 		$("#timeseg"+segment).trigger("click")				// Trigger click
@@ -727,7 +726,8 @@ Timeline.prototype.PlaySeg=function(start, end, segment, speed) 		// PLAY A PORT
 	var x=$($("#timeSlider").children('.ui-slider-handle')).offset().left;	// Get pos       			
 	$("#playerSpeed").html(speed);											// Show value
 	$("#playerSpeed").css({top:"-5px",left:x+9+"px"})						// Position text
-   	this.Play(this.curTime,end);											// Start playing	
+	this.Goto(pop.DateToTime(start));										// Go there
+	this.Play(this.curTime,end);											// Start playing	
 }
 
 
