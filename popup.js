@@ -457,6 +457,8 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/play\(([^,]+),(.+)\)/i);							// Get parts
 			vvv=vv[2].split(",");											// Get params
+			if (vv[1] == 'auto' && (sto.storyMode == "Stepped"))			// Stepped mode and auto
+				tln.PlaySeg(vvv[0],vvv[1],vvv[2],vvv[3]),vv[1]="";			// Trigger animation
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:tln.PlaySeg(\""+vvv[0]+"\",\""+vvv[1]+"\",\""+vvv[2]+"\",\""+vvv[3]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 			}	
 		}
