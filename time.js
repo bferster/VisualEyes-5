@@ -231,8 +231,8 @@ Timeline.prototype.SetDotPositions=function()							// SET DOT POSITIONS
 		if (!o.marker || (o.type != "icon"))								// No marker set, or not a type shown on timeline
 			continue;														// Skip
 		if (!o.pos) 				o.tpos=(++k%top);						// Auto set								
-		else if (o.pos == "top")	o.tpos=top;								// Put on top
 		else						o.tpos=o.pos;							// Use original
+		if (o.pos == "top")			o.tpos=top;								// Put on top
 	}
 }
 
