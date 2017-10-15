@@ -41,6 +41,7 @@ Story.prototype.InitStory=function(data)								// INIT STORY
 		str+="<div style='text-align:center'>";								// Center div
 	if (this.sd.title)	str+="<div class='story-title'>"+this.sd.title+"</div>";
 	if (this.sd.storyMode == "Stepped") {									// If stepped
+		str+="<img src='img/backbut.png' id='lastPage' style='cursor:pointer'>";		 // Back button
 		str+="<select id='pageSel' class='ve-bs' style='vertical-align:5px;text-align:center'>"; // Selector
 		for (i=0;i<this.sd.mobs.length;++i) 								// For each mob
 			if (this.sd.mobs[i].marker && (this.sd.mobs[i].marker.toLowerCase() == "story")) { 	// If  a story item
@@ -49,7 +50,7 @@ Story.prototype.InitStory=function(data)								// INIT STORY
 					this.pages.push(i);										// Save index to move
 					}
 				}
-		str+="</select>&nbsp;&nbsp;<img src='img/playbut.png' id='nextPage' style='cursor:pointer'>";	// Forward button
+		str+="</select><img src='img/nextbut.png' id='nextPage' style='cursor:pointer'>";	// Next button
 		str+="</div>";														// End center div
 		str+="<div id='storyDiv' style='padding:16px'>";					// Enclosing div										
 		str+=this.DrawStoryItem(this.pages[this.curPage])+"</div>";			// Add story to page
@@ -62,6 +63,16 @@ Story.prototype.InitStory=function(data)								// INIT STORY
 			_this.curPage=$("#pageSel").prop("selectedIndex");				// Get index
 			});
 
+		$("#lastPage").on("click", function() {								// LAST PAGE
+			if (!_this.curPage) {											// At start
+				pop.Sound("delete",curJson.muteSound);						// Delete sound
+				return;														// Quit
+				}
+			pop.Sound("click",curJson.muteSound);							// Click sound
+			_this.curPage=Math.max(_this.curPage-1,0);						// Dec	
+			$("#storyDiv").html(_this.DrawStoryItem(_this.pages[_this.curPage]));	// Set new page
+			$("#pageSel").prop("selectedIndex",_this.curPage);				// Change select
+			});
 		$("#nextPage").on("click", function() {								// NEXT PAGE
 			if (_this.curPage == _this.pages.length-1) {					// At end
 				pop.Sound("delete",curJson.muteSound);						// Delete sound
@@ -255,7 +266,4 @@ Story.prototype.SendMessage=function(cmd, msg) 							// SEND MESSAGE
 		str+="|"+msg;														// Add it
 	window.postMessage(str,"*");											// Send message to wind
 }
-
-
-
 
