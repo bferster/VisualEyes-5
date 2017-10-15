@@ -330,7 +330,8 @@ Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
 		});
 
 	$("#timeBar").on('click', function(e) {									// TIMEBAR CLICK
-  		ClearPopUps();														// Clear any open popup
+		_this.play();														// Stop playing														
+		ClearPopUps();														// Clear any open popup
 		});
 
  }
@@ -468,11 +469,6 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 
 Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 {
-	
-/* 	
-	Add time segments to div
-*/
-
 	var i,j,o,str,w2,r,m;
 	var _this=this;															// Save context for callback
 	str="<div id='timeViewBar' class='time-timeview'>"						// Enclosing div
@@ -612,7 +608,8 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 				var id=e.currentTarget.id.substr(9);						// Get ID
 				o=_this.sd.mobs[id];										// Point at mob
 			    str=o.desc;
-       			if (str) {													// If a desc set
+				_this.Play();												// Stop playing														
+				if (str) {													// If a desc set
 					if (str.match(/where\(/)) {								// If where macro
 						v=(str+" ").match(/where\(.*?\)/ig);				// Extract where(s)
 						for (i=0;i<v.length;++i) {							// For each macro
@@ -660,6 +657,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 		}
 	
 	$("#timeViewSVG").on('click', function(e) {								// TIMESEG CLICK
+		_this.Play();														// Stop playing														
 		if (e.target.tagName == "svg")										// Not on a marker
    			ClearPopUps();													// Clear any open popup
 		});
@@ -692,7 +690,7 @@ Timeline.prototype.Goto=function(time, segment)							// SET TIME AND [SEGMENT]
 		}
 }
 
-Timeline.prototype.Play=function(start, end) 							// PLAY TIMELINE
+Timeline.prototype.Play=function(start, end) 							// PLAY/STOP TIMELINE ANIMATION
 {
 	var _this=this;															// Save context for callback
 	clearInterval(this.interval);											// Clear timer

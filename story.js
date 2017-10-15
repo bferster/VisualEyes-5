@@ -93,6 +93,7 @@ Story.prototype.InitStory=function(data)								// INIT STORY
 
 Story.prototype.UpdateStory=function(curTime, timeFormat) 				// UPDATE STORY PANE
 {
+	tln.Play();																// Stop playing														
 	this.timeFormat=timeFormat;												// Set format
 	this.curTime=curTime-0;													// Set current timet
 	this.InitStory();														// Re-build page
@@ -160,6 +161,7 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 	else{																	// Stepped mode
 		fs=13;																// Larger font
 		maxPix=175;															// Larger pic	
+		tln.Play();															// Stop playing														
 		clearToggledLayers();												// Clear any layers toggled
 		if (mob.where)	mps.Goto(mob.where);								// Go there
 		if (mob.start)	tln.Goto(mob.start);								// Go then
