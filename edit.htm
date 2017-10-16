@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="img/shanti.ico">
+	<title>VisualEyes Project Editor</title>
+ 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>	
+	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css" />
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+	<script src="jquery.ui.touch-punch.min.js"></script>
+ 
+ 	<style type="text/css">
+		 body { 			font-family:Verdana,Geneva,sans-serif; font-size:12px; 
+							padding: 0px; box-sizing: border-box;
+							}
+		.ef-main {			
+							}
+		.ef-menu {			width: 100%; height: 32px; color:#666; background-color:#ddd; opacity: inherit;
+							border-top-left-radius: 6px; border-top-right-radius:6px;
+							}
+		.ef-menuItem {		margin-left: 50px; cursor: pointer; color:#000;
+							}
+		.ef-navMenubar  	{ position:absolute;padding:16px;
+							}
+		.ef-navMenuItem 	{ margin-right:20px;cursor:pointer;
+							}
+		.ef-showItem {		font-weight: bold; text-align: left; float: right; margin-right: 12px; margin-top: 8px;
+							}
+		.ef-body {			width: calc(100% - 4px);min-height: 300px; color :#666; border :2px solid #ddd;	
+							background-color:#fff; opacity: inherit;
+							}
+		.ef-pullDown {		position: absolute; background-color :#ddd; width: 100px; 
+							}
+		.ef-pullDownItem:hover{ background-color: #bbb; color: #eee
+							}
+		.ef-pullDownItem {	padding-bottom: 6px; cursor: pointer; width: 92px; padding:6px;
+							padding-left: 8px; padding-right: 0px; color:#999;
+							}
+		.unselectable { 	-moz-user-select: none;     -khtml-user-select: none;
+		   			 		-webkit-user-select: none;  -ms-user-select: none;   user-select: none;
+		   					}
+		.selectable { 		-moz-user-select: text;     -khtml-user-select: text;
+		   			 		-webkit-user-select: text;  -ms-user-select: text;   user-select: text;
+		   					}
+	</style>
+
+</head>
+<body>
+
+		<div id="mainDiv" class="ef-main unselectable" style="opacity:1">	
+				<div id="menuDiv" class="ef-menu" >
+					<img src="img/menuheader.png">
+					<span style="vertical-align:10px">
+						S H A N T l
+						<span style="margin-left:100px"></span>
+						<span id="fileMenu" class="ef-menuItem" style="margin-left:100px">File</span>
+						<span id="eventMenu" class="ef-menuItem"> Event</span>
+						<span id="storyMenu" class="ef-menuItem"> Story</span>
+						<span id="graphicsMenu" class="ef-menuItem">Graphics</span>
+						<span id="helpMenu" class="ef-menuItem">Help</span>
+						<div  id="showMenu" class="ef-showItem"><b>No project loaded</b></div>
+					</span>
+				</div>
+				<div id="bodyDiv" class="ef-body"></div>
+			</div>	
+
+<script>
+
+	var isMobile=false;															// Flag for mobile devices
+	var host="//viseyes.org/visualeyes/";										// Set host for database save/load
+	var userName="",password="",curShow=0;										// Login info
+	var lastClickTime=0;														// Store last click time
+	var changed=false;															// Changed flag
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// INIT
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	$(document).ready(function() {											// WHEN PAGE LOADED
+		if (window.addEventListener) 											// If supported this way
+			window.addEventListener("message",shivaEventHandler,false);			// Add event handler
+		else																	// Use other method
+			window.attachEvent("message",shivaEventHandler);					// Add handler
+		
+		isMobile=navigator.userAgent.match(/(ipad|iphone|ipod|android)/i) ? true : false; // Set mobile flag
+		var url=window.location.search.substring(1);							// Get query string
+		drupalMan=(""+url).match(/pr=d/);										// If called from Drupal manager
+		if (!url)																// Nothing on command line
+			url=456;															// Use default
+		if (drupalMan)	url="";													// If drupal, kill url
+		var h=$(window).height()-55;											// Calc height
+		var str="<iframe class='player' frameborder='0' scrolling='no' id='playerIF' src='index.html?-"+url;// Iframe
+		str+="' style='border:0;padding:0;margin:0;width:100%;height:"+h+"px'></iframe>"; // Sizing
+		$("#bodyDiv").append(str);												// Add player iframe
+		$("#showMenu").text("Current show: "+url);							// Set id
+	});
+
+	function SendShivaMessage(src, msg) 									// SEND SHIVA MESSAGE 
+	{
+		var str=src;															// Add src and window						
+		if (msg)																// If more to it
+			str+="|"+msg;														// Add it
+		if (window.parent)														// If has a parent
+			window.parent.postMessage(str,"*");									// Send message to parent wind
+		else																	// Local	
+			window.postMessage(str,"*");										// Send message to wind
+	}
+
+	function shivaEventHandler(e)											// ON SHIVA EVENT
+	{
+		trace(e.data);
+	
+	}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// MENUS
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	$("#fileMenu").on("click",function(e) { 
+		var l=$(this).position().left+92;
+		var t=$(this).position().top+23;
+		$("#fileMenu").css("color","#009900");										
+		$("#fileDiv").remove();
+		var str="<div class='ef-pullDown' style='left:"+l+"px;top:"+t+"px' id='fileDiv'>";
+		str+="<div class='ef-pullDownItem' style='color:#000' onclick='dataObj.Save()'> Save </div>";
+		str+="<div class='ef-pullDownItem' onclick='dataObj.Save()'> Copy </div>";
+		str+="<div class='ef-pullDownItem' onclick=''dataObj.Load()'> Paste </div>";
+		str+="<div id='undoMenu' class='ef-pullDownItem' onclick='UnDo()'> Undo</div>";
+		str+="</div>";
+		$("body").append(str);
+		$("#undoMenu").css("color", changed ? "#000" : "#999");			// Show active undos available
+
+		$("#fileDiv").on("mouseleave",function() { 
+			$("#fileDiv").remove();
+			$("#fileMenu").css("color","#000");										
+			});
+		
+		$("#fileDiv").on("click",function(e) { 
+			var i=Math.floor(Math.max(0,Math.min((e.clientY-42)/24,4)));
+			$("#fileDiv").remove();
+			$("#fileMenu").css("color","#000");	
+			});
+	
+		});
+
+		$("#helpMenu").on("click",function(e) { 
+			window.open("https://docs.google.com/document/d/161td5ZuqKqT5R5r9z1P8AxBA6l9LaP-eYl_RvCyvw2g","_blank");
+			});
+	
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// UNDO
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		function UnDo()
+		{
+		}
+
+// GOOGLE ANALYTICS ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-10474630-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+</body></html>
