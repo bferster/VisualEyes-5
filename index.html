@@ -199,7 +199,9 @@
 			}
 		else
 			InitProject(data);													// Init project
-     	}
+		if (window.parent)														// If within a window
+			window.parent.postMessage("Editor=load|"+curShow,"*");				// Send load message to editor
+   	}
 
 	function InitProject(data)												// INIT PROJECT
 	{
@@ -367,7 +369,7 @@
 		
 		isMobile=navigator.userAgent.match(/(ipad|iphone|ipod|android)/i) ? true : false; // Set mobile flag
 		var url=window.location.search.substring(1);							// Get query string
-		qmf=new QmediaFile("//www.stagetools.com/qmedia/",4);						// Alloc file system
+		qmf=new QmediaFile("//www.stagetools.com/qmedia/",4);					// Alloc file system
 
 		drupalMan=(""+url).match(/pr=d/);										// If called from Drupal manager
 		if (!url)																// Nothing on command line
@@ -514,17 +516,18 @@
 						vv[i]=FindMobByID(vv[i]);								// Convert to mob index
 				mps.DrawMapLayers(vv,v[2])										// Show markers(s)
 				}
-		}	
+			}	
+		if (e.data && e.data.match(/Editor=/)) {								// If an editor event
+			if (e.data.match(/refresh/))										// If refreshing
+				ReloadShow();													// Refresh show
+			}
+
 	}
 
 	$("#settingsBut").click(function(e) {										// SETTINGS BUTTON CLICK
 		if (e.ctrlKey && curJson.sheet) {										// If just refreshing spreadsheet
-   	  			dtl.GetSpreadsheet(curJson.sheet,true,null,function(data) {		// Get spreadsheet data
-					curJson.mobs=data;											// Set mobs
-					InitProject(curJson);										// Re-init project
-					},true);
-			pop.Sound("ding");													// Ding
-	 		return;																// Quit
+			ReloadShow();														// Refresh show
+			return;																// Quit
 	 		}
 		var str="<div style='max-height:60vh;overflow-y:auto'>";
 		str+="<table><tr height='18'>";
@@ -762,18 +765,9 @@
 
 
 	$("body").keyup(function(e) {											// KEY DOWN HANDLER
-		if (e.altKey && (e.keyCode == 82))	{									// Alt-R
-	   		if (curJson.sheet) 													// If a spreadsheet spec'd
-			 	dtl.GetSpreadsheet(curJson.sheet,true,null,function(mobs) {		// Get spreadsheet data
-					curJson.mobs=mobs;											// Set mobs
-					InitProject(curJson);										// Re-init project
-					pop.Sound("ding");											// Ding
-					},true);
-			}
+		if (e.altKey && (e.keyCode == 82))										// Alt-R
+			ReloadShow();														// Refresh show
 		});
-
-
-
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -890,6 +884,17 @@
 			}
 		return url;																	// Return link
 	}
+
+	function ReloadShow()														// RELOAD SHOW FROM SPREADSHEET
+	{
+		if (curJson.sheet) 															// If a spreadsheet spec'd
+			dtl.GetSpreadsheet(curJson.sheet,true,null,function(mobs) {				// Get spreadsheet data
+					curJson.mobs=mobs;												// Set mobs
+					InitProject(curJson);											// Re-init project
+					pop.Sound("ding");												// Ding
+					},true);
+	}
+
 
 // GOOGLE ANALYTICS ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
