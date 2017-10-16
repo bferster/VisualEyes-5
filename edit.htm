@@ -105,6 +105,11 @@
 		str+="' style='border:0;padding:0;margin:0;width:100%;height:"+h+"px'></iframe>"; // Sizing
 		$("#bodyDiv").append(str);												// Add player iframe
 		$("#mainDiv").animate({ opacity:1 },3000);								// Fade in
+
+		$(window).resize(function() {											// Dynamic resizing
+			var h=$(window).height()-55;										// Calc height
+			$("#playerIF").height(h)											// Resize iframe
+			});										
 	});
 
 	function SendShivaMessage(cmd, msg) 									// SEND SHIVA MESSAGE 
