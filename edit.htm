@@ -20,7 +20,7 @@
 		.ef-menu {			width: 100%; height: 32px; color:#666; background-color:#ddd; opacity: inherit;
 							border-top-left-radius: 6px; border-top-right-radius:6px;
 							}
-		.ef-menuItem {		margin-left: 50px; cursor: pointer; color:#000;
+		.ef-menuItem {		margin-left: 50px; cursor: pointer; color:#000; font-weight: normal;
 							}
 		.ef-navMenubar  	{ position:absolute;padding:16px;
 							}
@@ -33,7 +33,7 @@
 							}
 		.ef-editor {		position: absolute; background-color :#ddd; width: 576px; height: 276px; 
 							border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; padding: 12px;
-							box-shadow:4px 4px 8px #999; border: 1px solid #999;
+							border: 1px solid #999;
 							}
 		.ef-pullDown {		position: absolute; background-color :#ddd; width: 100px; 
 							}
@@ -66,8 +66,8 @@
 					S H A N T l
 					<span style="margin-left:100px"></span>
 					<span id="eventMenu"    class="ef-menuItem" onclick='EditEvent(this)'>Event</span>
+					<span id="graphicMenu" class="ef-menuItem" onclick='EditGraphic(this)'>Graphic</span>
 					<span id="storyMenu"    class="ef-menuItem" onclick='EditStory(this)'>Story</span>
-					<span id="graphicsMenu" class="ef-menuItem" onclick='EditGraphic(this)'>Graphic</span>
 					<span id="helpMenu" class="ef-menuItem">Help</span>
 					<span id="refreshMenu" style="margin-left:50px"class="ef-bs">Preview & Save</span>
 					<div  id="showMenu" class="ef-showItem"><b>No project loaded yet...</b></div>
@@ -192,28 +192,69 @@
 	{
 		var l=$(o).position().left+20;
 		var t=$(o).position().top+24;
-		$("#eventMenu").css({ "color":"#009900","font-weight":"bold" });										
-		$("#editDiv").remove();
+		$(".ef-menuItem").css({ "color":"#000","font-weight":"normal" });	// Restore menu bar									
+		$("#eventMenu").css({ "color":"#009900","font-weight":"bold" });		// Highlight this menu										
+		$("#editDiv").remove();											// Remove old editor
+		
 		var str="<div class='ef-editor' style='left:"+l+"px;top:"+t+"px' id='editDiv'>"
 		str+="<img src='img/closedot.gif' style='float:right' id='editCloseDot'>";	
-		str+="Start Id Title<br>"	
-			
+		str+="Show list of graphics to edit"	
+		
 		str+="</div>";
-		$("body").append(str);
+		$("body").append(str);											// Add editor
+		$("#editDiv").draggable();										// Make it draggable
 	
 		$("#editCloseDot").on("click",function(e) { 
-			$("#editDiv").remove();
-			$("#eventMenu").css({ "color":"#000","font-weight":"normal" });										
+			$("#editDiv").remove();										// Remove editor
+			$(".ef-menuItem").css({ "color":"#000","font-weight":"normal" });	// Restore menu bar									
 		});
 
 	}
 
-	function EditStory()
+	function EditStory(o)
 	{
+		var t=$(o).position().top+24;
+		var w=$(window).width()-34;
+		var h=$(window).height()-t-36;
+		var l=w*.66667;
+		
+		$(".ef-menuItem").css({ "color":"#000","font-weight":"normal" });	// Restore menu bar									
+		$("#storyMenu").css({ "color":"#009900","font-weight":"bold" });	// Highlight this menu										
+		$("#editDiv").remove();												// Remove old editor
+		var str="<div id='editDiv' class='ef-editor' style='left:"+l+"px;top:"+t+"px;"
+		str+="width:"+w*.33333+"px;height:"+h+"px;border-radius:0'>";
+		str+="<img src='img/closedot.gif' style='float:right' id='editCloseDot'>";	
+		str+="Rich text editor";
+		str+="</div>";
+		$("body").append(str);											// Add editor
+		$("#editDiv").draggable();										// Make it draggable
+		$("#editCloseDot").on("click",function(e) { 
+			$("#editDiv").remove();										// Remove editor
+			$(".ef-menuItem").css({ "color":"#000","font-weight":"normal" });	// Restore menu bar									
+		});
+
 	}
 
-	function EditGraphic()
+	function EditGraphic(o)
 	{
+		var l=$(o).position().left+20;
+		var t=$(o).position().top+24;
+		$(".ef-menuItem").css({ "color":"#000","font-weight":"normal" });	// Restore menu bar									
+		$("#graphicMenu").css({ "color":"#009900","font-weight":"bold" });	// Highlight this menu										
+		$("#editDiv").remove();											// Remove old editor
+		
+		var str="<div class='ef-editor' style='left:"+l+"px;top:"+t+"px' id='editDiv'>"
+		str+="<img src='img/closedot.gif' style='float:right' id='editCloseDot'>";	
+		str+="Show list of graphics to edit<br>"	
+			
+		str+="</div>";
+		$("body").append(str);											// Add editor
+		$("#editDiv").draggable();										// Make it draggable
+	
+		$("#editCloseDot").on("click",function(e) { 
+			$("#editDiv").remove();										// Remove editor
+			$(".ef-menuItem").css({ "color":"#000","font-weight":"normal" });	// Restore menu bar									
+		});
 	}
 
 
