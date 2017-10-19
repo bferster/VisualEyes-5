@@ -531,7 +531,7 @@ Space.prototype.DrawPath=function(num, time) 						// DRAW PATH
 				v[last][1]=o.dots[s][1]+((o.dots[e][1]-o.dots[s][1])*pct);	// Interpolate y
 				if (head && sty && (pct < 1))	{						// If a header defined
 					head.setGeometry(new ol.geom.Point(v[last]));		// Move it
-					sty.getImage().setOpacity(vis);						// Show it
+					sty.getImage().setOpacity(1);						// Show it
 					}
 				}
 			}
@@ -605,7 +605,7 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 
 	var i,image;
 	var w2=sty.w ? sty.w*.6667 : 8;											// Set size
-	if (sty.f) {															// If fill spec'd
+	if (sty.f && sty.f != "none") {											// If fill spec'd
 	  	if (sty.f.length == 4) sty.f+=sty.f.substr(1,3);					// Turn #555 into #55555
 	  	r=parseInt("0x"+sty.f.substr(1,2),16);								// R
 		g=parseInt("0x"+sty.f.substr(3,2),16);								// G

@@ -247,12 +247,13 @@
 					o.type="path";												// Set type
 					if (!o.desc)												// No desc
 						continue;												// Don't add
-						v=o.desc.split(",");									// Split by comma
+					v=o.desc.split(",");										// Split by comma
+					trace(v)
 					for (j=0;j<v.length;++j) {									// For each one spec'd
  						id=curJson.mobs[FindMobByID(v[j])];						// Point at mob
- 						if ((id == undefined) || (id < 0) || (!id.where))		// Mob not found or no where set
+						if ((id == undefined) || (id < 0) || (!id.where))		// Mob not found or no where set
  							continue;											// Skip it
- 						t=id.start;												// Get time
+						t=id.start;												// Get time
   						t=pop.DateToTime(t);									// +/- min past 1970
 						if (!j)		s=e=t;										// Init to 1st mob
 						vv=(""+id.where).split(",");							// Split into parts
@@ -262,7 +263,7 @@
 						s=Math.min(s,t);										// Earliest
 						e=Math.max(e,t);										// Latest
 						}
-					var ew=o.size ? o.size  : 2;								// Set size with 2 pixel default
+						var ew=o.size ? o.size  : 2;								// Set size with 2 pixel default
 					var eo=o.opacity ? o.opacity  : 1;							// Set opacity with 1.0 default
 					if (o.mapMarker) {											// If adding a header marker
 						sty={ m:o.mapMarker };									// Use mapMarker 
@@ -272,6 +273,14 @@
 						o.mapOpacity  ? sty.a=o.mapOpacity  : sty.a=eo;				
 						o.header=mps.AddMarkerLayer("0,0",sty,i+"h","");	
 						}	
+					
+					if (!dots[1][2]) {                                          // If no innner times
+                        var n=dots.length-1;                                    // Number of dots
+                        var ss=dots[0][2]; 										// Get end time
+                       	var ee=(dots[n][2]-ss)/(n-1); 							// Interval
+						for (j=1;j<dots.length-1;++j)							// For each intermediary dot
+                            dots[j][2]=ss+(ee*j); 								// Interpolate time 
+						}
 					dots=dots.sort(function(a, b) {  return a[2]-b[2]; });		// Sort ascending by time
 					o.lid=mps.AddPathLayer(dots,o.color,ew,eo,s,o.end ? o.end: e,o.show,o.header,i); // Add path to overlays
 					}
