@@ -237,6 +237,36 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// STORY EDITOR 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Story.prototype.StoryEditor=function(m) 								// STORY EDITOR
+{
+	$("#storyEditor").remove();												// Remove any old one
+	var w=$("#rightDiv").width()-20;
+	var h=$("#rightDiv").height()-28;
+	var l=$("#rightDiv").offset().left+8;
+	str="<div id='storyEditor' class='ve-storyEditor' style='left:"+l+"px;top:8px;width:"+w+"px;height:"+h+"px'>";
+	str+="<div style='margin:12px;margin-bottom:4px'><img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
+	str+="<span style='font-size:18px;color:#666'><b>VisualEyes Story Editor</b></span>";
+	str+=MakeSelect("seOps",false,["Choose","Preview","Paste old story","Copy this story","Quit","----------------","foot()","iframe()","link()","pic()","play()","show()","story()","where()","zoomer()"],"","style='float:right;margin-top:4px'")+"</td></tr>";
+	str+="</div><div style='width:"+(w-4)+"px'>";
+	str+="<iframe frameborder='0' scrolling='no' id='playerIF' src='storyEditor.htm?"+h+"' ";
+	str+="style='border:0;padding:0;margin:0;width:100%;height:"+(h-32)+"px'></iframe>";
+	str+="</div></div>";
+	$("body").append(str);												// Add editor
+	$("#storyEditor").draggable();										// Make it draggable
+	$("#seOps").on("change",function(e) { 								// ON SELECT
+		switch($(this).val()) {											// Route on change
+			case "Quit":
+				$("#storyEditor").remove();								// Remove editor
+				break;
+			}
+		$(this).val("Choose");											// Reset
+	});
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // HELPERS 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

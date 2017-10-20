@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="img/shanti.ico">
+	<title>VisualEyes Story Editor</title>
+ 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>	
+	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css" />
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+	<script src="jquery.ui.touch-punch.min.js"></script>
+	<script src="ckeditor/ckeditor.js"></script>
+	
+ 	<style type="text/css">
+		 body { 			font-family:Verdana,Geneva,sans-serif; font-size: 12px; 
+							padding: 0px; box-sizing: border-box;
+							}
+	</style>
+
+</head>
+<body>
+
+	<textarea class="ckeditor" id="editor1" name="editor1"></textarea>
+	
+
+<script>
+
+	var isMobile=false;															// Flag for mobile devices
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// INIT
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	$(document).ready(function() {											// WHEN PAGE LOADED
+		if (window.addEventListener) 											// If supported this way
+			window.addEventListener("message",shivaEventHandler,false);			// Add event handler
+		else																	// Use other method
+			window.attachEvent("message",shivaEventHandler);					// Add handler
+		isMobile=navigator.userAgent.match(/(ipad|iphone|ipod|android)/i) ? true : false; // Set mobile flag
+		var h=$(window).height()-34;
+		CKEDITOR.on('instanceLoaded', function(e) {e.editor.resize("100%", h)} );
+  	});
+
+	function SendShivaMessage(cmd, msg) 									// SEND SHIVA MESSAGE 
+	{
+		var str=cmd;															// Add src					
+		if (msg)																// If more to it
+			str+="|"+msg;														// Add it
+		var win=document.getElementById("playerIF").contentWindow;				// Point at iframe	
+		win.postMessage(str,"*");												// Send message to show
+	}
+
+	function shivaEventHandler(e)											// ON SHIVA EVENT
+	{
+		if (e.data && e.data.match(/Editor=load/))	{							// A show loaded
+			curShow=e.data.substring(12);										// Get show number
+			$("#showMenu").text("Current show: "+curShow);						// Set id
+           	var url="//www.stagetools.com/qmedia/loadshow.php?id="+curShow;		// Get from db
+			$.ajax({ url: url, dataType:'jsonp' });								// Get jsonp and call LoadShow() from it
+			}
+	}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// HELPERS
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	function trace(msg, p1, p2, p3, p4)										// CONSOLE 
+	{
+		if (p4 != undefined)
+			console.log(msg,p1,p2,p3,p4);
+		else if (p3 != undefined)
+			console.log(msg,p1,p2,p3);
+		else if (p2 != undefined)
+			console.log(msg,p1,p2);
+		else if (p1 != undefined)
+			console.log(msg,p1);
+		else
+			console.log(msg);
+	}
+
+// GOOGLE ANALYTICS ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-10474630-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+</body></html>

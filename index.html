@@ -77,6 +77,9 @@
 		.time-labels { 		position:absolute;font-weight:bold;background-color:#f8f8f8;padding-left:4px;
 							height:16px;
 							}
+		.ve-storyEditor {	position: absolute; background-color :#ddd; box-shadow: 4px 4px 8px #ccc;
+							border-radius: 14px; padding: 0px; border: 1px solid #999;
+							}
 		.ve-unselectable { 	-moz-user-select: none;    	 -khtml-user-select: none;
 		   			 		-webkit-user-select: none;  	-ms-user-select: none;   user-select: none;
 							}
@@ -148,7 +151,7 @@
 	var curShow="";																// Current show
 	var _this=this;																// Save context for callbacks
 	var origLR=.66, origUD=.75;													// Pane size to come back to
-	
+		
 	function ResizePanes()													// RESIZE PANES
 	{ 
 		var wid=$("#showDiv").width();											// Width
@@ -248,7 +251,6 @@
 					if (!o.desc)												// No desc
 						continue;												// Don't add
 					v=o.desc.split(",");										// Split by comma
-					trace(v)
 					for (j=0;j<v.length;++j) {									// For each one spec'd
  						id=curJson.mobs[FindMobByID(v[j])];						// Point at mob
 						if ((id == undefined) || (id < 0) || (!id.where))		// Mob not found or no where set
@@ -562,7 +564,7 @@
 		str+="<tr><td>Map&nbsp;location</td><td><input id='setwhere' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td>Map&nbsp;point</td><td><input id='setpoint' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td colspan=2><br></td> <tr>";
-		str+="<tr><td>Options</td><td>"+MakeSelect("setfile",false,["Choose","Load","Save","Save as...","Delete","Undelete","Drawing","Geo-reference"],"Save/Load");
+		str+="<tr><td>Options</td><td>"+MakeSelect("setfile",false,["Choose","Load","Save","Save as...","Delete","Undelete","Drawing","Geo-reference","Story editor"],"Save/Load");
 		str+="&nbsp;&nbsp;&nbsp<i><span id='showInd'>"+(curShow ? "#"+curShow : '')+"</span></i></span>&nbsp;&nbsp;&nbsp;"
 		str+="Help <a href='https://docs.google.com/document/d/161td5ZuqKqT5R5r9z1P8AxBA6l9LaP-eYl_RvCyvw2g/edit?usp=sharing' target='_blank'>";
 		str+="<img src='img/helpicon.gif' style='vertical-align:bottom' title='Show help'></a></td>";
@@ -641,6 +643,7 @@
 				case "Undelete": 		qmf.Delete(1);		break;				// Undelete
 				case "Drawing": 		mps.DrawingTool();	break;				// Run KML drawing tool
 				case "Geo-reference": 	mps.GeoReference("//farm9.staticflickr.com/8019/7310697988_18eb47c466_z.jpg");	break;		// Georef
+				case "Story editor" : 	sto.StoryEditor();	break;				// Story editor
 				}
 			$(this).val("Choose");												// Reset select
 			}); 
