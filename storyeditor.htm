@@ -9,7 +9,6 @@
 	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 	<script src="jquery.ui.touch-punch.min.js"></script>
 	<script src="ckeditor/ckeditor.js"></script>
-	
  	<style type="text/css">
 		 body { 			font-family:Verdana,Geneva,sans-serif; font-size: 12px; 
 							padding: 0px; box-sizing: border-box;
@@ -38,27 +37,21 @@
 		isMobile=navigator.userAgent.match(/(ipad|iphone|ipod|android)/i) ? true : false; // Set mobile flag
 		var h=$(window).height()-34;
 		CKEDITOR.on('instanceLoaded', function(e) {e.editor.resize("100%", h)} );
-  	});
-
-	function SendShivaMessage(cmd, msg) 									// SEND SHIVA MESSAGE 
-	{
-		var str=cmd;															// Add src					
-		if (msg)																// If more to it
-			str+="|"+msg;														// Add it
-		var win=document.getElementById("playerIF").contentWindow;				// Point at iframe	
-		win.postMessage(str,"*");												// Send message to show
-	}
+	});
 
 	function shivaEventHandler(e)											// ON SHIVA EVENT
 	{
-		if (e.data && e.data.match(/Editor=load/))	{							// A show loaded
-			curShow=e.data.substring(12);										// Get show number
-			$("#showMenu").text("Current show: "+curShow);						// Set id
-           	var url="//www.stagetools.com/qmedia/loadshow.php?id="+curShow;		// Get from db
-			$.ajax({ url: url, dataType:'jsonp' });								// Get jsonp and call LoadShow() from it
+		if (e.data && e.data.match(/INS:/))	{									// Insert macro
+			CKEDITOR.instances.editor1.insertText(e.data.substring(4));			// Insert text	
+			Sound("ding");														// Ding	
 			}
+		else if (e.data == "COPY") 												// Copy to clipboard
+			CopyToClipboard(CKEDITOR.instances.editor1.getData());				// Copy editor html			
+		else if (e.data == "GET") 												// Send back data
+			e.source.postMessage("STORY="+CKEDITOR.instances.editor1.getData(),"*");  // Send it
 	}
 
+		
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // HELPERS
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -76,6 +69,41 @@
 		else
 			console.log(msg);
 	}
+
+	function CopyToClipboard(text) 											// COPY TEXT TO CLIP BOARD
+	{
+  		var textArea = document.createElement("textarea");
+		textArea.style.position = 'fixed';
+  		textArea.style.top=textArea.style.left = 0;
+  		textArea.style.width=textArea.style.height = '2em';
+  		textArea.style.padding = 0;
+		textArea.style.border=textArea.style.outline=textArea.style.boxShadow = 'none';
+		textArea.style.background = 'transparent';
+		textArea.value = text;
+		document.body.appendChild(textArea);
+		textArea.select();
+		try {
+			if (document.execCommand('copy'))
+				Sound("ding");
+			else
+				Sound("delete");
+			} catch (err) {
+				Sound("delete");
+				}
+		document.body.removeChild(textArea);
+	}
+
+	function Sound(sound, mute)												// PLAY SOUND
+	{
+		var snd=new Audio();													// Init audio object
+		if (!snd.canPlayType("audio/mpeg") || (snd.canPlayType("audio/mpeg") == "maybe")) 
+			snd=new Audio("img/"+sound+".ogg");									// Use ogg
+		else	
+			snd=new Audio("img/"+sound+".mp3");									// Use mp3
+		if (!mute)																// If not initing or muting	
+			snd.play();															// Play sound
+	}
+
 
 // GOOGLE ANALYTICS ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -528,11 +528,8 @@
 				mps.DrawMapLayers(vv,v[2])										// Show markers(s)
 				}
 			}	
-		if (e.data && e.data.match(/Editor=/)) {								// If an editor event
-			if (e.data.match(/refresh/))										// If refreshing
-				ReloadShow();													// Refresh show
+		if (e.data && e.data.match(/STORY=/)) {									// If a story editor event
 			}
-
 	}
 
 	$("#settingsBut").click(function(e) {										// SETTINGS BUTTON CLICK
@@ -643,7 +640,10 @@
 				case "Undelete": 		qmf.Delete(1);		break;				// Undelete
 				case "Drawing": 		mps.DrawingTool();	break;				// Run KML drawing tool
 				case "Geo-reference": 	mps.GeoReference("//farm9.staticflickr.com/8019/7310697988_18eb47c466_z.jpg");	break;		// Georef
-				case "Story editor" : 	sto.StoryEditor();	break;				// Story editor
+				case "Story editor" : 											// Story editor
+					sto.StoryEditor();											// Edit
+					$("#dialogDiv").remove();									// Remove any old ones
+					break;				
 				}
 			$(this).val("Choose");												// Reset select
 			}); 

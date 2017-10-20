@@ -242,6 +242,7 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 
 Story.prototype.StoryEditor=function(m) 								// STORY EDITOR
 {
+	var str;
 	$("#storyEditor").remove();												// Remove any old one
 	var w=$("#rightDiv").width()-20;
 	var h=$("#rightDiv").height()-28;
@@ -249,19 +250,75 @@ Story.prototype.StoryEditor=function(m) 								// STORY EDITOR
 	str="<div id='storyEditor' class='ve-storyEditor' style='left:"+l+"px;top:8px;width:"+w+"px;height:"+h+"px'>";
 	str+="<div style='margin:12px;margin-bottom:4px'><img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
 	str+="<span style='font-size:18px;color:#666'><b>VisualEyes Story Editor</b></span>";
-	str+=MakeSelect("seOps",false,["Choose","Preview","Paste old story","Copy this story","Quit","----------------","foot()","iframe()","link()","pic()","play()","show()","story()","where()","zoomer()"],"","style='float:right;margin-top:4px'")+"</td></tr>";
+	str+=MakeSelect("seOps",false,["Choose","Reload","Copy to clipboard","----------------","foot()","iframe()","link()","pic()","show()","story()","where()","zoomer()","----------------","Quit"],"Choose","style='float:right;margin-top:4px'")+"</td></tr>";
 	str+="</div><div style='width:"+(w-4)+"px'>";
-	str+="<iframe frameborder='0' scrolling='no' id='playerIF' src='storyEditor.htm?"+h+"' ";
+	str+="<iframe frameborder='0' scrolling='no' id='playerIF' src='storyeditor.htm' ";
 	str+="style='border:0;padding:0;margin:0;width:100%;height:"+(h-32)+"px'></iframe>";
 	str+="</div></div>";
 	$("body").append(str);												// Add editor
 	$("#storyEditor").draggable();										// Make it draggable
+	var win=document.getElementById("playerIF").contentWindow;			// Point at iframe	
+
 	$("#seOps").on("change",function(e) { 								// ON SELECT
 		switch($(this).val()) {											// Route on change
 			case "Quit":
 				$("#storyEditor").remove();								// Remove editor
 				break;
-			}
+			case "Copy to clipboard":									// Copy
+				win.postMessage("COPY","*") 							// Send message
+				break;
+			case "Reload":												// Reload
+				ReloadShow();											// Refresh show
+				break;
+			case "foot()":												// Foot
+				str="Type footnote to add."
+				pop.GetTextBox("Add footnote macro", str, "", function(s) {
+					win.postMessage("INS:foot("+s+")","*") 			// Send message
+					});
+				break;
+			case "iframe()":											// Iframe
+				str="Type the fully formed url of the page you want to load as an iframe. If you want to specify a height in pixels, add it with a comma (i.e. http://mySite.com,400)."
+				pop.GetTextBox("Add iframe macro", str, "", function(s) {
+					win.postMessage("INS:iframe("+s+")","*") 			// Send message
+					});
+				break;
+			case "link()":												// Link
+				str="Type title and following a comma, the fully formed url of the page you want to show.  (i.e. here,http://mySite.com)."
+				pop.GetTextBox("Add link macro", str, "", function(s) {
+					win.postMessage("INS:link("+s+")","*") 				// Send message
+					});
+				break;
+			case "pic()":												// Pic
+				str="Type the fully formed url of the picture. If you want to specify a width in pixels, add it with a comma (i.e. http://mySite.com/pic.jpg,400)."
+				pop.GetTextBox("Add picture macro", str, "", function(s) {
+					win.postMessage("INS:pic("+s+")","*") 				// Send message
+					});
+				break;
+			case "show()":												// Show
+				str="Type title and following a comma, the id of the element to show.  (i.e. here,myId)."
+				pop.GetTextBox("Add show macro", str, "", function(s) {
+					win.postMessage("INS:show("+s+")","*") 				// Send message
+					});
+				break;
+			case "story()":												// Story
+				str="Type title and following a comma, the id of the story element to show.  (i.e. here,myStoryId)."
+				pop.GetTextBox("Add story macro", str, "", function(s) {
+					win.postMessage("INS:story("+s+")","*") 				// Send message
+					});
+				break;
+			case "where()":												// Where
+				str="Type title, lat, lot, zoom,and optional seconds.  (i.e. here,-78,39,600,4)."
+				pop.GetTextBox("Add where macro", str, "", function(s) {
+					win.postMessage("INS:where("+s+")","*") 			// Send message
+					});
+				break;
+			case "zoomer()":												// Link
+				str="Type title and following a comma, the fully formed url of the picture you want to zoom.  (i.e. here,http://mySite.com/pic.jpg)."
+				pop.GetTextBox("Add zoomer macro", str, "", function(s) {
+					win.postMessage("INS:zoomer("+s+")","*") 			// Send message
+					});
+				break;
+				}
 		$(this).val("Choose");											// Reset
 	});
 }
