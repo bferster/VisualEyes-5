@@ -277,43 +277,44 @@ Story.prototype.StoryEditor=function(m) 								// STORY EDITOR
 					});
 				break;
 			case "iframe()":											// Iframe
-				str="Type the fully formed url of the page you want to load as an iframe. If you want to specify a height in pixels, add it with a comma (i.e. http://mySite.com,400)."
+				str="Type the fully formed url of the page you want to load as an iframe. If you want to specify a height in pixels, add it following a comma (i.e. http://mySite.com,400)."
 				pop.GetTextBox("Add iframe macro", str, "", function(s) {
 					win.postMessage("INS:iframe("+s+")","*") 			// Send message
 					});
 				break;
 			case "link()":												// Link
-				str="Type title and following a comma, the fully formed url of the page you want to show.  (i.e. here,http://mySite.com)."
+				str="Type title to click on, a comma, and the fully formed url of the page you want to show.  (i.e. here,http://mySite.com)."
 				pop.GetTextBox("Add link macro", str, "", function(s) {
 					win.postMessage("INS:link("+s+")","*") 				// Send message
 					});
 				break;
 			case "pic()":												// Pic
-				str="Type the fully formed url of the picture. If you want to specify a width in pixels, add it with a comma (i.e. http://mySite.com/pic.jpg,400)."
+				str="Type the fully formed url of the picture. If you want to specify a width in pixels, add it following a comma (i.e. http://mySite.com/pic.jpg,400)."
 				pop.GetTextBox("Add picture macro", str, "", function(s) {
 					win.postMessage("INS:pic("+s+")","*") 				// Send message
 					});
 				break;
 			case "show()":												// Show
-				str="Type title and following a comma, the id of the element to show.  (i.e. here,myId)."
+				str="Type title to click on, and following a comma, the id of the element to show.  (i.e. here,myId)."
 				pop.GetTextBox("Add show macro", str, "", function(s) {
 					win.postMessage("INS:show("+s+")","*") 				// Send message
 					});
 				break;
 			case "story()":												// Story
-				str="Type title and following a comma, the id of the story element to show.  (i.e. here,myStoryId)."
+				str="Type title, and following a comma, the id of the story element to show.  (i.e. here,myStoryId)."
 				pop.GetTextBox("Add story macro", str, "", function(s) {
 					win.postMessage("INS:story("+s+")","*") 				// Send message
 					});
 				break;
 			case "where()":												// Where
-				str="Type title, lat, lot, zoom,and optional seconds.  (i.e. here,-78,39,600,4)."
+				str="Type title to click on. The current lon, lat, and zoom will be added automatically.)."
 				pop.GetTextBox("Add where macro", str, "", function(s) {
+					s+=","+mps.GetView();								// Add view
 					win.postMessage("INS:where("+s+")","*") 			// Send message
 					});
 				break;
 			case "zoomer()":												// Link
-				str="Type title and following a comma, the fully formed url of the picture you want to zoom.  (i.e. here,http://mySite.com/pic.jpg)."
+				str="Type title to click on, and following a comma, the fully formed url of the picture you want to zoom.  (i.e. here,http://mySite.com/pic.jpg)."
 				pop.GetTextBox("Add zoomer macro", str, "", function(s) {
 					win.postMessage("INS:zoomer("+s+")","*") 			// Send message
 					});

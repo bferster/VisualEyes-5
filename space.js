@@ -220,6 +220,12 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 		});
 	}	
 
+Space.prototype.GetView=function() 										// GET CURRENT VIEW
+{
+	var o=this.map.getView();												// Point at view
+	var c=ol.proj.transform(o.getCenter(),this.curProjection,'EPSG:4326');	// Get center
+	return (Math.floor(c[0]*10000)/10000+","+Math.floor(c[1]*10000)/10000+","+Math.round(o.getResolution()));
+}	
 
 Space.prototype.UpdateMapSize=function() 								// UPDATE MAP SIZE
 {

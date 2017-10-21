@@ -126,6 +126,15 @@ Popup.prototype.GetTextBox=function (title, content, def, callback)		// GET TEXT
 				            	"OK": 		function() { callback($("#gtBoxTt").val()); $(this).remove(); },
 				            	"Cancel":  	function() { $(this).remove(); }
 								}});	
+	
+	$("#gtBoxTt").keypress(function (e) {
+		if (e.which == 13) {
+			callback($("#gtBoxTt").val()); 
+			$("#alertBoxDiv").remove();												
+			return false;   
+			}
+		});
+
 	$(".ui-dialog-titlebar").hide();
 	$(".ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix").css("border","none");
 	$(".ui-dialog").css({"border-radius":"14px", "box-shadow":"4px 4px 8px #ccc"});
