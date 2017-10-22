@@ -5,25 +5,14 @@
 	<link REL="SHORTCUT ICON" HREF="img/shanti.ico">
 	<title>VisualEyes Story Editor</title>
  	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>	
-	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css" />
-	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
-	<script src="jquery.ui.touch-punch.min.js"></script>
 	<script src="ckeditor/ckeditor.js"></script>
  	<style type="text/css">
-		 body { 			font-family:Verdana,Geneva,sans-serif; font-size: 12px; 
-							padding: 0px; box-sizing: border-box;
-							}
+		 body { font-family: Verdana,Geneva,sans-serif; font-size: 12px; padding: 0; box-sizing: border-box;	}
 	</style>
-
 </head>
 <body>
-
 	<textarea class="ckeditor" id="editor1" name="editor1"></textarea>
-	
-
 <script>
-
-	var isMobile=false;															// Flag for mobile devices
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // INIT
@@ -34,9 +23,8 @@
 			window.addEventListener("message",shivaEventHandler,false);			// Add event handler
 		else																	// Use other method
 			window.attachEvent("message",shivaEventHandler);					// Add handler
-		isMobile=navigator.userAgent.match(/(ipad|iphone|ipod|android)/i) ? true : false; // Set mobile flag
-		var h=$(window).height()-34;
-		CKEDITOR.on('instanceLoaded', function(e) {e.editor.resize("100%", h)} );
+		var h=$(window).height()-34;											// Editor height
+		CKEDITOR.on('instanceLoaded', function(e) {e.editor.resize("100%", h)});// Resize editor
 	});
 
 	function shivaEventHandler(e)											// ON SHIVA EVENT
