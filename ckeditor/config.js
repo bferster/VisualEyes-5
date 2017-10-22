@@ -8,7 +8,7 @@ CKEDITOR.editorConfig = function( config ) {
 	config.toolbar =[
 		{ name: 'clipboard', items : [ 'Source','PasteFromWord','-','Undo','Redo' ] },
 		{ name: 'editing', items : [ 'SpellChecker', 'Scayt' ] },
-		{ name: 'insert', items : ['Table','SpecialChar','Table','Image'] },
+		{ name: 'insert', items : ['Table','SpecialChar','HorizontalRule','Image'] },
 		{ name: 'styles', items : [ 'Font','FontSize' ] },
 		{ name: 'colors', items : [ 'TextColor','BGColor' ] },
 		'/',
