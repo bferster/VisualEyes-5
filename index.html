@@ -246,13 +246,13 @@
 					o.lid=mps.AddKMLLayer(marker,o.opacity,o.id,s,e);			// Add KML layer								 
 					}
 				else if (o.marker && (o.marker.toLowerCase() == "path")) {		// A path
-					var dots=[];
+					var dots=[];												// Temorary dots holder
 					o.type="path";												// Set type
 					if (!o.desc)												// No desc
 						continue;												// Don't add
 					v=o.desc.split(",");										// Split by comma
 					for (j=0;j<v.length;++j) {									// For each one spec'd
- 						id=curJson.mobs[FindMobByID(v[j])];						// Point at mob
+						id=curJson.mobs[FindMobByID(v[j])];						// Point at mob
 						if ((id == undefined) || (id < 0) || (!id.where))		// Mob not found or no where set
  							continue;											// Skip it
 						t=id.start;												// Get time
@@ -265,7 +265,7 @@
 						s=Math.min(s,t);										// Earliest
 						e=Math.max(e,t);										// Latest
 						}
-						var ew=o.size ? o.size  : 2;								// Set size with 2 pixel default
+					var ew=o.size ? o.size  : 2;								// Set size with 2 pixel default
 					var eo=o.opacity ? o.opacity  : 1;							// Set opacity with 1.0 default
 					if (o.mapMarker) {											// If adding a header marker
 						sty={ m:o.mapMarker };									// Use mapMarker 
@@ -275,15 +275,12 @@
 						o.mapOpacity  ? sty.a=o.mapOpacity  : sty.a=eo;				
 						o.header=mps.AddMarkerLayer("0,0",sty,i+"h","");	
 						}	
-					
-					if (!dots[1][2]) {                                          // If no innner times
-                        var n=dots.length-1;                                    // Number of dots
-                        var ss=dots[0][2]; 										// Get end time
-                       	var ee=(dots[n][2]-ss)/(n-1); 							// Interval
-						for (j=1;j<dots.length-1;++j)							// For each intermediary dot
-                            dots[j][2]=ss+(ee*j); 								// Interpolate time 
-						}
 					dots=dots.sort(function(a, b) {  return a[2]-b[2]; });		// Sort ascending by time
+					if (o.start && o.end) {										// If times spec'd              
+                      	t=(o.end-o.start)/(dots.length-1); 						// Interval
+						for (j=0;j<dots.length-1;++j)							// For each intermediary dot
+                            dots[j][2]=o.start+(t*j); 							// Interpolate time 
+						}
 					o.lid=mps.AddPathLayer(dots,o.color,ew,eo,s,o.end ? o.end: e,o.show,o.header,i); // Add path to overlays
 					}
 				else if (marker.match(/\.png|.gif|\.jpg|\.jpeg|drive\.google/i) && o.where && ((""+o.where.split(",")).length > 3)) { // An image file with a full georef
@@ -811,6 +808,7 @@
 	{
 		var i,o;
 		var n=curJson.mobs.length;												// Get length
+		id=id.trim();															// Trim whitespace
 		for (i=0;i<n;++i) {														// For each mob
 			o=curJson.mobs[i].id;												// Get id												
 			if (o && o.indexOf(id) != -1)										// If it matches
