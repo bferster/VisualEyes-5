@@ -250,7 +250,7 @@ Story.prototype.StoryEditor=function(m) 								// STORY EDITOR
 	str="<div id='storyEditor' class='ve-storyEditor' style='left:"+l+"px;top:8px;width:"+w+"px;height:"+h+"px'>";
 	str+="<div style='margin:12px;margin-bottom:4px'><img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
 	str+="<span style='font-size:18px;color:#666'><b>VisualEyes Story Editor</b></span>";
-	str+=MakeSelect("seOps",false,["Choose","Reload spreadsheet","Copy to clipboard","----------------","foot()","iframe()","link()","pic()","show()","story()","where()","zoomer()","----------------","Quit"],"Choose","style='float:right;margin-top:4px'")+"</td></tr>";
+	str+=MakeSelect("seOps",false,["Choose","Reload spreadsheet","----------------","foot()","iframe()","link()","pic()","show()","story()","where()","zoomer()","----------------","Quit"],"Choose","style='float:right;margin-top:4px'")+"</td></tr>";
 	str+="</div><div style='width:"+(w-4)+"px'>";
 	str+="<iframe frameborder='0' scrolling='no' id='playerIF' src='storyeditor.htm' ";
 	str+="style='border:0;padding:0;margin:0;width:100%;height:"+(h-32)+"px'></iframe>";
@@ -263,9 +263,6 @@ Story.prototype.StoryEditor=function(m) 								// STORY EDITOR
 		switch($(this).val()) {											// Route on change
 			case "Quit":
 				$("#storyEditor").remove();								// Remove editor
-				break;
-			case "Copy to clipboard":									// Copy
-				win.postMessage("COPY","*") 							// Send message
 				break;
 			case "Reload spreadsheet":									// Reload
 				ReloadShow();											// Refresh show

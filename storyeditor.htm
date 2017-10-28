@@ -33,10 +33,6 @@
 			CKEDITOR.instances.editor1.insertText(e.data.substring(4));			// Insert text	
 			Sound("ding");														// Ding	
 			}
-		else if (e.data == "COPY") 												// Copy to clipboard
-			CopyToClipboard(CKEDITOR.instances.editor1.getData());				// Copy editor html			
-		else if (e.data == "GET") 												// Send back data
-			e.source.postMessage("STORY="+CKEDITOR.instances.editor1.getData(),"*");  // Send it
 	}
 
 		
