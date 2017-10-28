@@ -6,14 +6,12 @@ CKEDITOR.editorConfig = function( config ) {
 	config.resize_enabled = false;
 
 	config.toolbar =[
-		{ name: 'clipboard', items : [ 'Source','PasteFromWord','-','Undo','Redo' ] },
+		{ name: 'clipboard', items : [ 'Source','Undo','Redo' ] },
 		{ name: 'editing', items : [ 'SpellChecker', 'Scayt' ] },
 		{ name: 'insert', items : ['Table','SpecialChar','HorizontalRule','Image'] },
-		{ name: 'styles', items : [ 'Font','FontSize' ] },
-		{ name: 'colors', items : [ 'TextColor','BGColor' ] },
-		'/',
-		{ name: 'basicstyles', items : [ 'Bold','Italic','Underline','Strike','Subscript','Superscript','-','RemoveFormat' ] },
-		{ name: 'paragraph', items : [ 'NumberedList','BulletedList','-','Outdent','Indent','-','Blockquote',
-		'-','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock' ] },
+		{ name: 'basicstyles', items : [ 'Bold','Italic','Underline','RemoveFormat',
+			'NumberedList','BulletedList','Outdent','Indent',
+			'JustifyLeft','JustifyCenter','JustifyRight', ] },
+		{ name: 'styles', items : [	'-','Styles','Font','FontSize','TextColor' ] },
 		];
 };
