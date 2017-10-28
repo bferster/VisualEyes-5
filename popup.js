@@ -547,12 +547,18 @@ Popup.prototype.DateToTime=function(dateString) 						// CONVERT DATE TO MINS +/
  	@param {number} 
 	@return {string} number of mins += 1/1/1970
 */
+	var mins=0;																// Assume no extra time
 	if (!dateString)														// No date
 		return 0;															// Quit
 	if (!isNaN(dateString) && (dateString < -2500) || (dateString > 2500))	// Already in minutea
 		return dateString;													// Return original
 	var d=new Date();														// Make new date
-	var v=(dateString+"").split(" ")[0].split("/");							// Split date into parts
+	dateString+="";															// Make sure it's a string
+	if (dateString.split(":").length > 1) {									// Has hours
+		mins=dateString.split(":")[1]*60;									// Turn hours into minutes	
+		dateString=dateString.split(":")[0];								// Lop off minutes	
+		}
+	var v=(dateString).split(" ")[0].split("/");							// Split date into parts
 	if (v.length == 3)														// Mon/Day/Year
 		d.setFullYear(v[2],v[0]-1,v[1]);									// Set it to time
 	else if (v.length == 2)													// Mon/Year
@@ -560,8 +566,8 @@ Popup.prototype.DateToTime=function(dateString) 						// CONVERT DATE TO MINS +/
 	else																	// Year
 		d.setFullYear(v[0]);												// Set it to time
 	d.setMinutes(0); 	d.setSeconds(0); 									// Clear minutes/seconds
- 	var time=d.getTime()/60000;												// Conver ms to minutes
-  	return time;															// Return minutes +/- 1970
+ 	var time=(d.getTime()/60000)+mins;										// Conver ms to minutes and add extra time
+  	 return time;															// Return minutes +/- 1970
 
 }
 
