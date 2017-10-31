@@ -227,15 +227,13 @@ Space.prototype.GetView=function() 										// GET CURRENT VIEW
 	return (Math.floor(c[0]*10000)/10000+","+Math.floor(c[1]*10000)/10000+","+Math.round(o.getResolution()));
 }	
 
-Space.prototype.UpdateMapSize=function() 								// UPDATE MAP SIZE
+Space.prototype.UpdateMapSize=function() 								// UPDATE MAP SIZE TO MATCH DIV
 {
-
-/* 
-  	Update Openlayers map to match container div's size.
-  
-*/
-	if (this.map)															// If OL initted
+	if (this.map) {															// If OL initted
 		this.map.updateSize();												// Update map
+		var y=$(this.div).offset().top+$(this.div).height()-30;				// Y pos
+		$("#findPlaceDiv").css({ left:"6px",top:y+"px" });						// Move it and show
+		}
 }
 
 
@@ -460,7 +458,6 @@ Space.prototype.DrawChoropleth=function(num, time) 						// DRAW CHOROPLETH
 		features[i].setStyle(sty);											// Style it
 		}
 }
-
 
 Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show, header, id) 	// ADD PATH LAYER TO MAP						
 {
