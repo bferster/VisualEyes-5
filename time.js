@@ -638,13 +638,13 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 							str=str.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.ShowWebPage(\"#leftDiv\",\""+vv[2]+"\",\"zoomer\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 							}
 						}	
+					if (o.citation)	{										// If a cite
+						str+="<div class='story-cite' style='cursor:pointer'><br><a onclick='$(\"#cite"+id+"\").fadeIn()'>";
+						str+="<u>Citation</u><br><span style='display:none' id='cite"+id+"'><br>"+o.citation+"</span></div>";
+						}
+					_this.pop.ShowPopup(_this.div,_this.timeFormat,e.pageX+8,e.pageY-70,o.title,str,o.pic,o.start,o.end);	// Show popup
 					}
-       			if (o.citation)	{											// If a cite
-					str+="<div class='story-cite' style='cursor:pointer'><br><a onclick='$(\"#cite"+id+"\").fadeIn()'>";
-					str+="<u>Citation</u><br><span style='display:none' id='cite"+id+"'><br>"+o.citation+"</span></div>";
-					}
-			    _this.pop.ShowPopup(_this.div,_this.timeFormat,e.pageX+8,e.pageY-70,o.title,str,o.pic,o.start,o.end);	// Show popup
-				_this.SendMessage("time",o.start);							// Send new time
+ 				_this.SendMessage("time",o.start);							// Send new time
 				if (o.click) {												// If a click defined
 					v=o.click.split("+");									// Divide into individual actions
 					for (j=0;j<v.length;++j) {								// For each action

@@ -892,9 +892,11 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
  	 				}
 				  if (!id) 
 						return;	
-				  if (id.match(/Mob-/)) {										// If a mob
+				  if (id.match(/Mob-/)) {									// If a mob
   					var i=id.substr(4);										// Strip off header
-  					o=curJson.mobs[i];										// Point at mob data
+					if (isNaN(i))											// Must be a path header
+						return;												// Quit
+					o=curJson.mobs[i];										// Point at mob data
  					if (o.title) 		var title=o.title;					// Lead with title
   					if (o.spaceTitle) 	var title=o.spaceTitle;				// Space over-rides
  					if (o.desc) 		var desc=o.desc;					// Lead with desc
@@ -905,7 +907,8 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
 						desc+="<div class='story-cite' style='cursor:pointer'><br><a onclick='$(\"#cite"+i+"\").fadeIn()'>";
 						desc+="<u>Citation</u><br><span style='display:none' id='cite"+i+"'><br>"+o.citation+"</span></div>";
 						}
-     				_this.pop.ShowPopup(_this.div,_this.timeFormat,evt.pixel[0],evt.pixel[1],title,desc,pic,o.start,o.end);
+					if (o.desc)
+						_this.pop.ShowPopup(_this.div,_this.timeFormat,evt.pixel[0],evt.pixel[1],title,desc,pic,o.start,o.end);
 					if (o.start)											// If a time defined
 						_this.SendMessage("time",o.start);					// Send new time
 					if (o.click) {											// If a click defined
