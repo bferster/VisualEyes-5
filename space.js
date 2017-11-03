@@ -1,21 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SPACE.JS 
-//
-// Provides mapping component
-// Requires: popup.js
-// Calls global functions: Draw(), ClearPopUps()
-// Depends on global curJson for access to mob data
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function Space(div, pop)														// CONSTRUCTOR
 {
-
-/* 
- 	@param {string} div	Div ro attach map to.
- 	@param {object} pop	Points to popup library in popup.js.
- 	@constructor
-*/
-
 	this.div="#"+div;														// Current div selector
   	this.pop=pop;															// Point at popup lib
 	this.showBoxes=false;													// Show boxes
@@ -26,35 +14,16 @@ function Space(div, pop)														// CONSTRUCTOR
 	this.overlays=[];														// Holds overlay layers
 }
 
-
 Space.prototype.UpdateMap=function(curTime, timeFormat, panTime)		// UPDATE MAP
 {
-
-/*
-	Update the current time and set layer visibilities accordingly.
-	@param {number} curTime 	Current project time in mumber of mins += 1/1/1970
-	@param {string} timeFormat	Format to use when making time human readable	
-*/
-
 	this.timeFormat=timeFormat;												// Set format
 	this.curTime=curTime-0;													// Set current time
 	this.DrawMapLayers();													// Redraw map
 	this.panTime=panTime;													// Time to pan to position
 }
 
-
 Space.prototype.DrawMapLayers=function()								// DRAW OVERLAY LAYERS							
 {
-
-/* 
- 	Draws or shows overlay elements based on the current time.
-  	if .start != 0 marker is turned on at the .start time
-	if .start != 0 marker is turned off at the .end time
- 	If indices is set, the layers spec'd are turned on/off regardless of time
- 	@param {array} 		indices An array of indices specifying the marker(s) how.
-	@param {boolean} 	Whether.
-*/
-
 	var i,j,o,a,vis,sty;
 	if (this.canvasContext) {  												// If a canvas up      
 		this.canvasContext.clearRect(0,0,this.canvasWidth,this.canvasHeight); // Clear canvas
@@ -503,29 +472,30 @@ Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show,
 
 Space.prototype.DrawPath=function(num, time) 						// DRAW PATH						
 {
-
-/* 	Add path to marker layer.
- 	@param {number} num 	Layer to draw 
-	@param {number} time 	Current time in number of mins += 1/1/1970
-*/
-	
-	var s,e,pct,v=[],i=0,last,animate=false;
+	var s,e,pct,v=[],i=0,last;
 	var o=this.overlays[num];											// Point at overlay
 	var vis=dtl.ShowElement(o.tag) ? 0 : 1;								// Hide if hidden element
-	if (o.show && o.show.match(/a/i))	animate=true;					// Set animation mode
 	if (!o.dots.length)													// No dots
 		return;															// Quit
 	v.push([o.dots[0][0],o.dots[0][1]]);								// Add moveto dot
 	if (o.header) {														// If a header defined
 		var head=this.overlays[num-1].src;								// Point at header feature
 		var sty=head.getStyle();										// Get header style
-		if (sty)
+		if (sty)														// If a head style
 			sty.getImage().setOpacity(0);								// Hide
 		}			
+
+	var animate=false;													// No animation
+	var end=o.end;														// End at last dot	
+	if (o.show) {														// If show field set
+		if (o.show.match(/a/i))	animate=true;							// Animate last dot
+		if (o.show.match(/h/i))	end=9999999999999999;					// Set infinite path end
+		}
+
 	for (e=1;e<o.dots.length;++e) {										// For each lineto dot
 		s=e-1;															// Point at start of line
 		last=v.length-1;												// Point at last dot
-		if ((time >= o.dots[last][2]) && (time < o.end)) {				// This one's active
+		if ((time >= o.dots[last][2]) && (time < end)) {				// This one's active
 			v.push([o.dots[e][0],o.dots[e][1]]);						// Add end dot
 			last++;														// Point at last dot
 			if ((time < o.dots[e][2]) && animate){						// If before end of end dot and animating
@@ -542,7 +512,6 @@ Space.prototype.DrawPath=function(num, time) 						// DRAW PATH
 	if (!dtl.ShowElement(o.tag)) 	v=[];								// If hidden, hide it									
 	o.src.setGeometry(new ol.geom.LineString(v));						// Set new dots
 }
-
 
 Space.prototype.AddMarkerLayer=function(pos, style, id, start, end, show) 	// ADD MARKER LAYER TO MAP						
 {
@@ -671,12 +640,20 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 			  	}
 	  	break;
 	}
+	
+	var tf=sty.tf, dw=1, dc="";
+    if (sty.tf) {															// If a tf style
+        var v=sty.tf.split(" ");											// Split into parts
+        tf=v[0]+" "+v[1]+" "+v[2];											// Put back size/font
+        dw=v[3] ? v[3].replace(/px/i,"")-0 : 1;								// Get size if set
+        dc=v[4] ? v[4] : "#666";											// Get col if set
+        }
 	var text=new ol.style.Text( {											// Text style
 		textAlign: "center", textBaseline: "top",							// Set alignment
-		font: sty.tf,														// Set font
+		font: tf,															// Set font
 		text: sty.t ? sty.t : " ",											// Get label
 		fill: new ol.style.Fill({color: sty.tc }),							// Set color
-		stroke: new ol.style.Stroke({color: "#666", width:1 }),				// Outline
+		stroke: new ol.style.Stroke({color: dc, width: dw }),				// Outline
 		offsetY: w2,														// Set offset
 		});  
    	var s=new ol.style.Style({												// Create new style
@@ -887,12 +864,6 @@ MapImage.prototype.drawMapImage=function(opacity, _this)           	// DRAW IMAG
 
 Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES						
 {
-
-/* 
- 	Init the handing of marker and kml feature popups.
- 	Controls cursor on hover over feature/marker.
-*/
-
   	var _this=this;															// Save context for callbacks
 
  	this.map.on('click', function(evt) {									// ON MAP CLICK
@@ -1031,7 +1002,7 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 	str+="<tr><td>South</td><td><input id='grs' class='ve-is' style='width:80px' type='input'></td></tr>";
 	str+="<tr><td>East</td><td><input id='gre' class='ve-is' style='width:80px' type='input'></td></tr>";
 	str+="<tr><td>West</td><td><input id='grw' class='ve-is' style='width:80px' type='input'></td></tr>";
-	str+="<tr><td>Rotation</td><td><input id='grr' class='ve-is' style='width:80px' type='input'></td></tr>";
+	str+="<tr><td>Rotation</td><td><div id='rots' style='display:inline-block;width:66%'></div>&nbsp;&nbsp;&nbsp;<input id='grr' class='ve-is' style='width:40px' type='input'></td></tr>";
 	str+="<tr><td>Combined</td><td><input id='grc' class='ve-is' style='width:220px' type='input'></td></tr>";
 	str+="<tr><td>Opacity</td><td><div id='gra'></div></td></tr>";
 	str+="<tr><td colspan=2><br></td><tr>";
@@ -1055,7 +1026,12 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 		if (_this.geoRef)	_this.geoRef.a=ui.value/100; 					// If georef up. set val
 			_this.DrawMapLayers();											// Redraw map
 		 }});									
-	if (n)																	// If north set
+	 $("#rots").slider({ slide: function(e,ui) { 							// Init rotation slider
+		$("#grr").val(ui.value/100*360);									// Set text field
+		$("#grr").trigger("change");										// Trigger change
+		}});									
+
+	 if (n)																	// If north set
 		$("#grc").val(n+","+s+","+e+","+w+","+r);							// Combined
 
 	$("#grurl").on("change",function() {									// URL CHANGED

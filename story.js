@@ -159,6 +159,7 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 	var	fs=11,maxPix=100;													// Desc font size, pic size
 	var desc,col="#555",v,vv,title;
 	var mob=this.sd.mobs[num];												// Point at mob
+	if (!mob)		return "";												// No mob, so quit
 	if (mob.color)	col=mob.color;											// If a color set, use it
 	var _this=this;															// Save context for callback
 	if (this.storyMode != "Stepped") {										// Scroll mode
