@@ -45,8 +45,11 @@ Story.prototype.InitStory=function(data)								// INIT STORY
 		str+="<select id='pageSel' class='ve-bs' style='vertical-align:5px;text-align:center'>"; // Selector
 		for (i=0;i<this.sd.mobs.length;++i) 								// For each mob
 			if (this.sd.mobs[i].marker && (this.sd.mobs[i].marker.toLowerCase() == "story")) { 	// If  a story item
-				if (this.sd.mobs[i].show != "hide")	{					// If not hidden
-					str+="<option value='"+i+"'>"+(k++)+". "+ShortenString(this.sd.mobs[i].title,70)+"</option>";		// Add option
+				if (this.sd.mobs[i].show != "hide")	{						// If not hidden
+					str+="<option value='"+i+"'>";							// Option head
+					if (this.sd.mobs[i].pos)	str+="&nbsp;&bull;&nbsp;&nbsp;";	// Add indent if pos set		
+					else						str+=(k++)+". "; 					// Add number
+					str+=ShortenString(this.sd.mobs[i].title,70)+"</option>";		// Add option
 					this.pages.push(i);										// Save index to move
 					}
 				}

@@ -180,13 +180,15 @@
 	var curShow="";																// Current show
 	var _this=this;																// Save context for callbacks
 	var origLR=.66, origUD=.75;													// Pane size to come back to
-		
+	var topDot=-1;																// Top most dot
+
 	function ResizePanes()													// RESIZE PANES
 	{ 
 		var wid=$("#showDiv").width();											// Width
 		var hgt=$("#showDiv").height();											// Height
 		var cx=wid*curJson.leftRightSplit;										// Center
 		var cy=hgt*curJson.upDownSplit;											// Center
+
 		$("#leftDiv").width(cx);												// Set left width
 		$("#rightDiv").width(wid-cx);											// Set right width
 		$("#rightDiv").css("left",cx+"px");										// Set right pos
@@ -265,6 +267,9 @@
 				if (o.show.match(/off/i)) 	s=e=-1;								// Hide it
 				if (o.show.match(/g/i)) 	s=o.start;							// When controlled by timeline segment
 				}
+			if (o.marker && o.pos)												// If a marker and a pos set to it
+				if (!isNaN(o.pos))												// If a number
+					topDot=Math.max(topDot,o.pos);								// Find top most dot
 			if (o.marker || o.mapMarker) {										// If a marker spec'd 
 				var marker=o.mapMarker ? o.mapMarker : o.marker;				// Use mapMarker first, then marker
 				o.type="icon";													// Assume icon
@@ -367,6 +372,8 @@
 		tln.InitTimeline(curJson);												// Initialize timeline
 		mps.MarkerLayerToTop();													// Make marker layer the top-most layer
 		sto.InitStory(curJson);													// Initialize story
+		if (curJson.autoSizeTimeline) 											// If auto time
+			curJson.upDownSplit=($("#showDiv").height()-(topDot*12)-160)/$("#showDiv").height();
 		ResizePanes();															// Resize panes
 		if (curJson.mapStartPos)		mps.Goto(curJson.mapStartPos);			// Position map
 	}
@@ -471,7 +478,11 @@
                     });
 				ResizePanes();                                                  // Resize panes
 				});             
-		$(window).resize(ResizePanes);											// Dynamic resizing
+		$(window).resize(function() {											// Dynamic resizing
+			if (curJson.autoSizeTimeline) 										// If auto time
+				curJson.upDownSplit=($("#showDiv").height()-(topDot*12)-160)/$("#showDiv").height();
+			ResizePanes();														// Resize panes
+			});											
 		pop=new Popup("leftDiv");												// Alloc popup module
 		mps=new Space("leftDiv",pop);											// Alloc map module
 		tln=new Timeline("bottomDiv",pop);										// Alloc time module
@@ -583,8 +594,8 @@
 		str+="<tr><td>Title</td><td><input id='settitle' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td>Spreadsheet</td><td><input id='setsheet' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td>L-R split&nbsp;% </td><td>";
-		str+="<input id='setlr' class='ve-is' style='width:30px' type='input'>&nbsp;&nbsp;&nbsp;U-D&nbsp;split&nbsp;%  ";
-		str+="<input id='setud' class='ve-is' style='width:30px' type='input'></td></tr>";
+		str+="<input id='setlr' class='ve-is' style='width:30px' type='input'>&nbsp;&nbsp;U-D&nbsp;split&nbsp; ";
+		str+="<input id='setud' class='ve-is' style='width:30px' type='input'>&nbsp;Auto?<input id='setauto' type='checkbox'></td></tr>";
 		str+="<tr><td>Start/end </td><td>";
 		str+="<input id='setstart' class='ve-is' style='width:70px' value='"+curJson.start+"' type='input'>&nbsp;to&nbsp;";
 		str+="<input id='setend' class='ve-is' style='width:70px' value='"+curJson.end+"' type='input'></td></tr>";
@@ -616,9 +627,10 @@
 					InitProject(curJson);										// Re-init project
 			});
 						
- 		$("#setpan").val(curJson.panTime);										// Set pan time
+		$("#setmute").prop("checked",curJson.muteSound);					// Set mute
+		$("#setpan").val(curJson.panTime);										// Set pan time
 		$("#setspeed").val(curJson.defaultSpeed);								// Set timeline speed default
- 		$("#setbase").val(curJson.baseMap);										// Set base
+		$("#setbase").val(curJson.baseMap);										// Set base
 		$("#settime").val(curJson.timeFormat);									// Set timeformat
 		$("#setstory").val(curJson.storyMode);									// Set story mode
 		$("#setstart").val(curJson.start);										// Set start
@@ -630,6 +642,7 @@
 		$("#setstartpos").val(curJson.mapStartPos);								// Set map starting position
 		$("#setlr").val(Math.floor(curJson.leftRightSplit*100));				// Set lr split
 		$("#setud").val(Math.floor(curJson.upDownSplit*100));					// Set ud split
+		$("#setauto").prop("checked",curJson.autoSizeTimeline);						// Set auto timeline
 		pop.ColorPicker("setstcol",-1,true);									// Init color
 	
 		function getDataFromInputs() {											// GET DATA FROM DIALOG ELEMENTS
@@ -649,6 +662,7 @@
 			curJson.baseMap=$("#setbase").val();								// Get base
 			mps.SetBaseMap(curJson.baseMap);									// Set basemap layer
 			curJson.muteSound=$("#setmute").prop("checked");					// Set mute
+			curJson.autoSizeTimeline=$("#setauto").prop("checked");					// Set auto timeline
   		}
 		
 		$("#setbase").on("change", function(e) {								// BASE HANDLER
