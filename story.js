@@ -31,7 +31,7 @@ function Story(div, pop)												// CONSTRUCTOR
 
 Story.prototype.InitStory=function(data)								// INIT STORY
 {
-	var i,k=1,str="",ind=0;
+	var i,j,k=1,str="",ind=0;
 	if (data)	this.sd=data;												// Point at data
 	var _this=this;	
 	this.pages=[];															// Save context for callback
@@ -47,9 +47,12 @@ Story.prototype.InitStory=function(data)								// INIT STORY
 			if (this.sd.mobs[i].marker && (this.sd.mobs[i].marker.toLowerCase() == "story")) { 	// If  a story item
 				if (this.sd.mobs[i].show != "hide")	{						// If not hidden
 					str+="<option value='"+i+"'>";							// Option head
-					if (this.sd.mobs[i].pos)	str+="&nbsp;&bull;&nbsp;&nbsp;";	// Add indent if pos set		
-					else						str+=(k++)+". "; 					// Add number
-					str+=ShortenString(this.sd.mobs[i].title,70)+"</option>";		// Add option
+					if (this.sd.mobs[i].pos && (this.sd.mobs[i].pos > 0)) {	// Add indent if pos set	
+						for (j=0;j<this.sd.mobs[i].pos;++j)					// For each point	
+							str+="&nbsp;&nbsp;&nbsp;&nbsp;";				// Add spaces	
+					}	
+					else						str+=(k++)+". "; 			// Add number
+					str+=ShortenString(this.sd.mobs[i].title,70)+"</option>"; // Add option
 					this.pages.push(i);										// Save index to move
 					}
 				}
