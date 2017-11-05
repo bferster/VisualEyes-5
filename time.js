@@ -644,7 +644,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 						}
 					_this.pop.ShowPopup(_this.div,_this.timeFormat,e.pageX+8,e.pageY-70,o.title,str,o.pic,o.start,o.end);	// Show popup
 					}
- 				_this.SendMessage("time",o.start);							// Send new time
+				_this.Goto(o.start);										// Position timeline
 				if (o.click) {												// If a click defined
 					v=o.click.split("+");									// Divide into individual actions
 					for (j=0;j<v.length;++j) {								// For each action
