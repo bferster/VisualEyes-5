@@ -821,7 +821,8 @@ function MapImage(url, geoRef, _this) 									// MAPIMAGE CONSTRUCTOR
     this.s=v[1]-0;
     this.e=v[2]-0;
     this.w=v[3]-0;
-    var ne = ol.proj.transform([this.e, this.n], 'EPSG:4326', _this.curProjection);	// Project
+	this.full=v[5];
+	var ne = ol.proj.transform([this.e, this.n], 'EPSG:4326', _this.curProjection);	// Project
     var sw = ol.proj.transform([this.w, this.s], 'EPSG:4326', _this.curProjection);
     this.north = ne[1];
     this.south = sw[1];
@@ -848,6 +849,12 @@ MapImage.prototype.drawMapImage=function(opacity, _this)           	// DRAW IMAG
 		var yCenterOffset = _this.canvasHeight * (_this.canvasExtent[3]-this.center[1]) / canvasExtentHeight;
 		var drawWidth = _this.canvasWidth * (this.imgWidthMeters / canvasExtentWidth);
 		var drawHeight = _this.canvasHeight * (this.imgHeightMeters / canvasExtentHeight);
+		if (this.full) {
+			xCenterOffset=_this.canvasWidth/2;
+			yCenterOffset=_this.canvasHeight/2
+			drawWidth=$(mps.div).width()*this.full/100;
+			drawHeight=drawWidth/(this.imgWidth/this.imgHeight);
+			}
 		var ctx=_this.canvasContext;
 		if (ctx) {
 			ctx.globalAlpha = opacity;
