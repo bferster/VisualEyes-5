@@ -661,7 +661,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 					for (j=0;j<v.length;++j) {								// For each action
 						a=v[j].split(":");									// Opcode, payload split
 						if (a[0])											// At least a command
-						_this.SendMessage(a[0].trim(),v[j].substr(a[0].length+1));	// Show item on map
+							_this.SendMessage(a[0].trim(),v[j].substr(a[0].length+1));	// Show item on map
 						}
 					}	
 				});
