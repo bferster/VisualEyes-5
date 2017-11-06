@@ -504,7 +504,8 @@ Space.prototype.DrawPath=function(num, time) 						// DRAW PATH
 				v[last][1]=o.dots[s][1]+((o.dots[e][1]-o.dots[s][1])*pct);	// Interpolate y
 				if (head && sty && (pct < 1))	{						// If a header defined
 					head.setGeometry(new ol.geom.Point(v[last]));		// Move it
-					sty.getImage().setOpacity(1);						// Show it
+					if (dtl.ShowElement(o.tag))							// If not hidden								
+						sty.getImage().setOpacity(1);					// Show it
 					}
 				}
 			}

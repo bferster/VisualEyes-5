@@ -189,7 +189,7 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 				y=h-(o.tpos*rowHgt+(o.tpos-1)*rowPad);						// Position it
 			$("#svgMarker"+i).attr("transform","translate("+x+","+y+")");	// Move marker
 			if (o.marker) tmp=o.marker.toLowerCase();						// Marker type as lc
-				if (o.end && ((tmp == "line") || (tmp == "bar"))) {			// If a spanned event
+			if (o.end && ((tmp == "line") || (tmp == "bar") || (tmp == "box")|| (tmp == "rbox")|| (tmp == "rbar"))) {	// If a spanned event
 				x=(o.end-o.start)/dur*w;									// Calc end
 				$("#svgMarkerBar"+i).attr("width",x);						// Move bar
 				$("#svgMarkerEnd"+i).attr("x1",x);							// Move end line
@@ -197,6 +197,8 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 				$("#svgMarkerMid"+i).attr("x2",x);							// Move mid line
 				$("#svgMarkerText"+i).attr("text-anchor","middle");			// Center text
 				$("#svgMarkerText"+i).attr("x",x/2);						// Center origin 
+				if ((tmp == "rbar") || (tmp == "bar"))						// If filled bars
+					$("#svgMarkerText"+i).attr("fill","#fff");				// White text
 				}
 			}
 		w=$("#timeSlider").width()/10;										// Spacing
@@ -546,8 +548,17 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 			str+="<line id='svgMarkerEnd"+i+"' stroke='"+o.color+"' ";		// Line middle
 			str+="x1=100 y1="+(-w2-2)+" x2=100 y2=0/>";						// Points
 			}
+		else if (m == "box") {												// A hollow box
+			str+="<rect id='svgMarkerBar"+i+"' y="+(-w2-2)+" rx=2 ry=2 height="+(w2+w2+4)+" fill-opacity='0' stroke='"+o.color+"'/>"; 	// Add box
+			}
+		else if (m == "rbox") {												// A hollow round box
+			str+="<rect id='svgMarkerBar"+i+"' y="+(-w2-2)+" rx=8 ry=8 height="+(w2+w2+4)+" fill-opacity='0' stroke='"+o.color+"'/>"; 	// Add rounded box
+			}
+		else if (m == "rbar") {												// A round bar
+			str+="<rect id='svgMarkerBar"+i+"' y="+(-w2-2)+" rx=8 ry=8 height="+(w2+w2+4)+" fill='"+o.color+"'/>"; 	// Add rounded box
+			}
 		else if (m == "bar") {												// A bar
-			str+="<rect id='svgMarkerBar"+i+"' y="+(-w2)+" height="+(w2+w2)+" fill='"+o.color+"'/>"; 	// Add bar
+			str+="<rect id='svgMarkerBar"+i+"' y="+(-w2-2)+" rx=2 ry=2 height="+(w2+w2+4)+" fill='"+o.color+"'/>"; 	// Add bar
 			}
 		else
 			str+="<circle r="+w2+" fill='"+o.color+"' />";					// Default to dot
@@ -719,7 +730,7 @@ Timeline.prototype.PlaySeg=function(start, end, segment, speed) 		// PLAY A PORT
 		speed=this.playerSpeed/100;											// Use default
 	end=pop.DateToTime(end);												// Get end in secs
 	if ((segment != undefined) && this.timeSegments) 						// If setting a segment
-		$("#timeseg"+segment).trigger("click")				// Trigger click
+		$("#timeseg"+segment).trigger("click")								// Trigger click
 	$("#playerSlider").slider("option","value",speed);						// Set speed
 	var x=$($("#timeSlider").children('.ui-slider-handle')).offset().left;	// Get pos       			
 	$("#playerSpeed").html(speed);											// Show value
