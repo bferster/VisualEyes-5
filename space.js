@@ -656,7 +656,13 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 		fill: new ol.style.Fill({color: sty.tc }),							// Set color
 		stroke: new ol.style.Stroke({color: dc, width: dw }),				// Outline
 		offsetY: w2,														// Set offset
-		});  
+		}); 
+	if (sty.m.toLowerCase() == "ndot") {									// A numbered dot
+		text.setOffsetY(-6);												// Center
+		text.getFill().setColor("#fff");									// White text
+		}	
+
+	
    	var s=new ol.style.Style({												// Create new style
 		image: image, text: text											// Add icon, text
 		});
@@ -915,8 +921,12 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
 						desc+="<div class='story-cite' style='cursor:pointer'><br><a onclick='$(\"#cite"+i+"\").fadeIn()'>";
 						desc+="<u>Citation</u><br><span style='display:none' id='cite"+i+"'><br>"+o.citation+"</span></div>";
 						}
-					if (o.desc)
+					if (o.desc) {
+						if (desc.match(/\(NOTIME\)/i))						// If not showing in time
+							desc=desc.replace(/\(NOTIME\)/i,"");			// Remove tag
+						if (!desc.match(/\(NOMAP\)/i))						// If showing in map
 						_this.pop.ShowPopup(_this.div,_this.timeFormat,evt.pixel[0],evt.pixel[1],title,desc,pic,o.start,o.end);
+						}	
 					if (o.start)											// If a time defined
 						_this.SendMessage("time",o.start);					// Send new time
 					if (o.click) {											// If a click defined
@@ -924,7 +934,7 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
 						for (j=0;j<v.length;++j) {							// For each action
 							a=v[j].split(":");								// Opcode, payload split
 							if (a[0])										// At least a command
-							_this.SendMessage(a[0].trim(),v[j].substr(a[0].length+1));	// Show item on map
+								_this.SendMessage(a[0].trim(),v[j].substr(a[0].length+1));	// Send click action message
 							}
 						}	
 					}

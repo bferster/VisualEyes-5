@@ -277,7 +277,7 @@
 					o.type="kml";												// Set type
 					if (!isNaN(marker.split(".")[0]))							// If a number only
 						marker="getkml.php?id="+marker.split(".")[0];			// Load from qdata
-					o.lid=mps.AddKMLLayer(marker,o.opacity,o.id,s,e);			// Add KML layer								 
+					o.lid=mps.AddKMLLayer(marker,o.opacity,i,s,e);				// Add KML layer								 
 					}
 				else if (o.marker && (o.marker.toLowerCase() == "path")) {		// A path
 					var dots=[];												// Temorary dots holder
@@ -521,6 +521,8 @@
 				mps.Goto(v[1])													// Move map
 			if (e.data.match(/=segment/i))										// Set segment
 				$("#timeseg"+(v[1]-1)).trigger("click");						// Trigger segment
+			if (e.data.match(/=story/i))										// Set story item
+				sto.Open(v[1]);													// Open or goto this story line
 			if (e.data.match(/=zoom/i))	{										// Set position
 				$("#rightDiv").html("");										// Clear div
 				var vv=v[1].split(",");											// Divide param									
@@ -867,7 +869,7 @@
 		id=id.trim();															// Trim whitespace
 		for (i=0;i<n;++i) {														// For each mob
 			o=curJson.mobs[i].id;												// Get id												
-			if (o && o.indexOf(id) != -1)										// If it matches
+			if (o && (o+"").indexOf(id) != -1)									// If it matches
 				return i;														// Return index of mob
 			}
 		return -1;																// Return nothing found

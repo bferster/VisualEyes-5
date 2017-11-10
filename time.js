@@ -384,7 +384,7 @@ Timeline.prototype.AddPlayer=function() 								// ADD TIME PLAYER
 
 Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 {
-	var i,o,oo,str;
+	var i,k=0,o,oo,str;
 	var _this=this;															// Save context for callback
 	var dur=this.end-this.start;											// Calc duration
 	var ts=this.timeSegments=[];											// Point at segments and reset
@@ -393,8 +393,11 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 		o=this.sd.mobs[i];													// Point at mob
 		if (o.type != "segment")											// If not a segment
 			continue;														// Skip it
-		if (o.show == "open")												// If it's the open one
-			this.curSeg=i;													// This is current seg
+		if (o.show == "open") {												// If it's the open one
+			for (j=0;j<=i;++j)												// Scan segs
+				if (this.sd.mobs[j].type == "segment")	k++;				// If a seg, add to count
+			this.curSeg=k-1;													// This is current seg
+		}
 		oo={};																// New obj
 		oo.start=o.start;			oo.end=o.end;							// Start, end
 		oo.title=o.title;			oo.col=o.color;							// Title, color
@@ -620,7 +623,11 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 				o=_this.sd.mobs[id];										// Point at mob
 			    str=o.desc;
 				_this.Play();												// Stop playing														
+                if (str && str.match(/\(NOTIME\)/i))						// If not showing in time
+					str="";													// Clear it
 				if (str) {													// If a desc set
+					if (str.match(/\(NOMAP\)/i))							// If not showing in map
+					str=str.replace(/\(NOMAP\)/i,"");						// Remove tag
 					if (str.match(/where\(/)) {								// If where macro
 						v=(str+" ").match(/where\(.*?\)/ig);				// Extract where(s)
 						for (i=0;i<v.length;++i) {							// For each macro

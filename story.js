@@ -216,7 +216,7 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),title);	// Replace with image
 					}
 				}	
-				if (desc && desc.match(/show\(/)) {								// If show macro
+				if (desc && desc.match(/show\(/)) {							// If show macro
 				v=(desc+" ").match(/show\(.*?\)/ig);						// Extract show(s)
 				for (i=0;i<v.length;++i) {									// For each one
 					vv=v[i].match(/show\(([^,\)]*),*(.*)\)/i);				// Get parts
