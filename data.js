@@ -108,6 +108,7 @@ DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendErr
 	    var i,j,o,lab;
 		var keys=[],theData=[];
 		var data=response.getDataTable();									// Try getting table from Google
+		data=new google.visualization.DataView(data);						// Use view to overcome some formatting issues
 		if (!data && sendError) {											// If no data and sending
 			callback(null,url);												// Send to callback
 			return(null)													// Return null
