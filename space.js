@@ -942,7 +942,7 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
 					}
 			  	} 
 			else 															// No feature found
-				ClearPopUps();												// Clear any existing pop
+				ClearPopUps(true);											// Clear any existing pop
 			});
 
 	this.map.on('pointermove', function(e) {								// ON MOUSE MOVE
