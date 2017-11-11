@@ -372,8 +372,10 @@
 		tln.InitTimeline(curJson);												// Initialize timeline
 		mps.MarkerLayerToTop();													// Make marker layer the top-most layer
 		sto.InitStory(curJson);													// Initialize story
-		if (curJson.autoSizeTimeline) 											// If auto time
-			curJson.upDownSplit=($("#showDiv").height()-(topDot*12)-160)/$("#showDiv").height();
+		if (curJson.autoSizeTimeline) {											// If auto time
+			var y=curJson.hideTimelineDates ? 150 : 160;						// Set offset
+			curJson.upDownSplit=($("#showDiv").height()-(topDot*12)-y)/$("#showDiv").height();
+			}
 		ResizePanes();															// Resize panes
 		if (curJson.mapStartPos)		mps.Goto(curJson.mapStartPos);			// Position map
 	}
@@ -479,8 +481,10 @@
 				ResizePanes();                                                  // Resize panes
 				});             
 		$(window).resize(function() {											// Dynamic resizing
-			if (curJson.autoSizeTimeline) 										// If auto time
-				curJson.upDownSplit=($("#showDiv").height()-(topDot*12)-160)/$("#showDiv").height();
+			if (curJson.autoSizeTimeline) {										// If auto time
+				var y=curJson.hideTimelineDates ? 150 : 160;					// Set offset
+				curJson.upDownSplit=($("#showDiv").height()-(topDot*12)-y)/$("#showDiv").height();
+				}
 			ResizePanes();														// Resize panes
 			});											
 		pop=new Popup("leftDiv");												// Alloc popup module
