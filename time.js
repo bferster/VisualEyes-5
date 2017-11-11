@@ -24,19 +24,20 @@ Timeline.prototype.InitTimeline=function(data)							// INIT TIMELINE
 	this.margin=18;
 	this.curSeg=-1;															// Assume all segs
 	if (data)	this.sd=data;												// Point at setting and data
-
+	var hideDates=this.sd.hideTimelineDates ? true : false;					// Hiding dates?
 	this.timeFormat=this.sd.timeFormat;										// Set date format
 	this.start=pop.DateToTime(this.sd.start);								// Start date
 	this.end=pop.DateToTime(this.sd.end);									// End date
 	this.timeColor=this.sd.timeColor ? this.sd.timeColor : "#009900"; 		// Time slider color
 	this.hasTimeBar=this.sd.hasTimeBar ? this.sd.hasTimeBar : true; 		// Time bar?
-	this.showStartEnd=this.sd.showStartEnd ? this.sd.showStartEnd : true; 	// Show start/end dates?
+	this.showStartEnd=!hideDates; 											// Show start/end dates?
 	this.sliderTime=this.sd.sliderTime ? this.sd.sliderTime : "Bottom"; 	// Slider time pos
+	this.sliderTime=hideDates ? "None" : "Bottom"; 							// Slider time pos
 	this.hasTicks=this.sd.hasTicks ? this.sd.hasTicks : true; 				// Has tick marks?
-	this.hasTickLabels=this.sd.hasTickLabels ? this.sd.hasTickLabels : true; // Has tick labels?
+	this.hasTickLabels=!hideDates;											// Has tick labels?
 	this.segmentPos=this.sd.segmentPos ? this.sd.segmentPos : "Top"; 		// Segment bar pos
 	this.hasTimeView=this.sd.hasTimeView ? this.sd.hasTimeView : true; 		// Has timeview?
-	this.timeGridDate=this.sd.timeGridDate ? this.sd.timeGridDate : true; 	// Has timeview grid?
+	this.timeGridDate=!hideDates; 											// Has timeview grid?
 	this.segmentTextColor=this.sd.segmentTextColor ? this.sd.segmentTextColor : "#000";	// Segment text color
 	this.segmentColor=this.sd.segmentColor ? this.sd.segmentColor : "#ccc"; // Segment color
 	this.playerSpeed=this.sd.playerSpeed ? this.sd.playerSpeed : 5000; 		// Time to cross timeline / 2
@@ -45,7 +46,8 @@ Timeline.prototype.InitTimeline=function(data)							// INIT TIMELINE
 	this.hasBackBut=this.sd.hasBackBut ? this.sd.hasBackBut : true; 		// Has forward/back buttons?
 	this.muteSound=this.sd.muteSound ? this.sd.muteSound : false; 			// Sound  muted?
 	this.timeViewTextColor=this.sd.timeViewTextColor ? this.sd.timeViewTextColor : "#666"; 	//Timeview text color
-	
+
+
 	for (i=0;i<this.sd.mobs.length;++i) 									// For each mob
 		data.mobs[i].tpos=data.mobs[i].pos;									// Save original pos setting
 
@@ -660,7 +662,9 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 						str+="<div class='story-cite' style='cursor:pointer'><br><a onclick='$(\"#cite"+id+"\").fadeIn()'>";
 						str+="<u>Citation</u><br><span style='display:none' id='cite"+id+"'><br>"+o.citation+"</span></div>";
 						}
-					_this.pop.ShowPopup(_this.div,_this.timeFormat,e.pageX+8,e.pageY-70,o.title,str,o.pic,o.start,o.end);	// Show popup
+					var ss=curJson.hideTimelineDates ? 0 : o.start;			// Set start date
+					var ee=curJson.hideTimelineDates ? 0 : o.end;			// End
+					_this.pop.ShowPopup(_this.div,_this.timeFormat,e.pageX+8,e.pageY-70,o.title,str,o.pic,ss,ee);	// Show popup
 					}
 				_this.Goto(o.start);										// Position timeline
 				if (o.click) {												// If a click defined

@@ -513,55 +513,25 @@
 	function shivaEventHandler(e)											// ON SHIVA EVENT
 	{
 //		trace(e.data);
-		if (e.data && e.data.match(/Space=/)) {									// If a space event
+		if (e.data && (e.data.match(/Space=/) || e.data.match(/Time=/))) {		// If a space or time event
 			var v=e.data.split("|");											// Split into parts
-			if (e.data.match(/=time/i))											// Set time
-				tln.Goto(v[1]);													// Move timeline
 			if (e.data.match(/=where/i))										// Set position
 				mps.Goto(v[1])													// Move map
-			if (e.data.match(/=segment/i))										// Set segment
+			else if (e.data.match(/=basemap/i))									// Set basemap
+				mps.SetBaseMap(v[1]);											// Set basemap layer
+			else if (e.data.match(/=segment/i))									// Set segment
 				$("#timeseg"+(v[1]-1)).trigger("click");						// Trigger segment
-			if (e.data.match(/=story/i))										// Set story item
+			else if (e.data.match(/=story/i))									// Set story item
 				sto.Open(v[1]);													// Open or goto this story line
 			if (e.data.match(/=zoom/i))	{										// Set position
 				$("#rightDiv").html("");										// Clear div
 				var vv=v[1].split(",");											// Divide param									
-				if (vv[1])														// If a percentage spec'd
+				if (vv[1]) {													// If a percentage spec'd
 					AnimatePanes("map",vv[1]/100,undefined,function() {			// Animate pane there
 						pop.DrawZoomer("rightDiv",vv[0],2,4);					// Show zoomer
 						$("#rightDiv").append("<br><div class='story-return' style='position:static' onclick='ClearPopUps();sto.pop.Sound(\"click\",curJson.muteSound)'>Back to story</div>");
 						});								
-				else{
-					pop.DrawZoomer("rightDiv",vv[0],2,4);						// Show zoomer
-					$("#rightDiv").append("<br><div class='story-return' style='position:static' onclick='ClearPopUps();sto.pop.Sound(\"click\",curJson.muteSound)'>Back to story</div>");
-					}
-				}
-			else if (e.data.match(/=show/i))	{								// Set position
-				var i;
-				var vv=v[1].split(",");											// Get array of ids
-				for (i=0;i<vv.length;++i)										// For each one spec'd
-				if (vv[i] && (vv[i].match(/\/\//))) 							// A url
-					ShowIframe(vv[i]);											// Show in story pane
-				}
-			}
-		else if (e.data && e.data.match(/Time=/)) {								// If a time event
-			var v=e.data.split("|");											// Split into parts
-			if (e.data.match(/=where/i))										// Set position
-				mps.Goto(v[1])													// Move map
-			else if (e.data.match(/=time/i))									// New time
-				Draw(v[1])														// Redraw
-			else if (e.data.match(/=segment/i))									// Set segment
-				$("#timeseg"+(v[1]-1)).trigger("click");						// Trigger segment
-			if (e.data.match(/=story/i))										// Set story item
-				sto.Open(v[1]);													// Open or goto this story line
-			if (e.data.match(/=zoom/i)) {										// Set position
-				$("#rightDiv").html("");										// Clear div
-				var vv=v[1].split(",");											// Divide param									
-				if (vv[1])														// If a percentage spec'd
-					AnimatePanes("map",vv[1]/100,undefined,function() {			// Animate pane there
-						pop.DrawZoomer("rightDiv",vv[0],2,4);					// Show zoomer
-						$("#rightDiv").append("<br><div class='story-return' style='position:static' onclick='ClearPopUps();sto.pop.Sound(\"click\",curJson.muteSound)'>Back to story</div>");
-						});								
+						}
 				else{
 					pop.DrawZoomer("rightDiv",vv[0],2,4);						// Show zoomer
 					$("#rightDiv").append("<br><div class='story-return' style='position:static' onclick='ClearPopUps();sto.pop.Sound(\"click\",curJson.muteSound)'>Back to story</div>");
@@ -573,13 +543,22 @@
 				for (i=0;i<vv.length;++i)										// For each one spec'd
 					if (vv[i] && (vv[i].match(/\/\//)))							// A url
 						ShowIframe(vv[i]);										// Show in story pane
-					else
+					else{
 						vv[i]=FindMobByID(vv[i]);								// Convert to mob index
-				mps.DrawMapLayers(vv,v[2])										// Show markers(s)
+						mps.DrawMapLayers(vv,v[2])								// Show markers(s)
+						}
 				}
-			}	
-		if (e.data && e.data.match(/STORY=/)) {									// If a story editor event
 			}
+		if (e.data && e.data.match(/Space=/)) {									// If just a space event
+			var v=e.data.split("|");											// Split into parts
+			if (e.data.match(/=time/i))											// Set time
+				tln.Goto(v[1]);													// Move timeline
+			}
+		if (e.data && e.data.match(/Time=/)) {									// If just a time event
+			var v=e.data.split("|");											// Split into parts
+			if (e.data.match(/=time/i))											// New time
+				Draw(v[1])														// Redraw
+			}	
 	}
 
 
@@ -599,10 +578,10 @@
 		str+="<tr><td>Spreadsheet</td><td><input id='setsheet' class='ve-is' style='width:220px' type='input'></td></tr>";
 		str+="<tr><td>L-R split&nbsp;% </td><td>";
 		str+="<input id='setlr' class='ve-is' style='width:30px' type='input'>&nbsp;&nbsp;U-D&nbsp;split&nbsp; ";
-		str+="<input id='setud' class='ve-is' style='width:30px' type='input'>&nbsp;Auto?<input id='setauto' type='checkbox'></td></tr>";
+		str+="<input id='setud' class='ve-is' style='width:30px' type='input'>&nbsp;&nbsp;Auto?<input id='setauto' type='checkbox'></td></tr>";
 		str+="<tr><td>Start/end </td><td>";
-		str+="<input id='setstart' class='ve-is' style='width:70px' value='"+curJson.start+"' type='input'>&nbsp;to&nbsp;";
-		str+="<input id='setend' class='ve-is' style='width:70px' value='"+curJson.end+"' type='input'></td></tr>";
+		str+="<input id='setstart' class='ve-is' style='width:60px' value='"+curJson.start+"' type='input'>&nbsp;to&nbsp;";
+		str+="<input id='setend' class='ve-is' style='width:60px' value='"+curJson.end+"' type='input'>&nbsp;&nbsp;Hide?<input id='sethide' type='checkbox'></td></tr>";
 		str+="<tr><td>Date format </td><td>";
 		str+=MakeSelect("settime",false,["Year","Mo/Year","Mon Year","Mo/Day/Year","Mon Day, Year"],curJson.timeFormat)+"</td></tr>";
 		str+="<tr><td>Map&nbsp;label&nbsp;color</td><td><input id='setstcol' class='ve-is' style='width:50px' type='input'></td></tr>";
@@ -646,7 +625,8 @@
 		$("#setstartpos").val(curJson.mapStartPos);								// Set map starting position
 		$("#setlr").val(Math.floor(curJson.leftRightSplit*100));				// Set lr split
 		$("#setud").val(Math.floor(curJson.upDownSplit*100));					// Set ud split
-		$("#setauto").prop("checked",curJson.autoSizeTimeline);						// Set auto timeline
+		$("#setauto").prop("checked",curJson.autoSizeTimeline);					// Set auto timeline
+		$("#sethide").prop("checked",curJson.hideTimelineDates);				// Set date hiding
 		pop.ColorPicker("setstcol",-1,true);									// Init color
 	
 		function getDataFromInputs() {											// GET DATA FROM DIALOG ELEMENTS
@@ -666,8 +646,9 @@
 			curJson.baseMap=$("#setbase").val();								// Get base
 			mps.SetBaseMap(curJson.baseMap);									// Set basemap layer
 			curJson.muteSound=$("#setmute").prop("checked");					// Set mute
-			curJson.autoSizeTimeline=$("#setauto").prop("checked");					// Set auto timeline
-  		}
+			curJson.autoSizeTimeline=$("#setauto").prop("checked");				// Set auto timeline
+			curJson.hideTimelineDates=$("#sethide").prop("checked");			// Set timeline date hide
+		}
 		
 		$("#setbase").on("change", function(e) {								// BASE HANDLER
 			mps.SetBaseMap($("#setbase").val());								// Set basemap layer

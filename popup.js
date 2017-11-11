@@ -347,15 +347,6 @@ Popup.prototype.ColorPicker=function (name, transCol, init) 			//	DRAW COLORPICK
 
 Popup.prototype.ShowWebPage=function(div, url, title)						// SHOW WEB PAGE
 {
-
-/* 
- 	Draws iframe in popup  
- 	@param {string} div 	Container div (already has #).
-	@param {string} url 	URL of web page.
-	@param {string} title 	Title to show in popup in bold. Can be HTML formatted.
-	
-*/	
-	
 	var pan=false;
 	$("#st-webpage").remove();												// Remove any pre-existing popup
 	if (!url)																// If no url defined
