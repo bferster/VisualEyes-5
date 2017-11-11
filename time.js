@@ -47,7 +47,8 @@ Timeline.prototype.InitTimeline=function(data)							// INIT TIMELINE
 	this.muteSound=this.sd.muteSound ? this.sd.muteSound : false; 			// Sound  muted?
 	this.timeViewTextColor=this.sd.timeViewTextColor ? this.sd.timeViewTextColor : "#666"; 	//Timeview text color
 
-
+	this.curTime=this.start;												// Init timeline
+	
 	for (i=0;i<this.sd.mobs.length;++i) 									// For each mob
 		data.mobs[i].tpos=data.mobs[i].pos;									// Save original pos setting
 
