@@ -859,6 +859,7 @@ MapImage.prototype.drawMapImage=function(opacity, _this)           	// DRAW IMAG
 			xCenterOffset=_this.canvasWidth/2;
 			yCenterOffset=_this.canvasHeight/2
 			drawWidth=$(mps.div).width()*this.full/100;
+			if (isMobile)	drawWidth*=2;
 			drawHeight=drawWidth/(this.imgWidth/this.imgHeight);
 			}
 		var ctx=_this.canvasContext;
