@@ -17,6 +17,56 @@ function Popup()														// CONSTRUCTOR
 
 }
 
+Popup.prototype.ShowBooklet=function(div, id, page)							// SHOW BOOKLET
+{
+	var _this=this;															// Save context for callbacks
+	var curPage= page ? page : 1;
+	var o=curJson.mobs[id];													// Point at booklet mob
+	$("#st-popup").remove();												// Remove any pre-existing popup
+	if (!o.title && !o.desc)												// Nothing to show
+		return;																// Quit
+	var str="<div id='st-popup' class='popup-main' style='border: 1px solid #999;font-size:12px'>";	// Main div
+	str+="<div class='popup-title' style='text-align:center;margin-bottom:16px'>";	// Title div
+	if (o.title)															// If title set
+		str+="<b>"+o.title+"</b>";											// Add it
+	str+="</div><div>";														// End it				
+	var pages=o.desc.split("page()");
+	str+=getPage(pages[curPage]);
+	str+="</div><img src='img/backbut.png' id='lastB' style='position:absolute;cursor:pointer'>";	// Last
+	str+="<img src='img/nextbut.png' id='nextB' style='position:absolute;cursor:pointer'></div>";	// Next
+	$("body").append(str);											// Add popup
+	$("#st-popup").css({"max-width": "1500px","max-height":"1000px",width: o.size+"%"});	
+	$("#st-popup").height($("#st-popup").width()*.66);						// Set height
+	var x=$(div).width()/2-$("#st-popup").width()/2;						// Center it
+	var y=$(div).height()/2-$("#st-popup").height()/2;						// Center
+	$("#st-popup").css({left:x+"px",top:y+"px"});							// Position
+
+	$("#st-popup").fadeIn(300, function() {									// Fade in
+		y=$("#st-popup").height();											// Top
+		x=$("#st-popup").width()-2;											// Right
+		$("#lastB").css({left:"8px",top:y+"px"});							// Position
+		$("#nextB").css({left:x+"px",top:y+"px"});							// Position
+	});
+		
+	
+function getPage(content)												// FILL UP PAGE
+{
+	var i,desc,str="";
+	if ((pic=content.match(/pic\(.*?\)/i))) {								// If pic set
+		pic=pic[0].substring(4,pic[0].length-1);							// Get file
+		content=content.replace(/pic\(.*?\)/i,"");							// Delete text
+		pic=ConvertFromGoogleDrive(pic);									// Convert pic
+		str+="<td style='vertical-align:top'><img id='poppic' src='"+pic+"' class='booklet-pic'></td>";	// Add image
+		}
+	if (content) {															// If page set
+		desc=pop.ExpandMacros(content);										// Expand macros, if any
+		str+="<td class='popup-desc' id='popdesc'>"+desc;					// Add it
+		}
+	return str;
+}
+
+	
+	}
 
 Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, date, end)	// SHOW POPUP
 {

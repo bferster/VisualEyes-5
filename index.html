@@ -56,6 +56,8 @@
 							}
 		.popup-cite { 		text-align:right;font-size:8px;color:#999;display:none;
 							}
+		.booklet-pic { 		margin-right: 16px; vertical-align: top; border:1px solid #999; width:50%; overflow: hidden; float: left;
+							}				
 		.time-timebar { 	position:absolute;color:#999;
 							}
 		.time-seg { 		position:absolute;height:14px;text-align:center;padding-top:2px;
@@ -329,10 +331,12 @@
 					o.type="init";												// Set type
 				else if (marker.toLowerCase() == "story") 						// An time
 					o.type="init";												// Set type
-					else if (marker.toLowerCase() == "time") 					// An init
+				else if (marker.toLowerCase() == "time") 						// A time event
 					o.type="time";												// Set type
-				else if (o.marker && (o.marker.toLowerCase() == "label")) 		// A label
+				else if (o.marker.toLowerCase() == "label") 					// A label
 					o.type="label";												// Set type
+				else if (o.marker.toLowerCase() == "booklet") 					// A booklet
+					o.type="booklet";											// Set type
 				else if (marker.toLowerCase() == "data") {						// Data
 					o.type="story";												// Set type
 					dtl.GetSpreadsheet(o.where, false, null, function(data) {	// Get spreadsheet data
@@ -528,7 +532,7 @@
 				$("#timeseg"+(v[1]-1)).trigger("click");						// Trigger segment
 			else if (e.data.match(/=story/i))									// Set story item
 				sto.Open(v[1]);													// Open or goto this story line
-			if (e.data.match(/=zoom/i))	{										// Set position
+			else if (e.data.match(/=zoom/i))	{								// Set position
 				$("#rightDiv").html("");										// Clear div
 				var vv=v[1].split(",");											// Divide param									
 				if (vv[1]) {													// If a percentage spec'd
@@ -550,7 +554,10 @@
 						ShowIframe(vv[i]);										// Show in story pane
 					else{
 						vv[i]=FindMobByID(vv[i]);								// Convert to mob index
-						mps.DrawMapLayers(vv,v[2])								// Show markers(s)
+						if (curJson.mobs[vv[i]].type == "booklet")				// If a booklet
+							pop.ShowBooklet("#leftDiv",vv[i]);					// Show booklet
+						else													// A map layer
+							mps.DrawMapLayers(vv,v[2])							// Show markers(s)
 						}
 				}
 			}
@@ -580,7 +587,7 @@
 		str+="<table><tr height='18'>";
 		str+="<tr><td>Mute clicks?</td><td><input id='setmute' type='checkbox'></td></tr>";
 		str+="<tr><td>Title</td><td><input id='settitle' class='ve-is' style='width:220px' type='input'></td></tr>";
-		str+="<tr><td>Spreadsheet</td><td><input id='setsheet' class='ve-is' style='width:220px' type='input'></td></tr>";
+		str+="<tr><td>Spreadsheet</td><td><input id='setsheet' class='ve-is' style='width:220px' type='input'>&nbsp;&nbsp;<img id='showgdoc' style='cursor:pointer' src='img/gdrive.png'></td></tr>";
 		str+="<tr><td>L-R split&nbsp;% </td><td>";
 		str+="<input id='setlr' class='ve-is' style='width:30px' type='input'>&nbsp;&nbsp;U-D&nbsp;split&nbsp; ";
 		str+="<input id='setud' class='ve-is' style='width:30px' type='input'>&nbsp;&nbsp;Auto?<input id='setauto' type='checkbox'></td></tr>";
@@ -615,7 +622,7 @@
 					InitProject(curJson);										// Re-init project
 			});
 						
-		$("#setmute").prop("checked",curJson.muteSound);					// Set mute
+		$("#setmute").prop("checked",curJson.muteSound);						// Set mute
 		$("#setpan").val(curJson.panTime);										// Set pan time
 		$("#setspeed").val(curJson.defaultSpeed);								// Set timeline speed default
 		$("#setbase").val(curJson.baseMap);										// Set base
@@ -633,7 +640,11 @@
 		$("#setauto").prop("checked",curJson.autoSizeTimeline);					// Set auto timeline
 		$("#sethide").prop("checked",curJson.hideTimelineDates);				// Set date hiding
 		pop.ColorPicker("setstcol",-1,true);									// Init color
-	
+
+		$("#showgdoc").on("click",function() {									// Show google doc
+			window.open($("#setsheet").val(), '_blank');						// Show it	
+			});
+
 		function getDataFromInputs() {											// GET DATA FROM DIALOG ELEMENTS
 			curJson.panTime=$("#setpan").val();									// Set map pan time
 			curJson.defaultSpeed=$("#setspeed").val();							// Timeline speed
