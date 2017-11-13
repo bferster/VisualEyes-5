@@ -21,11 +21,13 @@ Popup.prototype.ShowBooklet=function(div, id, page)							// SHOW BOOKLET
 {
 	var _this=this;															// Save context for callbacks
 	var curPage= page ? page : 1;
+	var maxPage=3;
 	var o=curJson.mobs[id];													// Point at booklet mob
 	$("#st-popup").remove();												// Remove any pre-existing popup
+	$("#st-booklet").remove();												// Remove any pre-existing booklet
 	if (!o.title && !o.desc)												// Nothing to show
 		return;																// Quit
-	var str="<div id='st-popup' class='popup-main' style='border: 1px solid #999;font-size:12px'>";	// Main div
+	var str="<div id='st-booklet' class='popup-main' style='border: 1px solid #999;font-size:12px'>";	// Main div
 	str+="<div class='popup-title' style='text-align:center;margin-bottom:16px'>";	// Title div
 	if (o.title)															// If title set
 		str+="<b>"+o.title+"</b>";											// Add it
@@ -33,19 +35,22 @@ Popup.prototype.ShowBooklet=function(div, id, page)							// SHOW BOOKLET
 	var pages=o.desc.split("page()");
 	str+=getPage(pages[curPage]);
 	str+="</div><img src='img/backbut.png' id='lastB' style='position:absolute;cursor:pointer'>";	// Last
+	str+="<span id='pageCtr' style='position:absolute'></span>";			// Last
 	str+="<img src='img/nextbut.png' id='nextB' style='position:absolute;cursor:pointer'></div>";	// Next
 	$("body").append(str);											// Add popup
-	$("#st-popup").css({"max-width": "1500px","max-height":"1000px",width: o.size+"%"});	
-	$("#st-popup").height($("#st-popup").width()*.66);						// Set height
-	var x=$(div).width()/2-$("#st-popup").width()/2;						// Center it
-	var y=$(div).height()/2-$("#st-popup").height()/2;						// Center
-	$("#st-popup").css({left:x+"px",top:y+"px"});							// Position
-
-	$("#st-popup").fadeIn(300, function() {									// Fade in
-		y=$("#st-popup").height();											// Top
-		x=$("#st-popup").width()-2;											// Right
+	$("#st-booklet").css({"max-width": "1500px","max-height":"1000px",width: o.size+"%"});	
+	$("#st-booklet").height($("#st-booklet").width()*.66);					// Set height
+	var x=$(div).width()/2-$("#st-booklet").width()/2;						// Center it
+	var y=$(div).height()/2-$("#st-booklet").height()/2;					// Center
+	$("#st-booklet").css({left:x+"px",top:y+"px"});							// Position
+	$("#st-booklet").draggable();											// Make it draggable
+	$("#pageCtr").text("Page "+(curPage+1)+" of "+(maxPage+1));				// Page counter
+	$("#st-booklet").fadeIn(300, function() {								// Fade in
+		y=$("#st-booklet").height();										// Top
+		x=$("#st-booklet").width()-2;										// Right
 		$("#lastB").css({left:"8px",top:y+"px"});							// Position
 		$("#nextB").css({left:x+"px",top:y+"px"});							// Position
+		$("#pageCtr").css({left:"calc(50% - 26px)",top:y+"px"});			// Position
 	});
 		
 	
