@@ -27,15 +27,16 @@ Space.prototype.DrawMapLayers=function()								// DRAW OVERLAY LAYERS
 	var i,j,o,a,vis,sty;
 	if (this.canvasContext) {  												// If a canvas up      
 		this.canvasContext.clearRect(0,0,this.canvasWidth,this.canvasHeight); // Clear canvas
-   		for (i=0;i<this.overlays.length;i++) {								// For each overlay layer
+		var cTime=Math.round(this.curTime);									// Save rounded time   
+		for (i=0;i<this.overlays.length;i++) {								// For each overlay layer
             o=this.overlays[i];												// Get ptr  to layer
     		if (!o.start && !o.end)	vis=true;								// Both start/end 0, make it visible
     		else if (o.start) 		vis=false;								// If only a start set, hide until it comes up
     		else if (o.end) 		vis=true;								// If only an end set, show until until it comes down
     		else 					vis=false;								// Both set, hide until it comes up
 	
-	      	if (o.start && (this.curTime >= o.start))	vis=true;			// If past start and start defined, show it
-	      	if (o.end && (this.curTime > o.end))		vis=false;			// If past end and end defined, hide it
+	      	if (o.start && (cTime >= o.start))	vis=true;					// If past start and start defined, show it
+	      	if (o.end && (cTime > o.end))		vis=false;					// If past end and end defined, hide it
 			if (o.show && o.show.match(/g/i)) {								// If only showing if timeline segment is active
 				vis=false;													// Assume off
 				if ((o.start >= tln.curStart) && (o.start < tln.curEnd)) 	// In current time
@@ -246,6 +247,8 @@ Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 	if (!v[2])	v[2]=fs;													// If no res set, use current one
 	if (v[3])  	duration=v[3]*1000;											// Set duration from pos
 	else		duration=this.panTime*1000;									// Use global duration
+	
+//	v[2]*=1350*curJson.leftRightSplit/$(this.div).width();					// Resize to normalized screen
 
 	var pan=ol.animation.pan({												// Pan
 	    duration: duration,													// Duration

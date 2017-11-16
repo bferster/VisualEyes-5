@@ -56,8 +56,13 @@
 							}
 		.popup-cite { 		text-align:right;font-size:8px;color:#999;display:none;
 							}
-		.booklet-pic { 		margin-right: 16px; vertical-align: top; border:1px solid #999; width:50%; overflow: hidden; float: left;
-							}				
+
+        .booklet-main {     position: absolute; padding :16px; border-radius: 8px; display:none; 
+                            border: 1px solid #999; background-color: #fff; font-size: 12px;
+                            overflow-x: hidden; box-shadow: 3px 3px 6px #999;
+                            }
+		.booklet-pic {      margin-right: 16px; vertical-align: top; border:1px solid #999; width:50%; overflow: hidden; float: left; cursor:zoom-in;
+                            }   
 		.time-timebar { 	position:absolute;color:#999;
 							}
 		.time-seg { 		position:absolute;height:14px;text-align:center;padding-top:2px;
@@ -260,8 +265,8 @@
 			o.color=ColorToHex(o.color);										// Convert named color
 			o.mapColor=ColorToHex(o.mapColor);									// Convert named color
 			o.edge=ColorToHex(o.edge);											// Convert named color
-			if (o.start)		o.start=pop.DateToTime(o.start);				// Convert date to time
-			if (o.end)			o.end=pop.DateToTime(o.end);					// Convert date to time
+			if (o.start)		o.start=Math.round(pop.DateToTime(o.start));	// Convert date to time
+			if (o.end)			o.end=Math.round(pop.DateToTime(o.end));		// Convert date to time
 			if (o.opacity > 1)	o.opacity/=100;									// 0-100 to 0-1
 			s=e=0;																// Assume not timed
 			if (o.show) {														// If show mode spec'd
@@ -325,25 +330,25 @@
 					marker=ConvertFromGoogleDrive(marker);						// Get direct link if google drive
 					o.lid=mps.AddImageLayer(marker,o.where,o.opacity,s,e,i);	// Add image layer								 
 					}
-				else if (marker.toLowerCase() == "segment") 					// A segment
+				else if (marker && marker.toLowerCase() == "segment") 			// A segment
 					o.type="segment";											// Set type
-				else if (marker.toLowerCase() == "init") 						// An init
+				else if (marker && marker.toLowerCase() == "init") 				// An init
 					o.type="init";												// Set type
-				else if (marker.toLowerCase() == "story") 						// An time
+				else if (marker && marker.toLowerCase() == "story") 			// An time
 					o.type="init";												// Set type
-				else if (marker.toLowerCase() == "time") 						// A time event
+				else if (marker && marker.toLowerCase() == "time") 				// A time event
 					o.type="time";												// Set type
-				else if (o.marker.toLowerCase() == "label") 					// A label
+				else if (o.marker && o.marker.toLowerCase() == "label") 		// A label
 					o.type="label";												// Set type
-				else if (o.marker.toLowerCase() == "booklet") 					// A booklet
+				else if (o.marker && o.marker.toLowerCase() == "booklet") 		// A booklet
 					o.type="booklet";											// Set type
-				else if (marker.toLowerCase() == "data") {						// Data
+				else if (marker && marker.toLowerCase() == "data") {			// Data
 					o.type="story";												// Set type
 					dtl.GetSpreadsheet(o.where, false, null, function(data) {	// Get spreadsheet data
 						o.src=data												// Save data
 						}, true);
 					}
-				else if (marker.match(/choro/i)) {								// A choro
+				else if (marker && marker.match(/choro/i)) {					// A choro
 					o.type="choro";												// Set type
 					o.base=FindMobByID(o.where.split(":")[0]);					// Find mod index of base layer
 					if (o.base != -1) {											// If found
@@ -351,7 +356,7 @@
 						o.lid=mps.AddChoroplethLayer(o.color,o.edge,o.size, o.opacity,o.base,o.where,s,e,i);	// Add choro layer
 						}
 					}
-				else if (marker.match(/:/)) 									// A feature click
+				else if (marker && marker.match(/:/)) 							// A feature click
 					o.type="feature";											// Set type
 				else if (o.where) { 											// Must be an icon
 					var sty={};													// Not style
@@ -553,8 +558,8 @@
 					if (vv[i] && (vv[i].match(/\/\//)))							// A url
 						ShowIframe(vv[i]);										// Show in story pane
 					else{
-						vv[i]=FindMobByID(vv[i]);								// Convert to mob index
-						if (curJson.mobs[vv[i]].type == "booklet")				// If a booklet
+						j=FindMobByID(vv[i]);									// Convert to mob index
+						if (curJson.mobs[j].type == "booklet")					// If a booklet
 							pop.ShowBooklet("#leftDiv",vv[i]);					// Show booklet
 						else													// A map layer
 							mps.DrawMapLayers(vv,v[2])							// Show markers(s)

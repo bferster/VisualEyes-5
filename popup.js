@@ -17,61 +17,90 @@ function Popup()														// CONSTRUCTOR
 
 }
 
-Popup.prototype.ShowBooklet=function(div, id, page)							// SHOW BOOKLET
+Popup.prototype.ShowBooklet=function(div, id, width)					// SHOW BOOKLET
 {
 	var _this=this;															// Save context for callbacks
-	var curPage= page ? page : 1;
-	var maxPage=3;
+	if ((id=FindMobByID(id)) < 0)											// Convert to mob index
+		return;																// Quit if bad
+	var num=0;																// Starting page
 	var o=curJson.mobs[id];													// Point at booklet mob
 	$("#st-popup").remove();												// Remove any pre-existing popup
 	$("#st-booklet").remove();												// Remove any pre-existing booklet
 	if (!o.title && !o.desc)												// Nothing to show
 		return;																// Quit
-	var str="<div id='st-booklet' class='popup-main' style='border: 1px solid #999;font-size:12px'>";	// Main div
-	str+="<div class='popup-title' style='text-align:center;margin-bottom:16px'>";	// Title div
+	var str="<div id='st-booklet' class='booklet-main'>";					// Main div
+	str+="<div class='popup-title' style='text-align:center;margin-bottom:12px'>";	// Title div
 	if (o.title)															// If title set
 		str+="<b>"+o.title+"</b>";											// Add it
-	str+="</div><div>";														// End it				
-	var pages=o.desc.split("page()");
-	str+=getPage(pages[curPage]);
-	str+="</div><img src='img/backbut.png' id='lastB' style='position:absolute;cursor:pointer'>";	// Last
-	str+="<span id='pageCtr' style='position:absolute'></span>";			// Last
-	str+="<img src='img/nextbut.png' id='nextB' style='position:absolute;cursor:pointer'></div>";	// Next
-	$("body").append(str);											// Add popup
-	$("#st-booklet").css({"max-width": "1500px","max-height":"1000px",width: o.size+"%"});	
+	str+="<img id='bookClose' src='img/closedot.gif' style='float:right'>";	// Close dot
+	str+="</div>";															// End it				
+	str+="<div id='st-bookPage' style='overflow-y:auto; overflow-x: hidden'></div>"; // Content div
+	str+="<img src='img/backbut.png' id='lastB' style='position:absolute;cursor:pointer'>";	// Last
+	str+="<span id='pageCtr' style='position:absolute;font-size:9px;color:#ccc;font-style:italic'></span>";			// Last
+	str+="<img src='img/nextbut.png' id='nextB' style='position:absolute;cursor:pointer'>";	// Next
+	$("body").append(str);													// Add popup
+	setPage(id,num);
+	$("#st-booklet").css({ width: o.size+"%"});								// Set width
 	$("#st-booklet").height($("#st-booklet").width()*.66);					// Set height
 	var x=$(div).width()/2-$("#st-booklet").width()/2;						// Center it
 	var y=$(div).height()/2-$("#st-booklet").height()/2;					// Center
+	$("#st-bookPage").height($("#st-booklet").height()-50);					// Set scrolling div height
 	$("#st-booklet").css({left:x+"px",top:y+"px"});							// Position
 	$("#st-booklet").draggable();											// Make it draggable
-	$("#pageCtr").text("Page "+(curPage+1)+" of "+(maxPage+1));				// Page counter
+	
 	$("#st-booklet").fadeIn(300, function() {								// Fade in
 		y=$("#st-booklet").height();										// Top
 		x=$("#st-booklet").width()-2;										// Right
 		$("#lastB").css({left:"8px",top:y+"px"});							// Position
 		$("#nextB").css({left:x+"px",top:y+"px"});							// Position
 		$("#pageCtr").css({left:"calc(50% - 26px)",top:y+"px"});			// Position
-	});
-		
+		});
+
+	$("#lastB").on("click", function() {									// ON BACK CLICK
+		pop.Sound("click");													// Click
+		num=setPage(id,--num);												// Write page
+		});
+
+	$("#nextB").on("click", function() {									// ON NEXT CLICK
+		pop.Sound("click");													// Click
+		num=setPage(id,++num);												// Write page
+		});
+
+	$("#bookClose").on("click", function() {								// ON CLOSE
+		$("#st-booklet").remove();											// Remove booklet
+		});
+			
+	function setPage(id, num)											// FILL UP PAGE
+	{
+		var str="";
+		var pages=curJson.mobs[id].desc.split("page()");					// Get pages from desc field
+		num=Math.max(Math.min(num,pages.length-1),0)						// Cap 0-n
+		content=pages[num]+"";												// Point at content
+		if ((pic=content.match(/pic\(.*?\)/i))) {							// If pic set
+			pic=pic[0].substring(4,pic[0].length-1);						// Get file
+			content=content.replace(/pic\(.*?\)/i,"");						// Delete text
+			pic=ConvertFromGoogleDrive(pic);								// Convert pic
+			str+="<img id='poppic' ";										// Img start
+			if (!content) 	str+="style='width:100%' ";						// Make it full
+			str+="src='"+pic+"' class='booklet-pic'>";						// Add image
+			}
+		if (content) 														// If page set
+			str+=pop.ExpandMacros(content);									// Expand macros, if any
+		$("#st-bookPage").html(str);										// Add content
+		$("#pageCtr").text("Page "+(num+1)+" of "+(pages.length));			// Page counter
+
+		$("#poppic").on("click", function() {								// ON PIC CLICK
+			pop.Sound("click");												// Click
+			if ($(this).css("cursor") == "zoom-out")						// If big
+				$(this).css({"width":"50%","cursor":"zoom-in"});			// Make it small
+			else															// If small
+				$(this).css({"width":"100%","cursor":"zoom-out"});			// Make it big
+		});
 	
-function getPage(content)												// FILL UP PAGE
-{
-	var i,desc,str="";
-	if ((pic=content.match(/pic\(.*?\)/i))) {								// If pic set
-		pic=pic[0].substring(4,pic[0].length-1);							// Get file
-		content=content.replace(/pic\(.*?\)/i,"");							// Delete text
-		pic=ConvertFromGoogleDrive(pic);									// Convert pic
-		str+="<td style='vertical-align:top'><img id='poppic' src='"+pic+"' class='booklet-pic'></td>";	// Add image
+		return num;															// Return current page
 		}
-	if (content) {															// If page set
-		desc=pop.ExpandMacros(content);										// Expand macros, if any
-		str+="<td class='popup-desc' id='popdesc'>"+desc;					// Add it
-		}
-	return str;
 }
 
-	
-	}
 
 Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, date, end)	// SHOW POPUP
 {
@@ -476,7 +505,15 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:sto.Open(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 			}	
 		}
-	if (desc.match(/button\(/)) {											// If button macro
+	if (desc.match(/booklet\(/)) { 											// If booklet macro
+			v=(desc+" ").match(/booklet\(.*?\)/ig); 						// Extract show(s)
+			for (i=0;i<v.length;++i) {										// For each macro
+				vv=v[i].match(/booklet\(([^,]+),(.+)\)/i);					// Get parts
+				if (vv)														// If multi-part show with no visible part
+					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.ShowBooklet(\"#leftDiv\",\""+vv[2]+"\",\""+vv[3]+"\")'>"+vv[1]+"</a>"); // Replace with anchor tag
+				}   
+			}
+		if (desc.match(/button\(/)) {											// If button macro
 		v=(desc+" ").match(/button\(.*?\)/ig);								// Extract button
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/button\(([^,]+),(.+)\)/i);						// Get macro (x,title,params)
