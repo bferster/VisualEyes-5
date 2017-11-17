@@ -257,7 +257,7 @@ Story.prototype.StoryEditor=function(m) 								// STORY EDITOR
 	str="<div id='storyEditor' class='ve-storyEditor' style='left:"+l+"px;top:8px;width:"+w+"px;height:"+h+"px'>";
 	str+="<div style='margin:12px;margin-bottom:4px'><img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
 	str+="<span style='font-size:18px;color:#666'><b>VisualEyes Story Editor</b></span>";
-	str+=MakeSelect("seOps",false,["Choose","Reload spreadsheet","----------------","foot()","iframe()","link()","pic()","show()","story()","where()","zoomer()","----------------","Quit"],"Choose","style='float:right;margin-top:4px'")+"</td></tr>";
+	str+=MakeSelect("seOps",false,["Choose","Reload spreadsheet","----------------","foot()","iframe()","link()","page()","pic()","show()","story()","where()","zoomer()","----------------","Quit"],"Choose","style='float:right;margin-top:4px'")+"</td></tr>";
 	str+="</div><div style='width:"+(w-4)+"px'>";
 	str+="<iframe frameborder='0' scrolling='no' id='playerIF' src='storyeditor.htm' ";
 	str+="style='border:0;padding:0;margin:0;width:100%;height:"+(h-32)+"px'></iframe>";
@@ -307,8 +307,11 @@ Story.prototype.StoryEditor=function(m) 								// STORY EDITOR
 			case "story()":												// Story
 				str="Type title, and following a comma, the id of the story element to show.  (i.e. here,myStoryId)."
 				pop.GetTextBox("Add story macro", str, "", function(s) {
-					win.postMessage("INS:story("+s+")","*") 				// Send message
+					win.postMessage("INS:story("+s+")","*") 			// Send message
 					});
+				break;
+			case "page()":												// Page
+					win.postMessage("INS:page()","*") 					// Send message
 				break;
 			case "where()":												// Where
 				str="Type title to click on. The current lon, lat, and zoom will be added automatically.)."

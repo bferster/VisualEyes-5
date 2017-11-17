@@ -247,8 +247,8 @@ Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 	if (!v[2])	v[2]=fs;													// If no res set, use current one
 	if (v[3])  	duration=v[3]*1000;											// Set duration from pos
 	else		duration=this.panTime*1000;									// Use global duration
-	
-//	v[2]*=1350*curJson.leftRightSplit/$(this.div).width();					// Resize to normalized screen
+
+	v[2]*=1440*curJson.leftRightSplit/$(this.div).width();					// Resize to normalized screen
 
 	var pan=ol.animation.pan({												// Pan
 	    duration: duration,													// Duration
