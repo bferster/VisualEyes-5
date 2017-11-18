@@ -105,7 +105,7 @@ DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendErr
 		}			
      
     function handleGoogleResponse(response) {							// HANDLE INCOMING DATA
-	    var i,j,o,lab;
+	    var i,j,o,lab,val;
 		var keys=[],theData=[];
 		var data=response.getDataTable();									// Try getting table from Google
 		data=new google.visualization.DataView(data);						// Use view to overcome some formatting issues
@@ -131,17 +131,21 @@ DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendErr
 			var s=hasLabels ? 0 : 1;										// Starting row
 			for (i=s;i<rows;++i) {											// For each row
 				o={};														// New obj
-				for (j=0;j<keys.length;++j) 								// For each key
-					o[keys[j]]=data.getValue(i,j);							// Get data
+				for (j=0;j<keys.length;++j) {								// For each key
+					val=data.getFormattedValue(i,j);						// Get data
+					o[keys[j]]=val ? val : null;							// Add string or null
+					}
 				theData.push(o);											// Add to result
 	 			}
 			}
 		else{																// Nested arrays
 			for (i=0;i<rows;++i) {											// For each row
  				o=[];														// New sub-array
-				for (j=0;j<cols;++j) 										// For each col
-					o.push(data.getValue(i,j));								// Add to result
-   				theData.push(o);
+				for (j=0;j<cols;++j) {										// For each col
+					val=data.getFormattedValue(i,j);						// Get data
+					o[keys[j]]=val ? val : null;							// Add string or null
+					}
+			   theData.push(o);
 				}
 			}
 		callback(theData,url);												// Send to callback
