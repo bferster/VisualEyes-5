@@ -212,7 +212,7 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 				for (i=0;i<v.length;++i) {									// For each url
 					vv=v[i].match(/iframe\(([^,\)]*),*(.*)\)/i);			// Get parts
 					if (!vv[2])	vv[2]=400;									// Default to 400px high
-					title="<iframe src='"+vv[1]+"' frameborder=0 style='width:100%;height:"+vv[2]+"px'></iframe></div>";	// iframe
+					title="<iframe src='"+vv[1]+"' frameborder=0 style='width:100%;height:"+vv[2]+"px'></iframe>";	// iframe
 					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),title);	// Replace with image
 					}
 				}	
