@@ -554,7 +554,7 @@
 			else if (e.data.match(/=show/i))	{								// Set position
 				var vv=v[1].split(",");											// Get array of ids
 				if (vv[0] && (vv[0].match(/\/\//)))								// A url
-						ShowIframe(vv[0],vv[1]);								// Show iframe
+						ShowIframe2(vv[0],vv[1]);								// Show iframe
 				else{
 					j=FindMobByID(vv[0]);										// Convert to mob index
 					if (curJson.mobs[j].type == "booklet")						// If a booklet
@@ -935,7 +935,7 @@
 				});												
 	}
 
-	function ShowIframe(url, where)											// SHOW IFRAME
+	function ShowIframe2(url, where)											// SHOW IFRAME
 	{
 		var str;
 		ClearPopUps(true);														// Clear popups	

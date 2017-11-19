@@ -642,7 +642,8 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 						v=(str+" ").match(/link\(.*?\)/ig);					// Extract links(s)
 						for (i=0;i<v.length;++i) {							// For each macro
 							vv=v[i].match(/link\(([^,]+),(.+)\)/i);			// Get parts
-							str=str.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a  onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:ShowIframe(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+							trace(123,vv)
+							str=str.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a  onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:ShowIframe2(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 							}	
 						}
 					if (str.match(/show\(/)) {								// If show macro
