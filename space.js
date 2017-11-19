@@ -643,7 +643,7 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 		  			});
 			  	}
 	  	break;
-	}
+		}
 	
 	var tf=sty.tf, dw=1, dc="";
     if (sty.tf) {															// If a tf style
@@ -664,8 +664,6 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 		text.setOffsetY(-6);												// Center
 		text.getFill().setColor("#fff");									// White text
 		}	
-
-	
    	var s=new ol.style.Style({												// Create new style
 		image: image, text: text											// Add icon, text
 		});

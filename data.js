@@ -108,7 +108,7 @@ DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendErr
 	    var i,j,o,lab,val;
 		var keys=[],theData=[];
 		var data=response.getDataTable();									// Try getting table from Google
-		data=new google.visualization.DataView(data);						// Use view to overcome some formatting issues
+//		data=new google.visualization.DataView(data);						// Use view to overcome some formatting issues
 		if (!data && sendError) {											// If no data and sending
 			callback(null,url);												// Send to callback
 			return(null)													// Return null
@@ -132,7 +132,7 @@ DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendErr
 			for (i=s;i<rows;++i) {											// For each row
 				o={};														// New obj
 				for (j=0;j<keys.length;++j) {								// For each key
-					val=data.getFormattedValue(i,j);						// Get data
+					val=$.trim(data.getFormattedValue(i,j));				// Get data
 					o[keys[j]]=val ? val : null;							// Add string or null
 					}
 				theData.push(o);											// Add to result
