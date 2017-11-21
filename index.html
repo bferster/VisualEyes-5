@@ -29,7 +29,7 @@
 			  var place=autocomplete.getPlace();									// Get place
 			  var lat=place.geometry.location.lat();								// Get lat
 			  var lon=place.geometry.location.lng();								// Get lon
-			  mps.Goto(lon+","+lat+","+r);											// Move map
+			  mps.Goto(lon+","+lat+",20");											// Move map
 			  });
 	  }
 	</script>
@@ -508,9 +508,7 @@
 			window.parent.postMessage("ShivaReady=true","*");					// Send message to parent wind		
 
 		$("#setwhere").on("change", function() {								// ON LOCATION CHANGE
-			var v=$(this).val().split(",");										// Split into parts
-			v[2]/=1440*curJson.leftRightSplit/$("#leftDiv").width();			// Resize to normalized screen
-			mps.Goto(v[0]+","+v[1]+","+v[2]);									// Go there
+			mps.Goto($(this).val());											// Go there
 			});
 
 	});

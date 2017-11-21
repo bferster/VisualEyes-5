@@ -184,10 +184,10 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 		var o=_this.map.getView();											// Point at view
 		var c=ol.proj.transform(o.getCenter(),_this.curProjection,'EPSG:4326');	// Get center
 		var r=o.getResolution();											// Get res
-		r/=1440*curJson.leftRightSplit/$(this.div).width();					// Resize to normalized screen
+		r/=1440*curJson.leftRightSplit/$(_this.div).width();				// Resize to normalized screen
 		var pos=Math.floor(c[1]*10000)/10000+"|"+Math.floor(c[0]*10000)/10000+"|"+r+"|";	
 		pos+=Math.floor((o.getRotation()*180/Math.PI)*1000)/-1000;			// Rotation
-		$("#setwhere").val(Math.floor(c[0]*10000)/10000+","+Math.floor(c[1]*10000)/10000+","+Math.round(o.getResolution()));
+		$("#setwhere").val(Math.floor(c[0]*10000)/10000+","+Math.floor(c[1]*10000)/10000+","+Math.round(r));
 		_this.SendMessage("move",pos+"|scroll");							// Send that view has changed
 		});
 	}	
