@@ -941,7 +941,7 @@
 		ClearPopUps(true);														// Clear popups	
 		if (where == "map") {													// If overlaying map
 			str="<div id='st-booklet' style='position:absolute;top:50px;left:50px'>";											
-			str+="<iframe id='popupIF' frameborder='0' height='"+($("#leftDiv").height()-100)+"' width='"+($("#leftDiv").width()-100)+"' style='border-radius:8px;border:1px solid #666' src='"+url+"'/>";
+			str+="<iframe id='popupIF' frameborder='0' height='"+($("#leftDiv").height()-100)+"' width='"+($("#leftDiv").width()-100)+"' style='border-radius:8px' src='"+url+"'/>";
 			$("body").append("</div>"+str);										// Add iframe
 			}
 		else{																	// On story panel

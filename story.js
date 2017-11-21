@@ -287,7 +287,8 @@ Story.prototype.StoryEditor=function(m) 								// STORY EDITOR
 					});
 				break;
 			case "link()":												// Link
-				str="Type title to click on, a comma, and the fully formed url of the page you want to show.  (i.e. here,http://mySite.com)."
+				str="Type title to click on, a comma, and the fully formed url of the page you want to show.  (i.e. here,http://mySite.com). "
+				str+="If you want the link to appear over the map, add ,map to the macro  (i.e. here,http://mySite.com,map)."
 				pop.GetTextBox("Add link macro", str, "", function(s) {
 					win.postMessage("INS:link("+s+")","*") 				// Send message
 					});
