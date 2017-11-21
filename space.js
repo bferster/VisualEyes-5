@@ -243,8 +243,9 @@ Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 	var c=ol.proj.transform([v[0]-0,""+v[1].replace(/\*/,"")-0],'EPSG:4326',this.curProjection);	// Get center
 	var fc=o.getCenter();													// Get from center
 	var fs=o.getResolution();												// Get from resolution
+	fs/=1440*curJson.leftRightSplit/$(this.div).width();					// Resize to normalized screen
 	if ((Math.abs(fc[0]-c[0]) < 2) && (Math.abs(fc[1]-c[1]) < 2) &&			// Center match
-		(Math.abs(fs-v[2]) < 2) && (Math.abs(fs-v[2]) < 2))					// Resolution  match
+		(Math.abs(fs-v[2]) < 3) && (Math.abs(fs-v[2]) < 3))					// Resolution  match
 		return;																// Quit
 	if (!v[2])	v[2]=fs;													// If no res set, use current one
 	if (v[3])  	duration=v[3]*1000;											// Set duration from pos
