@@ -183,7 +183,9 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
       	_this.DrawMapLayers();												// Redraw maps in new extent, if moved
 		var o=_this.map.getView();											// Point at view
 		var c=ol.proj.transform(o.getCenter(),_this.curProjection,'EPSG:4326');	// Get center
-		var pos=Math.floor(c[1]*10000)/10000+"|"+Math.floor(c[0]*10000)/10000+"|"+o.getResolution()+"|";	
+		var r=o.getResolution();											// Get res
+		r/=1440*curJson.leftRightSplit/$(this.div).width();					// Resize to normalized screen
+		var pos=Math.floor(c[1]*10000)/10000+"|"+Math.floor(c[0]*10000)/10000+"|"+r+"|";	
 		pos+=Math.floor((o.getRotation()*180/Math.PI)*1000)/-1000;			// Rotation
 		$("#setwhere").val(Math.floor(c[0]*10000)/10000+","+Math.floor(c[1]*10000)/10000+","+Math.round(o.getResolution()));
 		_this.SendMessage("move",pos+"|scroll");							// Send that view has changed

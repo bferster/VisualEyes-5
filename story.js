@@ -257,7 +257,7 @@ Story.prototype.StoryEditor=function(m) 								// STORY EDITOR
 	str="<div id='storyEditor' class='ve-storyEditor' style='left:"+l+"px;top:8px;width:"+w+"px;height:"+h+"px'>";
 	str+="<div style='margin:12px;margin-bottom:4px'><img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
 	str+="<span style='font-size:18px;color:#666'><b>VisualEyes Story Editor</b></span>";
-	str+=MakeSelect("seOps",false,["Choose","Reload spreadsheet","----------------","foot()","iframe()","link()","page()","pic()","show()","story()","where()","zoomer()","----------------","Quit"],"Choose","style='float:right;margin-top:4px'")+"</td></tr>";
+	str+=MakeSelect("seOps",false,["Choose","Reload spreadsheet","----------------","foot()","iframe()","link()","page()","pic()","play()","show()","story()","where()","zoomer()","----------------","Quit"],"Choose","style='float:right;margin-top:4px'")+"</td></tr>";
 	str+="</div><div style='width:"+(w-4)+"px'>";
 	str+="<iframe frameborder='0' scrolling='no' id='playerIF' src='storyeditor.htm' ";
 	str+="style='border:0;padding:0;margin:0;width:100%;height:"+(h-32)+"px'></iframe>";
@@ -297,6 +297,12 @@ Story.prototype.StoryEditor=function(m) 								// STORY EDITOR
 				str="Type the fully formed url of the picture. If you want to specify a width in pixels, add it following a comma (i.e. http://mySite.com/pic.jpg,400)."
 				pop.GetTextBox("Add picture macro", str, "", function(s) {
 					win.postMessage("INS:pic("+s+")","*") 				// Send message
+					});
+				break;
+			case "play()":												// Story
+				str="Type title, and following a comma, the start, and end date to play the timeline from and to.  (i.e. here,1750,1776)."
+				pop.GetTextBox("Add play macro", str, "", function(s) {
+					win.postMessage("INS:play("+s+")","*") 				// Send message
 					});
 				break;
 			case "show()":												// Show
