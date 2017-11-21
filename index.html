@@ -537,20 +537,8 @@
 				$("#timeseg"+(v[1]-1)).trigger("click");						// Trigger segment
 			else if (e.data.match(/=story/i))									// Set story item
 				sto.Open(v[1]);													// Open or goto this story line
-			else if (e.data.match(/=zoom/i))	{								// Set position
-				$("#rightDiv").html("");										// Clear div
-				var vv=v[1].split(",");											// Divide param									
-				if (vv[1]) {													// If a percentage spec'd
-					AnimatePanes("map",vv[1]/100,undefined,function() {			// Animate pane there
-						pop.DrawZoomer("rightDiv",vv[0],2,4);					// Show zoomer
-						$("#rightDiv").append("<br><div class='story-return' style='position:static' onclick='ClearPopUps();sto.pop.Sound(\"click\",curJson.muteSound)'>Back to story</div>");
-						});								
-						}
-				else{
-					pop.DrawZoomer("rightDiv",vv[0],2,4);						// Show zoomer
-					$("#rightDiv").append("<br><div class='story-return' style='position:static' onclick='ClearPopUps();sto.pop.Sound(\"click\",curJson.muteSound)'>Back to story</div>");
-					}
-				}
+			else if (e.data.match(/=zoom/i))									// Zoomer
+				pop.ShowWebPage("#leftDiv",v[1],"zoomer");						// Show zoomer
 			else if (e.data.match(/=show/i))	{								// Set position
 				var vv=v[1].split(",");											// Get array of ids
 				if (vv[0] && (vv[0].match(/\/\//)))								// A url
