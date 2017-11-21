@@ -508,7 +508,9 @@
 			window.parent.postMessage("ShivaReady=true","*");					// Send message to parent wind		
 
 		$("#setwhere").on("change", function() {								// ON LOCATION CHANGE
-			mps.Goto($(this).val());											// Go there
+			var v=$(this).val().split(",");										// Split into parts
+			v[2]/=1440*curJson.leftRightSplit/$("#leftDiv").width();			// Resize to normalized screen
+			mps.Goto(v[0]+","+v[1]+","+v[2]);									// Go there
 			});
 
 	});
