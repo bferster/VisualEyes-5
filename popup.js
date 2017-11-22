@@ -35,9 +35,11 @@ Popup.prototype.ShowBooklet=function(div, id, width)					// SHOW BOOKLET
 	str+="<img id='bookClose' src='img/closedot.gif' style='float:right'>";	// Close dot
 	str+="</div>";															// End it				
 	str+="<div id='st-bookPage' style='overflow-y:auto; overflow-x: hidden'></div>"; // Content div
-	str+="<img src='img/backbut.png' id='lastB' style='position:absolute;cursor:pointer'>";	// Last
-	str+="<span id='pageCtr' style='position:absolute;font-size:9px;color:#ccc;font-style:italic'></span>";			// Last
-	str+="<img src='img/nextbut.png' id='nextB' style='position:absolute;cursor:pointer'>";	// Next
+	if (o.desc.split("page()").length > 1) {								// If multipage
+		str+="<img src='img/backbut.png' id='lastB' style='position:absolute;cursor:pointer'>";	// Last button
+		str+="<span id='pageCtr' style='position:absolute;font-size:9px;color:#999;font-style:italic'></span>";		// Center area
+		str+="<img src='img/nextbut.png' id='nextB' style='position:absolute;cursor:pointer'>";	// Next button
+		}
 	$("body").append(str);													// Add popup
 	setPage(id,num);
 	$("#st-booklet").css({ width: o.size+"%"});								// Set width
