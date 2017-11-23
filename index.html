@@ -572,7 +572,10 @@
 	function RouteShivaMessage(data) 										// ROUTE MESSAGE FROM SHIVA
 	{
 		var i,j,o,v,a;
-		data=data.replace(/Shiva.*=click\|.*\|/i,"");							// Remove first portions
+		v=data.split("|");														// Split
+		data=""+v[2];															// Add first real payload
+		for (i=3;i<v.length;++i)												// Add any others 
+			data+="|"+v[i];														// With |
 		for (i=0;i<curJson.mobs.length;++i) {									// For each mob	
 			o=curJson.mobs[i];													// Point at mob
 			if ((o.type == "shiva") && (o.id == data) && o.click) {				// A match
