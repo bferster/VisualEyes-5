@@ -548,7 +548,7 @@
 					if (curJson.mobs[j].type == "booklet")						// If a booklet
 						pop.ShowBooklet("#leftDiv",vv[0]);						// Show booklet
 					else														// A map layer
-						mps.DrawMapLayers(vv,v[2])								// Show markers(s)
+						toggleLayer(vv[0],(vv[1] == "off") ? false : true)		// Show marker
 					}
 				}
 			}

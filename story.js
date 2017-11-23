@@ -343,24 +343,6 @@ Story.prototype.StoryEditor=function(m) 								// STORY EDITOR
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-function toggleLayer(id, mode)											// TOGGLE LAYER
-{
-	var j;
-	mode=mode ? "on" : "off";												// Set as on/off
-	if ((j=FindMobByID(id)) != -1) {										// Get mob index
-		mps.overlays[curJson.mobs[j].lid].vis=mode;							// Show or hide layer
-		mps.DrawMapLayers();												// Redraw map
-		}
-}
-
-function clearToggledLayers()											// CLEAR ALL TOGGLED LAYERS
-{
-	var i;
-	for (i=0;i<mps.overlays.length;++i)										// For each layer
-		mps.overlays[i].vis=null;											// Hide layer toggling
-	mps.DrawMapLayers();													// Redraw map
-}
-
 Story.prototype.SendMessage=function(cmd, msg) 							// SEND MESSAGE
 {
 	var str="Time="+cmd;													// Add src and window						

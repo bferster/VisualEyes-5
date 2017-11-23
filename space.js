@@ -271,13 +271,7 @@ Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 
 Space.prototype.CreateOverlayLayer=function()							// CREATE CANVAS/VECTOR OVERLAY LAYERS				
 {        
-   
- /* 
-  	Creates the canvas layer needed to show images and the
-  	vector layer to show markers
- */
    	var _this=this;															// Save context for callback
- 
     this.canvasLayer=new ol.layer.Image( {									// Make new image layer
         source: new ol.source.ImageCanvas( {								// Add canvas sourcw
             canvasFunction: function(extent, res, pixelRatio, size, proj) { // Render function
@@ -307,11 +301,6 @@ Space.prototype.CreateOverlayLayer=function()							// CREATE CANVAS/VECTOR OVER
 
 Space.prototype.MarkerLayerToTop=function()								// MOVE MARKER LAYER ON TOP OF OTHER LAYERS
 {
-	
- /* 
-  	Moves the marker layer on top of all other layer
- */
-
 	var layer=this.map.getLayers().remove(this.markerLayer);				// Remove marker layer
 	var n=this.map.getLayers().getArray().length;							// Last index
 	this.map.getLayers().insertAt(n,layer);									// Place on top
@@ -964,13 +953,13 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
 Space.prototype.ClearLayers=function( ) 							// CLEAR MAP LAYERS					
 {
 	var i,o;
-	for (i=0;i<this.overlays.length;++i) {								// For each overlay
-		o=this.overlays[i];												// Point at it
-		if (o.type == "kml") 											// KML 
-			this.map.getLayers().remove(o.src);							// Remove layer
+	for (i=0;i<this.overlays.length;++i) {									// For each overlay
+		o=this.overlays[i];													// Point at it
+		if (o.type == "kml") 												// KML 
+			this.map.getLayers().remove(o.src);								// Remove layer
 		} 
-	this.markerLayer.getSource().clear(true);							// Clear all markers
-	this.overlays=[];													// All gone
+	this.markerLayer.getSource().clear(true);								// Clear all markers
+	this.overlays=[];														// All gone
 }
 
 
@@ -1622,3 +1611,20 @@ Space.prototype.Goto2=function(pos)										// SET VIEWPOINT
 	 o.setCenter(c);														// Set center
 }
 
+function toggleLayer(id, mode)											// TOGGLE LAYER
+{
+	var j;
+	mode=mode ? "on" : "off";												// Set as on/off
+	if ((j=FindMobByID(id)) != -1) {										// Get mob index
+		mps.overlays[curJson.mobs[j].lid].vis=mode;							// Show or hide layer
+		mps.DrawMapLayers();												// Redraw map
+		}
+}
+
+function clearToggledLayers()											// CLEAR ALL TOGGLED LAYERS
+{
+	var i;
+	for (i=0;i<mps.overlays.length;++i)										// For each layer
+		mps.overlays[i].vis=null;											// Hide layer toggling
+	mps.DrawMapLayers();													// Redraw map
+}
