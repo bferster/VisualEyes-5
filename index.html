@@ -348,6 +348,8 @@
 						o.src=data												// Save data
 						}, true);
 					}
+				else if (marker && marker.toLowerCase() == "shiva") 			// A SHIVA message handler
+					o.type="shiva";												// Set type
 				else if (marker && marker.match(/choro/i)) {					// A choro
 					o.type="choro";												// Set type
 					o.base=FindMobByID(o.where.split(":")[0]);					// Find mod index of base layer
@@ -562,7 +564,28 @@
 			if (e.data.match(/=time/i))											// New time
 				Draw(v[1])														// Redraw
 			}	
+		if (e.data && e.data.match(/Shiva.*=click/i)) {							// If a SHIVA event
+			RouteShivaMessage(e.data);											// Route
+			}
+		}
+
+	function RouteShivaMessage(data) 										// ROUTE MESSAGE FROM SHIVA
+	{
+		var i,j,o,v,a;
+		data=data.replace(/Shiva.*=click\|.*\|/i,"");							// Remove first portions
+		for (i=0;i<curJson.mobs.length;++i) {									// For each mob	
+			o=curJson.mobs[i];													// Point at mob
+			if ((o.type == "shiva") && (o.id == data) && o.click) {				// A match
+				v=o.click.split("+");											// Divide into individual actions
+				for (j=0;j<v.length;++j) {										// For each action
+					a=v[j].split(":");											// Opcode, payload split
+					if (a[0])													// At least a command
+						mps.SendMessage(a[0].trim(),v[j].substr(a[0].length+1)); // Send click action message
+					}
+				}
+			}
 	}
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
