@@ -576,6 +576,7 @@
 		data=""+v[2];															// Add first real payload
 		for (i=3;i<v.length;++i)												// Add any others 
 			data+="|"+v[i];														// With |
+		trace(data)
 		for (i=0;i<curJson.mobs.length;++i) {									// For each mob	
 			o=curJson.mobs[i];													// Point at mob
 			if ((o.type == "shiva") && (o.id == data) && o.click) {				// A match
@@ -883,7 +884,7 @@
 		id=id.trim();															// Trim whitespace
 		for (i=0;i<n;++i) {														// For each mob
 			o=curJson.mobs[i].id;												// Get id												
-			if (o && (o+"").indexOf(id) != -1)									// If it matches
+			if (o == id)														// If it matches
 				return i;														// Return index of mob
 			}
 		return -1;																// Return nothing found
