@@ -183,6 +183,7 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 		clearToggledLayers();												// Clear any layers toggled
 		if (mob.where)	mps.Goto(mob.where);								// Go there
 		if (mob.start)	tln.Goto(mob.start);								// Go then
+		$("#rightDiv").scrollTop(0);										// Scroll to top
 		}
 	if (mob.title)															// If a title
 		str+="<div class='story-header' style='display:inline-block;color:"+col+"'>"+mob.title+"</div><br>";
