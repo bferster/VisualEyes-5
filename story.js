@@ -183,6 +183,7 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 		clearToggledLayers();												// Clear any layers toggled
 		if (mob.where)	mps.Goto(mob.where);								// Go there
 		if (mob.start)	tln.Goto(mob.start);								// Go then
+		ClearPopUps(true);													// Clear popups	
 		$("#rightDiv").scrollTop(0);										// Scroll to top
 		}
 	if (mob.title)															// If a title
