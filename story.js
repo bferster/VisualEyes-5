@@ -162,8 +162,9 @@ Story.prototype.Open=function(id) 										// OPEN STORY ITEM OR GO TO PAGE
 Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 {
 	var str="";
+	var i,j,v,vv,a;
 	var	fs=11,maxPix=100;													// Desc font size, pic size
-	var desc,col="#555",v,vv,title;
+	var desc,col="#555",title;
 	var mob=this.sd.mobs[num];												// Point at mob
 	if (!mob)		return "";												// No mob, so quit
 	if (mob.color)	col=mob.color;											// If a color set, use it
@@ -226,6 +227,18 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"");	// Remove macro
 					}
 				}
+			if (desc && desc.match(/action\(/)) {							// If an action macro
+				v=(desc+" ").match(/action\(.*?\)/ig);						// Extract action(s)
+				for (i=0;i<v.length;++i) {									// For each one
+					var vv=v[i].substring(7,v[i].length-1).split("+");		// Get payload
+					for (j=0;j<vv.length;++j) {								// For each action
+						a=vv[j].split(":");									// Opcode, payload split
+						if (a[0])											// At least a command
+							_this.SendMessage(a[0].trim(),vv[j].substr(a[0].length+1));	// Send action message
+						}
+					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"");	// Remove macro
+					}
+				}	
 			if (desc && desc.match(/segment\(/)) {							// If segment macro
 				v=(desc+" ").match(/segment\(.*?\)/ig);						// Extract segment
 				vv=v[0].match(/segment\(([^,\)]*),*(.*)\)/i);				// Get parts
