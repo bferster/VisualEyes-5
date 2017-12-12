@@ -459,15 +459,9 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 				}
 			else															// All button
 				_this.curSeg=-1;											// Flag all
-			if (ts[id].click) {												// If a click defined
-				v=ts[id].click.split("+");									// Divide into individual actions
-				for (j=0;j<v.length;++j) {									// For each action
-					a=v[j].split(":");										// Opcode, payload split
-					if (a[0])												// At least a command
-						_this.SendMessage(a[0].trim(),v[j].substr(a[0].length+1));	// Show item on map
-					}
-				}	
-			_this.curTime=s;
+			if (ts[id].click) 												// If a click defined
+				pop.SendActions(ts[id].click);								// Send actions	
+			_this.curTime=s;												// Set time
 			_this.UpdateTimeline();											// Redraw timeline
 			});
 		}
@@ -640,14 +634,8 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 					_this.pop.ShowPopup(_this.div,_this.timeFormat,e.pageX+8,e.pageY-70,o.title,str,o.pic,ss,ee);	// Show popup
 					}
 				_this.Goto(o.start);										// Position timeline
-				if (o.click) {												// If a click defined
-					v=o.click.split("+");									// Divide into individual actions
-					for (j=0;j<v.length;++j) {								// For each action
-						a=v[j].split(":");									// Opcode, payload split
-						if (a[0])											// At least a command
-							_this.SendMessage(a[0].trim(),v[j].substr(a[0].length+1));	// Show item on map
-						}
-					}	
+				if (o.click) 												// If a click defined
+					pop.SendActions(o.click);								// Send actions	
 				});
 		}
 	
@@ -734,8 +722,5 @@ Timeline.prototype.SendMessage=function(cmd, msg) 						// SEND MESSAGE
 	var str="Time="+cmd;													// Add src and window						
 	if (msg)																// If more to it
 		str+="|"+msg;														// Add it
-//	if (window.parent)														// If has a parent
-//		window.parent.postMessage(str,"*");									// Send message to parent wind
-//	else																	// Local	
-		window.postMessage(str,"*");										// Send message to wind
+	window.postMessage(str,"*");											// Send message to wind
 }

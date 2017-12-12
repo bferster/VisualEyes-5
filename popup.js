@@ -461,6 +461,7 @@ Popup.prototype.ShowWebPage=function(div, url, title)						// SHOW WEB PAGE
 
 Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 {
+	var i,j,a;
 	var v,v,vvv,str="";
 	if (!desc) return null;
 
@@ -515,7 +516,7 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.ShowBooklet(\"#leftDiv\",\""+vv[2]+"\",\""+vv[3]+"\")'>"+vv[1]+"</a>"); // Replace with anchor tag
 				}   
 			}
-		if (desc.match(/button\(/)) {											// If button macro
+	if (desc.match(/button\(/)) {											// If button macro
 		v=(desc+" ").match(/button\(.*?\)/ig);								// Extract button
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/button\(([^,]+),(.+)\)/i);						// Get macro (x,title,params)
@@ -557,7 +558,14 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:tln.PlaySeg(\""+vvv[0]+"\",\""+vvv[1]+"\",\""+vvv[2]+"\",\""+vvv[3]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 			}	
 		}
-	
+	if (desc.match(/action\(/)) {											// If an action macro
+		v=(desc+" ").match(/action\(.*?\)/ig);								// Extract action(s)
+		for (i=0;i<v.length;++i) {											// For each one
+			vv=v[i].match(/action\(([^,]+),(.+)\)/i);						// Get parts
+			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.SendActions(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+			}
+		}
+
 	return desc;															// Return expanded html
 }
 
@@ -575,6 +583,16 @@ Popup.prototype.SetCookie=function(cname, cvalue, exdays)				// SET COOKIE
 	document.cookie = cname + "=" + cvalue + "; " + expires;
 }
 
+Popup.prototype.SendActions=function(actions) 						// SEND ACTION MESSAGE(s)
+{
+	var i,v,vv;
+	v=actions.split("+");												// Array of actions
+	for (i=0;i<v.length;++i) {											// For each one
+		vv=v[i].split(":");												// Opcode, payload split
+		if (vv[0])														// At least a command
+			window.postMessage("Popup="+vv[0]+"|"+vv[1],"*");			// Send message to wind
+		}
+}
 
 Popup.prototype.GetCookie=function(cname) {								// GET COOKIE
 	var name=cname+"=",c;

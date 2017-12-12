@@ -227,15 +227,10 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"");	// Remove macro
 					}
 				}
-			if (desc && desc.match(/action\(/)) {							// If an action macro
-				v=(desc+" ").match(/action\(.*?\)/ig);						// Extract action(s)
+			if (desc && desc.match(/auto\(/)) {								// If an auto macro
+				v=(desc+" ").match(/auto\(.*?\)/ig);						// Extract action(s)
 				for (i=0;i<v.length;++i) {									// For each one
-					var vv=v[i].substring(7,v[i].length-1).split("+");		// Get payload
-					for (j=0;j<vv.length;++j) {								// For each action
-						a=vv[j].split(":");									// Opcode, payload split
-						if (a[0])											// At least a command
-							_this.SendMessage(a[0].trim(),vv[j].substr(a[0].length+1));	// Send action message
-						}
+					pop.SendActions(v[i].substr(5,v[i].length-6));			// Extract actions and send
 					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"");	// Remove macro
 					}
 				}	

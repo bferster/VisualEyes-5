@@ -401,13 +401,7 @@
 		for (i=0;i<curJson.mobs.length;++i) {									// For each mob
 			o=curJson.mobs[i];													// Point at it
 			if ((o.type == "time") && (time >= o.start) && (time < o.end) && o.click) { // Got one
-				var v,a,j;
-				v=o.click.split("+");											// Divide into individual actions
-				for (j=0;j<v.length;++j) {										// For each action
-					a=v[j].split(":");											// Opcode, payload split
-					if (a[0])													// At least a command
-						tln.SendMessage(a[0].trim(),v[j].substr(a[0].length+1));	// Execute actions message
-					}
+				pop.SendActions(o.click);										// Send actions	
 				break;
 				}
 			}
@@ -529,7 +523,7 @@
 	function shivaEventHandler(e)											// ON SHIVA EVENT
 	{
 //		trace(e.data);
-		if (e.data && (e.data.match(/Space=/) || e.data.match(/Time=/))) {		// If a space or time event
+		if (e.data && (e.data.match(/Space=/) || e.data.match(/Time=/) || e.data.match(/Popup=/))) {	// If a space, time, or popup event
 			var v=e.data.split("|");											// Split into parts
 			if (e.data.match(/=where/i))										// Set position
 				mps.Goto(v[1])													// Move map
@@ -541,10 +535,12 @@
 				sto.Open(v[1]);													// Open or goto this story line
 			else if (e.data.match(/=zoom/i))									// Zoomer
 				pop.ShowWebPage("#leftDiv",v[1],"zoomer");						// Show zoomer
+			else if (e.data.match(/=mask/i))									// Mask
+				dtl.SetTagMask(v[1]);                                      		// Set mask
 			else if (e.data.match(/=show/i))	{								// Set position
 				var vv=v[1].split(",");											// Get array of ids
 				if (vv[0] && (vv[0].match(/\/\//)))								// A url
-						ShowIframe2(vv[0],vv[1]);								// Show iframe
+						ShowIframe2(vv[0],"map");								// Show iframe
 				else{
 					j=FindMobByID(vv[0]);										// Convert to mob index
 					if (curJson.mobs[j].type == "booklet")						// If a booklet
@@ -576,20 +572,12 @@
 		data=""+v[2];															// Add first real payload
 		for (i=3;i<v.length;++i)												// Add any others 
 			data+="|"+v[i];														// With |
-		trace(data)
 		for (i=0;i<curJson.mobs.length;++i) {									// For each mob	
 			o=curJson.mobs[i];													// Point at mob
-			if ((o.type == "shiva") && (o.id == data) && o.click) {				// A match
-				v=o.click.split("+");											// Divide into individual actions
-				for (j=0;j<v.length;++j) {										// For each action
-					a=v[j].split(":");											// Opcode, payload split
-					if (a[0])													// At least a command
-						mps.SendMessage(a[0].trim(),v[j].substr(a[0].length+1)); // Send click action message
-					}
-				}
+			if ((o.type == "shiva") && (o.id == data) && o.click) 				// A match
+				pop.SendActions(o.click);										// Send actions	
 			}
 	}
-
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

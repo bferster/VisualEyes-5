@@ -925,14 +925,8 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
 						}	
 					if (o.start)											// If a time defined
 						_this.SendMessage("time",o.start);					// Send new time
-					if (o.click) {											// If a click defined
-						v=o.click.split("+");								// Divide into individual actions
-						for (j=0;j<v.length;++j) {							// For each action
-							a=v[j].split(":");								// Opcode, payload split
-							if (a[0])										// At least a command
-								_this.SendMessage(a[0].trim(),v[j].substr(a[0].length+1));	// Send click action message
-							}
-						}	
+					if (o.click) 											// If a click defined
+						pop.SendActions(o.click);							// Send actions	
 					}
 			  	} 
 			else 															// No feature found
@@ -978,10 +972,7 @@ Space.prototype.SendMessage=function(cmd, msg) 							// SEND MESSAGE TO PARENT
 	var str="Space="+cmd;													// Add src and window						
 	if (msg)																// If more to it
 		str+="|"+msg;														// Add it
-//	if (window.parent)														// If has a parent
-//		window.parent.postMessage(str,"*");									// Send message to parent wind
-//	else																	// Local	
-		window.postMessage(str,"*");										// Send message to wind
+	window.postMessage(str,"*");											// Send message to wind
 }
 
 
