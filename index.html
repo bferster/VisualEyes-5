@@ -535,12 +535,14 @@
 				sto.Open(v[1]);													// Open or goto this story line
 			else if (e.data.match(/=zoom/i))									// Zoomer
 				pop.ShowWebPage("#leftDiv",v[1],"zoomer");						// Show zoomer
-			else if (e.data.match(/=mask/i))									// Mask
+			else if (e.data.match(/=mask/i)) {									// Mask
+				v[1]=e.data.match(/mask\|(.+)/)[1];								// Issue of handling |'s in regex
 				dtl.SetTagMask(v[1]);                                      		// Set mask
+				}
 			else if (e.data.match(/=show/i))	{								// Set position
 				var vv=v[1].split(",");											// Get array of ids
 				if (vv[0] && (vv[0].match(/\/\//)))								// A url
-						ShowIframe2(vv[0],"map");								// Show iframe
+					ShowIframe2(vv[0],"map");									// Show iframe
 				else{
 					j=FindMobByID(vv[0]);										// Convert to mob index
 					if (curJson.mobs[j].type == "booklet")						// If a booklet
