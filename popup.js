@@ -585,12 +585,13 @@ Popup.prototype.SetCookie=function(cname, cvalue, exdays)				// SET COOKIE
 
 Popup.prototype.SendActions=function(actions) 						// SEND ACTION MESSAGE(s)
 {
-	var i,v,vv;
+	var i,v,vv,op,val;
 	v=actions.split("+");												// Array of actions
 	for (i=0;i<v.length;++i) {											// For each one
-		vv=v[i].split(":");												// Opcode, payload split
-		if (vv[0])														// At least a command
-			window.postMessage("Popup="+vv[0]+"|"+vv[1],"*");			// Send message to wind
+		op=v[i].split(":")[0];											// Opcode
+		val=v[i].substr(op.length+1);									// Get value
+		if (op)															// At least a command
+			window.postMessage("Popup="+op+"|"+val,"*");				// Send message to wind
 		}
 }
 
