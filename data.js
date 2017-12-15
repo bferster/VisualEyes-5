@@ -6,12 +6,18 @@
 
 function DataLoad() 
 {
-	this.tagMask=new RegExp(".","i");
-}
+	this.tagMask=new RegExp(".","i");										// Default passes everything
+	this.tagMaskMode=true;													// Masking mode
+}	
 
 DataLoad.prototype.SetTagMask=function(tag)								// SET ELEMENT MASK
 {
 	if (!tag)	tag=".";													// If nothing set show all
+	this.tagMaskMode=true;													// Masking mode
+	if (tag.charAt(0) == "~") {												// If passing 
+		this.tagMaskMode=false;												// Passing mode
+		tag=tag.substr(1);													// Remove flag
+		}
 	this.tagMask=new RegExp(tag,"i");										// Set mask
 	tln.UpdateTimeline();													// Update project
 }
@@ -20,10 +26,11 @@ DataLoad.prototype.ShowElement=function(tag)							// DETERMINE IF SHOWING MOB E
 {
 	if (!tag)																// If no id
 		return true;														// Let it through
+	var ret=this.tagMaskMode;												// Set def return based on pass/show mode
 	if (tag && (""+tag).match(this.tagMask))								// If a match
-		return true;														// Let it through
+		return ret;															// Let it through
 	else																	// No match
-		return false;														// Hide it
+		return !ret;														// Hide it
 }
 
 DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendError) 	//	GET GOOGLE DOCS SPREADSHEET
