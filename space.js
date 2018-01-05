@@ -234,11 +234,13 @@ Space.prototype.Goto=function(pos)										// SET VIEWPOINT
   
 */
 
-	if ((!pos) || (pos.length < 5))											// No where to go
+	if (!pos)																// No where to go
 		return;																// Quit
 	var duration;
 	pos=pos.replace(/"/g,"");												// Remove quotes
 	var v=pos.split(",");													// Split up
+	if (v.length < 2)														// Not enough coords
+		return;																// Quit
 	var o=this.map.getView();												// Point at view
 	var c=ol.proj.transform([v[0]-0,""+v[1].replace(/\*/,"")-0],'EPSG:4326',this.curProjection);	// Get center
 	var fc=o.getCenter();													// Get from center
@@ -250,18 +252,14 @@ Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 	if (!v[2])	v[2]=fs;													// If no res set, use current one
 	if (v[3])  	duration=v[3]*1000;											// Set duration from pos
 	else		duration=this.panTime*1000;									// Use global duration
-
 	v[2]*=1440*curJson.leftRightSplit/$(this.div).width();					// Resize to normalized screen
-/*
-	var pan=ol.animation.pan({												// Pan
-	    duration: duration,													// Duration
-	    source: fc,															// Start value
-	    start: +new Date()													// Starting time
-	  	});
 
-  	this.map.beforeRender(pan);												// Pan
-*/	o.setResolution(v[2]);													// Set resolution								
-	o.setCenter(c);															// Set center
+	o.animate({																// Animate to position
+		center: c,															// Set center
+		resolution: v[2],													// Set res
+		duration:duration													// Set duration
+		});
+	
 }
 
 
