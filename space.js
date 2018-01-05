@@ -100,10 +100,7 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 				}),
 		new ol.layer.Tile({													// Terrain
 				visible: false,												// Invisible
-				source: new ol.source.TileWMS({								// WMS
- 						url: 'http://demo.opengeo.org/geoserver/wms',		// Url
- 						params: { 'LAYERS': 'ne:NE1_HR_LC_SR_W_DR' }		// Params
-						}),
+				source: new ol.source.Stamen({layer: 'terrain'}),			// Stamen terrain
 				projection: this.curProjection,								// Default projection
 				title: "Terrain"											// Set name
 				}),
@@ -121,11 +118,7 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 				}),
 		new ol.layer.Tile({													// Earth
 				visible: false,												// Invisible
-				source: new ol.source.TileJSON({
-    				url: 'http://api.tiles.mapbox.com/v3/' +
-        			'mapbox.natural-earth-hypso-bathy.jsonp',
-    				crossOrigin: 'anonymous'
-					}),
+				source: new ol.source.Stamen({layer: 'terrain-background'}),	// Stamen plain terrain
 				projection: this.curProjection,								// Default projection
 				title: "Earth"												// Set name
 				}),
@@ -142,7 +135,8 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 	this.featureSelect.setActive(false);									// Turn select off
 
     this.map=new ol.Map( { target: this.div.substr(1),						// Alloc OL
-    	layers:this.layers,													// Layers array									
+		loadTilesWhileInteracting: true,									// Load tiles
+		layers:this.layers,													// Layers array									
 		interactions: ol.interaction.defaults().extend([this.featureSelect]),	// Add feature select interaction
        	controls: ol.control.defaults({										// Controls
 				}).extend([ new ol.control.ScaleLine() ]),					// Add scale
@@ -1605,6 +1599,8 @@ Space.prototype.Goto2=function(pos)										// SET VIEWPOINT
 function toggleLayer(id, mode)											// TOGGLE LAYER
 {
 	var j;
+	if (mode == undefined)													// If undefined
+		mode=true;															// Assume we're turning it on
 	mode=mode ? "on" : "off";												// Set as on/off
 	if ((j=FindMobByID(id)) != -1) {										// Get mob index
 		mps.overlays[curJson.mobs[j].lid].vis=mode;							// Show or hide layer
