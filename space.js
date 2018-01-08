@@ -248,7 +248,14 @@ Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 	else		duration=this.panTime*1000;									// Use global duration
 	v[2]*=1440*curJson.leftRightSplit/$(this.div).width();					// Resize to normalized screen
 
-	o.animate({																// Animate to position
+	if (duration < 0) {														// If bouncing
+		duration=-duration;													// Make positive
+		var bounce=v[2]*2;													// Bounce up height
+		o.animate({ center: c,  duration: duration*2 });					// Animate pan
+		o.animate({	resolution: bounce , duration: duration }, {			// Animate zoom in 2 parts
+				resolution: v[2], duration: duration });					// Second part
+		}
+	else o.animate({														// Animate to position
 		center: c,															// Set center
 		resolution: v[2],													// Set res
 		duration:duration													// Set duration
@@ -1220,7 +1227,6 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 // DRAWING
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 Space.prototype.DrawingTool=function()									// DRAWING TOOL
 {
 	var _this=this;															// Context for callbacks
@@ -1566,35 +1572,10 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 
 }
 
-Space.prototype.Goto2=function(pos)										// SET VIEWPOINT
-{
-	var speed=1;															// Default speed
-	if (!pos)																// No where to go
-		return;																// Quit
-	var v=pos.split(",");													// Split up
-	var o=this.map.getView();												// Point at view
-	var c=ol.proj.transform([v[0]-0,""+v[1]-0],'EPSG:4326',this.curProjection);	// Get center
-	var fc=o.getCenter();													// Get from center
-	var fr=o.getRotation();													// Get from rotation		
-	var fs=o.getResolution();												// Get from resolution
-	var duration=2000;														// Duration
-	var start=+new Date();													// Start time
-//	if (v[5])	duration=v[5]*1000;											// If set, get duration
-	var pan=ol.animation.pan({												// Pan
-		duration: duration,													// Duration
-		source: fc,															// Start value
-		start: start														// Starting time
-		 });
-	 var bounce=ol.animation.bounce({										// Fly bounce
-		duration: duration,													// Duration
-		resolution: Math.min(2*o.getResolution(),2000),						// End value
-		start: start														// Starting time
-	  	});
-	
-	  this.map.beforeRender(pan,bounce);									// Pan and bounce
-	 o.setResolution(v[2]);													// Set resolution								
-	 o.setCenter(c);														// Set center
-}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// HELPERS
+/////////////////////////////////////////////////////////////////////////////////////////////////
 
 function toggleLayer(id, mode)											// TOGGLE LAYER
 {
