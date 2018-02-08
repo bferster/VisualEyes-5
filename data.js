@@ -111,7 +111,44 @@ DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendErr
 			}
 		}			
      
-    function handleGoogleResponse(response) {							// HANDLE INCOMING DATA
+ /*
+		var id=url.match(/(?<=\/d\/).+?(?=\/)/i)[0];						// Extract id
+		var str="https://docs.google.com/spreadsheets/d/"+id+"/export?format=tsv";	// Access tsv
+		var xhr=new XMLHttpRequest();										// Ajax
+		xhr.open("GET",str);												// Set open url
+		xhr.onload=function() { 											// On successful load
+			handleTSVResponse(xhr.responseText);							// Parse TSV 
+			};			
+		xhr.onreadystatechange=function(e)  { 								// On readystate change
+			if ((xhr.readyState === 4) && (xhr.status !== 200)) {  			// Ready, but no load
+				Sound("delete");											// Delete sound
+				PopUp("<p style='color:#990000'><b>Couldn't load Google Doc!</b></p>Make sure that <i>anyone</i><br>can view it in Google",5000); // Popup warning
+				}
+			};		
+		xhr.send();															// Do it
+		function handleTSVResponse(tsv) {									// HANDLE INCOMING TSV DATA
+		var i,j,v,o,blank;
+		var data=[];														
+		if (tsv) tsv.replace(/\\r/,"");										// Remove CRs
+		tsv=tsv.split("\n");												// Split into lines
+		var fields=tsv[0].split("\t");										// Get field names
+		for (i=1;i<tsv.length;++i) {										// For each line of data past header
+			o={};															// Fresh obj
+			blank=true;														// Assume it has no data
+			v=tsv[i].split("\t");											// Get data
+			for (j=0;j<fields.length;++j) {									// For each field
+				o[fields[j]]=v[j] ? v[j] : "";								// Fill out row
+				if (v[j])	blank=false;									// Something there
+				}
+			if (!blank)		data.push(o)									// Add to data
+			}	
+		trace(data)
+		callback(data,url);													// Send to callback
+	}
+	*/
+	
+	
+	function handleGoogleResponse(response) {							// HANDLE INCOMING DATA
 	    var i,j,o,lab,val;
 		var keys=[],theData=[];
 		var data=response.getDataTable();									// Try getting table from Google
