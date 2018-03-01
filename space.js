@@ -662,19 +662,41 @@ Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)
 		this.overlays[indices[i]].src.setStyle(s);							// Set style
 }
 
+Space.prototype.AddSVGLayer=function(url, geoRef, opacity, id, start, end) 	// ADD SVG LAYER TO MAP						
+{
+	var o={};
+   	var _this=this;															// Save context for callback
+	if (url && url.match(/\/\//)) 											// If cross-domain
+		url="proxy.php?url="+url;											// Add proxy
+
+	var index=this.overlays.length;											// Get index
+ 	o.type="svg";															// KML
+  	o.start=start;	o.end=end;												// Save start, end
+	o.opacity=opacity;														// Initial opacity
+	o.tag=curJson.mobs[id].id;												// Add id into tag
+	o.show=curJson.mobs[id].show;											// Add show tag
+	o.mob=id;																// Save original mob id
+	
+	var extent = [0, 0, 512, 512];
+	
+	o.src=new ol.layer.Image({  source: new ol.source.ImageStatic({			// New layer
+							title: "LAYER-"+this.overlays.length,			// Set name
+							projection: ol.proj.get(this.curProjection),	// Set  projection
+							imageExtent: extent,	//???
+							url: 'https://upload.wikimedia.org/wikipedia/commons/f/fd/Ghostscript_Tiger.svg',
+							})
+						});
+	
+	o.src.set('svgId',id)													// Set id
+	o.src.set('visible',false)												// Hide it
+	this.overlays.push(o);													// Add to overlay
+	this.loadCounter++;														// Add to count
+	this.map.addLayer(o.src);												// Add to map	
+ 	return index;															// Return layer ID
+	}
+
 Space.prototype.AddKMLLayer=function(url, opacity, id, start, end) 		// ADD KML LAYER TO MAP						
 {
-
-/* 	
- 	Add kml file to map as a new layer
-   	@param {string} url 	URL of kml file
-   	@param {number} opacity	Initial opacity of layer
-  	@param {string} id 		ID if layer
- 	@param {number} start 	Starting time of marker in number of mins += 1/1/1970
-	@param {number} end 	Ending time of marker in number of mins += 1/1/1970
- 	@return {number}		index of new layer added to overlays array.
-*/
-
 	var o={};
    	var _this=this;															// Save context for callback
 	if (url && url.match(/\/\//)) 											// If cross-domain

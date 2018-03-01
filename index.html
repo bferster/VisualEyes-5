@@ -287,6 +287,10 @@
 						marker="getkml.php?id="+marker.split(".")[0];			// Load from qdata
 					o.lid=mps.AddKMLLayer(marker,o.opacity,i,s,e);				// Add KML layer								 
 					}
+				else if (marker.match(/\.svg/i)) {								// An SVG file
+					o.type="kml";												// Set type
+					o.lid=mps.AddSVGLayer(marker,o.where,o.opacity,i,s,e);		// Add SVG layer								 
+					}
 				else if (o.marker && (o.marker.toLowerCase() == "path")) {		// A path
 					var dots=[];												// Temorary dots holder
 					o.type="path";												// Set type
