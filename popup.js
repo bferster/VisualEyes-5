@@ -527,13 +527,24 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),str);	// Replace with anchor tag
 			}	
 		}
+
+	if (desc.match(/opacity\(/)) {											// If opacity macro
+		v=(desc+" ").match(/opacity\(.*?\)/ig);								// Extract slider
+		for (i=0;i<v.length;++i) {											// For each macro
+			vv=v[i].match(/opacity\(([^,]+),(.+)\)/i);						// Get macro (title,mval,id)
+			vvv=vv[2].split(",");											// Get params
+			str=vv[1]+": <input style='vertical-align:-8px' type='range' min='0' max='100' value='"+vvv[0]+"' onchange=''>";	// Add slider
+			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),str);	// Replace with anchor tag
+			}	
+		}
+	
 	if (desc.match(/radio\(/)) {											// If radio macro
 		var name="name='rad-"+Math.floor(Math.random()*1000000)+"' ";		// Set unique group name
 		v=(desc+" ").match(/radio\(.*?\)/ig);								// Extract radio
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/radio\(([^,]+),(.+)\)/i);						// Get macro (x,title,params)
 			vvv=vv[2].split(",");											// Get params
-			str="<input type='radio'"+name;									// Header
+			str=vv[1]+": <input type='radio'"+name;							// Header
 			if ((vvv.length > 1) && (vvv[1] == "on")) {						// If turning it on
 				dtl.tagMask=new RegExp(vvv[0],"i");							// Set mask
 				str+=" checked ";											// Check it

@@ -677,7 +677,7 @@ Space.prototype.AddSVGLayer=function(url, geoRef, opacity, id, start, end) 	// A
 	o.show=curJson.mobs[id].show;											// Add show tag
 	o.mob=id;																// Save original mob id
 	
-	var extent = [0, 0, 512, 512];
+	var extent = [0, 0, 10, 10];
 	
 	o.src=new ol.layer.Image({  source: new ol.source.ImageStatic({			// New layer
 							title: "LAYER-"+this.overlays.length,			// Set name
