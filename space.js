@@ -1611,6 +1611,15 @@ function toggleLayer(id, mode)											// TOGGLE LAYER
 		}
 }
 
+function layerAlpha(id, alpha)											// SET LAYER'S ALPHA
+{
+	var j;
+	if ((j=FindMobByID(id)) != -1) {										// Get mob index
+		mps.overlays[curJson.mobs[j].lid].alpha=alpha/100;					// Set alpha
+		mps.DrawMapLayers();												// Redraw map
+		}
+}
+
 function clearToggledLayers()											// CLEAR ALL TOGGLED LAYERS
 {
 	var i;

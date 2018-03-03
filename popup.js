@@ -521,23 +521,22 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/button\(([^,]+),(.+)\)/i);						// Get macro (x,title,params)
 			vvv=vv[2].split(",");											// Get params
-			str="<button class='ve-is' style='width:auto;margin-bottom:4px;' onclick="; 		// Header
+			str="<button class='ve-is' style='width:auto;margin-bottom:4px;' onclick="; // Header
 			str+="'dtl.SetTagMask(\""+vvv[0]+"\")'";						// Set regex and refresh
 			str+=">"+vv[1]+"</button>";
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),str);	// Replace with anchor tag
 			}	
 		}
-
 	if (desc.match(/opacity\(/)) {											// If opacity macro
 		v=(desc+" ").match(/opacity\(.*?\)/ig);								// Extract slider
 		for (i=0;i<v.length;++i) {											// For each macro
-			vv=v[i].match(/opacity\(([^,]+),(.+)\)/i);						// Get macro (title,mval,id)
+			vv=v[i].match(/opacity\(([^,]+),(.+)\)/i);						// Get macro (title,val,id)
 			vvv=vv[2].split(",");											// Get params
-			str=vv[1]+": <input style='vertical-align:-8px' type='range' min='0' max='100' value='"+vvv[0]+"' onchange=''>";	// Add slider
+			str=vv[1]+": <input id='alphaVal' style='vertical-align:-8px' type='range' min='0' max='100' value='"+vvv[0]+"' ";
+			str+="onchange='layerAlpha(\""+vvv[1]+"\",this.value)'>";
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),str);	// Replace with anchor tag
 			}	
 		}
-	
 	if (desc.match(/radio\(/)) {											// If radio macro
 		var name="name='rad-"+Math.floor(Math.random()*1000000)+"' ";		// Set unique group name
 		v=(desc+" ").match(/radio\(.*?\)/ig);								// Extract radio
