@@ -1,1 +1,0 @@
-Header set Content-Security-Policy "script-src 'self' 'unsafe-inline' *.googleapis.com openlayers.org *.google.com *.stagetools.com *.google-analytics.com"
