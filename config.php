@@ -1,7 +1,12 @@
 <?php
-// configuration file for QMedia File System
-$dbname='qmedia';
-$dbuser='qmedia';
-$dbpass='';															// Supply your own (prename)
-$link=mysqli_connect("localhost", $dbuser, $dbpass, $dbname) or die ("Could not connect to server.");
+
+// configuration file for qmedia
+
+$dbms = 'mysql';
+$dbhost = 'localhost';
+$dbname = 'qmedia';
+$dbuser = 'qmedia';
+$dbpasswd = '';    // Qmedia prename
+$connection = mysql_connect($dbhost, $dbuser, $dbpasswd) or die ("Could not connect to server.");
+$dc = mysql_select_db($dbname,$connection) or die ("Couldn't select database.");
 ?>
