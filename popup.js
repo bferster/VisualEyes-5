@@ -533,6 +533,7 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 			vv=v[i].match(/opacity\(([^,]+),(.+)\)/i);						// Get macro (title,val,id)
 			vvv=vv[2].split(",");											// Get params
 			str=vv[1]+": <input id='alphaVal' style='vertical-align:-8px' type='range' min='0' max='100' value='100' ";
+			str+="oninput='layerAlpha(\""+vvv[0]+"\",this.value)' ";
 			str+="onchange='layerAlpha(\""+vvv[0]+"\",this.value)'>";
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),str);	// Replace with anchor tag
 			}	
