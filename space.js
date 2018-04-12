@@ -53,10 +53,12 @@ Space.prototype.DrawMapLayers=function()								// DRAW OVERLAY LAYERS
 			if (vis && (o.type == "image"))	{								// If a visible image 
            		(o.alpha == undefined) ? a=1 : a=o.alpha;					// Let alpha control opacity if defined
            		if (!vis) a=0;												// Hide if invisible
-            		o.src.drawMapImage(a,this);   							// Draw it   
+            	o.src.drawMapImage(a,this);   								// Draw it   
         		}
         	else if (o.type == "kml") {										// If a kml 
-       			o.src.set('visible',vis);									// Show/hide it
+				(o.alpha == undefined) ? a=1 : a=o.alpha;					// Let alpha control opacity if defined
+				if (!vis) a=0;												// Hide if invisible
+			   o.src.set('visible',vis);									// Show/hide it
             	o.src.set("opacity",a);										// Set opacity								
              	}
         	else if (o.type == "icon") {									// If an icon 
@@ -1624,7 +1626,7 @@ function layerAlpha(id, alpha)											// SET LAYER'S ALPHA
 {
 	var j;
 	if ((j=FindMobByID(id)) != -1) {										// Get mob index
-		mps.overlays[curJson.mobs[j].lid].alpha=alpha/100;					// Srt alpha
+		mps.overlays[curJson.mobs[j].lid].alpha=alpha/100;					// Set alpha
 		mps.DrawMapLayers();												// Redraw map
 		}
 }
