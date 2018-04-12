@@ -283,7 +283,7 @@
 			if (o.marker || o.mapMarker) {										// If a marker spec'd 
 				var marker=o.mapMarker ? o.mapMarker : o.marker;				// Use mapMarker first, then marker
 				o.type="icon";													// Assume icon
-				if (marker.match(/kml/i)) {										// A KML file
+				if (marker.match(/[kml|\{z\}]/i)) {								// A KML file
 					o.type="kml";												// Set type
 					if (!isNaN(marker.split(".")[0]))							// If a number only
 						marker="getkml.php?id="+marker.split(".")[0];			// Load from qdata

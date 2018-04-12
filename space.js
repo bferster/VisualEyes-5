@@ -709,15 +709,24 @@ Space.prototype.AddKMLLayer=function(url, opacity, id, start, end) 		// ADD KML 
 	o.tag=curJson.mobs[id].id;												// Add id into tag
 	o.show=curJson.mobs[id].show;											// Add show tag
 	o.mob=id;																// Save original mob id
-	
-	o.src=new ol.layer.Vector({  source: new ol.source.Vector({				// New layer
-							title: "LAYER-"+this.overlays.length,			// Set name
-				   			projection: ol.proj.get(this.curProjection),	// Set KML projection
-				    		format: new ol.format.KML({ extractStyles:true}),					// KML format
-				    		url: url										// URL
-				  			})
-						});
-	
+
+	if (url && url.match(/\{z\}/)) { 										// Tiled KML image
+		o.src=new ol.layer.Tile({  source: new ol.source.XYZ({				// New layer
+				title: "LAYER-"+this.overlays.length,						// Set name
+				projection: ol.proj.get(this.curProjection),				// Set KML projection
+				url: url													// URL
+				})
+			});
+		}
+	else{																	// Normal KML
+		o.src=new ol.layer.Vector({  source: new ol.source.Vector({			// New layer
+				title: "LAYER-"+this.overlays.length,						// Set name
+				projection: ol.proj.get(this.curProjection),				// Set KML projection
+				format: new ol.format.KML({ extractStyles:true}),			// KML format
+				url: url													// URL
+				})
+			});
+		}
 	o.src.set('kmlId',id)													// Set id
 	o.src.set('visible',false)												// Hide it
 	this.overlays.push(o);													// Add to overlay
