@@ -4,8 +4,8 @@
 	<meta charset="UTF-8" />
 	<link REL="SHORTCUT ICON" HREF="img/shanti.ico">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes, user-scalable=yes">
-	<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' *.google.com *.googleapis.com
-		  https://openlayers.org *.google-analytics.com  *.virtualearth.net *.stagetools.com"> 
+	<!--meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' *.google.com *.googleapis.com
+		  https://openlayers.org *.google-analytics.com  *.virtualearth.net *.stagetools.com"--> 
 	<title>VisualEyes</title>
  	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>	
 	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css" />
@@ -181,7 +181,7 @@
 	var paneAnimationTimer=null;												// Times pane animations
 	var imageAnimationTimer=[];													// Times image animations
 	var isMobile=false;															// Flag for mobile devices
-	var host="//viseyes.org/visualeyes/";										// Set host for database save/load
+	var host="https://viseyes.org/visualeyes/";									// Set host for database save/load
 	var userName="",password="",curShow=0;										// Login info
 	var lastClickTime=0;														// Store last click time
 	var drupalMan=false;														// Flag for drupal manager	
