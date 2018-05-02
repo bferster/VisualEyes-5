@@ -181,7 +181,7 @@
 	var paneAnimationTimer=null;												// Times pane animations
 	var imageAnimationTimer=[];													// Times image animations
 	var isMobile=false;															// Flag for mobile devices
-	var host="https://viseyes.org/visualeyes/";									// Set host for database save/load
+	var host="//viseyes.org/visualeyes/";										// Set host for database save/load
 	var userName="",password="",curShow=0;										// Login info
 	var lastClickTime=0;														// Store last click time
 	var drupalMan=false;														// Flag for drupal manager	
@@ -427,7 +427,7 @@
 		
 		isMobile=navigator.userAgent.match(/(ipad|iphone|ipod|android)/i) ? true : false; // Set mobile flag
 		var url=window.location.search.substring(1);							// Get query string
-		qmf=new QmediaFile("http://www.stagetools.com/qmedia/",4);				// Alloc file system
+		qmf=new QmediaFile("//www.stagetools.com/qmedia/",4);					// Alloc file system
 
 		drupalMan=(""+url).match(/pr=d/);										// If called from Drupal manager
 		if (!url)																// Nothing on command line
