@@ -888,7 +888,7 @@ MapImage.prototype.drawMapImage=function(opacity, _this)           	// DRAW IMAG
 			drawHeight=drawWidth/(this.imgWidth/this.imgHeight);
 			}
 		var ctx=_this.canvasContext;
-		if (ctx) {
+		if (ctx && this.img.width) {
 			ctx.globalAlpha = opacity;
 			ctx.translate(xCenterOffset,yCenterOffset);
 			ctx.rotate(this.rotation * (Math.PI/180));
