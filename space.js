@@ -155,6 +155,8 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 	this.map.on('click', function(e) {										// ON CLICK
 		var c=ol.proj.transform(e.coordinate,_this.curProjection,'EPSG:4326');	// Get center
 		$("#setpoint").val(Math.floor(c[0]*10000)/10000+","+Math.floor(c[1]*10000)/10000);
+		if (e.originalEvent.ctrlKey) 										// If control key presssed
+			$("#esWhere").val($("#setpoint").val());						// Set editor
 		if (e.originalEvent.shiftKey) {										// If shift key presssed
   			var lay;
   			var feature=_this.map.forEachFeatureAtPixel(e.pixel,			// Look through features
