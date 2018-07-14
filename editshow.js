@@ -5,7 +5,12 @@
 function EditShow()														// CONSTRUCTOR
 {
 	var _this=this;															// Save context 
-	$("body").contextmenu(function(e) { _this.Draw(e); return false; });	// Add context menu handler
+	$("body").contextmenu(function(e) { 									// Add context menu handler
+		if (e.ctrlKey) {													// If control key
+			_this.Draw(e); 													// Show editor
+			return false;													// Inhibit browser comtext menu
+			} 
+		});	
 }
 
 EditShow.prototype.Draw=function(e)										// MAIN MENU
