@@ -396,9 +396,9 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 		if (o.show == "open") {												// If it's the open one
 			for (j=0;j<=i;++j)												// Scan segs
 				if (this.sd.mobs[j].type == "segment")	k++;				// If a seg, add to count
-			this.curSeg=k-1;													// This is current seg
+			this.curSeg=k-1;												// This is current seg
 		}
-		oo={};																// New obj
+		oo={};						oo.id=i									// New obj with mob id
 		oo.start=o.start;			oo.end=o.end;							// Start, end
 		oo.title=o.title;			oo.col=o.color;							// Title, color
 		oo.click=o.click;			oo.size=o.size							// Click, size
