@@ -5,6 +5,7 @@
 function EditShow()														// CONSTRUCTOR
 {
 	var _this=this;															// Save context 
+	this.curId=-1;
 	$("body").contextmenu(function(e) { 									// Add context menu handler
 		if (e.ctrlKey) {													// If control key
 			_this.Draw(e); 													// Show editor
@@ -16,6 +17,7 @@ function EditShow()														// CONSTRUCTOR
 EditShow.prototype.Draw=function(e)										// MAIN MENU
 {
 	var mode="story";
+	var _this=this;															// Save context 
 	var x=e.clientX,y=e.clientY;											// Get pos
 	$("#editShowDiv").remove();												// Remove it
 	if ((x < $("#leftDiv").width()) && (y < $("#leftDiv").height())) 		// In map area
@@ -51,8 +53,8 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	str+="</table>"
 	str+="<p><hr></p>";																			
 	str+="<div '>";																		
-	str+="<div id='esPreviewBut' class='ve-gbs'>Save</div>&nbsp;&nbsp;";						
-	str+="<div id='esSaveBut' class='ve-gbs'>Copy changes to clipboard</div>&nbsp;&nbsp;";						
+	str+="<div id='esSaveBut' class='ve-gbs'>Save</div>&nbsp;&nbsp;";						
+	str+="<div id='esCopyBut' class='ve-gbs'>Copy changes to clipboard</div>&nbsp;&nbsp;";						
 	str+="<img id='esRemoveBut' title='Delete' style='vertical-align:-5px' src='img/trashbut.gif'></div>";	// Trash button
 	$("body").append(str);	
 	$("#editShowDiv").draggable();											// Make it draggable
@@ -71,7 +73,42 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	$("#esClose").on("click", function(e) {									// MAP COLOR HANDLER
 		$("#editShowDiv").remove();											// Remove editor
 	}); 
-		
+
+	$("#esSaveBut").on("click", function() {  								// ON SAVE 
+		o=curJson.mobs[_this.curId];										// Point at mob
+		o.id=$("#esId").val();												// Id
+		o.marker=$("#esMarker").val();										// Marker
+		o.title=$("#esTitle").val();										// Title
+		o.start=$("#esStart").val();										// Start
+		o.end=$("#esEnd").val();											// End
+		o.desc=$("#esDesc").val();											// Desc
+		o.pic=$("#esPic").val();											// Pic
+		o.pos=$("#esPos").val();											// Pos
+		o.color=$("#esColor").val();										// Color
+		o.size=$("#esSize").val();											// Pos
+		o.opacity=$("#esOpacity").val();									// Opacity
+		o.mapMarker=$("#esMapMarker").val();								// Map marker
+		o.mapColor=$("#esMapColor").val();									// Color
+		o.mapSize=$("#esMapSize").val();									// Size
+		o.where=$("#esWhere").val();										// Where
+		o.show=$("#esShow").val();											// Show
+		o.click=$("#esClick").val();										// Click
+		InitProject(curJson);												// Reinit project
+		$("#editShowDiv").remove();											// Remove editor
+		});
+
+	$("#copyBut").on("click", function() {  								// ON COPY TO CLIPBOARD
+		var str=this.MakeTabFile();											// Create TSV file
+		$("#outputDiv").val(str);											// Show it
+		$("#outputDiv")[0].select();										// Select div
+		try {
+			if (document.execCommand('copy')) {								// Copy to clipboard
+				Sound("ding");												// Ding
+				PopUp("Course<br>spreadsheet<br>copied to clipboard");		// Show popup
+				}
+			} catch (err) { console.log("Clipboard copy error")}			// Show error
+		});
+
 }
 
 EditShow.prototype.EditTime=function(e)									// EDIT TIMELINE ITEM
@@ -79,40 +116,41 @@ EditShow.prototype.EditTime=function(e)									// EDIT TIMELINE ITEM
 	var o={};
 	var id=e.target.id;														// Get id
 	if (!id) id=e.target.parentElement.id;									// Look at parent
+	this.curId=-1;
 	$("#editShowDiv").css({ top:$("#leftDiv").height()-$("#editShowDiv").height()-60+"px",left: $("#leftDiv").width()/2-250+"px"});
 	pop.ColorPicker("esMapColor",-1,true);									// Init color
 	pop.ColorPicker("esColor",-1,true);										// Init color
 	if (id && id.match(/timeseg/i)) {										// A segment		
 		$("#esHead").text("Edit segment");									// Set title
-		o=curJson.mobs[tln.timeSegments[id.substr(7)].id];					// Point at seg's mob
+		this.curId=tln.timeSegments[id.substr(7)].id;						// Save mob id
+		o=curJson.mobs[this.curId];											// Point at seg's mob
 		}
 	else if (id && id.match(/svgmarker/i)) { 								// An event
 		$("#esHead").text("Edit event");									// Set title
 		if (id.match(/svgMarkerText/i)) 	id=id.substr(13);				// Extract id
 		else if (id.match(/svgMarker/i))	id=id.substr(9);				// Extract id
-		o=curJson.mobs[id];													// Point at seg
+		this.curId=id;														// Save mob id
+		o=curJson.mobs[this.curId];											// Point at event
 		}
 	else																	// Nothing	
 		$("#esHead").text("Add event or segment");							// Add
-
-	if (o.title)	$("#esTitle").val(o.title);								// Title
-	if (o.startO)	$("#esStart").val(o.startO);							// Start
-	if (o.endO)		$("#esEnd").val(o.endO);								// End
-	if (o.id)		$("#esId").val(o.id);									// Id
-	if (o.click)	$("#esClick").val(o.click);								// Click
-	if (o.where)	$("#esWhere").val(o.where);								// Where
-	if (o.desc)		$("#esDesc").val(o.desc);								// Desc
-	if (o.pic)		$("#esPic").val(o.pic);									// Pic
-	if (o.marker)	$("#esMarker").val(o.marker.toLowerCase());				// Marker
-	if (o.size)		$("#esSize").val(o.size);								// Size
-	if (o.color)	$("#esColor").val(o.color);								// Color
-	if (o.mapMarker) $("#esMapMarker").val(o.mapMarker);					// Map marker
-	if (o.mapSize)	$("#esMapSize").val(o.mapSize);							// Size
-	if (o.mapColor)	$("#esMapColor").val(o.mapColor);						// Color
-	if (o.pos)		$("#esPos").val(o.pos);									// Pos
-	if (o.color)	$("#esColor").val(o.color);								// Color
-	if (o.size)		$("#esSize").val(o.size);								// Pos
-	if (o.opacityO)	$("#esOpacity").val(o.opacityO);						// Opacity
+		if (o.id)		$("#esId").val(o.id);								// Id
+		if (o.marker)	$("#esMarker").val(o.marker.toLowerCase());			// Marker
+		if (o.start)	$("#esStart").val(o.startO);						// Start
+		if (o.end)		$("#esEnd").val(o.endO);							// End
+		if (o.title)	$("#esTitle").val(o.title);							// Title
+		if (o.desc)		$("#esDesc").val(o.desc);							// Desc
+		if (o.pic)		$("#esPic").val(o.pic);								// Pic
+		if (o.pos)		$("#esPos").val(o.pos);								// Pos
+		if (o.color)	$("#esColor").val(o.color);							// Color
+		if (o.size)		$("#esSize").val(o.size);							// Size
+		if (o.opacity)	$("#esOpacity").val(o.opacityO);					// Opacity
+		if (o.mapMarker) $("#esMapMarker").val(o.mapMarker);				// Map marker
+		if (o.mapColor)	$("#esMapColor").val(o.mapColor);					// Color
+		if (o.mapSize)	$("#esMapSize").val(o.mapSize);						// Size
+		if (o.show)		$("#esShow").val(o.show);							// Show
+		if (o.click)	$("#esClick").val(o.click);							// Click
+		if (o.where)	$("#esWhere").val(o.where);							// Where
 	}
 
 EditShow.prototype.EditMap=function(x, y)								// EDIT MAP ITEM
@@ -126,3 +164,34 @@ EditShow.prototype.EditStory=function(id)								// EDIT STORY ITEM
 	$("#editShowDiv").css({ top:"16px",left: $("#leftDiv").width()-546+"px"});
 	$("#esHead").text("Edit Story");
 }
+
+EditShow.prototype.MakeTabFile=function(data)							// MAKE TAB-DELINEATED FILE OF PROJECY
+{
+	var i,o,s;
+	var str="id\tmarker\tstart\tend\ttitledesc\tpic\tpos\tcolor\tsize\topacity\tedge\tmapMarker\tmapColor\tmapSize\twhere\tshow\tclick\tcitation\ttags\n";													// Add header
+	for (i=0;i<data.mobs.length;++i) {										// For each mob	
+		o=data.mobs.lobs[i];												// Point at mob
+		s=o.id;			str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	// Save data
+		s=o.marker;		str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
+		s=o.startO;		str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
+		s=o.endO;		str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
+		s=o.title;		str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
+		s=o.desc;		str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
+		s=o.pic;		str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
+		s=o.pos;		str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
+		s=o.color;		str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
+		s=o.size;		str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
+		s=o.opacityO;	str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
+		s=o.edge;		str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
+		s=o.mapMarker;	str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
+		s=o.mapColor;	str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
+		s=o.mapSize;	str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
+		s=o.where;		str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
+		s=o.show;		str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
+		s=o.click;		str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
+		s=o.citation;	str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
+		s=o.tags;		str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\n";	
+		}		
+	return str;
+	}
+
