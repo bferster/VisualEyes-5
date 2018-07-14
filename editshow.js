@@ -55,7 +55,8 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	str+="<div '>";																		
 	str+="<div id='esSaveBut' class='ve-gbs'>Save</div>&nbsp;&nbsp;";						
 	str+="<div id='esCopyBut' class='ve-gbs'>Copy changes to clipboard</div>&nbsp;&nbsp;";						
-	str+="<img id='esRemoveBut' title='Delete' style='vertical-align:-5px' src='img/trashbut.gif'></div>";	// Trash button
+	str+="<img id='esRemoveBut' title='Delete' style='vertical-align:-5px' src='img/trashbut.gif'>";	// Trash button
+	str+="<textarea id='outputDiv2' style='width:1px;height:1px;opacity:.01'></textarea></div>";
 	$("body").append(str);	
 	$("#editShowDiv").draggable();											// Make it draggable
 	if (mode == "time") 		this.EditTime(e);
@@ -75,6 +76,11 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	}); 
 
 	$("#esSaveBut").on("click", function() {  								// ON SAVE 
+		var i,o;
+		for (i=0;i<curJson.mobs.length;++i) {								// For each mob	
+			o=curJson.mobs[i];												// Point at mob
+			o.start=o.startO;	o.end=o.endO;	o.opacity=o.opacityO;		// Restore original values
+			}
 		o=curJson.mobs[_this.curId];										// Point at mob
 		o.id=$("#esId").val();												// Id
 		o.marker=$("#esMarker").val();										// Marker
@@ -97,19 +103,28 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 		$("#editShowDiv").remove();											// Remove editor
 		});
 
-	$("#copyBut").on("click", function() {  								// ON COPY TO CLIPBOARD
-		var str=this.MakeTabFile();											// Create TSV file
-		$("#outputDiv").val(str);											// Show it
-		$("#outputDiv")[0].select();										// Select div
+	$("#esCopyBut").on("click", function() {  								// ON COPY TO CLIPBOARD
+		var str=_this.MakeTabFile(curJson);									// Create TSV file
+		$("#outputDiv2").val(str);											// Show it
+		$("#outputDiv2")[0].select();										// Select div
 		try {
 			if (document.execCommand('copy')) {								// Copy to clipboard
 				Sound("ding");												// Ding
-				PopUp("Course<br>spreadsheet<br>copied to clipboard");		// Show popup
 				}
 			} catch (err) { console.log("Clipboard copy error")}			// Show error
 		});
 
-}
+		$("#esRemoveBut").on("click", function() {  						// REMOVE MOB
+			if (_this.curId >= 0)											// Valid mob
+				ConfirmBox("Are you sure?",	function() {					// Sure?
+					curJson.mobs.splice(_this.curId,1);						// Remove it
+					InitProject(curJson);									// Reinit project
+					$("#editShowDiv").remove();								// Remove editor
+					});
+		});		
+
+	}
+
 
 EditShow.prototype.EditTime=function(e)									// EDIT TIMELINE ITEM
 {
@@ -118,8 +133,6 @@ EditShow.prototype.EditTime=function(e)									// EDIT TIMELINE ITEM
 	if (!id) id=e.target.parentElement.id;									// Look at parent
 	this.curId=-1;
 	$("#editShowDiv").css({ top:$("#leftDiv").height()-$("#editShowDiv").height()-60+"px",left: $("#leftDiv").width()/2-250+"px"});
-	pop.ColorPicker("esMapColor",-1,true);									// Init color
-	pop.ColorPicker("esColor",-1,true);										// Init color
 	if (id && id.match(/timeseg/i)) {										// A segment		
 		$("#esHead").text("Edit segment");									// Set title
 		this.curId=tln.timeSegments[id.substr(7)].id;						// Save mob id
@@ -151,7 +164,9 @@ EditShow.prototype.EditTime=function(e)									// EDIT TIMELINE ITEM
 		if (o.show)		$("#esShow").val(o.show);							// Show
 		if (o.click)	$("#esClick").val(o.click);							// Click
 		if (o.where)	$("#esWhere").val(o.where);							// Where
-	}
+		pop.ColorPicker("esMapColor",-1,true);								// Init color
+		pop.ColorPicker("esColor",-1,true);									// Init color
+		}
 
 EditShow.prototype.EditMap=function(x, y)								// EDIT MAP ITEM
 {
@@ -168,9 +183,9 @@ EditShow.prototype.EditStory=function(id)								// EDIT STORY ITEM
 EditShow.prototype.MakeTabFile=function(data)							// MAKE TAB-DELINEATED FILE OF PROJECY
 {
 	var i,o,s;
-	var str="id\tmarker\tstart\tend\ttitledesc\tpic\tpos\tcolor\tsize\topacity\tedge\tmapMarker\tmapColor\tmapSize\twhere\tshow\tclick\tcitation\ttags\n";													// Add header
+	var str="id\tmarker\tstart\tend\ttitle\tdesc\tpic\tpos\tcolor\tsize\topacity\tedge\tmapMarker\tmapColor\tmapSize\twhere\tshow\tclick\tcitation\ttags\n";													// Add header
 	for (i=0;i<data.mobs.length;++i) {										// For each mob	
-		o=data.mobs.lobs[i];												// Point at mob
+		o=data.mobs[i];														// Point at mob
 		s=o.id;			str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	// Save data
 		s=o.marker;		str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
 		s=o.startO;		str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
