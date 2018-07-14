@@ -31,7 +31,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	str+="<tr><td><b>Start</b></td><td><input class='ve-is' style='width:80px' type='text' id='esStart'>&nbsp;&nbsp;";	
 	str+="<b>End</b>&nbsp;&nbsp;<input class='ve-is' style='width:80px' type='text' id='esEnd'>&nbsp;&nbsp;";	
 	str+="<b>Id</b>&nbsp;&nbsp;<input class='ve-is' style='width:114px' type='text' id='esId'></td></tr>";	
-	str+="<tr><td><b>On click do</b></td><td><input class='ve-is' style='width:calc(100% - 48px)' type='text' id='esClick'>&nbsp;&nbsp;<img src='img/editbut.gif' id='esClickEditor' style='vertical-align:-5px;cursor:pointer'></td></tr>";	
+	str+="<tr><td><b>On click</b></td><td><input class='ve-is' style='width:calc(100% - 48px)' type='text' id='esClick'>&nbsp;&nbsp;<img src='img/editbut.gif' id='esClickEditor' style='vertical-align:-5px;cursor:pointer'></td></tr>";	
 	if (mode == "time") {
 		str+="<tr><td><b>Where&nbsp;</b></td><td><input class='ve-is' style='width:140px' type='text' id='esWhere'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>(Ctrl-click to get from map)</i></td></tr>";	
 		str+="<tr><td><b>Popup text<br></b></td><td>";
@@ -122,9 +122,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 					$("#editShowDiv").remove();								// Remove editor
 					});
 		});		
-
-	}
-
+}
 
 EditShow.prototype.EditTime=function(e)									// EDIT TIMELINE ITEM
 {
