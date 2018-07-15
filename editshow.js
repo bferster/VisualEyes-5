@@ -34,7 +34,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	str+="<tr><td><b>On click</b></td><td><input class='ve-is' style='width:calc(100% - 48px)' type='text' id='esClick'>&nbsp;&nbsp;<img src='img/editbut.gif' id='esClickEditor' style='vertical-align:-5px;cursor:pointer'></td></tr>";	
 	if (mode == "time") {
 		str+="<tr><td><b>Where&nbsp;</b></td><td><input class='ve-is' style='width:140px' type='text' id='esWhere'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>(Ctrl-click to get from map)</i></td></tr>";	
-		str+="<tr><td><b>Popup text<br></b></td><td>";
+		str+="<tr><td><b>Popup text<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src='img/editbut.gif' id='esHtmlEditor' style='margin-top:6px;cursor:pointer'></b></td><td>";
 		str+="<textarea class='ve-is'  style='width:calc(100% - 18px);height:60px' id='esDesc'></textarea></td></tr>";	
 		str+="<tr><td><b>Image</b></td><td><input class='ve-is' style='width:calc(100% - 18px)' type='text' id='esPic'></td></tr>";	
 		str+="<tr><td><b>Marker</b></td><td>"+MakeSelect("esMarker",false,["","dot","diamond","star","bar","box","rbar","line","triup","tridown","triright","trileft","ndot","segment"]);
@@ -55,6 +55,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	str+="<div '>";																		
 	str+="<div id='esSaveBut' class='ve-gbs'>Save</div>&nbsp;&nbsp;";						
 	str+="<div id='esCopyBut' class='ve-gbs'>Copy changes to clipboard</div>&nbsp;&nbsp;";						
+	str+="<div id='esCopyLineBut' class='ve-gbs'>Copy line</div>&nbsp;&nbsp;";						
 	str+="<img id='esRemoveBut' title='Delete' style='vertical-align:-5px' src='img/trashbut.gif'>";	// Trash button
 	str+="<textarea id='outputDiv2' style='width:1px;height:1px;opacity:.01'></textarea></div>";
 	$("body").append(str);	
@@ -77,6 +78,14 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 
 	$("#esSaveBut").on("click", function() {  								// ON SAVE 
 		var i,o;
+		if (_this.curId == -1) {											// A new mob
+			ConfirmBox("This will add a new event. Are you sure?",	function() { // Sure?
+				curJson.mobs.push({});										// Add new mob
+				_this.curId=curJson.mobs.length-1;							// Point at it
+				$("#esSaveBut").trigger("click");							// Try again
+				});
+			return;															// Quit and rely on trigger if continuing
+			}
 		for (i=0;i<curJson.mobs.length;++i) {								// For each mob	
 			o=curJson.mobs[i];												// Point at mob
 			o.start=o.startO;	o.end=o.endO;	o.opacity=o.opacityO;		// Restore original values
@@ -114,13 +123,24 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 			} catch (err) { console.log("Clipboard copy error")}			// Show error
 		});
 
-		$("#esRemoveBut").on("click", function() {  						// REMOVE MOB
-			if (_this.curId >= 0)											// Valid mob
-				ConfirmBox("Are you sure?",	function() {					// Sure?
-					curJson.mobs.splice(_this.curId,1);						// Remove it
-					InitProject(curJson);									// Reinit project
-					$("#editShowDiv").remove();								// Remove editor
-					});
+	$("#esCopyLineBut").on("click", function() {  							// ON COPY LINE TO CLIPBOARD
+		var str=_this.MakeTabFile(curJson,_this.curId);						// Create TSV line
+		$("#outputDiv2").val(str);											// Show it
+		$("#outputDiv2")[0].select();										// Select div
+		try {
+			if (document.execCommand('copy')) {								// Copy to clipboard
+				Sound("ding");												// Ding
+				}
+			} catch (err) { console.log("Clipboard copy error")}			// Show error
+		});
+	
+	$("#esRemoveBut").on("click", function() {  							// REMOVE MOB
+		if (_this.curId >= 0)												// Valid mob
+			ConfirmBox("Are you sure?",	function() {						// Sure?
+				curJson.mobs.splice(_this.curId,1);							// Remove it
+				InitProject(curJson);										// Reinit project
+				$("#editShowDiv").remove();									// Remove editor
+				});
 		});		
 }
 
@@ -178,11 +198,15 @@ EditShow.prototype.EditStory=function(id)								// EDIT STORY ITEM
 	$("#esHead").text("Edit Story");
 }
 
-EditShow.prototype.MakeTabFile=function(data)							// MAKE TAB-DELINEATED FILE OF PROJECY
+EditShow.prototype.MakeTabFile=function(data, line)						// MAKE TAB-DELINEATED FILE OF PROJECY
 {
-	var i,o,s;
-	var str="id\tmarker\tstart\tend\ttitle\tdesc\tpic\tpos\tcolor\tsize\topacity\tedge\tmapMarker\tmapColor\tmapSize\twhere\tshow\tclick\tcitation\ttags\n";													// Add header
-	for (i=0;i<data.mobs.length;++i) {										// For each mob	
+	var i,o,s,str="";
+	var start=0,end=data.mobs.length;										// Assume full show
+	if (line != undefined) 													// If line defined
+		start=line,end=line++;												// Just save this line
+	else																	// Add header for full
+		str+="id\tmarker\tstart\tend\ttitle\tdesc\tpic\tpos\tcolor\tsize\topacity\tedge\tmapMarker\tmapColor\tmapSize\twhere\tshow\tclick\tcitation\ttags\n";													// Add header
+	for (i=start;i<end;++i) {										// For each mob	
 		o=data.mobs[i];														// Point at mob
 		s=o.id;			str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	// Save data
 		s=o.marker;		str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
