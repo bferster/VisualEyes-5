@@ -155,11 +155,15 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 	this.map.on('click', function(e) {										// ON CLICK
 		var c=ol.proj.transform(e.coordinate,_this.curProjection,'EPSG:4326');	// Get center
 		$("#setpoint").val(Math.floor(c[0]*10000)/10000+","+Math.floor(c[1]*10000)/10000);
-		if (e.originalEvent.ctrlKey) 										// If control key presssed
-			$("#esWhere").val($("#setpoint").val());						// Set editor
+		if (e.originalEvent.ctrlKey) {										// If control key presssed
+			if (eds.curMode == "story")										// Editing a story
+				$("#esWhere").val(_this.GetView());							// Set editor with view
+			else															// Anything else
+				$("#esWhere").val($("#setpoint").val());					// Set editor with point
+			}
 		if (e.originalEvent.shiftKey) {										// If shift key presssed
   			var lay;
-  			var feature=_this.map.forEachFeatureAtPixel(e.pixel,			// Look through features
+			  var feature=_this.map.forEachFeatureAtPixel(e.pixel,			// Look through features
       			function(feature, layer) {									// On match to location
          			lay=layer;												// Save layer
          			return feature;											// Return feature
@@ -167,7 +171,7 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 			if (feature) {													// If one found
   				var j;
   				var id=feature.getId();										// Get feature id
-    			if (lay && (lay.get("kmlId"))) 	{							// If a KML id
+				  if (lay && (lay.get("kmlId"))) 	{							// If a KML id
  					var fa=lay.getSource().getFeatures();					// Point at all features
  					for (j=0;j<fa.length;++j)								// For each one
  						if (fa[j].getId() == id)							// A match for id
@@ -188,7 +192,17 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 		$("#setwhere").val(Math.floor(c[0]*10000)/10000+","+Math.floor(c[1]*10000)/10000+","+Math.round(r));
 		_this.SendMessage("move",pos+"|scroll");							// Send that view has changed
 		});
-	}	
+}	
+
+Space.prototype.GetMapFeatureId=function(x, y) 							// GET FEATURE ID AT PIXEL
+{
+	var id=this.map.forEachFeatureAtPixel([x,y],							// Look through features
+		function(feature, layer) {											// On match to location
+			return feature.getId();											// Return feature
+			});
+		if (id)		return id;												// Return feature
+		else		return -1;												// Nothing found	
+}	
 
 Space.prototype.GetView=function() 										// GET CURRENT VIEW
 {

@@ -5,9 +5,10 @@
 function EditShow()														// CONSTRUCTOR
 {
 	var _this=this;															// Save context 
-	this.curId=-1;
+	this.curMode="";														// Current curMode
+	this.curId=-1;															// Current id
 	$("body").contextmenu(function(e) { 									// Add context menu handler
-		if (e.ctrlKey) {													// If control key
+		if (e.ctrlKey && e.altKey) {										// If control+alt key
 			_this.Draw(e); 													// Show editor
 			return false;													// Inhibit browser comtext menu
 			} 
@@ -16,14 +17,15 @@ function EditShow()														// CONSTRUCTOR
 
 EditShow.prototype.Draw=function(e)										// MAIN MENU
 {
-	this.mode="story";
+	this.curMode="story";
 	var _this=this;															// Save context 
 	var x=e.clientX,y=e.clientY;											// Get pos
 	$("#editShowDiv").remove();												// Remove it
+	$("#storyEditor").remove();												// Kill story editor
 	if ((x < $("#leftDiv").width()) && (y < $("#leftDiv").height())) 		// In map area
-		this.mode="map";													// Edit map item
+		this.curMode="map";													// Edit map item
 	else if ((x < $("#leftDiv").width()) && (y > $("#leftDiv").height())) 	// In timeline
-		this.mode="time";													// Edit timeline item
+		this.curMode="time";												// Edit timeline item
 	str="<div id='editShowDiv' class='ve-showEditor'>";
 	str+="<img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
 	str+="<span style='font-size:18px;color:#666;font-weight:bold'><span id='esHead'></span><span id='esClose'style='float:right;cursor:pointer'><i>x</i></span></span><p><hr></p>";
@@ -34,7 +36,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	str+="<b>Id</b>&nbsp;&nbsp;<input class='ve-is' style='width:42px' type='text' id='esId'></td></tr>";	
 	str+="<tr><td><b>On click</b></td><td><input class='ve-is' style='width:calc(100% - 48px)' type='text' id='esClick'>&nbsp;&nbsp;<img src='img/editbut.gif' id='esClickEditor' style='vertical-align:-5px;cursor:pointer'></td></tr>";	
 	str+="<tr><td><b>Where&nbsp;</b></td><td><input class='ve-is' style='width:140px' type='text' id='esWhere'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>(Ctrl-click to get from map)</i></td></tr>";	
-	str+="<tr><td><b>Desc&nbsp;&nbsp;&nbsp;<img src='img/editbut.gif' id='esHtmlEditor' style='vertical-align:-4px;cursor:pointer'></b></td><td>";
+	str+="<tr><td><b>Desc&nbsp;&nbsp;&nbsp;<img src='img/editbut.gif' onclick='sto.StoryEditor(\"edit\")' style='vertical-align:-4px;cursor:pointer'></b></td><td>";
 	str+="<textarea class='ve-is'  style='width:calc(100% - 18px);height:60px' id='esDesc'></textarea></td></tr>";	
 	str+="<tr><td><b>Image</b></td><td><input class='ve-is' style='width:calc(100% - 18px)' type='text' id='esPic'></td></tr>";	
 	str+="<tr><td><b>Marker</b></td><td>"+MakeSelect("esMarker",false,["dot","diamond","star","bar","box","rbar","line","triup","tridown","triright","trileft","ndot","------------","segment","path","over","story"]);
@@ -57,7 +59,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	$("body").append(str);	
 	$("#editShowDiv").draggable();											// Make it draggable
 	this.curId=-1;															// Assume a new one
-	if (this.mode == "time") {												// Timeline item
+	if (this.curMode == "time") {											// Timeline item
 		var id=e.target.id;													// Get id
 		if (!id) id=e.target.parentElement.id;								// Look at parent
 		if (id && id.match(/timeseg/i)) {									// A segment		
@@ -72,27 +74,37 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 			}
 		$("#editShowDiv").css({ top:$("#leftDiv").height()-$("#editShowDiv").height()-60+"px",left: $("#leftDiv").width()/2-250+"px"});
 		}
-	else if (this.mode == "story") {										// Story item	
+	else if (this.curMode == "story") {										// Story item	
 		$("#esHead").text("Edit Story");									// Title
 		this.curId=sto.pages[sto.curPage];									// Extract id
 		$("#editShowDiv").css({ top:"16px",left: $("#leftDiv").width()-546+"px"});
 		}	
-	else if (this.mode == "map") {											// Map item	
+	else if (this.curMode == "map") {										// Map item	
 		$("#esHead").text("Edit Map");										// Set title
+		id=""+mps.GetMapFeatureId(x,y);										// Look for feature at map
+		if (id && id.match(/Mob-/i)) { 										// An event
+			id=id.substr(4);												// Extract id
+			this.curId=id;													// Save mob id
+			}
 		$("#editShowDiv").css({ top:"16px",left: $("#leftDiv").width()+16+"px"});
 		}
 	this.EditEvent(e);														// Edit
 
-	$("#esColor").on("click", function(e) {									// COLOR HANDLER
+	$("#esColor").on("click", function() {									// COLOR HANDLER
 		pop.ColorPicker("esColor",-1);										// Set color
 		}); 
 	
-	$("#esMapColor").on("click", function(e) {								// MAP COLOR HANDLER
+	$("#esMapColor").on("click", function() {								// MAP COLOR HANDLER
 		pop.ColorPicker("esMapColor",-1);									// Set color
 		}); 
 		
+	$("#esClickEditor").on("click", function() {							// CLICK EDITOR HANDLER
+		_this.ClickEditor();												// Run click editor
+		}); 
+			
 	$("#esClose").on("click", function(e) {									// MAP COLOR HANDLER
 		$("#editShowDiv").remove();											// Remove editor
+		$("#storyEditor").remove();											// Kill story editor
 	}); 
 
 	$("#esSaveBut").on("click", function() {  								// ON SAVE 
@@ -129,6 +141,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 		o.click=$("#esClick").val();										// Click
 		InitProject(curJson);												// Reinit project
 		$("#editShowDiv").remove();											// Remove editor
+		$("#storyEditor").remove();											// Kill story editor
 		});
 
 	$("#esCopyBut").on("click", function() {  								// ON COPY TO CLIPBOARD
@@ -159,7 +172,8 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 				curJson.mobs.splice(_this.curId,1);							// Remove it
 				InitProject(curJson);										// Reinit project
 				$("#editShowDiv").remove();									// Remove editor
-				});
+				$("#storyEditor").remove();									// Kill story editor
+			});
 		});		
 
 	$("#esHelp").on("click", function(e) {									// HELP
@@ -201,6 +215,24 @@ EditShow.prototype.EditEvent=function(e)									// EDIT ITEM
 	if (o.where)	$("#esWhere").val(o.where);								// Where
 	pop.ColorPicker("esMapColor",-1,true);									// Init color
 	pop.ColorPicker("esColor",-1,true);										// Init color
+}
+
+EditShow.prototype.ClickEditor=function()								// MAIN MENU
+{
+	var _this=this;															// Save context 
+	$("#storyEditor").remove();												// Kill story editor
+	str="<div id='storyEditor' class='ve-clickEditor'>";
+	str+="<span style='font-size:14px;color:#666;font-weight:bold'>Click actions<span id='esClose'style='float:right;cursor:pointer'><i>x</i></span></span><p><hr></p>";
+	str+="<table><tr><td><b>Title</b></td><td><input class='ve-is' style='width:calc(100% - 18px)' type='text' id='esTitle'></td></tr>";	
+	str+="<tr><td><b>Start</b></td><td><input class='ve-is' style='width:60px' type='text' id='esStart'>&nbsp;&nbsp;";	
+	str+="<b>End</b>&nbsp;&nbsp;<input class='ve-is' style='width:60px' type='text' id='esEnd'>&nbsp;&nbsp;";	
+	str+="<b>Show</b>&nbsp;&nbsp;<input class='ve-is' style='width:40px' type='text' id='esShow'>&nbsp;&nbsp;";	
+	str+="</table>"
+	str+="<p><hr></p>";																			
+	str+="<div>";																		
+	str+="<div id='esSaveBut' class='ve-gbs'>Save click changes</div>&nbsp;&nbsp;";						
+	$("#editShowDiv").append(str);	
+	$("#storyEditor").draggable();											// Make it draggable
 }
 
 EditShow.prototype.MakeTabFile=function(data, line)						// MAKE TAB-DELINEATED FILE OF PROJECY

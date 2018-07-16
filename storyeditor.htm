@@ -27,10 +27,16 @@
 		CKEDITOR.on('instanceLoaded', function(e) {e.editor.resize("100%", h)});// Resize editor
 	});
 
-	function shivaEventHandler(e)											// ON SHIVA EVENT
+	function shivaEventHandler(e)											// ON EVENT
 	{
 		if (e.data && e.data.match(/INS:/))	{									// Insert macro
 			CKEDITOR.instances.editor1.insertText(e.data.substring(4));			// Insert text	
+			Sound("ding");														// Ding	
+			}
+		else if (e.data && e.data.match(/PUT:/))								// Put 
+			CKEDITOR.instances.editor1.setData(e.data.substring(4));			// Set html	
+		else if (e.data && e.data.match(/GET:/)) {								// Get
+			e.source.postMessage("StoryEdit="+CKEDITOR.instances.editor1.getData(e.data.substring(4)),"*");
 			Sound("ding");														// Ding	
 			}
 	}

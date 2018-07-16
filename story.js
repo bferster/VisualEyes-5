@@ -257,7 +257,7 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 // STORY EDITOR 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Story.prototype.StoryEditor=function(m) 								// STORY EDITOR
+Story.prototype.StoryEditor=function(mode) 								// STORY EDITOR
 {
 	var str;
 	$("#storyEditor").remove();												// Remove any old one
@@ -266,8 +266,11 @@ Story.prototype.StoryEditor=function(m) 								// STORY EDITOR
 	var l=$("#rightDiv").offset().left+8;
 	str="<div id='storyEditor' class='ve-storyEditor' style='left:"+l+"px;top:8px;width:"+w+"px;height:"+h+"px'>";
 	str+="<div style='margin:12px;margin-bottom:4px'><img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
-	str+="<span style='font-size:18px;color:#666'><b>VisualEyes Story Editor</b></span>";
-	str+=MakeSelect("seOps",false,["Choose","Reload spreadsheet","----------------","foot()","iframe()","link()","page()","pic()","play()","show()","story()","where()","zoomer()","----------------","Quit"],"Choose","style='float:right;margin-top:4px'")+"</td></tr>";
+	str+="<span style='font-size:18px;color:#666'><b>Story Editor</b></span>";
+	str+="<div style='float:right'>"
+	str+=MakeSelect("seOps",false,["Add macro","foot()","iframe()","link()","page()","pic()","play()","show()","story()","where()","zoomer()"]);
+	if (mode == "edit")	str+="&nbsp;&nbsp;<div id='seSaveBut' class='ve-gbs'>Save</div>&nbsp;";						
+	str+="&nbsp;&nbsp;<img src='img/closedot.gif' style='vertical-align:-2px' onclick='$(\"#storyEditor\").remove()'></div>"
 	str+="</div><div style='width:"+(w-4)+"px'>";
 	str+="<iframe frameborder='0' scrolling='no' id='playerIF' src='storyeditor.htm' ";
 	str+="style='border:0;padding:0;margin:0;width:100%;height:"+(h-32)+"px'></iframe>";
@@ -276,14 +279,17 @@ Story.prototype.StoryEditor=function(m) 								// STORY EDITOR
 	$("#storyEditor").draggable();										// Make it draggable
 	var win=document.getElementById("playerIF").contentWindow;			// Point at iframe	
 
+	if (mode == "edit") {												// If editing
+		$("#playerIF").on("load",function() {							// If Iframe loaded
+			win.postMessage("PUT:"+$("#esDesc").val(),"*"); 			// Populate editor
+			});
+		$("#seSaveBut").on("click",function() {							// ON SAVE
+			win.postMessage("GET:","*"); 								// Get data to textarea in editor
+			});
+		}
+
 	$("#seOps").on("change",function(e) { 								// ON SELECT
 		switch($(this).val()) {											// Route on change
-			case "Quit":
-				$("#storyEditor").remove();								// Remove editor
-				break;
-			case "Reload spreadsheet":									// Reload
-				ReloadShow();											// Refresh show
-				break;
 			case "foot()":												// Foot
 				str="Type footnote to add."
 				pop.GetTextBox("Add footnote macro", str, "", function(s) {
@@ -337,14 +343,14 @@ Story.prototype.StoryEditor=function(m) 								// STORY EDITOR
 					win.postMessage("INS:where("+s+")","*") 			// Send message
 					});
 				break;
-			case "zoomer()":												// Link
+			case "zoomer()":											// Link
 				str="Type title to click on, and following a comma, the fully formed url of the picture you want to zoom.  (i.e. here,http://mySite.com/pic.jpg)."
 				pop.GetTextBox("Add zoomer macro", str, "", function(s) {
 					win.postMessage("INS:zoomer("+s+")","*") 			// Send message
 					});
 				break;
 				}
-		$(this).val("Choose");											// Reset
+		$(this).val("Add macro");										// Reset
 	});
 }
 
