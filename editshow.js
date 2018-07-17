@@ -99,7 +99,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 		}); 
 		
 	$("#esClickEditor").on("click", function() {							// CLICK EDITOR HANDLER
-		_this.ClickEditor();												// Run click editor
+		_this.ClickEditor($("#esClick").val());								// Run click editor
 		}); 
 			
 	$("#esClose").on("click", function(e) {									// MAP COLOR HANDLER
@@ -217,22 +217,116 @@ EditShow.prototype.EditEvent=function(e)									// EDIT ITEM
 	pop.ColorPicker("esColor",-1,true);										// Init color
 }
 
-EditShow.prototype.ClickEditor=function()								// MAIN MENU
+EditShow.prototype.ClickEditor=function(data)								// MAIN MENU
 {
+	var i,v=[],vv=[];
 	var _this=this;															// Save context 
 	$("#storyEditor").remove();												// Kill story editor
 	str="<div id='storyEditor' class='ve-clickEditor'>";
-	str+="<span style='font-size:14px;color:#666;font-weight:bold'>Click actions<span id='esClose'style='float:right;cursor:pointer'><i>x</i></span></span><p><hr></p>";
-	str+="<table><tr><td><b>Title</b></td><td><input class='ve-is' style='width:calc(100% - 18px)' type='text' id='esTitle'></td></tr>";	
-	str+="<tr><td><b>Start</b></td><td><input class='ve-is' style='width:60px' type='text' id='esStart'>&nbsp;&nbsp;";	
-	str+="<b>End</b>&nbsp;&nbsp;<input class='ve-is' style='width:60px' type='text' id='esEnd'>&nbsp;&nbsp;";	
-	str+="<b>Show</b>&nbsp;&nbsp;<input class='ve-is' style='width:40px' type='text' id='esShow'>&nbsp;&nbsp;";	
+	str+="<span style='font-size:14px;color:#666;font-weight:bold'>Click actions<span id='ceClose'style='float:right;cursor:pointer'><i>x</i></span></span><p><hr></p>";
+	str+="<table><tr><td><b>Click actions&nbsp;</b></td><td>"+MakeSelect("ceClicks",false,[],"","style='max-width:240px'");
+	str+="&nbsp;&nbsp;<img id='ceAddBut' title='Add new action' style='vertical-align:-5px' src='img/addbut.gif'>";
+	str+="&nbsp;&nbsp;<img id='ceRemoveBut' title='Delete action' style='vertical-align:-5px' src='img/trashbut.gif'></td></tr>";
+	str+="<tr><td><b>Do this</b></td><td>"+MakeSelect("ceActions",false,["where","show","story","basemap","segment","zoomer","mask"]);
+	str+="<tr><td><b>With/to</b></td><td><input class='ve-is' style='width:100%' type='text' id='ceWith'></td></tr>";	
 	str+="</table>"
 	str+="<p><hr></p>";																			
 	str+="<div>";																		
-	str+="<div id='esSaveBut' class='ve-gbs'>Save click changes</div>&nbsp;&nbsp;";						
+	str+="<div id='ceSaveBut' class='ve-gbs'>Save click changes</div>&nbsp;&nbsp;";						
 	$("#editShowDiv").append(str);	
 	$("#storyEditor").draggable();											// Make it draggable
+	if (data)																// If some data
+		v=(""+data).split("+");												// Array of click actions
+	for (i=0;i<v.length;++i) 												// For each action
+	$("#ceClicks").append("<option value='"+v[i]+"'>"+(i+1)+" - "+v[i].split(":")[0]+"</option>");	 // Add to select
+	if (v.length) {															// Actions set														
+		vv=v[0].split(":");													// Point at 1st and split
+		$("#ceActions").val(vv[0]);											// Set action
+		$("#ceWith").val(vv[1] ? vv[1] : "");								// Set with
+		}
+	else{
+		$("#ceRemoveBut").hide();											// Hide trash button
+		$("#ceClicks").append("<option>Use + to add action</option>"); 		// Add to select
+		}
+
+	$("#ceClose").on("click", function(e) {									// MAP COLOR HANDLER
+		$("#storyEditor").remove();											// Kill dialog
+		}); 
+
+	$("#ceSaveBut").on("click", function() {  								// ON SAVE 
+		var s=""
+		$("#ceClicks :selected").val($("#ceActions").val()+":"+$("#ceWith").val());	// Set value
+		var n=$("#ceClicks option").length;									// Number of options
+		for (i=0;i<n;++i) {													// For each option
+			s+=$("#ceClicks option:eq("+i+")").val();						// Add click action from value
+			if (i != n-1)	s+="+";											// Add sep
+			}
+		$("#esClick").val(s);												// Save click actions
+		$("#storyEditor").remove();											// Kill dialog
+		Sound("click");														// Click
+		});
+
+	$("#ceAddBut").on("click", function() {  								// ON ADD 
+		if ($("#ceClicks").val() == "Use + to add action")					// If first				
+			$("#ceClicks").empty();											// Empty missive
+		var i=$("#ceClicks option").length;									// Number of options
+		$("#ceClicks").append("<option value='"+$("#ceActions").val()+":"+$("#ceWith").val()+"'>"+i+" - "+$("#ceActions").val()+"</option>") // Add to select
+		$("#ceRemoveBut").show();											// Hide trash button
+		Sound("ding");														// Ding
+	});
+			
+	$("#ceRemoveBut").on("click", function() {  							// ON REMOVE 
+		$("#ceClicks :selected").remove();									// Remove action from select
+		if (!$("#ceClicks option").length) {								// No actions left												
+			$("#ceClicks").append("<option>Use + to add action</option>"); 	// Add to select
+			$("#ceRemoveBut").hide();										// Hide trash button
+			}
+		else{
+			vv=(""+$("#ceClicks").val()).split(":");						// Point at 1st and split
+			$("#ceActions").val(vv[0]);										// Set action
+			$("#ceWith").val(vv[1] ? vv[1] : "");							// Set with
+			}
+		Sound("delete");													// Delete
+		});
+
+	$("#ceWith").on("click", function() {  									// ON WITH CLICK
+		var i,ids=[];
+		if ($("#ceActions").val() == "where") {								// If a where
+			$(this).val(mps.GetView());										// Get current view
+			Sound("ding");													// Ding
+			}
+		else if ($("#ceActions").val() == "basemap") 						// If basemap
+			$(this).autocomplete({ source: ["Satellite","Terrain","Earth","Watercolor","B&W","Roadmap"] });
+		else if ($("#ceActions").val() == "show") {							// If  show
+			for (i=0;i<curJson.mobs.length;++i)								// For each mob
+				if (curJson.mobs[i].id)										// If a valid id
+					ids.push(curJson.mobs[i].id);							// Add to autocomplete array
+			$(this).autocomplete({ source: ids });							// Auto complete
+			}
+		else if ($("#ceActions").val() == "story") {						// If  story
+			for (i=0;i<curJson.mobs.length;++i)								// For each mob
+				if (curJson.mobs[i].id && (curJson.mobs[i].marker == "story"))	// If a valid story id
+					ids.push(curJson.mobs[i].id);							// Add to autocomplete array
+				$(this).autocomplete({ source: ids });						// Auto complete
+				}
+			});
+
+	$("#ceActions").on("change", function() {								// ON ACTION CHANGE
+		$("#ceClicks :selected").text($("#ceClicks :selected").text().substr(0,4)+$("#ceActions").val());	// Set label
+		$("#ceClicks :selected").val($("#ceActions").val()+":"+$("#ceWith").val());	// Set value
+		});
+
+	$("#ceWith").on("change", function() {									// ON WITH CHANGE
+		$("#ceClicks :selected").text($("#ceClicks :selected").text().substr(0,4)+$("#ceActions").val());	// Set label
+		$("#ceClicks :selected").val($("#ceActions").val()+":"+$("#ceWith").val());	// Set value
+		});
+
+	$("#ceClicks").on("change", function() {								// ON ACTION CLICK CHANGE
+		vv=$(this).val().split(":");										// Point at selected
+		$("#ceActions").val(vv[0]);											// Set action
+		$("#ceWith").val(vv[1] ? vv[1] : "");								// Set do
+		});
+
 }
 
 EditShow.prototype.MakeTabFile=function(data, line)						// MAKE TAB-DELINEATED FILE OF PROJECY
@@ -240,7 +334,7 @@ EditShow.prototype.MakeTabFile=function(data, line)						// MAKE TAB-DELINEATED 
 	var i,o,s,str="";
 	var start=0,end=data.mobs.length;										// Assume full show
 	if (line != undefined) 													// If line defined
-		start=line,end=line++;												// Just save this line
+		start=line,end=++line;												// Just save this line
 	else																	// Add header for full
 		str+="id\tmarker\tstart\tend\ttitle\tdesc\tpic\tpos\tcolor\tsize\topacity\tedge\tmapMarker\tmapColor\tmapSize\twhere\tshow\tclick\tcitation\ttags\n";													// Add header
 	for (i=start;i<end;++i) {										// For each mob	
