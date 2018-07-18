@@ -65,12 +65,14 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 		if (id && id.match(/timeseg/i)) {									// A segment		
 			$("#esHead").text("Edit segment");								// Set title
 			this.curId=tln.timeSegments[id.substr(7)].id;					// Save mob id
+			Sound("click");													// Click	
 			}
 		else if (id && id.match(/svgmarker/i)) { 							// An event
 			$("#esHead").text("Edit event");								// Set title
 			if (id.match(/svgMarkerText/i)) 	id=id.substr(13);			// Extract id
 			else if (id.match(/svgMarker/i))	id=id.substr(9);			// Extract id
 			this.curId=id;													// Save mob id
+			Sound("click");													// Click	
 			}
 		$("#editShowDiv").css({ top:$("#leftDiv").height()-$("#editShowDiv").height()-60+"px",left: $("#leftDiv").width()/2-250+"px"});
 		}
@@ -78,15 +80,17 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 		$("#esHead").text("Edit Story");									// Title
 		this.curId=sto.pages[sto.curPage];									// Extract id
 		$("#editShowDiv").css({ top:"16px",left: $("#leftDiv").width()-546+"px"});
-		}	
+		Sound("click");													// Click	
+	}	
 	else if (this.curMode == "map") {										// Map item	
-		$("#esHead").text("Edit Map");										// Set title
+		$("#esHead").text("Edit Event");									// Set title
 		id=""+mps.GetMapFeatureId(x,y);										// Look for feature at map
 		if (id && id.match(/Mob-/i)) { 										// An event
 			id=id.substr(4);												// Extract id
 			this.curId=id;													// Save mob id
+			Sound("click");													// Click	
 			}
-		$("#editShowDiv").css({ top:"16px",left: $("#leftDiv").width()+16+"px"});
+		$("#editShowDiv").css({ top:$("#leftDiv").height()-$("#editShowDiv").height()-60+"px",left: $("#leftDiv").width()/2-250+"px"});
 		}
 	this.EditEvent(e);														// Edit
 
