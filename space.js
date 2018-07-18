@@ -1029,7 +1029,7 @@ Space.prototype.SendMessage=function(cmd, msg) 							// SEND MESSAGE TO PARENT
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
+Space.prototype.GeoReference=function(url, where, edit)					// GEO REFERENCE IMAGE
 {
 	var n,s,e,w,r,asp;
 	var _this=this;															// Context for callbacks
@@ -1038,7 +1038,7 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 	$("#dialogDiv").remove();												// Close dialog
 	pop.Sound("click",curJson.muteSound);									// Click sound							
 	var str="<table>";
-	str+="<tr><td>Image&nbsp;URL&nbsp;</td><td><input id='grurl' class='ve-is' style='width:220px' type='input'></td></tr>";
+	if (!edit) str+="<tr><td>Image&nbsp;URL&nbsp;</td><td><input id='grurl' class='ve-is' style='width:220px' type='input'></td></tr>";
 	str+="<tr><td>North</td><td><input id='grn' class='ve-is' style='width:80px' type='input'></td></tr>";
 	str+="<tr><td>South</td><td><input id='grs' class='ve-is' style='width:80px' type='input'></td></tr>";
 	str+="<tr><td>East</td><td><input id='gre' class='ve-is' style='width:80px' type='input'></td></tr>";
@@ -1046,9 +1046,9 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 	str+="<tr><td>Rotation</td><td><div id='rots' style='display:inline-block;width:66%'></div>&nbsp;&nbsp;&nbsp;<input id='grr' class='ve-is' style='width:40px' type='input'></td></tr>";
 	str+="<tr><td>Combined</td><td><input id='grc' class='ve-is' style='width:220px' type='input'></td></tr>";
 	str+="<tr><td>Opacity</td><td><div id='gra'></div></td></tr>";
-	str+="<tr><td colspan=2><br></td><tr>";
-	str+="<tr><td></td><td><button id='grstart' class='ve-bs'>Geo-reference</button><td></td><tr>";
+	if (!edit) str+="<tr><td colspan=2><br></td><tr><tr><td></td><td><button id='grstart' class='ve-bs'>Geo-reference</button><td></td><tr>";
 	str+="</table>";
+
 	this.pop.Dialog("Geo-reference image",str, function() {					// On OK
 				CloseGeoRef();												// Close out
 				}, 
@@ -1072,9 +1072,13 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 		$("#grr").trigger("change");										// Trigger change
 		}});									
 
-	 if (n)																	// If north set
+	 if (n)	{																// If north set
 		$("#grc").val(n+","+s+","+e+","+w+","+r);							// Combined
+		$("#esWhere").val(n+","+s+","+e+","+w+","+r);						// Combined to edit menu
+		}
 
+	if (edit) startGeoRef();												// If calling from edit dialog
+											 
 	$("#grurl").on("change",function() {									// URL CHANGED
 		url=$(this).val();													// Get value
 		});		
@@ -1082,32 +1086,42 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 	$("#grn").on("change",function() {										// NORTH CHANGED
 		n=$(this).val();													// Get value
 		$("#grc").val(n+","+s+","+e+","+w+","+r);							// Combined
+		$("#esWhere").val(n+","+s+","+e+","+w+","+r);						// Combined to edit menu
 		});		
 	
 	$("#grs").on("change",function() {										// SOUTH CHANGED
 		s=$(this).val();													// Get value
 		$("#grc").val(n+","+s+","+e+","+w+","+r);							// Combined
+		$("#esWhere").val(n+","+s+","+e+","+w+","+r);						// Combined to edit menu
 		});		
 
 	$("#gre").on("change",function() {										// EAST CHANGED
 		e=$(this).val();													// Get value
 		$("#grc").val(n+","+s+","+e+","+w+","+r);							// Combined
+		$("#esWhere").val(n+","+s+","+e+","+w+","+r);						// Combined to edit menu
 		});		
 	
 	$("#grw").on("change",function() {										// WEST CHANGED
 		w=$(this).val();													// Get value
 		$("#grc").val(n+","+s+","+e+","+w+","+r);							// Combined
+		$("#esWhere").val(n+","+s+","+e+","+w+","+r);						// Combined to edit menu
 		});		
 	
 	$("#grr").on("change",function() {										// ROTATION CHANGED
 		r=$(this).val();													// Get value
 		$("#grc").val(n+","+s+","+e+","+w+","+r);							// Combined
+		$("#esWhere").val(n+","+s+","+e+","+w+","+r);						// Combined to edit menu
 		if (_this.geoRef)	_this.geoRef.r=r; 								// If georef up. set val
 		ReDrawImage(true);													// Redraw image only, not the dots
 		_this.DrawMapLayers();												// Redraw map
 		});		
 
 	$("#grstart").click( function() {										// START CLICK
+		startGeoRef()
+		});
+
+	function startGeoRef()
+	{
 		_this.geoRef={ a:1 };												// Create georef obj
 		_this.geoRef.img=new Image();										// Make new img
 		_this.geoRef.img.src=url;											// Set  url
@@ -1121,6 +1135,7 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 				se=ol.proj.transform(se,_this.curProjection,"EPSG:4326"); 	// Project 
 				n=nw[1];	s=se[1];	e=se[0];	w=nw[0];	r=0;		// New points
 				$("#grc").val(n+","+s+","+e+","+w+","+r);					// Combined
+				$("#esWhere").val(n+","+s+","+e+","+w+","+r);				// Combined to edit menu
 				$("#grn").val(n);	$("#grs").val(s); 	$("#grr").val(r);	// Init n/s/r
 				$("#gre").val(e);	$("#grw").val(w);						// e/w
 				}
@@ -1190,7 +1205,7 @@ Space.prototype.GeoReference=function(url, where)						// GEO REFERENCE IMAGE
 		});															 
 		
 	};
-});
+}
 
 	function CloseGeoRef()												// CLOSE UP GEOREFERENCING
 	{	

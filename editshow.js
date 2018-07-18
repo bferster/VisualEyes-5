@@ -17,6 +17,7 @@ function EditShow()														// CONSTRUCTOR
 
 EditShow.prototype.Draw=function(e)										// MAIN MENU
 {
+	var descHgt=60;
 	this.curMode="story";
 	var _this=this;															// Save context 
 	var x=e.clientX,y=e.clientY;											// Get pos
@@ -26,6 +27,8 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 		this.curMode="map";													// Edit map item
 	else if ((x < $("#leftDiv").width()) && (y > $("#leftDiv").height())) 	// In timeline
 		this.curMode="time";												// Edit timeline item
+	else																	// In story
+		descHgt=300;														// Bigger description
 	str="<div id='editShowDiv' class='ve-showEditor'>";
 	str+="<img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
 	str+="<span style='font-size:18px;color:#666;font-weight:bold'><span id='esHead'></span><span id='esClose'style='float:right;cursor:pointer'><i>x</i></span></span><p><hr></p>";
@@ -35,18 +38,20 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	str+="<b>Show</b>&nbsp;&nbsp;<input class='ve-is' style='width:40px' type='text' id='esShow'>&nbsp;&nbsp;";	
 	str+="<b>Id</b>&nbsp;&nbsp;<input class='ve-is' style='width:42px' type='text' id='esId'></td></tr>";	
 	str+="<tr><td><b>On click</b></td><td><input class='ve-is' style='width:calc(100% - 48px)' type='text' id='esClick'>&nbsp;&nbsp;<img src='img/editbut.gif' id='esClickEditor' style='vertical-align:-5px;cursor:pointer'></td></tr>";	
-	str+="<tr><td><b>Where&nbsp;</b></td><td><input class='ve-is' style='width:140px' type='text' id='esWhere'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>(Ctrl-click to get from map)</i></td></tr>";	
+	str+="<tr><td><b>Where&nbsp;</b></td><td><input class='ve-is' style='width:140px' type='text' id='esWhere'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id='esGeo'></span></td></tr>";	
 	str+="<tr><td><b>Desc&nbsp;&nbsp;&nbsp;<img src='img/editbut.gif' onclick='sto.StoryEditor(\"edit\")' style='vertical-align:-4px;cursor:pointer'></b></td><td>";
-	str+="<textarea class='ve-is'  style='width:calc(100% - 18px);height:60px' id='esDesc'></textarea></td></tr>";	
+	str+="<textarea class='ve-is'  style='width:calc(100% - 18px);height:"+descHgt+"px' id='esDesc'></textarea></td></tr>";	
 	str+="<tr><td><b>Image</b></td><td><input class='ve-is' style='width:calc(100% - 18px)' type='text' id='esPic'></td></tr>";	
 	str+="<tr><td><b>Marker</b></td><td>"+MakeSelect("esMarker",false,["dot","diamond","star","bar","box","rbar","line","triup","tridown","triright","trileft","ndot","------------","segment","path","over","story"]);
 	str+="&nbsp;&nbsp;<b>Size</b>&nbsp;&nbsp;<input class='ve-is' style='width:30px' type='text' id='esSize'>";
 	str+="&nbsp;&nbsp;<b>Color</b>&nbsp;&nbsp;<input class='ve-is' style='width:30px' type='text' id='esColor'>";
 	str+="&nbsp;&nbsp;<b>Position</b>&nbsp;&nbsp;"+MakeSelect("esPos",false,["","1","2","3","4","5","6","7","8","9"])+"</td></tr>";
-	str+="<tr><td><b>Map marker&nbsp;</b></td><td>"+MakeSelect("esMapMarker",false,["","dot","diamond","star","bar","box","rbar","line","triup","tridown","triright","trileft","ndot"]);
-	str+="&nbsp;&nbsp;<b>Size</b>&nbsp;&nbsp;<input class='ve-is' style='width:30px' type='text' id='esMapSize'>";
-	str+="&nbsp;&nbsp;<b>Color</b>&nbsp;&nbsp;<input class='ve-is' style='width:30px' type='text' id='esMapColor'>";
-	str+="&nbsp;&nbsp;<b>Opacity</b>&nbsp;&nbsp;<input class='ve-is' style='width:33px' type='text' id='esOpacity'></td></tr>";
+	if (this.curMode != "story") {												// Hide for story
+		str+="<tr><td><b>Map marker&nbsp;</b></td><td>"+MakeSelect("esMapMarker",false,["","dot","diamond","star","bar","box","rbar","line","triup","tridown","triright","trileft","ndot"]);
+		str+="&nbsp;&nbsp;<b>Size</b>&nbsp;&nbsp;<input class='ve-is' style='width:30px' type='text' id='esMapSize'>";
+		str+="&nbsp;&nbsp;<b>Color</b>&nbsp;&nbsp;<input class='ve-is' style='width:30px' type='text' id='esMapColor'>";
+		str+="&nbsp;&nbsp;<b>Opacity</b>&nbsp;&nbsp;<input class='ve-is' style='width:33px' type='text' id='esOpacity'></td></tr>";
+		}
 	str+="</table>"
 	str+="<p><hr></p>";																			
 	str+="<div '>";																		
@@ -57,6 +62,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	str+="<img src='img/helpicon.gif' id='esHelp' style='float:right;vertical-align:-5px;cursor:pointer'>"	
 	str+="<textarea id='outputDiv' style='width:1px;height:1px;opacity:.01'></textarea></div>";
 	$("body").append(str);	
+	
 	$("#editShowDiv").draggable();											// Make it draggable
 	this.curId=-1;															// Assume a new one
 	if (this.curMode == "time") {											// Timeline item
@@ -93,6 +99,16 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 		$("#editShowDiv").css({ top:$("#leftDiv").height()-$("#editShowDiv").height()-60+"px",left: $("#leftDiv").width()/2-250+"px"});
 		}
 	this.EditEvent(e);														// Edit
+	setEventOptions();														// Change event options
+
+	function setEventOptions()												// SET EVENT OPTIONS
+	{
+		var marker=$("#esMarker").val();									// Get cur marekt
+		if (marker == "over")												// If overlay
+			$("#esGeo").html("<a href='javascript:void(0)' onclick='eds.GeoRef()'>Click to georeference</a>");
+		else																// Regular
+			$("#esGeo").html("<i>Ctrl-click on map to get</i>");			// Map click
+		}
 
 	$("#esColor").on("click", function() {									// COLOR HANDLER
 		pop.ColorPicker("esColor",-1);										// Set color
@@ -110,6 +126,10 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 		$("#editShowDiv").remove();											// Remove editor
 		$("#storyEditor").remove();											// Kill story editor
 	}); 
+
+	$("#esMarker").on("change", function(e) {								// MARKER CHANGE HANDLER
+		setEventOptions();													// Change event options
+		});
 
 	$("#esSaveBut").on("click", function() {  								// ON SAVE 
 		var i,o;
@@ -187,6 +207,13 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	$("#esMarker").on("click", function() {  								// ON CHANGE MARKER
 		});		
 	}
+
+
+EditShow.prototype.GeoRef=function()										//  GEO-REFERENCE
+{
+	mps.GeoReference($("#esPic").val() ? $("#esPic").val() : "//farm9.staticflickr.com/8019/7310697988_18eb47c466_z.jpg",$("#esWhere").val() ? $("#esWhere").val() : "",1)
+}
+
 
 EditShow.prototype.EditEvent=function(e)									// EDIT ITEM
 {

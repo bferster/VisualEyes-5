@@ -296,7 +296,11 @@
 				if (!isNaN(o.pos))												// If a number
 					topDot=Math.max(topDot,o.pos);								// Find top most dot
 			if (o.marker || o.mapMarker) {										// If a marker spec'd 
-				var marker=o.mapMarker ? o.mapMarker : o.marker;				// Use mapMarker first, then marker
+				var marker;
+				if (o.marker == "over")											// If an overlay
+					marker=o.mapMarker ? o.mapMarker : o.pic;					// Use mapMarker first, then pic
+				else															// Regular marker	
+					marker=o.mapMarker ? o.mapMarker : o.marker;				// Use mapMarker first, then marker
 				o.type="icon";													// Assume icon
 				if (marker.match(/kml|\{z\}/i)) {								// A KML file
 					o.type="kml";												// Set type
