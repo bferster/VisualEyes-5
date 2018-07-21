@@ -42,7 +42,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	str+="<tr><td><b>Desc&nbsp;&nbsp;&nbsp;<img src='img/editbut.gif' onclick='sto.StoryEditor(\"edit\")' style='vertical-align:-4px;cursor:pointer'></b></td><td>";
 	str+="<textarea class='ve-is'  style='width:calc(100% - 18px);height:"+descHgt+"px' id='esDesc'></textarea></td></tr>";	
 	str+="<tr><td><b>Image</b></td><td><input class='ve-is' style='width:calc(100% - 18px)' type='text' id='esPic'></td></tr>";	
-	str+="<tr><td><b>Marker</b></td><td>"+MakeSelect("esMarker",false,["dot","diamond","star","bar","box","rbar","line","triup","tridown","triright","trileft","ndot","------------","segment","path","over","story"]);
+	str+="<tr><td><b>Marker</b></td><td>"+MakeSelect("esMarker",false,["dot","diamond","star","bar","box","rbar","line","triup","tridown","triright","trileft","ndot","------------","segment","path","over","story","booklet"]);
 	str+="&nbsp;&nbsp;<b>Size</b>&nbsp;&nbsp;<input class='ve-is' style='width:30px' type='text' id='esSize'>";
 	str+="&nbsp;&nbsp;<b>Color</b>&nbsp;&nbsp;<input class='ve-is' style='width:30px' type='text' id='esColor'>";
 	str+="&nbsp;&nbsp;<b>Position</b>&nbsp;&nbsp;"+MakeSelect("esPos",false,["","1","2","3","4","5","6","7","8","9"])+"</td></tr>";
@@ -58,6 +58,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	str+="<div id='esSaveBut' class='ve-gbs'>Save changes</div>&nbsp;&nbsp;";						
 	str+="<div id='esCopyBut' class='ve-gbs'>Copy project to clipboard</div>&nbsp;&nbsp;";						
 	str+="<div id='esCopyLineBut' class='ve-gbs'>Copy line</div>&nbsp;&nbsp;";						
+	str+="<div id='esFindBut' class='ve-gbs'>Find</div>&nbsp;&nbsp;";						
 	str+="<img id='esRemoveBut' title='Delete' style='vertical-align:-5px' src='img/trashbut.gif'>";	// Trash button
 	str+="<img src='img/helpicon.gif' id='esHelp' style='float:right;vertical-align:-5px;cursor:pointer'>"	
 	str+="<textarea id='outputDiv' style='width:1px;height:1px;opacity:.01'></textarea></div>";
@@ -121,7 +122,11 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	$("#esClickEditor").on("click", function() {							// CLICK EDITOR HANDLER
 		_this.ClickEditor($("#esClick").val());								// Run click editor
 		}); 
-			
+
+	$("#esFindBut").on("click", function() {								// FIND MOB HANDLER
+		_this.FindMob();													// Run find dialog
+		}); 
+						
 	$("#esClose").on("click", function(e) {									// MAP COLOR HANDLER
 		$("#editShowDiv").remove();											// Remove editor
 		$("#storyEditor").remove();											// Kill story editor
@@ -146,6 +151,14 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 			o.start=o.startO;	o.end=o.endO;	o.opacity=o.opacityO;		// Restore original values
 			}
 		o=curJson.mobs[_this.curId];										// Point at mob
+		getMobValues(o);													// Get values from inputa	
+		InitProject(curJson);												// Reinit project
+		Sound("ding");														// Ding
+		$("#editShowDiv").remove();											// Remove editor
+		$("#storyEditor").remove();											// Kill story editor
+		});
+
+	function getMobValues(o) {											// GET VALUES FROM INPUTS
 		o.id=$("#esId").val();												// Id
 		o.marker=$("#esMarker").val();										// Marker
 		o.title=$("#esTitle").val();										// Title
@@ -163,10 +176,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 		o.where=$("#esWhere").val();										// Where
 		o.show=$("#esShow").val();											// Show
 		o.click=$("#esClick").val();										// Click
-		InitProject(curJson);												// Reinit project
-		$("#editShowDiv").remove();											// Remove editor
-		$("#storyEditor").remove();											// Kill story editor
-		});
+		}
 
 	$("#esCopyBut").on("click", function() {  								// ON COPY TO CLIPBOARD
 		var str=_this.MakeTabFile(curJson);									// Create TSV file
@@ -180,7 +190,9 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 		});
 
 	$("#esCopyLineBut").on("click", function() {  							// ON COPY LINE TO CLIPBOARD
-		var str=_this.MakeTabFile(curJson,_this.curId);						// Create TSV line
+		var o={};
+		getMobValues(o);													// Extract values
+		var str=_this.MakeTabFile(curJson,o);								// Create TSV line
 		$("#outputDiv").val(str);											// Show it
 		$("#outputDiv")[0].select();										// Select div
 		try {
@@ -215,7 +227,7 @@ EditShow.prototype.GeoRef=function()										//  GEO-REFERENCE
 }
 
 
-EditShow.prototype.EditEvent=function(e)									// EDIT ITEM
+EditShow.prototype.EditEvent=function()									// EDIT ITEM
 {
 	var o={};
 	if (this.curId == -1) {													// Invalid event
@@ -223,9 +235,10 @@ EditShow.prototype.EditEvent=function(e)									// EDIT ITEM
 		$("#esRemoveBut").remove();											// Remove trashcan
 		$("#esSaveBut").text("Add new event");								// Say add
 		}
-	else																	// Nothing	
+	else{																	// Nothing	
 		o=curJson.mobs[this.curId];											// Point at event
-
+		$("#esFindBut").remove();											// Remove find but
+		}
 	if (o.id)		$("#esId").val(o.id);									// Id
 	if (o.marker)	$("#esMarker").val(o.marker.toLowerCase());				// Marker
 	if (o.start)	$("#esStart").val(o.startO);							// Start
@@ -247,6 +260,53 @@ EditShow.prototype.EditEvent=function(e)									// EDIT ITEM
 	pop.ColorPicker("esMapColor",-1,true);									// Init color
 	pop.ColorPicker("esColor",-1,true);										// Init color
 }
+
+EditShow.prototype.FindMob=function()										// FIND MOB
+{
+	var _this=this;															// Save context 
+	$("#storyEditor").remove();												// Kill story editor
+	str="<div id='storyEditor' class='ve-clickEditor'>";
+	str+="<span style='font-size:14px;color:#666;font-weight:bold'>Find event by Id<span id='fmClose'style='float:right;cursor:pointer'><i>x</i></span></span><p><hr></p>";
+	str+="<table><tr><td><b>Kind of event&nbsp;</b></td><td>"+MakeSelect("fmType",false,["any","path","over","story","booklet"])+"&nbsp;&nbsp<i>(limits the ids shown)</i>";
+	str+="<tr><td><b>Type Id here&nbsp;</b></td><td><input class='ve-is' style='width:160px' type='text' id='fmId'>&nbsp;&nbsp;";	
+	str+="<div id='fmFindBut' class='ve-gbs'>Find</div></td></tr></table><div>";						
+	$("#editShowDiv").append(str);											// Set body
+	autoComplete("any");													// Set auto complete to any
+
+	$("#fmClose").on("click", function(e) {									// X CLICK
+		$("#storyEditor").remove();											// Kill dialog
+		}); 
+
+	$("#fmId").on("change", function() {  									// ON ENTER
+		$("#fmFindBut").trigger("click");									// Trigger find
+		}); 
+	
+	$("#fmType").on("change", function(e) {									// TYPE CHANGE
+		autoComplete($(this).val());										// Set auto complete
+		}); 
+
+	$("#fmFindBut").on("click", function() {  									// ON FIND CLICK
+		for (i=0;i<curJson.mobs.length;++i)									// For each mob
+			if ((""+curJson.mobs[i].id).toLowerCase() == $("#fmId").val().toLowerCase())	{	// If found
+				_this.curId=i;												// Set id
+				$("#storyEditor").remove();									// Kill dialog
+				_this.EditEvent();											// Edit
+				Sound("ding");												// Ding
+				return;														// Quit	
+				}
+		Sound("delete");													// Delete
+		});
+
+	function autoComplete(type)	{											// SET AUTOCOMPLETE
+		var i,ids=[];	
+		for (i=0;i<curJson.mobs.length;++i)									// For each mob
+		if (curJson.mobs[i].id && ((curJson.mobs[i].marker == type) || (type == "any")))	//  A match
+			ids.push(curJson.mobs[i].id);									// Add to autocomplete array
+		$("#fmId").autocomplete({ source: ids });							// Auto complete
+	}		
+
+}
+
 
 EditShow.prototype.ClickEditor=function(data)								// MAIN MENU
 {
@@ -360,16 +420,18 @@ EditShow.prototype.ClickEditor=function(data)								// MAIN MENU
 
 }
 
-EditShow.prototype.MakeTabFile=function(data, line)						// MAKE TAB-DELINEATED FILE OF PROJECY
+EditShow.prototype.MakeTabFile=function(data, line)						// MAKE TAB-DELINEATED FILE OF PROJECT
 {
 	var i,o,s,str="";
 	var start=0,end=data.mobs.length;										// Assume full show
 	if (line != undefined) 													// If line defined
-		start=line,end=++line;												// Just save this line
+		start=0,end=1;														// Just save one line
 	else																	// Add header for full
 		str+="id\tmarker\tstart\tend\ttitle\tdesc\tpic\tpos\tcolor\tsize\topacity\tedge\tmapMarker\tmapColor\tmapSize\twhere\tshow\tclick\tcitation\ttags\n";													// Add header
-	for (i=start;i<end;++i) {										// For each mob	
+	for (i=start;i<end;++i) {												// For each mob	
 		o=data.mobs[i];														// Point at mob
+		if (line != undefined) 												// If line defined
+			o=line;															// Use it
 		s=o.id;			str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	// Save data
 		s=o.marker;		str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
 		s=o.startO;		str+=(s ? (""+s).replace(/(\n|\r|\t)/g,"") : "")+"\t";	
