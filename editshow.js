@@ -104,6 +104,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 
 	function setEventOptions()												// SET EVENT OPTIONS
 	{
+		var i,ids=[];	
 		var marker=$("#esMarker").val();									// Get cur marekt
 		if (marker == "over")												// If overlay
 			$("#esGeo").html("<a href='javascript:void(0)' onclick='eds.GeoRef()'>Click to georeference</a>");
@@ -226,18 +227,20 @@ EditShow.prototype.GeoRef=function()										//  GEO-REFERENCE
 	mps.GeoReference($("#esPic").val() ? $("#esPic").val() : "//farm9.staticflickr.com/8019/7310697988_18eb47c466_z.jpg",$("#esWhere").val() ? $("#esWhere").val() : "",1)
 }
 
-
 EditShow.prototype.EditEvent=function()									// EDIT ITEM
 {
 	var o={};
 	if (this.curId == -1) {													// Invalid event
 		$("#esHead").text("Add a new event");								// Add
-		$("#esRemoveBut").remove();											// Remove trashcan
+		$("#esRemoveBut").hide();											// Hide trashcan
 		$("#esSaveBut").text("Add new event");								// Say add
 		}
 	else{																	// Nothing	
 		o=curJson.mobs[this.curId];											// Point at event
 		$("#esFindBut").remove();											// Remove find but
+		$("#esRemoveBut").show();											// Show trashcan
+		$("#esHead").text("Edit event");									// Edit
+		$("#esSaveBut").text("Save changes");								// Say save
 		}
 	if (o.id)		$("#esId").val(o.id);									// Id
 	if (o.marker)	$("#esMarker").val(o.marker.toLowerCase());				// Marker
@@ -271,6 +274,7 @@ EditShow.prototype.FindMob=function()										// FIND MOB
 	str+="<tr><td><b>Type Id here&nbsp;</b></td><td><input class='ve-is' style='width:160px' type='text' id='fmId'>&nbsp;&nbsp;";	
 	str+="<div id='fmFindBut' class='ve-gbs'>Find</div></td></tr></table><div>";						
 	$("#editShowDiv").append(str);											// Set body
+	$("#fmId").focus();														// Setb fpocus on input
 	autoComplete("any");													// Set auto complete to any
 
 	$("#fmClose").on("click", function(e) {									// X CLICK
@@ -302,11 +306,9 @@ EditShow.prototype.FindMob=function()										// FIND MOB
 		for (i=0;i<curJson.mobs.length;++i)									// For each mob
 		if (curJson.mobs[i].id && ((curJson.mobs[i].marker == type) || (type == "any")))	//  A match
 			ids.push(curJson.mobs[i].id);									// Add to autocomplete array
-		$("#fmId").autocomplete({ source: ids });							// Auto complete
+		$("#fmId").autocomplete({ source: ids, minLength: 0});				// Auto complete
 	}		
-
 }
-
 
 EditShow.prototype.ClickEditor=function(data)								// MAIN MENU
 {
@@ -387,18 +389,18 @@ EditShow.prototype.ClickEditor=function(data)								// MAIN MENU
 			Sound("ding");													// Ding
 			}
 		else if ($("#ceActions").val() == "basemap") 						// If basemap
-			$(this).autocomplete({ source: ["Satellite","Terrain","Earth","Watercolor","B&W","Roadmap"] });
+			$(this).autocomplete({ source: ["Satellite","Terrain","Earth","Watercolor","B&W","Roadmap"], minLength: 0 });
 		else if ($("#ceActions").val() == "show") {							// If  show
 			for (i=0;i<curJson.mobs.length;++i)								// For each mob
 				if (curJson.mobs[i].id)										// If a valid id
 					ids.push(curJson.mobs[i].id);							// Add to autocomplete array
-			$(this).autocomplete({ source: ids });							// Auto complete
+			$(this).autocomplete({ source: ids, minLength: 0 });			// Auto complete
 			}
 		else if ($("#ceActions").val() == "story") {						// If  story
 			for (i=0;i<curJson.mobs.length;++i)								// For each mob
 				if (curJson.mobs[i].id && (curJson.mobs[i].marker == "story"))	// If a valid story id
 					ids.push(curJson.mobs[i].id);							// Add to autocomplete array
-				$(this).autocomplete({ source: ids });						// Auto complete
+				$(this).autocomplete({ source: ids, minLength: 0 });		// Auto complete
 				}
 			});
 

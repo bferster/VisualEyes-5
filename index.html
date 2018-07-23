@@ -342,12 +342,13 @@
 						o.mapOpacity  ? sty.a=o.mapOpacity  : sty.a=eo;				
 						o.header=mps.AddMarkerLayer("0,0",sty,i+"h","");	
 						}	
-					dots=dots.sort(function(a, b) {  return a[2]-b[2]; });		// Sort ascending by time
-					if (o.start && o.end) {										// If times spec'd              
+					if (o.start && o.end) {										// If times spec'd in path, interpolate dot times            
                       	t=(o.end-o.start)/(dots.length-1); 						// Interval
-						for (j=0;j<dots.length;++j)								// For each intermediary dot
+						  for (j=0;j<dots.length;++j)							// For each intermediary dot
                             dots[j][2]=o.start+(t*j); 							// Interpolate time 
 						}
+					else														// Use times in dots
+						dots=dots.sort(function(a, b) {  return a[2]-b[2]; });	// Sort ascending by time
 					o.lid=mps.AddPathLayer(dots,o.color,ew,eo,s,o.end ? o.end: e,o.show,o.header,i); // Add path to overlays
 					}
 				else if (marker.match(/\.png|.gif|\.jpg|\.jpeg|drive\.google/i) && o.where && ((""+o.where.split(",")).length > 3)) { // An image file with a full georef
