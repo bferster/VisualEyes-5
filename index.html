@@ -301,6 +301,8 @@
 					marker=o.mapMarker ? o.mapMarker : o.pic;					// Use mapMarker first, then pic
 				else															// Regular marker	
 					marker=o.mapMarker ? o.mapMarker : o.marker;				// Use mapMarker first, then marker
+				if (!marker)													// No marker spec'd
+					continue;													// Skip it
 				o.type="icon";													// Assume icon
 				if (marker.match(/kml|\{z\}/i)) {								// A KML file
 					o.type="kml";												// Set type
