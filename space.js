@@ -253,6 +253,8 @@ Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 	var v=pos.split(",");													// Split up
 	if (v.length < 2)														// Not enough coords
 		return;																// Quit
+	if (isNaN(v[0]) || isNaN(v[1]) || isNaN(v[0]))							// Invalid coord
+		return;																// Quit
 	var o=this.map.getView();												// Point at view
 	var c=ol.proj.transform([v[0]-0,""+v[1].replace(/\*/,"")-0],'EPSG:4326',this.curProjection);	// Get center
 	var fc=o.getCenter();													// Get from center
