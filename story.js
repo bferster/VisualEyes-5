@@ -268,7 +268,7 @@ Story.prototype.StoryEditor=function(mode) 								// STORY EDITOR
 	str+="<div style='margin:12px;margin-bottom:4px'><img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
 	str+="<span style='font-size:18px;color:#666'><b>Story Editor</b></span>";
 	str+="<div style='float:right'>"
-	str+=MakeSelect("seOps",false,["Add macro","foot()","iframe()","link()","page()","pic()","play()","show()","story()","where()","zoomer()"]);
+	str+=MakeSelect("seOps",false,["Add macro","action()","auto()","foot()","iframe()","link()","page()","pic()","play()","show()","story()","where()","zoomer()"]);
 	if (mode == "edit")	str+="&nbsp;&nbsp;<div id='seSaveBut' class='ve-gbs'>Save</div>&nbsp;";						
 	str+="&nbsp;&nbsp;<img src='img/closedot.gif' style='vertical-align:-2px' onclick='$(\"#storyEditor\").remove()'></div>"
 	str+="</div><div style='width:"+(w-4)+"px'>";
@@ -290,6 +290,18 @@ Story.prototype.StoryEditor=function(mode) 								// STORY EDITOR
 
 	$("#seOps").on("change",function(e) { 								// ON SELECT
 		switch($(this).val()) {											// Route on change
+			case "action()":											// Action
+				str="Type title to click on, and following a comma and the action(s), separated by a + sign. (i.e. here,show:myOver+basemap:RoadMap)."
+				pop.GetTextBox("Add action macro", str, "", function(s) {
+					win.postMessage("INS:action("+s+")","*") 				// Send message
+					});
+				break;
+			case "auto()":												// Auto
+				str="Type the action(s) to run at display, separated by a + sign. (i.e. show:myOver+basemap:RoadMap)."
+				pop.GetTextBox("Add auto macro", str, "", function(s) {
+					win.postMessage("INS:auto("+s+")","*") 				// Send message
+					});
+				break;
 			case "foot()":												// Foot
 				str="Type footnote to add."
 				pop.GetTextBox("Add footnote macro", str, "", function(s) {

@@ -201,14 +201,14 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 Popup.prototype.GetTextBox=function (title, content, def, callback)		// GET TEXT LINE BOX
 {
 	this.Sound("click");													// Ding sound
-	$("#alertBoxDiv").remove();												// Remove any old ones
-	$("body").append("<div class='ve-unselectable' id='alertBoxDiv'></div>");														
+	$("#textBoxDiv").remove();												// Remove any old ones
+	$("body").append("<div class='ve-unselectable' id='textBoxDiv'></div>");														
 	var str="<p><img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
 	str+="<span id='gtBoxTi'style='font-size:18px;text-shadow:1px 1px #ccc;color:#990000'><b>"+title+"</b></span><p>";
 	str+="<div style='font-size:14px;margin:14px'>"+content;
 	str+="<p><input class='ve-is' type='text' id='gtBoxTt' value='"+def+"'></p></div>";
-	$("#alertBoxDiv").append(str);	
-	$("#alertBoxDiv").dialog({ width:400, buttons: {
+	$("#textBoxDiv").append(str);	
+	$("#textBoxDiv").dialog({ width:400, buttons: {
 				            	"OK": 		function() { callback($("#gtBoxTt").val()); $(this).remove(); },
 				            	"Cancel":  	function() { $(this).remove(); }
 								}});	
@@ -216,7 +216,7 @@ Popup.prototype.GetTextBox=function (title, content, def, callback)		// GET TEXT
 	$("#gtBoxTt").keypress(function (e) {
 		if (e.which == 13) {
 			callback($("#gtBoxTt").val()); 
-			$("#alertBoxDiv").remove();												
+			$("#textBoxDiv").remove();												
 			return false;   
 			}
 		});
