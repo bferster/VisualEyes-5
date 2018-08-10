@@ -1650,23 +1650,8 @@ function toggleLayer(id, mode)											// TOGGLE LAYER
 		mode=true;															// Assume we're turning it on
 	mode=mode ? "on" : "off";												// Set as on/off
 	if ((j=FindMobByID(id)) != -1) {										// Get mob index
-		var o=curJson.mobs[j];												// Point at mob
-		if (o.type == "icon") {												// If an icon 
-			for (i=0;i<mps.overlays.length;++i) {							// For each overlay
-				if (mps.overlays[i].mob == j) { 							// Matches
-					var sty=mps.overlays[i].src.getStyle();  				// Point at style
-					if (!sty)	return;										// Skip if no style
-					sty.getImage().setOpacity(mode ? 1 : 0);				// Set icon opacity
-					sty.getText().setScale(mode ? 1 : 0);					// Set text opacity
-					mps.markerLayer.getSource().changed();					// Redraw marker layer
-					break;													// Stop looking
-					}
-				}
-			}
-		else{																// Must be an overlay
-			mps.overlays[o.lid].vis=mode;									// Show or hide layer
-			mps.DrawMapLayers();											// Redraw map
-			}
+		mps.overlays[curJson.mobs[j].lid].vis=mode;							// Show or hide layer
+		mps.DrawMapLayers();												// Redraw map
 		}
 }
 
