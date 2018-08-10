@@ -77,14 +77,16 @@ Popup.prototype.ShowBooklet=function(div, id, width)					// SHOW BOOKLET
 		var str="";
 		var pages=curJson.mobs[id].desc.split("page()");					// Get pages from desc field
 		num=Math.max(Math.min(num,pages.length-1),0)						// Cap 0-n
-		content=pages[num]+"";												// Point at content
+		var content=pages[num]+"";											// Point at content
 		if ((pic=content.match(/pic\(.*?\)/i))) {							// If pic set
-			pic=pic[0].substring(4,pic[0].length-1);						// Get file
+			var v=pic[0].substring(4,pic[0].length-1).split(",");			// Split from possible caption
+			var cap=v[1] ? "<br>"+v[1] : "";								// Get cap
 			content=content.replace(/pic\(.*?\)/i,"");						// Delete text
-			pic=ConvertFromGoogleDrive(pic);								// Convert pic
-			str+="<img id='poppic' ";										// Img start
-			if (!content) 	str+="style='width:100%' ";						// Make it full
-			str+="src='"+pic+"' class='booklet-pic'>";						// Add image
+			var wid=content ? 50 : 100;										// Full size if no content text
+			str+="<div id='poppic' style='float:left;width:"+wid+"%;overflow:hidden;margin-right:16px;font-size:10px'>";	// Enclosing div for image and caption
+			v[0]=ConvertFromGoogleDrive(""+v[0]);							// Convert pic
+			str+="<img src='"+v[0]+"' class='booklet-pic'>";				// Add image
+			str+=cap+"</div>";												// Add caption & enclosing div
 			}
 		if (content) 														// If page set
 			str+=pop.ExpandMacros(content);									// Expand macros, if any
