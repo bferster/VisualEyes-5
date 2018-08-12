@@ -55,7 +55,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	str+="</table>"
 	str+="<p><hr></p>";																			
 	str+="<div '>";																		
-	str+="<div id='esSaveBut' class='ve-gbs'>Save changes</div>&nbsp;&nbsp;";						
+	str+="<div id='esSaveBut' class='ve-gbs'>Preview changes</div>&nbsp;&nbsp;";						
 	str+="<div id='esCopyBut' class='ve-gbs'>Copy project to clipboard</div>&nbsp;&nbsp;";						
 	str+="<div id='esCopyLineBut' class='ve-gbs'>Copy line</div>&nbsp;&nbsp;";						
 	str+="<div id='esFindBut' class='ve-gbs'>Find</div>&nbsp;&nbsp;";						

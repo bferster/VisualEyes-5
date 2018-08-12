@@ -46,16 +46,16 @@ Popup.prototype.ShowBooklet=function(div, id, width)					// SHOW BOOKLET
 	$("#st-booklet").height($("#st-booklet").width()*.66);					// Set height
 	var x=$(div).width()/2-$("#st-booklet").width()/2;						// Center it
 	var y=$(div).height()/2-$("#st-booklet").height()/2;					// Center
-	$("#st-bookPage").height($("#st-booklet").height()-50);					// Set scrolling div height
+	$("#st-bookPage").height($("#st-booklet").height()-60);					// Set scrolling div height
 	$("#st-booklet").css({left:x+"px",top:y+"px"});							// Position
 	$("#st-booklet").draggable();											// Make it draggable
 	
 	$("#st-booklet").fadeIn(300, function() {								// Fade in
-		y=$("#st-booklet").height();										// Top
+		y=$("#st-booklet").height()+6;										// Top
 		x=$("#st-booklet").width()-2;										// Right
 		$("#lastB").css({left:"8px",top:y+"px"});							// Position
 		$("#nextB").css({left:x+"px",top:y+"px"});							// Position
-		$("#pageCtr").css({left:"calc(50% - 26px)",top:y+"px"});			// Position
+		$("#pageCtr").css({left:"calc(50% - 26px)",top:(y+4)+"px"});		// Position
 		});
 
 	$("#lastB").on("click", function() {									// ON BACK CLICK
