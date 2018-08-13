@@ -13,6 +13,8 @@ function DataLoad()
 DataLoad.prototype.SetTagMask=function(tag)								// SET ELEMENT MASK
 {
 	if (!tag)	tag=".";													// If nothing set show all
+	tag=tag.replace(/`l/ig,"(");											// Replace left paren
+	tag=tag.replace(/`r/ig,")");											// Replace right
 	this.tagMaskMode=true;													// Masking mode
 	if (tag.charAt(0) == "~") {												// If passing 
 		this.tagMaskMode=false;												// Passing mode
