@@ -223,7 +223,7 @@ Story.prototype.DrawStoryItem=function(num) 							// DRAW STORY ITEM
 				v=(desc+" ").match(/show\(.*?\)/ig);						// Extract show(s)
 				for (i=0;i<v.length;++i) {									// For each one
 					vv=v[i].match(/show\(([^,\)]*),*(.*)\)/i);				// Get parts
-					toggleLayer(vv[1],true);								// Show layer																		
+					toggleLayer(vv[1],true,vv[2]);							// Show layer																		
 					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"");	// Remove macro
 					}
 				}

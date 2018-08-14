@@ -1643,11 +1643,15 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 // HELPERS
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
-function toggleLayer(id, mode)											// TOGGLE LAYER
+function toggleLayer(id, mode, offMask)									// TOGGLE LAYER
 {
-	var j;
-	if (mode == undefined)													// If undefined
-		mode=true;															// Assume we're turning it on
+	var i,j;
+	if (offMask) {															// If a hide mask defined
+		for (i=0;i<mps.overlays.length;++i) 								// For each overlay
+			if ((""+mps.overlays[i].tag).match(RegExp(offMask,"i")))		// Matches one to be hidden
+				mps.overlays[i].vis="off";									// Hide layer
+		}
+	if (mode == undefined)	mode=true;										// If undefined, assume we're turning it on
 	mode=mode ? "on" : "off";												// Set as on/off
 	if ((j=FindMobByID(id)) != -1) {										// Get mob index
 		mps.overlays[curJson.mobs[j].lid].vis=mode;							// Show or hide layer
