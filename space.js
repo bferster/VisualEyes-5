@@ -44,11 +44,12 @@ Space.prototype.DrawMapLayers=function()								// DRAW OVERLAY LAYERS
 				}
 	        a=(o.opacity != undefined) ? o.opacity : 1						// Use defined opacity or 1
 	
-			if (o.show == "off")		vis=false;							// If hidde in spreadsheet, hide it
-			if (o.vis == "off")			vis=false;							// If toggled hidden, hide it
-			else if (o.vis == "on")		vis=true;							// If toggled showing, show it
-
+			if (o.show == "off")			vis=false;						// If hidded in spreadsheet, hide it
+			if (o.vis == "off")				vis=false;						// If toggled hidden, hide it
+			else if (o.vis == "on")			vis=true;						// If toggled showing, show it
 			if (!dtl.ShowElement(o.tag))	vis=false;						// If not being shown, hide it
+
+
 
 			if (vis && (o.type == "image"))	{								// If a visible image 
            		(o.alpha == undefined) ? a=1 : a=o.alpha;					// Let alpha control opacity if defined
@@ -58,7 +59,7 @@ Space.prototype.DrawMapLayers=function()								// DRAW OVERLAY LAYERS
         	else if (o.type == "kml") {										// If a kml 
 				(o.alpha == undefined) ? a=1 : a=o.alpha;					// Let alpha control opacity if defined
 				if (!vis) a=0;												// Hide if invisible
-			   o.src.set('visible',vis);									// Show/hide it
+			   	o.src.set('visible',vis);									// Show/hide it
             	o.src.set("opacity",a);										// Set opacity								
              	}
         	else if (o.type == "icon") {									// If an icon 
@@ -68,9 +69,9 @@ Space.prototype.DrawMapLayers=function()								// DRAW OVERLAY LAYERS
 				sty.getText().setScale(vis ? 1 : 0);						// Set text opacity
               	}
 	       	else if (o.type == "path") 										// If a path
-   				this.DrawPath(i,this.curTime)								// Show it
-	       	else if (o.type == "choro") 									// If a shoro
-         		this.DrawChoropleth(i,this.curTime)							// Show it
+				this.DrawPath(i,this.curTime,vis)							// Show it
+	       	else if (o.type == "choro") 									// If a choro
+			   	this.DrawChoropleth(i,this.curTime,vis)						// Show it
 			}
 		}
 	if (this.geoRef)														// If georeferencing
@@ -328,21 +329,6 @@ Space.prototype.MarkerLayerToTop=function()								// MOVE MARKER LAYER ON TOP O
 
 Space.prototype.AddChoroplethLayer=function(col, ecol, ewid,opacity, base, where, start, end, id)	// ADD CHORPLETH LAYER
 {
-		
-/* 	
- 	Add choropleth  layer.
- 	@param {string} 	col 	Color 
-	@param {string} 	ecol 	Edge color 
-	@param {number} 	ewid 	Edge width 
- 	@param {number} 	opacity Opacity  0-1
- 	@param {number} 	base 	Index of base vector layer to style
- 	@param {string} 	where 	Conditions (id:featureId[,featureId,...]
- 	@param {number} 	start 	Starting time of marker in number of mins += 1/1/1970
-	@param {number} 	end 	Ending time of marker in number of mins += 1/1/1970
-	@param {number} 	id 		Mob id
-	@return {number} 	index	Index of layer added
-*/
-
 	var o={};
 	if (!opacity)	opacity=1;												// Default opacity
 	o.type="choro";															// Path
@@ -356,15 +342,8 @@ Space.prototype.AddChoroplethLayer=function(col, ecol, ewid,opacity, base, where
 	return index;															// Return layer index
 }
 
-Space.prototype.DrawChoropleth=function(num, time) 						// DRAW CHOROPLETH						
+Space.prototype.DrawChoropleth=function(num, time, vis) 				// DRAW CHOROPLETH						
 {
-
-/* 	
- 	Draw choropleth layer.
- 	@param {number} num 	Layer to draw 
-	@param {number} time 	Current time in number of mins += 1/1/1970
-*/
-
 	var i,v,os,sty;
 	var fr,fb,fg,fa,er,eg,eb,ea,ew;
 	var o=this.overlays[num];												// Point at overlay
@@ -484,11 +463,10 @@ Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show,
 	return index;															// Return feature
 }
 
-Space.prototype.DrawPath=function(num, time) 						// DRAW PATH						
+Space.prototype.DrawPath=function(num, time, vis) 					// DRAW PATH						
 {
 	var s,e,pct,v=[],i=0,last;
 	var o=this.overlays[num];											// Point at overlay
-	var vis=dtl.ShowElement(o.tag) ? 0 : 1;								// Hide if hidden element
 	if (!o.dots.length)													// No dots
 		return;															// Quit
 	v.push([o.dots[0][0],o.dots[0][1]]);								// Add moveto dot
@@ -524,7 +502,7 @@ Space.prototype.DrawPath=function(num, time) 						// DRAW PATH
 				}
 			}
 		}
-	if (!dtl.ShowElement(o.tag)) 	v=[];								// If hidden, hide it									
+	if (!vis) 	v=[];													// If hidden, hide it									
 	o.src.setGeometry(new ol.geom.LineString(v));						// Set new dots
 }
 

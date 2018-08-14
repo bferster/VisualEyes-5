@@ -519,17 +519,6 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.ShowBooklet(\"#leftDiv\",\""+vv[2]+"\",\""+vv[3]+"\")'>"+vv[1]+"</a>"); // Replace with anchor tag
 				}   
 			}
-	if (desc.match(/button\(/)) {											// If button macro
-		v=(desc+" ").match(/button\(.*?\)/ig);								// Extract button
-		for (i=0;i<v.length;++i) {											// For each macro
-			vv=v[i].match(/button\(([^,]+),(.+)\)/i);						// Get macro (x,title,params)
-			vvv=vv[2].split(",");											// Get params
-			str="<button class='ve-is' style='width:auto;margin-bottom:4px;' onclick="; // Header
-			str+="'dtl.SetTagMask(\""+vvv[0]+"\")'";						// Set regex and refresh
-			str+=">"+vv[1]+"</button>";
-			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),str);	// Replace with anchor tag
-			}	
-		}
 	if (desc.match(/opacity\(/)) {											// If opacity macro
 		v=(desc+" ").match(/opacity\(.*?\)/ig);								// Extract slider
 		for (i=0;i<v.length;++i) {											// For each macro
@@ -541,6 +530,18 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),str);	// Replace with anchor tag
 			}	
 		}
+	if (desc.match(/button\(/)) {											// If button macro
+		v=(desc+" ").match(/button\(.*?\)/ig);								// Extract button
+		for (i=0;i<v.length;++i) {											// For each macro
+			vv=v[i].match(/button\(([^,]+),(.+)\)/i);						// Get macro (x,title,params)
+			str="<button class='ve-is' style='width:auto;margin-bottom:4px;' onclick='"; // Header
+			if (!vv[2].match(/:/))											// If not an action
+				vv[2]="mask:"+vv[2];										// Force regex into an action
+			str+="pop.SendActions(\""+vv[2]+"\")";							// Send them		
+			str+="'>"+vv[1]+"</button>";									// End button
+			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),str);	// Replace with anchor tag
+			}	
+		}
 	if (desc.match(/radio\(/)) {											// If radio macro
 		var name="name='rad-"+Math.floor(Math.random()*1000000)+"' ";		// Set unique group name
 		v=(desc+" ").match(/radio\(.*?\)/ig);								// Extract radio
@@ -548,11 +549,13 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 			vv=v[i].match(/radio\(([^,]+),(.+)\)/i);						// Get macro (title, regex, mode)
 			vvv=vv[2].split(",");											// Get params
 			str="<input style='vertical-align:-2px' type='radio'"+name;		// Header
+			if (!vvv[0].match(/:/))											// If not an action
+				vvv[0]="mask:"+vvv[0];										// Force regex into an action
 			if ((vvv.length > 1) && (vvv[1] == "on")) {						// If turning it on
-				dtl.tagMask=new RegExp(vvv[0],"i");							// Set mask
+				pop.SendActions(vvv[0]);									// Send action(s)	
 				str+=" checked ";											// Check it
 				}
-			str+=" onclick='dtl.SetTagMask(\""+vvv[0]+"\")'> "+vv[1];		// Set regex and refresh
+			str+=" onclick='pop.SendActions(\""+vvv[0]+"\")'> "+vv[1];		// Send action(s)
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),str);	// Replace with anchor tag
 			}	
 		}
