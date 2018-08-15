@@ -546,12 +546,15 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 		var name="name='rad-"+Math.floor(Math.random()*1000000)+"' ";		// Set unique group name
 		v=(desc+" ").match(/radio\(.*?\)/ig);								// Extract radio
 		for (i=0;i<v.length;++i) {											// For each macro
-			vv=v[i].match(/radio\(([^,]+),(.+)\)/i);						// Get macro (title, regex, mode)
+			vv=v[i].match(/radio\(([^,]+),(.+)\)/i);						// Get macro (title, cmd)
 			vvv=vv[2].split(",");											// Get params
+			if (vvv[vvv.length-1].toLowerCase() == "on")					// An on command
+				vvv.pop();													// Remove it
+			for (j=1;j<vvv.length;++j)	vvv[0]+=","+vvv[j];					// Put back intro string
 			str="<input style='vertical-align:-2px' type='radio'"+name;		// Header
 			if (!vvv[0].match(/:/))											// If not an action
 				vvv[0]="mask:"+vvv[0];										// Force regex into an action
-			if ((vvv.length > 1) && (vvv[1] == "on")) {						// If turning it on
+			if (vv[0].match(/on\)/i)) {										// If turning it on
 				pop.SendActions(vvv[0]);									// Send action(s)	
 				str+=" checked ";											// Check it
 				}
