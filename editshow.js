@@ -163,8 +163,8 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 		o.id=$("#esId").val();												// Id
 		o.marker=$("#esMarker").val();										// Marker
 		o.title=$("#esTitle").val();										// Title
-		o.start=$("#esStart").val();										// Start
-		o.end=$("#esEnd").val();											// End
+		o.start=o.startO=$("#esStart").val();								// Start
+		o.end=o.endO=$("#esEnd").val();										// End
 		o.desc=$("#esDesc").val();											// Desc
 		o.pic=$("#esPic").val();											// Pic
 		o.pos=$("#esPos").val();											// Pos

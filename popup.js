@@ -550,9 +550,9 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 			vvv=vv[2].split(",");											// Get params
 			if (vvv[vvv.length-1].toLowerCase() == "on")					// An on command
 				vvv.pop();													// Remove it
-			for (j=1;j<vvv.length;++j)	vvv[0]+=","+vvv[j];					// Put back intro string
+			for (j=1;j<vvv.length;++j)	vvv[0]+=","+vvv[j];					// Put back into string
 			str="<input style='vertical-align:-2px' type='radio'"+name;		// Header
-			if (!vvv[0].match(/:/))											// If not an action
+			if (!vvv[0].match(/:/))											// If not an action, must be a regex
 				vvv[0]="mask:"+vvv[0];										// Force regex into an action
 			if (vv[0].match(/on\)/i)) {										// If turning it on
 				pop.SendActions(vvv[0]);									// Send action(s)	
