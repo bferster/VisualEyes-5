@@ -13,6 +13,11 @@ function DataLoad()
 DataLoad.prototype.SetTagMask=function(tag)								// SET ELEMENT MASK
 {
 	if (!tag)	tag=".";													// If nothing set show all
+	if (tag.match(/radio*/)) {												// A radio macro
+		var v=tag.split("*");												// Split into hide and show
+		tag="^((?!"+v[1]+").)*$";											// Hide named group
+		if (v[2])	tag+="|"+v[2];											// Add show group
+		}
 	tag=tag.replace(/`l/ig,"(");											// Replace left paren
 	tag=tag.replace(/`r/ig,")");											// Replace right
 	this.tagMaskMode=true;													// Masking mode
