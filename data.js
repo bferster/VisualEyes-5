@@ -8,6 +8,7 @@ function DataLoad()
 {
 	this.tagMask=new RegExp(".","i");										// Default passes everything
 	this.tagMaskMode=true;													// Masking mode
+	this.userVars=[];														// Holds user variables								
 }	
 
 DataLoad.prototype.SetTagMask=function(tag)								// SET ELEMENT MASK

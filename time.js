@@ -417,7 +417,7 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 		}
 	for (i=0;i<ts.length;++i) { 											// For each tick
 		ts[i].pct=(ts[i].end-ts[i].start)/dur;								// Calc percentage
-		if (ts[0].size == "equal")											// If equal aize
+		if ((ts[0].size == "equal") || (ts[0].size == "9999")) 				// If equal aize
 			ts[i].pct=hasAll ? 1/(ts.length-1) : 1/ts.length;				// Divide them up equally
 		str+="<div class='time-seg' id='timeseg"+i+"' ";					// Add div
 		str+="style='color:"+this.segmentTextColor+";background-color:"+ts[i].col+"'>";

@@ -276,6 +276,7 @@
 			}
 		origLR=curJson.leftRightSplit;											// Save return ratio
 		origUD=curJson.upDownSplit;												// Save return ratio
+		dtl.userVars=[];														// Reset usr defined variables
 		for (i=0;i<curJson.mobs.length;++i) {									// For each mob	
 			o=curJson.mobs[i];													// Point at mob
 			o.color=ColorToHex(o.color);										// Convert named color
@@ -553,6 +554,7 @@
 	{
 //		trace(e.data);
 		if (e.data && (e.data.match(/Space=/) || e.data.match(/Time=/) || e.data.match(/Popup=/))) {	// If a space, time, or popup event
+			var j,vv;
 			var v=e.data.split("|");											// Split into parts
 			if (e.data.match(/=where/i))										// Set position
 				mps.Goto(v[1])													// Move map
@@ -568,8 +570,20 @@
 				v[1]=e.data.match(/mask\|(.+)/)[1];								// Issue of handling |'s in regex
 				dtl.SetTagMask(v[1]);                                      		// Set mask
 				}
-			else if (e.data.match(/=show/i))	{								// Set position
-				var vv=v[1].split(",");											// Get array of ids
+			else if (e.data.match(/=var/i))	{									// Set user variable
+				vv=v[1].split(",");												// Split by ,
+				if ((vv[1].charAt(0) == '>') ||	(vv[1].charAt(0) == '-')) {		// Inc/dec
+					if (vv[1].charAt(0) == '>') vv[1]=vv[1].substr(1);			// Lop off > (because I couldn't use + sign)
+					if (dtl.userVars[vv[0]] == undefined) dtl.userVars[vv[0]]=0;  // At least 0
+					dtl.userVars[vv[0]]+=(vv[1]-0);								// Add
+					}
+				else															// Set
+					dtl.userVars[vv[0]]=vv[1];									// Store new value
+				}
+			else if (e.data.match(/=if/i))										// If
+				EvaluateIf(v[1]);													// Evaluate if
+			else if (e.data.match(/=show/i))	{								// Show
+				vv=v[1].split(",");												// Get array of ids
 				if (vv[0] && (vv[0].match(/\/\//)))								// A url
 					ShowIframe2(vv[0],"map");									// Show iframe
 				else{
@@ -611,6 +625,20 @@
 			}
 	}
 
+	function EvaluateIf(cmd) 												// EVALUATE IF STATEMENT
+	{
+		var v=cmd.split(",");													// Split up params
+		if (v.length < 4)	return;												// Not enough params
+		acts=v[3];																// First part of action
+		for (var i=4;i<v.length;++i)	acts+=","+v[i];							// Add trailing parts, if any
+		v[0]=dtl.userVars[v[0]];												// Find user var value by name
+		if ((v[1] == "EQ") && (v[0] == v[2]))		pop.SendActions(acts);		// Equal
+		else if ((v[1] == "NE") && (v[0] != v[2]))	pop.SendActions(acts);		// Not equal
+		else if ((v[1] == "LT") && (v[0] <  v[2]))	pop.SendActions(acts);		// Less than
+		else if ((v[1] == "LE") && (v[0] <= v[2]))	pop.SendActions(acts);		// Less equal
+		else if ((v[1] == "GT") && (v[0] >  v[2]))	pop.SendActions(acts);		// Greater than
+		else if ((v[1] == "GE") && (v[0] >= v[2]))	pop.SendActions(acts);		// Greater Equal
+	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SETTINGS
