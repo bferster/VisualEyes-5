@@ -239,23 +239,17 @@ Space.prototype.SetBaseMap=function(newMap) 							// SET BASE MAP
 
 Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 {
-
-/* 
-  	Set map center, resolution, and time
-  	@param {string} pos	Position to got to in this format:
-  						longitude,latitude[,resolution,time]
-  
-*/
-
-	if (!pos)																// No where to go
-		return;																// Quit
-	var duration;
+	if (!pos)	return;														// No where to go
+	var duration,manual=false;
+	if (pos.charAt(0) == '*') {												// If hand animating
+		pos=pos.substr(1);													// Remove *
+		manual=true;														// Set flag	
+		}
 	pos=pos.replace(/"/g,"");												// Remove quotes
 	var v=pos.split(",");													// Split up
-	if (v.length < 2)														// Not enough coords
-		return;																// Quit
-	if (isNaN(v[0]) || isNaN(v[1]) || isNaN(v[0]))							// Invalid coord
-		return;																// Quit
+	if (v.length < 2)	return;												// Not enough coords
+	if (isNaN(v[0]) || isNaN(v[1]) || isNaN(v[0]))	return;					// Invalid coord
+
 	var o=this.map.getView();												// Point at view
 	var c=ol.proj.transform([v[0]-0,""+v[1].replace(/\*/,"")-0],'EPSG:4326',this.curProjection);	// Get center
 	var fc=o.getCenter();													// Get from center
@@ -268,6 +262,16 @@ Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 	if (v[3])  	duration=v[3]*1000;											// Set duration from pos
 	else		duration=this.panTime*1000;									// Use global duration
 	v[2]*=1440*curJson.leftRightSplit/$(this.div).width();					// Resize to normalized screen
+
+	if (manual) {															// If animating
+		clearInterval(this.gotoPosTimer);									// Stop timer, if open
+		this.gotoStartTime=new Date().getTime();							// Start time
+		this.gotoPosDur=duration;											// Duration
+		this.gotoStartPos=[fc[0],fc[1],fs];									// Start
+		this.gotoEndPos=[c[0],c[1],v[2]]									// End
+		this.gotoPosTimer=setInterval(function() {mps.GoToPos() },42);		// Animate map
+		return;																// Quit
+		}
 
 	if (duration < 0) {														// If bouncing
 		duration=-duration;													// Make positive
@@ -284,6 +288,20 @@ Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 	
 }
 
+Space.prototype.GoToPos=function() 										// ANIMATE TO A POSITION OVER TIME
+{
+	var o=this.map.getView();												// Point at view
+	var pct=(new Date().getTime()-mps.gotoStartTime)/mps.gotoPosDur;		// Get percentage
+	if (pct >= 1) {															// If done
+		clearInterval(mps.gotoPosTimer);									// Stop timer
+		pct=1;																// Go to end
+		}
+	var start=mps.gotoStartPos;												// Point at start
+	var end=mps.gotoEndPos;													// Point at end
+	pct=1.0-((Math.cos(3.1414*pct)+1)/2.0);									// Full cosine curve
+	o.setCenter([start[0]+((end[0]-start[0])*pct)-0,start[1]+((end[1]-start[1])*pct)-0]);
+	o.setResolution(start[2]+((end[2]-start[2])*pct)-0);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // IMAGE OVERLAY
