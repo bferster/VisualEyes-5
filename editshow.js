@@ -86,6 +86,13 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	else if (this.curMode == "story") {										// Story item	
 		$("#esHead").text("Edit Story");									// Title
 		this.curId=sto.pages[sto.curPage];									// Extract id
+		if (sto.storyMode == "Scrolled") {									// If scrolled
+			for (var i=0;i<sto.pages.length;++i)							// Look through pages
+				if (curJson.mobs[sto.pages[i]].open) {						// If open
+					this.curId=sto.pages[i]-0;								// Get index
+					break;													// Quit looking
+					}
+			}
 		$("#editShowDiv").css({ top:"16px",left: $("#leftDiv").width()-546+"px"});
 		Sound("click");													// Click	
 	}	
