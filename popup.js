@@ -41,22 +41,24 @@ Popup.prototype.ShowBooklet=function(div, id, width)					// SHOW BOOKLET
 		str+="<img src='img/nextbut.png' id='nextB' style='position:absolute;cursor:pointer'>";	// Next button
 		}
 	$("body").append(str);													// Add popup
-	setPage(id,num);
+	setPage(id,num);														// Fill page
 	$("#st-booklet").css({ width: o.size+"%"});								// Set width
 	$("#st-booklet").height($("#st-booklet").width()*.66);					// Set height
 	var x=$(div).width()/2-$("#st-booklet").width()/2;						// Center it
 	var y=$(div).height()/2-$("#st-booklet").height()/2;					// Center
-	$("#st-bookPage").height($("#st-booklet").height()-60);					// Set scrolling div height
 	$("#st-booklet").css({left:x+"px",top:y+"px"});							// Position
 	$("#st-booklet").draggable();											// Make it draggable
-	
-	$("#st-booklet").fadeIn(300, function() {								// Fade in
-		y=$("#st-booklet").height()+6;										// Top
-		x=$("#st-booklet").width()-2;										// Right
+	$("#st-booklet").resizable({ resize: function() {	posLabels() } });	// Make it resizable
+	$("#st-booklet").fadeIn(300, function() { posLabels(); });				// Fade in
+
+	function posLabels() {													// POSITION LABELS												
+		var y=$("#st-booklet").height()+6;									// Top
+		var x=$("#st-booklet").width()-2;									// Right
 		$("#lastB").css({left:"8px",top:y+"px"});							// Position
 		$("#nextB").css({left:x+"px",top:y+"px"});							// Position
 		$("#pageCtr").css({left:"calc(50% - 26px)",top:(y+4)+"px"});		// Position
-		});
+		$("#st-bookPage").height($("#st-booklet").height()-60);				// Set scrolling div height
+		}
 
 	$("#lastB").on("click", function() {									// ON BACK CLICK
 		pop.Sound("click");													// Click
