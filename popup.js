@@ -54,9 +54,9 @@ Popup.prototype.ShowBooklet=function(div, id, width)					// SHOW BOOKLET
 	function posLabels() {													// POSITION LABELS												
 		var y=$("#st-booklet").height()+6;									// Top
 		var x=$("#st-booklet").width()-2;									// Right
-		$("#lastB").css({left:"8px",top:y+"px"});							// Position
-		$("#nextB").css({left:x+"px",top:y+"px"});							// Position
-		$("#pageCtr").css({left:"calc(50% - 26px)",top:(y+4)+"px"});		// Position
+		$("#lastB").css({left:"calc(50% - 50px)",top:y+"px"});				// Position
+		$("#nextB").css({left:"calc(50% + 40px)",top:y+"px"});				// Position
+		$("#pageCtr").css({left:"calc(50% - 24px)",top:(y+4)+"px"});		// Position
 		$("#st-bookPage").height($("#st-booklet").height()-60);				// Set scrolling div height
 		}
 
