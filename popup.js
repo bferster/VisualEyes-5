@@ -85,10 +85,10 @@ Popup.prototype.ShowBooklet=function(div, id, width)					// SHOW BOOKLET
 			var cap=v[1] ? "<br>"+v[1] : "";								// Get cap
 			content=content.replace(/pic\(.*?\)/i,"");						// Delete text
 			var wid=content ? 50 : 100;										// Full size if no content text
-			str+="<div id='poppic' style='float:left;width:"+wid+"%;overflow:hidden;margin-right:16px;font-size:10px'>";	// Enclosing div for image and caption
+			str+="<p id='poppic' style='float:left;width:"+wid+"%;overflow:hidden;margin-right:16px;font-size:10px'>";	// Enclosing div for image and caption
 			v[0]=ConvertFromGoogleDrive(""+v[0]);							// Convert pic
 			str+="<img src='"+v[0]+"' class='booklet-pic'>";				// Add image
-			str+=cap+"</div>";												// Add caption & enclosing div
+			str+=cap+"</p>";												// Add caption & enclosing div
 			}
 		if (content) 														// If page set
 			str+=pop.ExpandMacros(content);									// Expand macros, if any
