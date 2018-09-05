@@ -612,7 +612,8 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 		o.markerWidth=$("#svgMarker"+i)[0].getBBox().width;					// Save marker width
 
 		$("#svgMarker"+i).on('click', function(e) {							// ON MARKER CLICK
-				var v,j,a;
+;
+			var v,j,a;
 				var id=e.currentTarget.id.substr(9);						// Get ID
 				o=_this.sd.mobs[id];										// Point at mob
 			    str=o.desc;
@@ -639,7 +640,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 	$("#timeViewSVG").on('click', function(e) {								// TIMESEG CLICK
 		_this.Play();														// Stop playing														
 		if (e.target.tagName == "svg")										// Not on a marker
-   			ClearPopUps();													// Clear any open popup
+   			ClearPopUps(true);												// Clear any open popups
 		});
 }
 
