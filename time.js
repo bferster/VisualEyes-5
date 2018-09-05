@@ -333,7 +333,7 @@ Timeline.prototype.AddTimeBar=function() 								// ADD TIME BAR
 
 	$("#timeBar").on('click', function(e) {									// TIMEBAR CLICK
 		_this.Play();														// Stop playing														
-		ClearPopUps();														// Clear any open popup
+		ClearPopUps(true);													// Clear any open popup
 		});
 
  }
