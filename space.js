@@ -734,6 +734,15 @@ Space.prototype.AddKMLLayer=function(url, opacity, id, start, end) 		// ADD KML 
 				})
 			});
 		}
+	if (url && url.match(/\.geojson/i)) { 									// Geojson image
+		o.src=new ol.layer.Vector({  source: new ol.source.Vector({			// New layer
+			title: "LAYER-"+this.overlays.length,							// Set name
+			projection: ol.proj.get(this.curProjection),					// Set projection
+			format: new ol.format.GeoJSON(),								// Set format
+			url: url														// URL
+			})
+		});
+		}
 	else{																	// Normal KML
 		o.src=new ol.layer.Vector({  source: new ol.source.Vector({			// New layer
 				title: "LAYER-"+this.overlays.length,						// Set name

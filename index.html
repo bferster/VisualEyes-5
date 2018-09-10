@@ -305,7 +305,7 @@
 				if (!marker)													// No marker spec'd
 					continue;													// Skip it
 				o.type="icon";													// Assume icon
-				if (marker.match(/kml|\{z\}/i)) {								// A KML file
+				if (marker.match(/kml|\{z\}|\.geojson/i)) {						// A KML/GeoJson file
 					o.type="kml";												// Set type
 					if (!isNaN(marker.split(".")[0]))							// If a number only
 						marker="getkml.php?id="+marker.split(".")[0];			// Load from qdata
