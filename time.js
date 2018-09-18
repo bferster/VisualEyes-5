@@ -227,12 +227,15 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 Timeline.prototype.SetDotPositions=function()							// SET DOT POSITIONS
 {
 	var i,k=0,o;
-	var top=($("#timeViewBar").height()-32)/16;								// Top line
+	var top=Math.ceil(($("#timeViewBar").height()-32)/16);					// Top line
 	for (i=0;i<this.sd.mobs.length;++i) {									// For each mob
 		o=this.sd.mobs[i];													// Point at mob
 		if (!o.marker || (o.type != "icon"))								// No marker set, or not a type shown on timeline
-			continue;														// Skip
-		if (!o.pos) 				o.tpos=(++k%top);						// Auto set								
+		continue;															// Skip
+		if (!o.pos) {														// Auto set
+			k=Math.max(++k%top,1);											// Advance from 1-top
+			o.tpos=k;														// Set pos													
+			}
 		else						o.tpos=o.pos;							// Use original
 		if (o.pos == "top")			o.tpos=top;								// Put on top
 	}
