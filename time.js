@@ -226,7 +226,7 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 
 Timeline.prototype.SetDotPositions=function()							// SET DOT POSITIONS
 {
-	var i,k=-1,o;
+	var i,k=0,o;
 	var top=($("#timeViewBar").height()-32)/16;								// Top line
 	for (i=0;i<this.sd.mobs.length;++i) {									// For each mob
 		o=this.sd.mobs[i];													// Point at mob
