@@ -8,18 +8,50 @@
 	 <script src="https://apis.google.com/js/api.js"></script>
 	</head>
 <body>
-
 <script>
 
-	var gd=new Gdrive();													// Google drive access
-	gapi.load('client', handleClientLoad)	
-	function handleClientLoad() {
+ var data=[
+    ["Item", "Cost", "Stocked", "Ship Date"],
+    ["Wheel", "$20.50", "4", "3/1/2016"],
+    ["Door", "$15", "2", "3/15/2016"],
+    ["Engine", "$100", "1", "30/20/2016"],
+    ["Totals", "=SUM(B2:B4)", "=SUM(C2:C4)", "=MAX(D2:D4)"]
+  	];
+
+
+SaveSpreadsheet("10MmgXFUlqMgJ0Ijkw7HiKhS2zBlv_T6CX-THK5o163U",data);
+ 
+function SaveSpreadsheet(id, data)															// CLEAR AND SAVE DATA TO GDRIVE
+{
 		gapi.load('client:auth2', function() {
-			gd.InitClient(Load);
+			gapi.client.init({																	// Init
+          	apiKey: "AIzaSyD0jrIlONfTgL-qkfnMTNdjizsNbLBBjTk",									// Key
+			clientId: "453812393680-8tb3isinl1bap0vqamv45cc5d9c7ohai.apps.googleusercontent.com", // Google client id 
+			scope:"https://www.googleapis.com/auth/drive",										// Scope
+          	discoveryDocs:["https://sheets.googleapis.com/$discovery/rest?version=v4"],			// API discovery
+        	}).then(function () {																// When initted, listen for sign-in state changes.
+	        	gapi.auth2.getAuthInstance().isSignedIn.listen(doIt);							// Try						
+        		doIt(gapi.auth2.getAuthInstance().isSignedIn.get());							// Try
+	
+				function doIt(isSignedIn) {														// Do action
+					if (!isSignedIn) 															// If not signed in yet														
+						gapi.auth2.getAuthInstance().signIn();									// Sign in
+					else{																		// Clear and save
+						var params= { spreadsheetId:id, range: "A1:ZZZ100000" };				// Where to save it
+						var body= { majorDimension: "ROWS", values: data };						// Data to save
+						var request=gapi.client.sheets.spreadsheets.values.clear(params);		// Clear first
+						request.then(function(r) { 												// When cleared
+							params.valueInputOption="RAW";										// Send raw data
+							var request=gapi.client.sheets.spreadsheets.values.update(params,body);	// Send new data
+							request.then(function(r){}, function(e) { trace(e.result.error.message); })	// Error reporting for send
+							}, 
+						function(e) { trace(e.result.error.message); });						// Error reporting for clear
+						}
+				}			
 			});
-      }
-
-
+		});
+}		
+	
 	function Load()
 	{
 		gd.Picker(true,function(res) {
@@ -44,7 +76,7 @@ Gdrive.prototype.InitClient=function(callback) 								// INIT API LIBRARY
 { 
 	gapi.client.init({															// Init
           apiKey: this.key, clientId: this.clientId, scope: this.scope,			// Params
-          discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
+          discoveryDocs:["https://sheets.googleapis.com/$discovery/rest?version=v4"],
         	}).then(function () {												// When initted, listen for sign-in state changes.
  	        	gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
         		updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
