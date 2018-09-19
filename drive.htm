@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes, user-scalable=yes">
+	<title>Drive</title>
+ 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>	
+	 <script src="https://apis.google.com/js/api.js"></script>
+	</head>
+<body>
+
+<script>
+
+	var gd=new Gdrive();													// Google drive access
+	gapi.load('client', handleClientLoad)	
+	function handleClientLoad() {
+		gapi.load('client:auth2', function() {
+			gd.InitClient(Load);
+			});
+      }
+
+
+	function Load()
+	{
+		gd.Picker(true,function(res) {
+			trace (res)
+		});
+	}
+
+//https://viseyes.org/visualeyes/drive.htm
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// GOOGLE DRIVE ACCESS 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function Gdrive()															// CONSTRUCTOR
+{
+	this.clientId="453812393680-8tb3isinl1bap0vqamv45cc5d9c7ohai.apps.googleusercontent.com";	// Google client id
+	this.scope="https://www.googleapis.com/auth/drive";							// Scope of access
+	this.key="AIzaSyD0jrIlONfTgL-qkfnMTNdjizsNbLBBjTk";							// Google API key
+}
+
+Gdrive.prototype.InitClient=function(callback) 								// INIT API LIBRARY	
+{ 
+	gapi.client.init({															// Init
+          apiKey: this.key, clientId: this.clientId, scope: this.scope,			// Params
+          discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
+        	}).then(function () {												// When initted, listen for sign-in state changes.
+ 	        	gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+        		updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+				
+				function updateSigninStatus(isSignedIn) {
+					if (!isSignedIn) 
+						gapi.auth2.getAuthInstance().signIn();
+					else{
+						if (callback) callback();
+						}
+					}
+        		});
+      }
+
+Gdrive.prototype.Download=function(id, callback)							// DOWNLOAD DATA FROM GDRIVE
+{
+	var request = gapi.client.drive.files.get({ 'fileId': id });				// Request file
+	request.execute(function(resp) {											// Get data
+		if (resp.downloadUrl) {													// If a link
+		    var accessToken=gapi.auth.getToken().access_token;					// Get access token
+		    var xhr=new XMLHttpRequest();										// Ajax
+		    xhr.open("GET",resp.downloadUrl);									// Set open url
+		    xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);		// Set header
+		    xhr.onload = function()  {  callback(xhr.responseText);   };		// On load
+		    xhr.send();															// Do it
+		  	}
+		});
+	}
+
+Gdrive.prototype.Picker=function(allFiles, callback)						// RUN GDRIVE PICKER
+{
+	var _this=this;
+	var pickerApiLoaded=false;
+		var oauthToken;
+		gapi.load('auth', { 'callback': function() {
+				window.gapi.auth.authorize( {
+	              	'client_id': _this.clientId,
+	             	'scope': [ _this.scope,],
+	              	'immediate': false }, function(authResult) {
+							if (authResult && !authResult.error) {
+	          					oauthToken=authResult.access_token;
+	          					createPicker();
+	          					}
+	          				});
+				}
+			});
+		
+		gapi.load('picker', {'callback': function() {
+				pickerApiLoaded=true;
+		        createPicker();
+	    	   	}
+			});
+	
+		function createPicker() {
+			if (pickerApiLoaded && oauthToken) {
+				var view=new google.picker.DocsView(google.picker.ViewId.SPREADSHEETS).
+				setOwnedByMe(allFiles).
+				setIncludeFolders(true);
+				var picker = new google.picker.PickerBuilder().
+					addView(view).
+					setOAuthToken(oauthToken).
+					setDeveloperKey(_this.key).
+					setCallback(pickerCallback).
+					build();
+				picker.setVisible(true);
+				}
+			}
+	
+		function pickerCallback(data) {
+	        if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
+         		var doc=data[google.picker.Response.DOCUMENTS][0];
+	      		callback(doc.id)
+	       		}
+			}
+	   
+	}	// End closure
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// HELPERS
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	function trace(msg, p1, p2, p3, p4)										// CONSOLE 
+	{
+		if (p4 != undefined)
+			console.log(msg,p1,p2,p3,p4);
+		else if (p3 != undefined)
+			console.log(msg,p1,p2,p3);
+		else if (p2 != undefined)
+			console.log(msg,p1,p2);
+		else if (p1 != undefined)
+			console.log(msg,p1);
+		else
+			console.log(msg);
+	}
+
+
+</script>
+</body>
+</html>
