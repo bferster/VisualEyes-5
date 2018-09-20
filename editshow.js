@@ -56,7 +56,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	str+="<p><hr></p>";																			
 	str+="<div '>";																		
 	str+="<div id='esSaveBut' class='ve-gbs'>Save changes</div>&nbsp;&nbsp;";						
-	str+="<div id='esCopyBut' class='ve-gbs'>Copy project to clipboard</div>&nbsp;&nbsp;";						
+	str+="<div id='esCopyBut' class='ve-gbs'>Save project to GDrive</div>&nbsp;&nbsp;";						
 	str+="<div id='esCopyLineBut' class='ve-gbs'>Copy line</div>&nbsp;&nbsp;";						
 	str+="<div id='esFindBut' class='ve-gbs'>Find</div>&nbsp;&nbsp;";						
 	str+="<img id='esRemoveBut' title='Delete' style='vertical-align:-5px' src='img/trashbut.gif'>";	// Trash button
@@ -186,15 +186,19 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 		o.click=$("#esClick").val();										// Click
 		}
 
-	$("#esCopyBut").on("click", function() {  								// ON COPY TO CLIPBOARD
-		var str=_this.MakeTabFile(curJson);									// Create TSV file
-		$("#outputDiv").val(str);											// Show it
-		$("#outputDiv")[0].select();										// Select div
-		try {
-			if (document.execCommand('copy')) {								// Copy to clipboard
-				Sound("ding");												// Ding
-				}
-			} catch (err) { console.log("Clipboard copy error")}			// Show error
+	$("#esCopyBut").on("click", function() {  								// ON COPY TO GDRIVE
+		var o,i,d=[];
+		for (i=0;i<curJson.mobs.length;++i) {								// For each mob	
+			o=curJson.mobs[i];												// Point at mob
+			o.start=o.startO;	o.end=o.endO;	o.opacity=o.opacityO;		// Restore original values
+			}
+		o=curJson.mobs[_this.curId];										// Point at mob
+		getMobValues(o);													// Get values from inputa	
+		var v=_this.MakeTabFile(curJson).split("\n");						// Split into rows
+		for (i=0;i<v.length;++i)											// For each row
+			d.push(v[i].split("\t"));										// Add array of fields
+		var str=curJson.sheet.match(/\/d\/(.+)\//)[1];						// Extract id
+		_this.SaveSpreadsheet(str,d);										// Save to GDrive
 		});
 
 	$("#esCopyLineBut").on("click", function() {  							// ON COPY LINE TO CLIPBOARD
@@ -467,8 +471,9 @@ EditShow.prototype.MakeTabFile=function(data, line)						// MAKE TAB-DELINEATED 
 
 EditShow.prototype.SaveSpreadsheet=function(id, data)										// CLEAR AND SAVE DATA TO GDRIVE
 {
-	trace(gapi)	
-	gapi.load('client:auth2', function() {
+	if (!id)	return;																			// Quit if no id
+	var _this=this;																				// Save context
+	gapi.load('client:auth2', function() {														// Start oauto
 			gapi.client.init({																	// Init
           	apiKey: "AIzaSyD0jrIlONfTgL-qkfnMTNdjizsNbLBBjTk",									// Key
 			clientId: "453812393680-8tb3isinl1bap0vqamv45cc5d9c7ohai.apps.googleusercontent.com", // Google client id 
@@ -490,7 +495,7 @@ EditShow.prototype.SaveSpreadsheet=function(id, data)										// CLEAR AND SAVE
 							var request=gapi.client.sheets.spreadsheets.values.update(params,body);	// Send new data
 							request.then(function(r) {											// Good save
 								Sound("ding");													// Ding
-								PopUp("Project<br>copied to Google Drive");						// Show popup
+								_this.PopUp("Project<br>copied to Google Drive");				// Show popup
 								}, 
 								function(e) { trace(e.result.error.message); })					// Error reporting for send
 							}, 
@@ -500,3 +505,13 @@ EditShow.prototype.SaveSpreadsheet=function(id, data)										// CLEAR AND SAVE
 			});
 		});
 }
+
+EditShow.prototype.PopUp=function(msg)														// TIMED POPUP
+{
+	$("#popupDiv").remove();																	// Kill old one, if any
+	var str="<div id='popupDiv' class='ve-popup'>"; 											// Add div
+	str+=msg+"</div>"; 																			// Add div
+	$("body").append(str);																		// Add to  body
+	$("#popupDiv").fadeIn(500).delay(2000).fadeOut(500)											// Animate in and out		
+}
+
