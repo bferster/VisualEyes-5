@@ -464,3 +464,39 @@ EditShow.prototype.MakeTabFile=function(data, line)						// MAKE TAB-DELINEATED 
 		}		
 	return str;
 	}
+
+EditShow.prototype.SaveSpreadsheet=function(id, data)										// CLEAR AND SAVE DATA TO GDRIVE
+{
+	trace(gapi)	
+	gapi.load('client:auth2', function() {
+			gapi.client.init({																	// Init
+          	apiKey: "AIzaSyD0jrIlONfTgL-qkfnMTNdjizsNbLBBjTk",									// Key
+			clientId: "453812393680-8tb3isinl1bap0vqamv45cc5d9c7ohai.apps.googleusercontent.com", // Google client id 
+			scope:"https://www.googleapis.com/auth/drive",										// Scope
+          	discoveryDocs:["https://sheets.googleapis.com/$discovery/rest?version=v4"],			// API discovery
+        	}).then(function () {																// When initted, listen for sign-in state changes.
+	        	gapi.auth2.getAuthInstance().isSignedIn.listen(doIt);							// Try						
+        		doIt(gapi.auth2.getAuthInstance().isSignedIn.get());							// Try
+	
+				function doIt(isSignedIn) {														// Do action
+					if (!isSignedIn) 															// If not signed in yet														
+						gapi.auth2.getAuthInstance().signIn();									// Sign in
+					else{																		// Clear and save
+						var params= { spreadsheetId:id, range: "A1:ZZZ100000" };				// Where to save it
+						var body= { majorDimension: "ROWS", values: data };						// Data to save
+						var request=gapi.client.sheets.spreadsheets.values.clear(params);		// Clear first
+						request.then(function(r) { 												// When cleared
+							params.valueInputOption="RAW";										// Send raw data
+							var request=gapi.client.sheets.spreadsheets.values.update(params,body);	// Send new data
+							request.then(function(r) {											// Good save
+								Sound("ding");													// Ding
+								PopUp("Project<br>copied to Google Drive");						// Show popup
+								}, 
+								function(e) { trace(e.result.error.message); })					// Error reporting for send
+							}, 
+						function(e) { trace(e.result.error.message); });						// Error reporting for clear
+						}
+				}			
+			});
+		});
+}

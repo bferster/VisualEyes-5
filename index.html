@@ -15,27 +15,13 @@
    	<script src="https://openlayers.org/en/v5.2.0/build/ol.js" type="text/javascript"></script>
   	<script type="text/javascript" src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
 	<script src="http://www.stagetools.com/qmedia/qfile.js"></script>
-	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeGRjMSfeJ3Fgiu_RXntnu2LxuPxrsufU&libraries=places&callback=InitAutoComplete" async defer></script>	
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD0jrIlONfTgL-qkfnMTNdjizsNbLBBjTk&libraries=places"></script>	
 	<script src="space.js" type="text/javascript"></script>
   	<script src="time.js" type="text/javascript"></script>
   	<script src="popup.js" type="text/javascript"></script>
   	<script src="data.js" type="text/javascript"></script>
   	<script src="story.js" type="text/javascript"></script>
   	<script src="editshow.js" type="text/javascript"></script>
-
-	<script>
-	function InitAutoComplete()	{												// INIT GOOGLE's GEOCODER
-		  var input=document.getElementById("findPlace");							// Point at input box
-		  var autocomplete=new google.maps.places.Autocomplete(input);				// Init autocomplete
-			
-		  autocomplete.addListener('place_changed', function() {					// On complete
-			  var place=autocomplete.getPlace();									// Get place
-			  var lat=place.geometry.location.lat();								// Get lat
-			  var lon=place.geometry.location.lng();								// Get lon
-			  mps.Goto(lon+","+lat+",20");											// Move map
-			  });
-	  }
-	</script>
 
  	<style type="text/css">
 		body { 				font-family:Verdana,Geneva,sans-serif; font-size:9px; 
@@ -184,8 +170,6 @@
 </div>
 	
 <script>
-
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DISPLAY
@@ -536,6 +520,15 @@
 		$("#setwhere").on("change", function() {								// ON LOCATION CHANGE
 			mps.Goto($(this).val());											// Go there
 			});
+		
+		var input=document.getElementById("findPlace");							// GEOLOCATE - point at input box
+		var autocomplete=new google.maps.places.Autocomplete(input);			// Init autocomplete
+		autocomplete.addListener('place_changed', function() {					// On complete
+			 var place=autocomplete.getPlace();									// Get place
+			 var lat=place.geometry.location.lat();								// Get lat
+			 var lon=place.geometry.location.lng();								// Get lon
+			 mps.Goto(lon+","+lat+",20");										// Move map
+			 });
 
 	});
 

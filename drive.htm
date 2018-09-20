@@ -21,6 +21,10 @@
 
 SaveSpreadsheet("10MmgXFUlqMgJ0Ijkw7HiKhS2zBlv_T6CX-THK5o163U",data);
  
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// GOOGLE DRIVE
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 function SaveSpreadsheet(id, data)															// CLEAR AND SAVE DATA TO GDRIVE
 {
 		gapi.load('client:auth2', function() {
@@ -43,15 +47,18 @@ function SaveSpreadsheet(id, data)															// CLEAR AND SAVE DATA TO GDRIV
 						request.then(function(r) { 												// When cleared
 							params.valueInputOption="RAW";										// Send raw data
 							var request=gapi.client.sheets.spreadsheets.values.update(params,body);	// Send new data
-							request.then(function(r){}, function(e) { trace(e.result.error.message); })	// Error reporting for send
+							request.then(function(r) {											// Good save
+								Sound("ding");													// Ding
+								PopUp("Project<br>copied to Google Drive");						// Show popup
+								}, 
+								function(e) { trace(e.result.error.message); })					// Error reporting for send
 							}, 
 						function(e) { trace(e.result.error.message); });						// Error reporting for clear
 						}
 				}			
 			});
 		});
-}		
-	
+}	
 	function Load()
 	{
 		gd.Picker(true,function(res) {
