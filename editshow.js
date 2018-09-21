@@ -167,6 +167,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 		});
 
 	function getMobValues(o) {											// GET VALUES FROM INPUTS
+		if (!o)	return;														// Got to have an obj
 		o.id=$("#esId").val();												// Id
 		o.marker=$("#esMarker").val();										// Marker
 		o.title=$("#esTitle").val();										// Title
