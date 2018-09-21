@@ -107,17 +107,6 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 		$("#editShowDiv").css({ top:$("#leftDiv").height()-$("#editShowDiv").height()-60+"px",left: $("#leftDiv").width()/2-250+"px"});
 		}
 	this.EditEvent(e);														// Edit
-	setEventOptions();														// Change event options
-
-	function setEventOptions()												// SET EVENT OPTIONS
-	{
-		var i,ids=[];	
-		var marker=$("#esMarker").val();									// Get cur marekt
-		if (marker == "over")												// If overlay
-			$("#esGeo").html("<a href='javascript:void(0)' onclick='eds.GeoRef()'>Click to georeference</a>");
-		else																// Regular
-			$("#esGeo").html("<i>Ctrl-click on map to get</i>");			// Map click
-		}
 
 	$("#esColor").on("click", function() {									// COLOR HANDLER
 		pop.ColorPicker("esColor",-1);										// Set color
@@ -141,7 +130,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	}); 
 
 	$("#esMarker").on("change", function(e) {								// MARKER CHANGE HANDLER
-		setEventOptions();													// Change event options
+		_this.setEventOptions();											// Change event options
 		});
 
 	$("#esSaveBut").on("click", function() {  								// ON SAVE 
@@ -239,6 +228,15 @@ EditShow.prototype.GeoRef=function()										//  GEO-REFERENCE
 	mps.GeoReference($("#esPic").val() ? $("#esPic").val() : "//farm9.staticflickr.com/8019/7310697988_18eb47c466_z.jpg",$("#esWhere").val() ? $("#esWhere").val() : "",1)
 }
 
+EditShow.prototype.setEventOptions=function()								// SET EVENT OPTIONS
+{
+	var marker=$("#esMarker").val();											// Get cur marker
+	if (marker == "over")														// If overlay
+		$("#esGeo").html("<a href='javascript:void(0)' onclick='eds.GeoRef()'>Click to georeference</a>");
+	else																		// Regular
+		$("#esGeo").html("<i>Ctrl-click on map to get</i>");					// Map click
+}
+
 EditShow.prototype.EditEvent=function()									// EDIT ITEM
 {
 	var o={};
@@ -247,8 +245,8 @@ EditShow.prototype.EditEvent=function()									// EDIT ITEM
 		$("#esRemoveBut").hide();											// Hide trashcan
 		$("#esSaveBut").text("Add new event");								// Say add
 		}
-	else{																	// Nothing	
-		o=curJson.mobs[this.curId];											// Point at event
+	else{																	// Valid event	
+		if (curJson.mobs[this.curId]) o=curJson.mobs[this.curId];			// Point at event
 		$("#esFindBut").remove();											// Remove find but
 		$("#esRemoveBut").show();											// Show trashcan
 		$("#esHead").text("Edit event");									// Edit
@@ -274,6 +272,7 @@ EditShow.prototype.EditEvent=function()									// EDIT ITEM
 	if (o.where)	$("#esWhere").val(o.where);								// Where
 	pop.ColorPicker("esMapColor",-1,true);									// Init color
 	pop.ColorPicker("esColor",-1,true);										// Init color
+	this.setEventOptions();													// Change event options
 }
 
 EditShow.prototype.FindMob=function()										// FIND MOB

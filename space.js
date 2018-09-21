@@ -1129,6 +1129,7 @@ Space.prototype.GeoReference=function(url, where, edit)					// GEO REFERENCE IMA
 
 	function startGeoRef()
 	{
+
 		_this.geoRef={ a:1 };												// Create georef obj
 		_this.geoRef.img=new Image();										// Make new img
 		_this.geoRef.img.src=url;											// Set  url
@@ -1265,8 +1266,8 @@ Space.prototype.GeoReference=function(url, where, edit)					// GEO REFERENCE IMA
 				})
 			}
 	
-		o.pts[0].x=w+Math.abs(e-w)/2;										// CX
-		o.pts[0].y=s+Math.abs(n-s)/2;										// CY
+		o.pts[0].x=w-0+Math.abs(e-w)/2;										// CX
+		o.pts[0].y=s-0+Math.abs(n-s)/2;										// CY
 		o.pts[1].x=w-0;	o.pts[1].y=n-0;										// NW
 		o.pts[2].x=e-0;	o.pts[2].y=n-0;										// NE
 		o.pts[3].x=e-0;	o.pts[3].y=s-0;										// SE
@@ -1287,7 +1288,7 @@ Space.prototype.GeoReference=function(url, where, edit)					// GEO REFERENCE IMA
 				o.pts[i].f.setId("georef"+i);								// Add id
 				o.pts[i].f.setStyle(sty);									// Set feature
 				_this.drawLayer.getSource().addFeature(o.pts[i].f);			// Add feature to layer
-				}
+			}
 			else															// Just moving them
 				o.pts[i].f.getGeometry().setCoordinates(p);					// Set geometry
 			}
