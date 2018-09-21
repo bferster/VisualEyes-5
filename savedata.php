@@ -7,6 +7,8 @@ header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Max-Age: 1000');
 require_once('config.php');
 			
+
+	$email="";	$password=""; $title=""; $type="";	$data="";	// Declare vars
 	$email=strtolower($_REQUEST['email']);						// Get email
 	$password=$_REQUEST['password'];							// Get password
 	$title=$_REQUEST['title'];									// Get title

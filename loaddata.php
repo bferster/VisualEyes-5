@@ -4,6 +4,7 @@ header('Expires: Sun, 01 Jul 2005 00:00:00 GMT');
 header('Pragma: no-cache'); 
 require_once('config.php');
 	
+	$id="";	$kml="";											// Declare
 	$id=addEscapes($_REQUEST['id']);							// Get id
 	$kml=addEscapes($_REQUEST['kml']);							// Get id
 											
