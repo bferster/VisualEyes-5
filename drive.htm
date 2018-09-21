@@ -21,8 +21,8 @@
 
 //SaveSpreadsheet("10MmgXFUlqMgJ0Ijkw7HiKhS2zBlv_T6CX-THK5o163U",data);
 
-GetSpreadsheet(true,function(res) {	trace (res)	} );
-
+GetSpreadsheet(true,function(id, name) {	trace (id,name)	} );
+//https://viseyes.org/visualeyes/drive.htm
  
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // GOOGLE DRIVE
@@ -68,78 +68,46 @@ function SaveSpreadsheet(id, data)															// CLEAR AND SAVE DATA TO GDRIV
 function GetSpreadsheet(allFiles, callback)													// RUN GDRIVE PICKER
 {
 	var oauthToken,pickerApiLoaded=false;
-	gapi.load('auth', { 'callback': function() {												// Auth loaded
-			window.gapi.auth.authorize( {														// Authorize
-				apiKey: gdKey, clientId: gdClientId, scope:gdScope,								// Params
-				'immediate': false }, function(authResult) {
-						if (authResult && !authResult.error) {
-							oauthToken=authResult.access_token;
-							createPicker();
-							}
-						});
-			}
-		});
-		
-	gapi.load('picker', {'callback': function() {
-			pickerApiLoaded=true;
-			createPicker();
-			}
-		});
-	
-		function createPicker() {
-			if (pickerApiLoaded && oauthToken) {
-				var view=new google.picker.DocsView(google.picker.ViewId.SPREADSHEETS).
-				setOwnedByMe(allFiles).setIncludeFolders(true);
-				var picker = new google.picker.PickerBuilder().
-					addView(view).setOAuthToken(oauthToken).
-					setDeveloperKey(_this.key).setCallback(pickerCallback).build();
-				picker.setVisible(true);
-				}
-			}
-	
-		function pickerCallback(data) {
-	        if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
-         		var doc=data[google.picker.Response.DOCUMENTS][0];
-	      		callback(doc.id)
-	       		}
-			}
-	   
-	}	// End closure
-
-
-//https://viseyes.org/visualeyes/drive.htm
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// GOOGLE DRIVE ACCESS 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function Gdrive()															// CONSTRUCTOR
-{
-	this.clientId="453812393680-8tb3isinl1bap0vqamv45cc5d9c7ohai.apps.googleusercontent.com";	// Google client id
-	this.scope="https://www.googleapis.com/auth/drive";							// Scope of access
-	this.key="AIzaSyD0jrIlONfTgL-qkfnMTNdjizsNbLBBjTk";							// Google API key
-}
-
-Gdrive.prototype.InitClient=function(callback) 								// INIT API LIBRARY	
-{ 
-	gapi.client.init({															// Init
-          apiKey: this.key, clientId: this.clientId, scope: this.scope,			// Params
-          discoveryDocs:["https://sheets.googleapis.com/$discovery/rest?version=v4"],
-        	}).then(function () {												// When initted, listen for sign-in state changes.
- 	        	gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-        		updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-				
-				function updateSigninStatus(isSignedIn) {
-					if (!isSignedIn) 
-						gapi.auth2.getAuthInstance().signIn();
-					else{
-						if (callback) callback();
+	gapi.load('auth', { callback: function() {													// LOAD AUTH
+		window.gapi.auth.authorize({															// Authorize
+				apiKey: gdKey, client_id: gdClientId, scope:gdScope,immediate: false },			// Params
+				function(authResult) {															// On auth return
+					if (authResult && !authResult.error) {										// If OK
+						oauthToken=authResult.access_token;										// Set token
+						createPicker();															// Create picker
 						}
-					}
-        		});
-      }
+				});																				// End auth.authorize()
+			}																					// End callback()
+		});																						// End auth()
+		
+	gapi.load('picker', {'callback': function() {												// LOAD PICKER							
+			pickerApiLoaded=true;																// Set flag
+			createPicker();																		// Create picker
+			}
+		});
+	
+	function createPicker() {																	// CREATE GDRIVE PICKER
+		if (pickerApiLoaded && oauthToken) {													// If loaded and authed
+			var view=new google.picker.DocsView(google.picker.ViewId.SPREADSHEETS).				// Make view
+			setOwnedByMe(allFiles).setIncludeFolders(true);										// Params
+			var picker=new google.picker.PickerBuilder().										// Make picker
+				addView(view).setOAuthToken(oauthToken).										// Params
+				setDeveloperKey(gdKey).setCallback(pickerCallback).build();						// Do it
+			picker.setVisible(true);															// Show picker
+			}
+		}
 
-Gdrive.prototype.Download=function(id, callback)							// DOWNLOAD DATA FROM GDRIVE
+	function pickerCallback(data) {																// FILE CHOSEN CALLBACK
+		if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {				// If picked
+			var doc=data[google.picker.Response.DOCUMENTS][0];									// Get doc
+			callback(doc.id,doc.name);															// Return name and id
+			}
+		}
+}																								// End closure
+
+
+
+function Download(id, callback)														// DOWNLOAD DATA FROM GDRIVE
 {
 	var request = gapi.client.drive.files.get({ 'fileId': id });				// Request file
 	request.execute(function(resp) {											// Get data
@@ -153,55 +121,6 @@ Gdrive.prototype.Download=function(id, callback)							// DOWNLOAD DATA FROM GDR
 		  	}
 		});
 	}
-
-Gdrive.prototype.Picker=function(allFiles, callback)						// RUN GDRIVE PICKER
-{
-	var _this=this;
-	var pickerApiLoaded=false;
-		var oauthToken;
-		gapi.load('auth', { 'callback': function() {
-				window.gapi.auth.authorize( {
-	              	'client_id': _this.clientId,
-	             	'scope': [ _this.scope,],
-	              	'immediate': false }, function(authResult) {
-							if (authResult && !authResult.error) {
-	          					oauthToken=authResult.access_token;
-	          					createPicker();
-	          					}
-	          				});
-				}
-			});
-		
-		gapi.load('picker', {'callback': function() {
-				pickerApiLoaded=true;
-		        createPicker();
-	    	   	}
-			});
-	
-		function createPicker() {
-			if (pickerApiLoaded && oauthToken) {
-				var view=new google.picker.DocsView(google.picker.ViewId.SPREADSHEETS).
-				setOwnedByMe(allFiles).
-				setIncludeFolders(true);
-				var picker = new google.picker.PickerBuilder().
-					addView(view).
-					setOAuthToken(oauthToken).
-					setDeveloperKey(_this.key).
-					setCallback(pickerCallback).
-					build();
-				picker.setVisible(true);
-				}
-			}
-	
-		function pickerCallback(data) {
-	        if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
-         		var doc=data[google.picker.Response.DOCUMENTS][0];
-	      		callback(doc.id)
-	       		}
-			}
-	   
-	}	// End closure
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // HELPERS

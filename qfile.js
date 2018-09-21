@@ -100,7 +100,13 @@
 			dat["password"]=_this.password;										// Add password
 			dat["ver"]=_this.version;											// Add version
 			dat["private"]=pri;													// Add private
-			dat["script"]="LoadShow("+JSON.stringify(curJson,null,'\t')+")";	// Add jsonp-wrapped script
+			if (_this.version == 4) {											// VisualEyes
+				var tdata=$.parseJSON(JSON.stringify(curJson));					// Clone
+				tdata.mobs=null;												// Kill mobs
+				dat["script"]="LoadShow("+JSON.stringify(tdata,null,'\t')+")";	// Add jsonp-wrapped script
+				}												
+			else
+				dat["script"]="LoadShow("+JSON.stringify(curJson,null,'\t')+")";// Add jsonp-wrapped script
 			if (curJson.title)													// If a title	
 				dat["title"]=AddEscapes(curJson.title);							// Add title
 			else if ((qmf.version == 1) && curJson[0]) {						// If ME
