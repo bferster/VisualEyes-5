@@ -45,10 +45,24 @@ DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendErr
 {
 	this.spreadsheetError=null;
 	if (url.indexOf("google.com") != -1) {									// If Google doc
-		var query=new google.visualization.Query(url);						// Make query object	
-		query.send(handleGoogleResponse);									// Fetch data
+//		var query=new google.visualization.Query(url);						// Make query object	
+//		query.send(handleGoogleResponse);									// Fetch data
+		url=url.match(/\/d\/(.+)\//)[1];									// Extract id
+		var str="https://docs.google.com/spreadsheets/d/"+url+"/export?format=tsv";		// Access
+		var xhr=new XMLHttpRequest();										// Ajax
+		xhr.open("GET",str);												// Set open url
+		xhr.onload=function() { handleTSVResponse(xhr.responseText); };		// On successful load, init app from TSV file
+		xhr.send();															// Do it
+		
+		xhr.onreadystatechange=function(e) { 								// ON AJAX STATE CHANGE
+			if ((xhr.readyState === 4) && (xhr.status !== 200)) {  			// Ready, but no load
+				Sound("delete");											// Delete sound
+				PopUp("<p style='color:#990000'><b>Couldn't load Google Doc!</b></p>Make sure that <i>anyone</i><br>can view it in Google",5000); // Popup warning
+				}
+			};		
 		}
-	else{																	// A CSV
+		
+		else{																	// A CSV
 		$.ajax({															// Fetch file
 			type:  'GET',													// a GET
 			url:   'proxy.php',												// Use proxy for cross-domain issue
@@ -119,22 +133,7 @@ DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendErr
 			}
 		}			
      
- /*
-		var id=url.match(/(?<=\/d\/).+?(?=\/)/i)[0];						// Extract id
-		var str="https://docs.google.com/spreadsheets/d/"+id+"/export?format=tsv";	// Access tsv
-		var xhr=new XMLHttpRequest();										// Ajax
-		xhr.open("GET",str);												// Set open url
-		xhr.onload=function() { 											// On successful load
-			handleTSVResponse(xhr.responseText);							// Parse TSV 
-			};			
-		xhr.onreadystatechange=function(e)  { 								// On readystate change
-			if ((xhr.readyState === 4) && (xhr.status !== 200)) {  			// Ready, but no load
-				Sound("delete");											// Delete sound
-				PopUp("<p style='color:#990000'><b>Couldn't load Google Doc!</b></p>Make sure that <i>anyone</i><br>can view it in Google",5000); // Popup warning
-				}
-			};		
-		xhr.send();															// Do it
-		function handleTSVResponse(tsv) {									// HANDLE INCOMING TSV DATA
+	function handleTSVResponse(tsv) {									// HANDLE INCOMING TSV DATA
 		var i,j,v,o,blank;
 		var data=[];														
 		if (tsv) tsv.replace(/\\r/,"");										// Remove CRs
@@ -145,18 +144,15 @@ DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendErr
 			blank=true;														// Assume it has no data
 			v=tsv[i].split("\t");											// Get data
 			for (j=0;j<fields.length;++j) {									// For each field
-				o[fields[j]]=v[j] ? v[j] : "";								// Fill out row
+				o[fields[j]]=v[j] ? v[j] : null;							// Fill out row
 				if (v[j])	blank=false;									// Something there
 				}
 			if (!blank)		data.push(o)									// Add to data
 			}	
-		trace(data)
 		callback(data,url);													// Send to callback
 	}
-	*/
-	
-	
-	function handleGoogleResponse(response) {							// HANDLE INCOMING DATA
+
+/* function handleGoogleResponse(response) {							// HANDLE INCOMING DATA
 	    var i,j,o,lab,val;
 		var keys=[],theData=[];
 		var data=response.getDataTable();									// Try getting table from Google
@@ -201,7 +197,8 @@ DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendErr
 				}
 			}
 		callback(theData,url);												// Send to callback
-   		}															
+	 }*/
+
 }
 
 DataLoad.prototype.Query=function(src, dst, query, fields, sort) 	// RUN QUERY
