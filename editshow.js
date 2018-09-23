@@ -45,7 +45,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	str+="<tr><td><b>Marker</b></td><td>"+MakeSelect("esMarker",false,["dot","diamond","star","bar","box","rbar","line","triup","tridown","triright","trileft","ndot","------------","segment","path","over","story","booklet"]);
 	str+="&nbsp;&nbsp;<b>Size</b>&nbsp;&nbsp;<input class='ve-is' style='width:30px' type='text' id='esSize'>";
 	str+="&nbsp;&nbsp;<b>Color</b>&nbsp;&nbsp;<input class='ve-is' style='width:30px' type='text' id='esColor'>";
-	str+="&nbsp;&nbsp;<b>Position</b>&nbsp;&nbsp;"+MakeSelect("esPos",false,["","1","2","3","4","5","6","7","8","9"])+"</td></tr>";
+	str+="&nbsp;&nbsp;<b>Position</b>&nbsp;&nbsp;"+MakeSelect("esPos",false,["","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"])+"</td></tr>";
 	if (this.curMode != "story") {												// Hide for story
 		str+="<tr><td><b>Map marker&nbsp;</b></td><td>"+MakeSelect("esMapMarker",false,["","dot","diamond","star","bar","box","rbar","line","triup","tridown","triright","trileft","ndot"]);
 		str+="&nbsp;&nbsp;<b>Size</b>&nbsp;&nbsp;<input class='ve-is' style='width:30px' type='text' id='esMapSize'>";
