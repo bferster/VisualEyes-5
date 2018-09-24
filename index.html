@@ -549,6 +549,18 @@
 			var v=e.data.split("|");											// Split into parts
 			if (e.data.match(/=where/i))										// Set position
 				mps.Goto(v[1])													// Move map
+			else if (e.data.match(/=show/i)) {									// Show
+				vv=v[1].split(",");												// Get array of ids
+				if (vv[0] && (vv[0].match(/\/\//)))								// A url
+					ShowIframe2(vv[0],"map");									// Show iframe
+				else{
+					j=FindMobByID(vv[0]);										// Convert to mob index
+					if (curJson.mobs[j].type == "booklet")						// If a booklet
+						pop.ShowBooklet("#leftDiv",vv[0]);						// Show booklet
+					else														// A map layer
+						toggleLayer(vv[0],(vv[1] == "off") ? false : true, vv[2]);	// Show marker
+					}
+				}
 			else if (e.data.match(/=basemap/i))									// Set basemap
 				mps.SetBaseMap(v[1]);											// Set basemap layer
 			else if (e.data.match(/=segment/i))									// Set segment
@@ -572,18 +584,10 @@
 					dtl.userVars[vv[0]]=vv[1];									// Store new value
 				}
 			else if (e.data.match(/=if/i))										// If
-				EvaluateIf(v[1]);													// Evaluate if
-			else if (e.data.match(/=show/i))	{								// Show
-				vv=v[1].split(",");												// Get array of ids
-				if (vv[0] && (vv[0].match(/\/\//)))								// A url
-					ShowIframe2(vv[0],"map");									// Show iframe
-				else{
-					j=FindMobByID(vv[0]);										// Convert to mob index
-					if (curJson.mobs[j].type == "booklet")						// If a booklet
-						pop.ShowBooklet("#leftDiv",vv[0]);						// Show booklet
-					else														// A map layer
-						toggleLayer(vv[0],(vv[1] == "off") ? false : true, vv[2]);	// Show marker
-					}
+				EvaluateIf(v[1]);												// Evaluate if
+			else if (e.data.match(/=timescale/i)) {								// Timescale
+				tln.timeViewScale=v[1]/100;										// Set timescale (0-800)			
+				tln.UpdateTimeline(); 											// Redraw timeline 
 				}
 			}
 		if (e.data && e.data.match(/Space=/)) {									// If just a space event
