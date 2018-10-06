@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 	<meta charset="UTF-8" />
 	<link REL="SHORTCUT ICON" HREF="img/shanti.ico">
@@ -10,18 +10,18 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 	<script src="jquery.ui.touch-punch.min.js"></script>
   	<link rel="stylesheet" href="https://openlayers.org/en/v5.2.0/css/ol.css" type="text/css">
-   	<script src="https://openlayers.org/en/v5.2.0/build/ol.js" type="text/javascript"></script>
+   	<script src="https://openlayers.org/en/v5.2.0/build/ol.js"></script>
  	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAeGRjMSfeJ3Fgiu_RXntnu2LxuPxrsufU&libraries=places"></script>	
 	<script src="https://apis.google.com/js/api.js"></script>
 	<script src="qfile.js"></script>
-	<script src="space.js" type="text/javascript"></script>
-  	<script src="time.js" type="text/javascript"></script>
-  	<script src="popup.js" type="text/javascript"></script>
-  	<script src="data.js" type="text/javascript"></script>
-  	<script src="story.js" type="text/javascript"></script>
-  	<script src="editshow.js" type="text/javascript"></script>
+	<script src="space.js"></script>
+  	<script src="time.js"></script>
+  	<script src="popup.js"></script>
+  	<script src="data.js"></script>
+  	<script src="story.js"></script>
+  	<script src="editshow.js"></script>
 
- 	<style type="text/css">
+ 	<style>
 		body { 				font-family:Verdana,Geneva,sans-serif; font-size:9px; 
 							padding:0px;margin:0px;
 							}
@@ -146,7 +146,7 @@
 <body>
 <div id="showDiv" style="opacity:0" class="ve-base">
 	<div id="bottomDiv" style="position:absolute;top:0px;opacity:inherit" class="ve-bottom ve-unselectable">
-		<img id="settingsBut" src="img/settingsbut.gif" style="position:absolute;cursor:pointer">
+		<img id="settingsBut" src="img/settingsbut.gif" alt="Settings" style="position:absolute;cursor:pointer">
 	</div>
 	<div id="leftDiv" style="position:absolute;opacity:inherit" class="ve-left"></div>
 	<div id="rightDiv" style="position:absolute;opacity:inherit" class="ve-right"></div>
@@ -157,9 +157,9 @@
 		<div id="bSiz1" style="position:absolute;height:20px;width:100%" class="ve-unselectable"></div>
 	</div>
 </div>
-<div id="splashDiv" class="ve-splash"><img src="img/velogo.png"><br><p style="font-size:13px">The University of Virginia</p></div>
+<div id="splashDiv" class="ve-splash"><img src="img/velogo.png" alt=""><br><p style="font-size:13px">The University of Virginia</p></div>
 <div id="findPlaceDiv" style="position:absolute;display:none">
-	<img id="findPlaceImg" src="img/search.png" style="vertical-align:middle">
+	<img id="findPlaceImg" src="img/search.png" alt="" style="vertical-align:middle">
 	<input id="findPlace" type="text" placeholder="Enter a location" class="ve-is" style="display:none;width:200px">
 	<span id="findLatLon" style="display:none">&nbsp;&nbsp;
 		<input id="setwhere" type="text" class="ve-latLon">&nbsp;&nbsp;&nbsp;
