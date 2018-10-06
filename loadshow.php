@@ -6,8 +6,10 @@ require_once('config.php');
 	
 	$id="";	$password="";										// Declare vars
 	$id=$_GET['id'];											// Get ID
-	$password=$_GET['password'];								// Password
-	$password=addEscapes($password);							// Escape password	
+	if (isset($_GET['password'])) {								// If in cmdline
+		$password=$_GET['password'];							// Password
+		$password=addEscapes($password);						// Escape password	
+		}
 	$id=addEscapes($id);										// ID
 	$query="SELECT * FROM qshow WHERE id = '$id'";				// Make query
 	$result=mysql_query($query);								// Run query
