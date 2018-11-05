@@ -1433,7 +1433,7 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 	 			_this.drawData.inOpenDraw=null;								// Kill flag
 	 			_this.drawData.type="Choose";								// Choose mode
 		 		$("#drtype").val(_this.drawData.type);						// Reset selector
-				DrawEditFeature();										// Reset interaction
+				DrawEditFeature();											// Reset interaction
 	 		});	
  	 	}
 
@@ -1456,7 +1456,7 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 		}
 	
 	this.featureSelect.getFeatures().on("change:length", function(e) {		// ON FEATURE SELECT
-		var col,ecol,ewid,lab="",a=1,v,s;
+		var col,ecol,ewid,lab="",a=1,s;
 		var f=e.target.item(0);
 		if (f)	s=f.getStyle();
 		else{
@@ -1468,7 +1468,7 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 			$("#drdelete").hide();											// Hide delete button
 			$("#drupdate").hide();											// Hide update button
 			}
-		if (s) {
+		if (s) {															// If a style
 			if (!_this.drawData.inOpenDraw)									// If not drawing
 				_this.pop.Sound("click");									// Click sound
 			_this.drawData.curFeature=f;									// Set current feature
@@ -1477,7 +1477,6 @@ Space.prototype.DrawingTool=function()									// DRAWING TOOL
 			$("#drclear").hide();											// Hide button
 			$("#drdelete").show();											// Show delete button
 			$("#drupdate").show();											// Show update button
-	
 			if (s.getFill()) {												// Has fill
 				col=rgb2hex(s.getFill().getColor());						// Get color
 				a1=s.getFill().getColor().split(",")[3];					// Get alpha

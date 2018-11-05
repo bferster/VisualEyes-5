@@ -804,17 +804,17 @@
 	    var fs=new ol.format.KML().readFeatures(data.data);						// Read in features
 	    for (i=0;i<fs.length;++i){												// For each feature
 	        f=fs[i].clone();													// Clone feature
-			if (f.get("Style")) 												// If an embedded style
-				os=f.get("Style")[0];											// Get embedded style 
-			if (f.getGeometry().getType() == "Point") 							// If a marker
+			if (f.getStyle()) 													// If an embedded style
+				os=f.getStyle();												// Get embedded style 
+				if (f.getGeometry().getType() == "Point") 							// If a marker
 				s=new ol.style.Style({											// Alloc text style
-				   image: new ol.style.Circle( {								// Draw circle
+				  	image: new ol.style.Circle( {								// Draw circle
 				      		radius: os.getStroke().getWidth(),					// Ewid controls size
 				      		fill: new ol.style.Fill({
 				      			color: RGBtoRGBA(os.getFill().getColor())
 				      			})
 				      		}),
-			      text:	new ol.style.Text( {									// Text style
+			    	text:	new ol.style.Text( {									// Text style
 					    	textAlign: "left", textBaseline: "middle",			// Set alignment
 					    	font: "bold 14px Arial",							// Set font
 					    	text: "XXXX",										// Set label
