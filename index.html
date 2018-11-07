@@ -801,43 +801,41 @@
  	function LoadUserData(data)												// HANDLE INCOMING DATA LOAD
 	{
 	    var i,f,s,os;
-	    var fs=new ol.format.KML().readFeatures(data.data);						// Read in features
-	    for (i=0;i<fs.length;++i){												// For each feature
+		var eCol="ff000000",eWid=2,col="ff000000";
+		var fs=new ol.format.KML().readFeatures(data.data);						// Read in features
+		var v=data.data.split("</Placemark>");									// Split into features
+		for (i=0;i<fs.length;++i){												// For each feature
 	        f=fs[i].clone();													// Clone feature
+			eCol=v[i].match(/<LineStyle><color>(.+?)<\/color>/i)[1];			// Get edge color
+			eWid=v[i].match(/<width>(.+?)<\/width>/i)[1];						// Get edge width
+			col=v[i].match(/<PolyStyle><color>(.+?)<\/color>/i)[1];				// Get fill color
 			if (f.getStyle()) 													// If an embedded style
 				os=f.getStyle();												// Get embedded style 
-				if (f.getGeometry().getType() == "Point") 							// If a marker
-				s=new ol.style.Style({											// Alloc text style
-				  	image: new ol.style.Circle( {								// Draw circle
-				      		radius: os.getStroke().getWidth(),					// Ewid controls size
-				      		fill: new ol.style.Fill({
-				      			color: RGBtoRGBA(os.getFill().getColor())
-				      			})
-				      		}),
-			    	text:	new ol.style.Text( {									// Text style
-					    	textAlign: "left", textBaseline: "middle",			// Set alignment
-					    	font: "bold 14px Arial",							// Set font
-					    	text: "XXXX",										// Set label
-				   	 		fill: new ol.style.Fill({color: "#fff" }),			// Set text color
-					    	stroke: new ol.style.Stroke( { color: "#666", width: 1 }),	// Set edge		   
-							offsetX: os.getStroke().getWidth()+8				// Set offset
-					 		})
-						});
-			else
-				s=new ol.style.Style( {												// Alloc style								
-					fill: 	new ol.style.Fill(	 { color: RGBtoRGBA(os.getFill().getColor()) } ),									// Fill
-					stroke: new ol.style.Stroke( { color: RGBtoRGBA(os.getStroke().getColor()), width: os.getStroke().getWidth() })	// Edge
+				s=new ol.style.Style( {											// Alloc style								
+					fill: 	new ol.style.Fill(	 { color: ABGR(col) }),			// Fill
+					stroke: new ol.style.Stroke( { color: ABGR(eCol), width: eWid})	// Edge
+//					fill: 	new ol.style.Fill(	 { color: RGBtoRGBA(os.getFill().getColor()) } ),									// Fill
+//					stroke: new ol.style.Stroke( { color: RGBtoRGBA(os.getStroke().getColor()), width: os.getStroke().getWidth() })	// Edge
 					});
-   			f.setStyle(s);														// Style it
+  			f.setStyle(s);														// Style it
     		f.getGeometry().transform("EPSG:4326","EPSG:3857");					// Project
 	       	f.setId("SEG-"+Math.floor(Math.random()*999999));  					// Set id
 			mps.drawingLayer.getSource().addFeature(f);							// Add to layer
 			}
 		mps.DrawMapLayers();													// Redraw map
 	
-		function RGBtoRGBA(c) {													// CONVERT ARRAY TO rgba()
-			return "rgba("+c[0]+","+c[1]+","+c[2]+","+c[3]+")";		
-		}
+		function ABGR(col) {													// CONVERT KML COL TO rgba()
+			var b=parseInt(col.substr(2,2),16);									// Get hex to decimal
+			var g=parseInt(col.substr(4,2),16);											
+			var r=parseInt(col.substr(6,2),16);
+			var a=parseInt(col.substr(0,2),16);								
+			return "rgba("+r+","+g+","+b+","+a/255+")";		
+			}
+		
+//		function RGBtoRGBA(c) {													// CONVERT ARRAY TO rgba()
+//			return "rgba("+c[0]+","+c[1]+","+c[2]+","+c[3]+")";		
+//			}
+
 	}
 
 	function popListFiles(files)											// CALLBACK TO List()
