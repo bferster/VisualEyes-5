@@ -268,7 +268,7 @@ Story.prototype.StoryEditor=function(mode) 								// STORY EDITOR
 	str+="<div style='margin:12px;margin-bottom:4px'><img src='img/shantilogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
 	str+="<span style='font-size:18px;color:#666'><b>Story Editor</b></span>";
 	str+="<div style='float:right'>"
-	str+=MakeSelect("seOps",false,["Add macro","action()","auto()","foot()","iframe()","link()","page()","pic()","play()","show()","story()","where()","zoomer()"]);
+	str+=MakeSelect("seOps",false,["Add macro","action()","auto()","bar()","foot()","iframe()","link()","page()","pic()","play()","show()","story()","where()","zoomer()"]);
 	if (mode == "edit")	str+="&nbsp;&nbsp;<div id='seSaveBut' class='ve-gbs'>Save</div>&nbsp;";						
 	str+="&nbsp;&nbsp;<img src='img/closedot.gif' style='vertical-align:-2px' onclick='$(\"#storyEditor\").remove()'></div>"
 	str+="</div><div style='width:"+(w-4)+"px'>";
@@ -302,10 +302,16 @@ Story.prototype.StoryEditor=function(mode) 								// STORY EDITOR
 					win.postMessage("INS:auto("+s+")","*") 				// Send message
 					});
 				break;
+			case "bar()":												// Bar
+				str="Type text bar to add."
+				pop.GetTextBox("Add title bar macro", str, "", function(s) {
+					win.postMessage("INS:bar("+s+")","*") 				// Send message
+					});
+				break;
 			case "foot()":												// Foot
 				str="Type footnote to add."
 				pop.GetTextBox("Add footnote macro", str, "", function(s) {
-					win.postMessage("INS:foot("+s+")","*") 			// Send message
+					win.postMessage("INS:foot("+s+")","*") 				// Send message
 					});
 				break;
 			case "iframe()":											// Iframe

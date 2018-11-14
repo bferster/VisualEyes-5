@@ -494,9 +494,16 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 		}
 	if (desc && desc.match(/foot\(/)) {										// If foot macro
 		v=(desc+" ").match(/foot\(.*?\)/ig);								// Extract footnotes(s)
-		for (i=0;i<v.length;++i) {											// For each url
-			title=v[i].substr(5,v[i].length-6);								// Extract actual note
+		for (i=0;i<v.length;++i) {											// For each foot
+			title=v[i].substr(5,v[i].length-6);								// Extract text
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&"))," <a href='#' title='"+title+"'><b><sup></ul>"+(i+1)+"</b></sup></a> ");	// Replace with anchor tag
+			}	
+		}
+	if (desc && desc.match(/bar\(/)) {										// If bar macro
+		v=(desc+" ").match(/bar\(.*?\)/ig);									// Extract bar(s)
+		for (i=0;i<v.length;++i) {											// For each bar
+			title=v[i].substr(4,v[i].length-5);								// Extract title bar
+			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<div class='popup-bar'>"+title+"</div>");	// Replace with title bar
 			}	
 		}
 	if (desc.match(/zoomer\(/)) {											// If zoomer macro
