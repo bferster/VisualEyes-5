@@ -18,7 +18,7 @@
 	QmediaFile.prototype.Load=function() 									//	LOAD FILE
 	{
 		var str="<br/>"
-		str+="If you want to load only projects you have created, type your email address. To load any project, leave it blank. If you want to load a private project, you will need to type in its password. The email is not required.<br>"
+		str+="If you want to load only projects you have created, type your email address. To load any project, leave it blank. The email is not required.<br>"
 		str+="<br/><blockquote><table cellspacing=0 cellpadding=0 style='font-size:11px'>";
 		str+="<tr><td><b>Email</b></td><td><input"+this.butsty+"type='text' id='email' size='20' value='"+this.email+"'/></td></tr>";
 		str+="<tr><td><b>Password&nbsp;&nbsp;</b></td><td><input"+this.butsty+"type='password' id='password' size='20' value='"+this.password+"'/></td></tr>";
@@ -64,12 +64,10 @@
 		var str="<br/>"
 		if (saveAs)																// If save as...
 			curShow=this.curFile="";											// Force a new file to be made
-		str+="Type your email address. To load any project. Type in a password to protect it. Set the private checkbox if you want to make the project private only to you. <br>"
+		str+="Type your email address. To load any project. Type in a password to protect it.<br>"
 		str+="<br/><blockquote><table cellspacing=0 cellpadding=0 style='font-size:11px'>";
 		str+="<tr><td><b>Email</b><span style='color:#990000'> *</span></td><td><input"+this.butsty+"type='text' id='email' size='20' value='"+this.email+"'/></td></tr>";
 		str+="<tr><td><b>Password</b><span style='color:#990000'> *</span>&nbsp;&nbsp;</b></td><td><input"+this.butsty+"type='password' id='password' size='20' value='"+this.password+"'/></td></tr>";
-		if (this.version != 5)
-			str+="<tr><td><b>Private?&nbsp;&nbsp;</b></td><td><input"+this.butsty+"type='checkbox' id='private'/></td></tr>";
 		str+="</table></blockquote><div style='font-size:12px;text-align:right'><br>";	
 		str+="<button"+this.butsty+"id='saveBut'>Save</button>";	
 		str+="<button"+this.butsty+"id='cancelBut'>Cancel</button></div>";	
@@ -82,8 +80,6 @@
 			if (_this.password)													// If a password
 				_this.password=_this.password.replace(/#/g,"@");				// #'s are a no-no, replace with @'s	
 			_this.email=$("#email").val();										// Get current email
-			var pri= $("#private").prop("checked") ? 1 : 0						// Get private
-			
 			if (!_this.password && !_this.email) 								// Missing both
 				 return _this.LightBoxAlert("Need email and password");			// Quit with alert
 			else if (!_this.password) 											// Missing password
@@ -99,7 +95,7 @@
 			dat["email"]=_this.email;											// Add email
 			dat["password"]=_this.password;										// Add password
 			dat["ver"]=_this.version;											// Add version
-			dat["private"]=pri;													// Add private
+			dat["private"]=0;													// Add private
 			if (_this.version == 4) {											// VisualEyes
 				var tdata=$.parseJSON(JSON.stringify(curJson));					// Clone
 				tdata.mobs=null;												// Kill mobs
