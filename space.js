@@ -161,6 +161,7 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 				$("#esWhere").val(_this.GetView());							// Set editor with view
 			else															// Anything else
 				$("#esWhere").val($("#setpoint").val());					// Set editor with point
+			$("#ceWith").val(_this.GetView());								// Set click editor with view
 			}
 		if (e.originalEvent.shiftKey) {										// If shift key presssed
   			var lay;
@@ -172,7 +173,7 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 			if (feature) {													// If one found
   				var j;
   				var id=feature.getId();										// Get feature id
-				  if (lay && (lay.get("kmlId"))) 	{							// If a KML id
+				  if (lay && (lay.get("kmlId"))) 	{						// If a KML id
  					var fa=lay.getSource().getFeatures();					// Point at all features
  					for (j=0;j<fa.length;++j)								// For each one
  						if (fa[j].getId() == id)							// A match for id

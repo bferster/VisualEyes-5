@@ -47,10 +47,10 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	str+="&nbsp;&nbsp;<b>Color</b>&nbsp;&nbsp;<input class='ve-is' style='width:30px' type='text' id='esColor'>";
 	str+="&nbsp;&nbsp;<b>Position</b>&nbsp;&nbsp;"+MakeSelect("esPos",false,["","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"])+"</td></tr>";
 	if (this.curMode != "story") {												// Hide for story
-		str+="<tr><td><b>Map marker&nbsp;</b></td><td>"+MakeSelect("esMapMarker",false,["","dot","diamond","star","bar","box","rbar","line","triup","tridown","triright","trileft","ndot"]);
+		str+="<tr><td><b>Map&nbsp;marker&nbsp;</b></td><td>"+MakeSelect("esMapMarker",false,["","dot","diamond","star","bar","box","rbar","line","triup","tridown","triright","trileft","ndot"]);
 		str+="&nbsp;&nbsp;<b>Size</b>&nbsp;&nbsp;<input class='ve-is' style='width:30px' type='text' id='esMapSize'>";
 		str+="&nbsp;&nbsp;<b>Color</b>&nbsp;&nbsp;<input class='ve-is' style='width:30px' type='text' id='esMapColor'>";
-		str+="&nbsp;&nbsp;<b>Opacity</b>&nbsp;&nbsp;<input class='ve-is' style='width:33px' type='text' id='esOpacity'></td></tr>";
+		str+="&nbsp;&nbsp;<b>Opacity</b>&nbsp;&nbsp;&nbsp;<input class='ve-is' style='width:33px' type='text' id='esOpacity'></td></tr>";
 		}
 	str+="</table>"
 	str+="<p><hr></p>";																			
@@ -333,10 +333,11 @@ EditShow.prototype.ClickEditor=function(data)								// MAIN MENU
 	str+="&nbsp;&nbsp;<img id='ceRemoveBut' title='Delete action' style='vertical-align:-5px' src='img/trashbut.gif'></td></tr>";
 	str+="<tr><td><b>Do this</b></td><td>"+MakeSelect("ceActions",false,["where","show","story","basemap","segment","zoomer","mask"]);
 	str+="<tr><td><b>With/to</b></td><td><input class='ve-is' style='width:100%' type='text' id='ceWith'></td></tr>";	
+	str+="<tr><td></td><td>&nbsp;&nbsp;<i>Ctrl-click gets map view</i></td></tr>";	
 	str+="</table>"
 	str+="<p><hr></p>";																			
 	str+="<div>";																		
-	str+="<div id='ceSaveBut' class='ve-gbs'>Save click changes</div>&nbsp;&nbsp;";						
+	str+="<div id='ceSaveBut' class='ve-gbs'>Save click changes</div>";						
 	$("#editShowDiv").append(str);	
 	$("#storyEditor").draggable();											// Make it draggable
 	if (data)																// If some data
