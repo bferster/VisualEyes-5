@@ -159,6 +159,7 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 			else															// Anything else
 				$("#esWhere").val($("#setpoint").val());					// Set editor with point
 			$("#ceWith").val(_this.GetView());								// Set click editor with view
+			$("#setstartpos").val(_this.GetView());							// Set settings editor with view
 			}
 		if (e.originalEvent.shiftKey) {										// If shift key presssed
   			var lay;
