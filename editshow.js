@@ -215,7 +215,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 		});		
 
 	$("#esHelp").on("click", function(e) {									// HELP
-		window.open("https://docs.google.com/document/d/161td5ZuqKqT5R5r9z1P8AxBA6l9LaP-eYl_RvCyvw2g/edit?usp=sharing",'_blank');	
+		window.open("https://docs.google.com/document/d/1TBCCF03Wc5NpkG4EVJdxYuhUdauV1b_KICUOhNZQhEI/edit?usp=sharing",'_blank');	
 	}); 
 	
 	$("#esMarker").on("click", function() {  								// ON CHANGE MARKER

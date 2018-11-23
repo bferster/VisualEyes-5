@@ -48,9 +48,6 @@ Space.prototype.DrawMapLayers=function()								// DRAW OVERLAY LAYERS
 			if (o.vis == "off")				vis=false;						// If toggled hidden, hide it
 			else if (o.vis == "on")			vis=true;						// If toggled showing, show it
 			if (!dtl.ShowElement(o.tag))	vis=false;						// If not being shown, hide it
-
-
-
 			if (vis && (o.type == "image"))	{								// If a visible image 
            		(o.alpha == undefined) ? a=1 : a=o.alpha;					// Let alpha control opacity if defined
            		if (!vis) a=0;												// Hide if invisible
