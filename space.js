@@ -1236,6 +1236,8 @@ Space.prototype.GeoReference=function(url, where, edit)					// GEO REFERENCE IMA
 		_this.DrawMapLayers();												// Redraw map
 		$("#grn").val(n);		$("#grs").val(s);	$("#grc").val(pos);		// N/S/C
 		$("#gre").val(e);		$("#grw").val(w); 	$("#grr").val(r);		// E/W/R
+		$("#esWhere").val(pos);												// Combined to edit menu
+
 		if (!noDots)														// If moving dots too
 			SetControlDots();												// Reset control dots
 		}
