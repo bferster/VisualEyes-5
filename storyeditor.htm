@@ -2,107 +2,35 @@
 <html>
 <head>
 	<meta charset="UTF-8" />
-	<link REL="SHORTCUT ICON" HREF="img/shanti.ico">
-	<title>VisualEyes Story Editor</title>
  	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>	
 	<script src="ckeditor/ckeditor.js"></script>
- 	<style type="text/css">
-		 body { font-family: Verdana,Geneva,sans-serif; font-size: 12px; padding: 0; box-sizing: border-box;	}
-	</style>
-</head>
+ </head>
 <body>
 	<textarea class="ckeditor" id="editor1" name="editor1"></textarea>
 <script>
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// INIT
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	$(document).ready(function() {											// WHEN PAGE LOADED
 		if (window.addEventListener) 											// If supported this way
 			window.addEventListener("message",shivaEventHandler,false);			// Add event handler
 		else																	// Use other method
 			window.attachEvent("message",shivaEventHandler);					// Add handler
-		var h=$(window).height()-34;											// Editor height
-		CKEDITOR.on('instanceLoaded', function(e) {e.editor.resize("100%", h)});// Resize editor
-	});
+		CKEDITOR.on('instanceLoaded', function(e) {								// When loaded
+			e.editor.resize("100%", $(window).height()-34);						// Resize editor
+			CKEDITOR.instances.editor1.on('change', function(e) { window.parent.postMessage("RTEditor=changed","*"); });	// Send change message
+			});
+		});
 
 	function shivaEventHandler(e)											// ON EVENT
 	{
 		if (e.data && e.data.match(/INS:/))	{									// Insert macro
 			CKEDITOR.instances.editor1.insertText(e.data.substring(4));			// Insert text	
-			Sound("ding");														// Ding	
 			}
 		else if (e.data && e.data.match(/PUT:/))								// Put 
 			CKEDITOR.instances.editor1.setData(e.data.substring(4));			// Set html	
 		else if (e.data && e.data.match(/GET:/)) {								// Get
 			e.source.postMessage("StoryEdit="+CKEDITOR.instances.editor1.getData(e.data.substring(4)),"*");
-			Sound("ding");														// Ding	
 			}
 	}
-
-		
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// HELPERS
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	function trace(msg, p1, p2, p3, p4)										// CONSOLE 
-	{
-		if (p4 != undefined)
-			console.log(msg,p1,p2,p3,p4);
-		else if (p3 != undefined)
-			console.log(msg,p1,p2,p3);
-		else if (p2 != undefined)
-			console.log(msg,p1,p2);
-		else if (p1 != undefined)
-			console.log(msg,p1);
-		else
-			console.log(msg);
-	}
-
-	function CopyToClipboard(text) 											// COPY TEXT TO CLIP BOARD
-	{
-  		var textArea = document.createElement("textarea");
-		textArea.style.position = 'fixed';
-  		textArea.style.top=textArea.style.left = 0;
-  		textArea.style.width=textArea.style.height = '2em';
-  		textArea.style.padding = 0;
-		textArea.style.border=textArea.style.outline=textArea.style.boxShadow = 'none';
-		textArea.style.background = 'transparent';
-		textArea.value = text;
-		document.body.appendChild(textArea);
-		textArea.select();
-		try {
-			if (document.execCommand('copy'))
-				Sound("ding");
-			else
-				Sound("delete");
-			} catch (err) {
-				Sound("delete");
-				}
-		document.body.removeChild(textArea);
-	}
-
-	function Sound(sound, mute)												// PLAY SOUND
-	{
-		var snd=new Audio();													// Init audio object
-		if (!snd.canPlayType("audio/mpeg") || (snd.canPlayType("audio/mpeg") == "maybe")) 
-			snd=new Audio("img/"+sound+".ogg");									// Use ogg
-		else	
-			snd=new Audio("img/"+sound+".mp3");									// Use mp3
-		if (!mute)																// If not initing or muting	
-			snd.play();															// Play sound
-	}
-
-
-// GOOGLE ANALYTICS ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-  ga('create', 'UA-10474630-1', 'auto');
-  ga('send', 'pageview');
 
 </script>
 </body></html>

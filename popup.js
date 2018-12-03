@@ -480,7 +480,7 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 		v=(desc+" ").match(/link\(.*?\)/ig);								// Extract links(s)
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/link\(([^,]+),(.+)\)/i);							// Get parts
-			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a  onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:ShowIframe2(\""+vv[2]+"\",\"map\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a style='color:#000077' onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:ShowIframe2(\""+vv[2]+"\",\"map\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 			}	
 		}
 	if (desc.match(/show\(/)) {												// If show macro

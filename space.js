@@ -154,12 +154,13 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 		var c=ol.proj.transform(e.coordinate,_this.curProjection,'EPSG:4326');	// Get center
 		$("#setpoint").val(Math.floor(c[0]*10000)/10000+","+Math.floor(c[1]*10000)/10000);
 		if (e.originalEvent.ctrlKey) {										// If control key presssed
+			var vw=_this.GetView();											// Get current view
 			if (eds.curMode == "story")										// Editing a story
-				$("#esWhere").val(_this.GetView());							// Set editor with view
+				$("#esWhere").val(vw);										// Set editor with view
 			else															// Anything else
 				$("#esWhere").val($("#setpoint").val());					// Set editor with point
-			$("#ceWith").val(_this.GetView());								// Set click editor with view
-			$("#setstartpos").val(_this.GetView());							// Set settings editor with view
+			$("#ceWith").val(vw);											// Set click editor with view
+			$("#setstartpos").val(vw);										// Set settings editor with view
 			}
 		if (e.originalEvent.shiftKey) {										// If shift key presssed
   			var lay;
@@ -1052,6 +1053,7 @@ Space.prototype.GeoReference=function(url, where, edit)					// GEO REFERENCE IMA
 	str+="<tr><td>Rotation</td><td><div id='rots' style='display:inline-block;width:66%'></div>&nbsp;&nbsp;&nbsp;<input id='grr' class='ve-is' style='width:40px' type='input'></td></tr>";
 	str+="<tr><td>Combined</td><td><input id='grc' class='ve-is' style='width:220px' type='input'></td></tr>";
 	str+="<tr><td>Opacity</td><td><div id='gra'></div></td></tr>";
+	str+="<tr><td>Map&nbsp;base </td><td>"+MakeSelect("setbase",false,["Satellite","Terrain","Earth","Watercolor","B&W","Roadmap"],curJson.baseMap);
 	if (!edit) str+="<tr><td colspan=2><br></td><tr><tr><td></td><td><button id='grstart' class='ve-bs'>Geo-reference</button><td></td><tr>";
 	str+="</table>";
 
@@ -1084,7 +1086,11 @@ Space.prototype.GeoReference=function(url, where, edit)					// GEO REFERENCE IMA
 		}
 
 	if (edit) startGeoRef();												// If calling from edit dialog
-											 
+
+	$("#setbase").on("change", function(e) {								// BASE HANDLER
+		mps.SetBaseMap($("#setbase").val());								// Set basemap layer
+		}); 
+
 	$("#grurl").on("change",function() {									// URL CHANGED
 		url=$(this).val();													// Get value
 		});		
@@ -1227,6 +1233,7 @@ Space.prototype.GeoReference=function(url, where, edit)					// GEO REFERENCE IMA
 			delete _this.geoRef.img;										// Remove added pic
 		_this.geoRef=null;													// Kill georef
 		_this.DrawMapLayers();												// Redraw map
+		mps.SetBaseMap(curJson.baseMap);									// Restore basemap layer
 	}
 	
 	function ReDrawImage(noDots)										// REDRAW MAP

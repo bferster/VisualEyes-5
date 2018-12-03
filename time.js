@@ -439,36 +439,38 @@ Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 		$("#timeseg"+(ts.length-1)).css({"border-top-right-radius":"10px","border-bottom-right-radius":"10px"});
 	
 	for (i=0;i<ts.length;++i) { 											// For each segment
-
 		$("#timeseg"+i).hover(												// ON SEG HOVER
 			function(){ $(this).css("color","#009900")},					// Highlight
 			function(){ $(this).css("color",_this.segmentTextColor)} 		// Hide
 			);
-		
 		$("#timeseg"+i).click( function(e) {								// ON SEG CLICK
-			var i,v,j;
-			_this.lastViewLeft=0;											// Reset view position
-			var id=e.target.id.substr(7);									// Get ID
-			_this.pop.Sound("click",_this.muteSound);						// Click sound
-			for (i=0;i<ts.length;++i)  										// For each segment
-				$("#timeseg"+i).css({"background-color":ts[i].col});		// Clear it
-			$(this).css({"background-color":"#acc3db" });					// Highlight picked one
-			var s=_this.start;												// Assume timeline start
-			if (!ts[id].all) {												// If a regular seg
-				_this.curSeg=id;											// Its current
-				s=ts[id].start;												// Start at segment start
-				}
-			else															// All button
-				_this.curSeg=-1;											// Flag all
-			if (ts[id].click) 												// If a click defined
-				pop.SendActions(ts[id].click);								// Send actions	
-			_this.curTime=s;												// Set time
-			_this.UpdateTimeline();											// Redraw timeline
+			_this.SetSegment(e.target.id.substr(7),true);					// Set segment
 			});
 		}
-
-	$("#timeseg"+this.curSeg).trigger("click");								// Turn segment on
 }
+
+Timeline.prototype.SetSegment=function(id, sendActions) 				// SET SEGMENT
+{
+	var i;
+	var ts=this.timeSegments												// Point at segments
+	this.lastViewLeft=0;													// Reset view position
+	this.pop.Sound("click",this.muteSound);									// Click sound
+	for (i=0;i<ts.length;++i)  												// For each segment
+		$("#timeseg"+i).css({"background-color":ts[i].col});				// Clear it
+	$($("#timeseg"+id)).css({"background-color":"#acc3db" });				// Highlight picked one
+	var s=this.start;														// Assume timeline start
+	if (!ts[id].all) {														// If a regular seg
+		this.curSeg=id;														// Its current
+		s=ts[id].start;														// Start at segment start
+		}
+	else																	// All button
+		this.curSeg=-1;														// Flag all
+	if (ts[id].click && sendActions) 										// If a click defined and sending them
+		pop.SendActions(ts[id].click);										// Send actions	
+	this.curTime=s;															// Set time
+	this.UpdateTimeline();													// Redraw timeline
+}
+
 
 Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 {

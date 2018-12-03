@@ -7,6 +7,7 @@ function EditShow()														// CONSTRUCTOR
 	var _this=this;															// Save context 
 	this.curMode="";														// Current curMode
 	this.curId=-1;															// Current id
+	this.rtChanged=0;														// Rich text changed
 	$("body").contextmenu(function(e) { 									// Add context menu handler
 		if (e.ctrlKey && e.altKey) {										// If control+alt key
 			_this.Draw(e); 													// Show editor
@@ -52,6 +53,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 		str+="&nbsp;&nbsp;<b>Color</b>&nbsp;&nbsp;<input class='ve-is' style='width:30px' type='text' id='esMapColor'>";
 		str+="&nbsp;&nbsp;<b>Opacity</b>&nbsp;&nbsp;&nbsp;<input class='ve-is' style='width:33px' type='text' id='esOpacity'></td></tr>";
 		}
+	str+="<tr><td><b>Citation</b></td><td><input class='ve-is' style='width:calc(100% - 18px)' type='text' id='esCite'></td></tr>";	
 	str+="</table>"
 	str+="<p><hr></p>";																			
 	str+="<div '>";																		
@@ -136,12 +138,14 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	$("#esSaveBut").on("click", function() {  								// ON SAVE 
 		var i,o;
 		if (_this.curId == -1) {											// A new mob
-			ConfirmBox("This will add a new event. Are you sure?",	function() { // Sure?
-				curJson.mobs.push({});										// Add new mob
-				_this.curId=curJson.mobs.length-1;							// Point at it
-				$("#esSaveBut").trigger("click");							// Try again
+			curJson.mobs.push({});											// Add new mob
+			_this.curId=curJson.mobs.length-1;								// Point at it
+			}
+		if (_this.rtChanged) {
+			ConfirmBox("You have unsave changes in the editor. Save them?",	()=> { // Sure?
+				$("#seSaveBut").trigger("click");							// Save it
 				});
-			return;															// Quit and rely on trigger if continuing
+			return;
 			}
 		for (i=0;i<curJson.mobs.length;++i) {								// For each mob	
 			o=curJson.mobs[i];												// Point at mob
@@ -149,6 +153,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 			}
 		o=curJson.mobs[_this.curId];										// Point at mob
 		getMobValues(o);													// Get values from inputa	
+		trace(o)
 		InitProject(curJson);												// Reinit project
 		Sound("ding");														// Ding
 		$("#editShowDiv").remove();											// Remove editor
@@ -174,16 +179,13 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 		o.where=$("#esWhere").val();										// Where
 		o.show=$("#esShow").val();											// Show
 		o.click=$("#esClick").val();										// Click
+		o.citation=$("#esCite").val();										// Citation
 		}
 
 	$("#esCopyBut").on("click", function() {  								// ON COPY TO GDRIVE
 		var o,i,d=[];
-		for (i=0;i<curJson.mobs.length;++i) {								// For each mob	
-			o=curJson.mobs[i];												// Point at mob
-			o.start=o.startO;	o.end=o.endO;	o.opacity=o.opacityO;		// Restore original values
-			}
 		o=curJson.mobs[_this.curId];										// Point at mob
-		getMobValues(o);													// Get values from inputa	
+		getMobValues(o);													// Get values from inputs	
 		var v=_this.MakeTabFile(curJson).split("\n");						// Split into rows
 		for (i=0;i<v.length;++i)											// For each row
 			d.push(v[i].split("\t"));										// Add array of fields
@@ -234,7 +236,7 @@ EditShow.prototype.setEventOptions=function()								// SET EVENT OPTIONS
 	if (marker == "over")														// If overlay
 		$("#esGeo").html("<a href='javascript:void(0)' onclick='eds.GeoRef()'>Click to georeference</a>");
 	else																		// Regular
-		$("#esGeo").html("<i>Ctrl-click on map to get</i>");					// Map click
+		$("#esGeo").html("<i>Ctrl-click on map to capture</i>");				// Map click
 }
 
 EditShow.prototype.EditEvent=function()									// EDIT ITEM
@@ -270,6 +272,8 @@ EditShow.prototype.EditEvent=function()									// EDIT ITEM
 	if (o.open)		$("#esOpen").val(o.open);								// Open
 	if (o.click)	$("#esClick").val(o.click);								// Click
 	if (o.where)	$("#esWhere").val(o.where);								// Where
+	if (o.citation)	$("#esCite").val(o.citation);							// Citation
+
 	pop.ColorPicker("esMapColor",-1,true);									// Init color
 	pop.ColorPicker("esColor",-1,true);										// Init color
 	this.setEventOptions();													// Change event options
@@ -333,7 +337,7 @@ EditShow.prototype.ClickEditor=function(data)								// MAIN MENU
 	str+="&nbsp;&nbsp;<img id='ceRemoveBut' title='Delete action' style='vertical-align:-5px' src='img/trashbut.gif'></td></tr>";
 	str+="<tr><td><b>Do this</b></td><td>"+MakeSelect("ceActions",false,["where","show","story","basemap","segment","zoomer","mask"]);
 	str+="<tr><td><b>With/to</b></td><td><input class='ve-is' style='width:100%' type='text' id='ceWith'></td></tr>";	
-	str+="<tr><td></td><td>&nbsp;&nbsp;<i>Ctrl-click gets map view</i></td></tr>";	
+	str+="<tr><td></td><td>&nbsp;&nbsp;<span id='cemc'><i>Click above to get map view</i></span></td></tr>";	
 	str+="</table>"
 	str+="<p><hr></p>";																			
 	str+="<div>";																		
@@ -348,10 +352,11 @@ EditShow.prototype.ClickEditor=function(data)								// MAIN MENU
 		vv=v[0].split(":");													// Point at 1st and split
 		$("#ceActions").val(vv[0]);											// Set action
 		$("#ceWith").val(vv[1] ? vv[1] : "");								// Set with
+		($("#ceActions").val() == "where") ? $("#cemc").show() : $("#cemc").hide();	// Hide show map click msg
 		}
 	else{
 		$("#ceRemoveBut").hide();											// Hide trash button
-		$("#ceClicks").append("<option>Use + to add action</option>"); 		// Add to select
+		$("#ceClicks").append("<option>Choose action to add</option>"); 	// Add to select
 		}
 
 	$("#ceClose").on("click", function(e) {									// MAP COLOR HANDLER
@@ -372,18 +377,20 @@ EditShow.prototype.ClickEditor=function(data)								// MAIN MENU
 		});
 
 	$("#ceAddBut").on("click", function() {  								// ON ADD 
-		if ($("#ceClicks").val() == "Use + to add action")					// If first				
+		if ($("#ceClicks").val() == "Choose action to add")					// If first				
 			$("#ceClicks").empty();											// Empty missive
-		var i=$("#ceClicks option").length;									// Number of options
+		var i=$("#ceClicks option").length+1;								// Number of options
 		$("#ceClicks").append("<option value='"+$("#ceActions").val()+":"+$("#ceWith").val()+"'>"+i+" - "+$("#ceActions").val()+"</option>") // Add to select
 		$("#ceRemoveBut").show();											// Hide trash button
+		($("#ceActions").val() == "where") ? $("#cemc").show() : $("#cemc").hide();	// Hide show map click msg
+		$("#ceClicks").prop("selectedIndex",i-1);							// Set to new item
 		Sound("ding");														// Ding
 	});
 			
 	$("#ceRemoveBut").on("click", function() {  							// ON REMOVE 
 		$("#ceClicks :selected").remove();									// Remove action from select
 		if (!$("#ceClicks option").length) {								// No actions left												
-			$("#ceClicks").append("<option>Use + to add action</option>"); 	// Add to select
+			$("#ceClicks").append("<option>Choose action to add</option>"); 	// Add to select
 			$("#ceRemoveBut").hide();										// Hide trash button
 			}
 		else{
@@ -392,6 +399,7 @@ EditShow.prototype.ClickEditor=function(data)								// MAIN MENU
 			$("#ceWith").val(vv[1] ? vv[1] : "");							// Set with
 			}
 		Sound("delete");													// Delete
+		($("#ceActions").val() == "where") ? $("#cemc").show() : $("#cemc").hide();	// Hide show map click msg
 		});
 
 	$("#ceWith").on("click", function() {  									// ON WITH CLICK
@@ -419,6 +427,7 @@ EditShow.prototype.ClickEditor=function(data)								// MAIN MENU
 	$("#ceActions").on("change", function() {								// ON ACTION CHANGE
 		$("#ceClicks :selected").text($("#ceClicks :selected").text().substr(0,4)+$("#ceActions").val());	// Set label
 		$("#ceClicks :selected").val($("#ceActions").val()+":"+$("#ceWith").val());	// Set value
+		($("#ceActions").val() == "where") ? $("#cemc").show() : $("#cemc").hide();	// Hide show map click msg
 		});
 
 	$("#ceWith").on("change", function() {									// ON WITH CHANGE

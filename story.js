@@ -278,13 +278,16 @@ Story.prototype.StoryEditor=function(mode) 								// STORY EDITOR
 	$("body").append(str);												// Add editor
 	$("#storyEditor").draggable();										// Make it draggable
 	var win=document.getElementById("playerIF").contentWindow;			// Point at iframe	
+	eds.rtChanged=0;													// No change yet			
 
 	if (mode == "edit") {												// If editing
 		$("#playerIF").on("load",function() {							// If Iframe loaded
 			win.postMessage("PUT:"+$("#esDesc").val(),"*"); 			// Populate editor
+			eds.rtChanged=0;											// No changes			
 			});
 		$("#seSaveBut").on("click",function() {							// ON SAVE
 			win.postMessage("GET:","*"); 								// Get data to textarea in editor
+			eds.rtChanged=0;											// No changes			
 			});
 		}
 

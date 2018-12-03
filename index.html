@@ -565,7 +565,7 @@
 			else if (e.data.match(/=basemap/i))									// Set basemap
 				mps.SetBaseMap(v[1]);											// Set basemap layer
 			else if (e.data.match(/=segment/i))									// Set segment
-				$("#timeseg"+(v[1]-1)).trigger("click");						// Trigger segment
+				tln.SetSegment(v[1]-1,false);									// Set segment without any click actions
 			else if (e.data.match(/=story/i))									// Set story item
 				sto.Open(v[1]);													// Open or goto this story line
 			else if (e.data.match(/=zoom/i))									// Zoomer
@@ -605,7 +605,9 @@
 			$("#esDesc").val(e.data.substring(10));								// Fill editor textbox			
 			$("#storyEditor").remove();											// Kill story editor
 			}
-	}
+		if (e.data && e.data.match(/RTEditor=changed/i)) 						// If a text change in rich text editor
+			eds.rtChanged++;													// Log change
+}
 
 	function RouteShivaMessage(data) 										// ROUTE MESSAGE FROM SHIVA
 	{
@@ -996,6 +998,7 @@
 	{
 		var str;
 		ClearPopUps(true);														// Clear popups	
+		if (url)	url=url.replace(/\'/g,"%27");								// Replace '
 		if (where == "map") {													// If overlaying map
 			str="<div id='st-booklet' style='position:absolute;top:50px;left:50px'>";											
 			str+="<iframe id='popupIF' frameborder='0' height='"+($("#leftDiv").height()-100)+"' width='"+($("#leftDiv").width()-100)+"' style='border-radius:8px' src='"+url+"'/>";
