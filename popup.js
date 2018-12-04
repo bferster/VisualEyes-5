@@ -110,23 +110,6 @@ Popup.prototype.ShowBooklet=function(div, id, width)					// SHOW BOOKLET
 
 Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, date, end)	// SHOW POPUP
 {
-
-/* 
- 	Draws popup at coordinates x, y. 
- 	If no coordinates given, popup is removed.
- 	If x coord is -1, a centered larger popup is drawn.
- 	Click on pic shown only the pic. 
- 	Click on box makes larger, centered.
- 	title, desc, pic, and date are all optional.
-	@param {string} div Container div.
-	@param {number} x horizontal placement
- 	@param {number} y vertical placement
- 	@param {string} desc text to show in popup. Can be HTML formatted.
- 	@param {string} title to show in popup in bold. Can be HTML formatted.
- 	@param {string} pic URL of image file (jpeg, png or gif)
-	@param {string} date date to show
-*/
-
 	$("#st-popup").remove();												// Remove any pre-existing popup
 	if (x == undefined)														// If no x defined
 		return;																// We're just removing
@@ -181,29 +164,34 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 	$("#poppic").click( function(e) {										// ON CLICK OF PIC
 		if ($("#st-popup").width() < 301)									// If not enlarged
 			return;															// Do nothing							
+		var h=$("#leftDiv").height();										// Get map height
 		$("#popdesc").html("");												// Clear description
 		$("#st-popup").css("cursor","auto");								// Normal cursor
 		var r=($("#poppic").width()/$("#poppic").height() < 1) ? .33 : .66;	// Make smaller if portait mode
 		$("#poppic").css("cursor","auto");									// Normal cursor
-		$("#st-popup").css("max-height",$(window).height()-100+"px");		// Make it taller
+		$("#st-popup").css("max-height",h-100+"px");						// Make it taller
 		$("#st-popup").css("max-width",$(div).width()*r+"px");				// Make it wider
-		$("#poppic").css("max-height",$(window).height()-100);				// Make pic taller
-		$("#poppic").css("max-width",$(div).width()*r+"px");				// Make pic bigger
-		$("#poppic").width($(div).width()*r);								// Make pic bigger
-		x=$(div).width()/2-$("#st-popup").width()/2;						// Center it
-		$("#st-popup").css({left:(x+8)+"px",top:"70px"});					// Position
+		$("#poppic").css("max-height",h-150);								// Make pic taller
+		$("#poppic").css("max-width",$(div).width()*r-8+"px");				// Make pic wider
+		$("#poppic").width($(div).width()*r);								// Make pic wider
+		var x=($(div).width()-$("#st-popup").width())/2;					// Center it
+		var y=(h-$("#st-popup").height())/2;								// Center it
+		$("#st-popup").css({left:x-16+"px",top:y-16+"px"});					// Position
 		e.stopPropagation()
 		});
 
 	function enlarge() {													// ENLARGE POPUP TO MAP AREA
+		var h=$("#leftDiv").height();										// Get map height
+		if (h < 150)	return;												// Too small
 		$("#popdesc").css("cursor","auto");									// Normal cursor
 		var r=($("#poppic").width()/$("#poppic").height() < 1) ? .8 : 1;	// Make smaller if portait mode
-		$("#st-popup").css("max-width",$(div).width()*.66);					// Make it wider
-		$("#st-popup").css("max-height",$(window).height()-200+"px");		// Make it taller
-		$("#poppic").css("max-height",$(window).height()-100);				// Make pic taller
-		$("#poppic").css("max-width",$(div).width()*(desc ? .33*r : .66*r)+"px");	// Make pic bigger
-		x=$(div).width()/2-$("#st-popup").width()/2;						// Center it
-		$("#st-popup").css({left:(x+8)+"px",top:"70px"});					// Position
+		$("#st-popup").css("max-width",$(div).width()*.55);					// Make it wider
+		$("#st-popup").css("max-height",h-200+"px");						// Make it taller
+		$("#poppic").css("max-height",h-100);								// Make pic taller
+		$("#poppic").css("max-width",$(div).width()*(desc ? .25*r : .66*r)+"px");	// Make pic bigger
+		var x=($(div).width()-$("#st-popup").width())/2;					// Center it
+		var y=(h-$("#st-popup").height())/2;								// Center it
+		$("#st-popup").css({left:x-16+"px",top:y-16+"px"});					// Position
 		$("#popcite").fadeIn();												// Show citation, if any
 		}
 
