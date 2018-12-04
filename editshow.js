@@ -153,7 +153,6 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 			}
 		o=curJson.mobs[_this.curId];										// Point at mob
 		getMobValues(o);													// Get values from inputa	
-		trace(o)
 		InitProject(curJson);												// Reinit project
 		Sound("ding");														// Ding
 		$("#editShowDiv").remove();											// Remove editor
@@ -405,7 +404,7 @@ EditShow.prototype.ClickEditor=function(data)								// MAIN MENU
 	$("#ceWith").on("click", function() {  									// ON WITH CLICK
 		var i,ids=[];
 		if ($("#ceActions").val() == "where") {								// If a where
-			$(this).val(mps.GetView());										// Get current view
+			$(this).val(mps.GetView(true));									// Get current view
 			Sound("ding");													// Ding
 			}
 		else if ($("#ceActions").val() == "basemap") 						// If basemap

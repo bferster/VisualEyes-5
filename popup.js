@@ -127,7 +127,6 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 	@param {string} date date to show
 */
 
-   	var _this=this;															// Save context for callbacks
 	$("#st-popup").remove();												// Remove any pre-existing popup
 	if (x == undefined)														// If no x defined
 		return;																// We're just removing
@@ -163,24 +162,21 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 		x=$(div).width()/2-$("#st-popup").width()/2;						// Center it
 		y=50;																// Near top			
 		}
-	$("#st-popup").css({left:(x+8)+"px",top:(y+20)+"px"});					// Position
-	$("#st-popup").fadeIn(300, function() {									// Fade in
+
+	if (desc.match(/\(BIG\)/)) {											// If (BIG) tag
+		$("#popdesc").html($("#popdesc").html().replace(/\(BIG\)/,""));		// Remove tag
+		enlarge();															// Enlarge
+		}
+	else{																	// Regular size
+		$("#st-popup").css({left:(x+8)+"px",top:(y+20)+"px"});				// Position
 		if ((y+50+$("#st-popup").height() > $(div).offset().top+$(div).height()) && (y != 50)) { // Overflows bottom
 			y=$(div).offset().top+$(div).height()-50-$("#st-popup").height();	// Cap at bottom
 			$("#st-popup").css({top:(y+20)+"px"});							// Re-position
 			}
-		});
-	$("#st-popup").click( function(e) {										// ON CLICK OF TEXT
-		$("#popdesc").css("cursor","auto");									// Normal cursor
-		var r=($("#poppic").width()/$("#poppic").height() < 1) ? .8 : 1;	// Make smaller if portait mode
-		$("#st-popup").css("max-width",$(div).width()*.66);					// Make it wider
-		$("#st-popup").css("max-height",$(window).height()-200+"px");		// Make it taller
-		$("#poppic").css("max-height",$(window).height()-100);				// Make pic taller
-		$("#poppic").css("max-width",$(div).width()*(desc ? .33*r : .66*r)+"px");	// Make pic bigger
-		x=$(div).width()/2-$("#st-popup").width()/2;						// Center it
-		$("#st-popup").css({left:(x+8)+"px",top:"70px"});					// Position
-		$("#popcite").fadeIn();												// Show citation, if any
-		});	
+		}
+	$("#st-popup").fadeIn(300);												// Fade in 
+	
+	$("#st-popup").click( ()=> { enlarge(); });								// ON CLICK OF TEXT
 
 	$("#poppic").click( function(e) {										// ON CLICK OF PIC
 		if ($("#st-popup").width() < 301)									// If not enlarged
@@ -198,6 +194,18 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 		$("#st-popup").css({left:(x+8)+"px",top:"70px"});					// Position
 		e.stopPropagation()
 		});
+
+	function enlarge() {													// ENLARGE POPUP TO MAP AREA
+		$("#popdesc").css("cursor","auto");									// Normal cursor
+		var r=($("#poppic").width()/$("#poppic").height() < 1) ? .8 : 1;	// Make smaller if portait mode
+		$("#st-popup").css("max-width",$(div).width()*.66);					// Make it wider
+		$("#st-popup").css("max-height",$(window).height()-200+"px");		// Make it taller
+		$("#poppic").css("max-height",$(window).height()-100);				// Make pic taller
+		$("#poppic").css("max-width",$(div).width()*(desc ? .33*r : .66*r)+"px");	// Make pic bigger
+		x=$(div).width()/2-$("#st-popup").width()/2;						// Center it
+		$("#st-popup").css({left:(x+8)+"px",top:"70px"});					// Position
+		$("#popcite").fadeIn();												// Show citation, if any
+		}
 
 }
  

@@ -154,13 +154,11 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 		var c=ol.proj.transform(e.coordinate,_this.curProjection,'EPSG:4326');	// Get center
 		$("#setpoint").val(Math.floor(c[0]*10000)/10000+","+Math.floor(c[1]*10000)/10000);
 		if (e.originalEvent.ctrlKey) {										// If control key presssed
-			var vw=_this.GetView();											// Get current view
 			if (eds.curMode == "story")										// Editing a story
-				$("#esWhere").val(vw);										// Set editor with view
+				$("#esWhere").val(_this.GetView(true));						// Set editor with view
 			else															// Anything else
 				$("#esWhere").val($("#setpoint").val());					// Set editor with point
-			$("#ceWith").val(vw);											// Set click editor with view
-			$("#setstartpos").val(vw);										// Set settings editor with view
+			$("#setstartpos").val(_this.GetView(true));						// Set settings editor with view
 			}
 		if (e.originalEvent.shiftKey) {										// If shift key presssed
   			var lay;
@@ -205,11 +203,14 @@ Space.prototype.GetMapFeatureId=function(x, y) 							// GET FEATURE ID AT PIXEL
 		else		return -1;												// Nothing found	
 }	
 
-Space.prototype.GetView=function() 										// GET CURRENT VIEW
+Space.prototype.GetView=function(adjust) 								// GET CURRENT VIEW
 {
 	var o=this.map.getView();												// Point at view
+	var r=o.getResolution();												// Get res
 	var c=ol.proj.transform(o.getCenter(),this.curProjection,'EPSG:4326');	// Get center
-	return (Math.floor(c[0]*10000)/10000+","+Math.floor(c[1]*10000)/10000+","+Math.round(o.getResolution()));
+	if (adjust)
+		r/=1440*curJson.leftRightSplit/$(this.div).width();					// Resize to normalized screen
+	return (Math.floor(c[0]*10000)/10000+","+Math.floor(c[1]*10000)/10000+","+Math.round(r));
 }	
 
 Space.prototype.UpdateMapSize=function() 								// UPDATE MAP SIZE TO MATCH DIV
@@ -217,7 +218,7 @@ Space.prototype.UpdateMapSize=function() 								// UPDATE MAP SIZE TO MATCH DIV
 	if (this.map) {															// If OL initted
 		this.map.updateSize();												// Update map
 		var y=$(this.div).offset().top+$(this.div).height()-30;				// Y pos
-		$("#findPlaceDiv").css({ left:"6px",top:y+"px" });						// Move it and show
+		$("#findPlaceDiv").css({ left:"6px",top:y+"px" });					// Move it and show
 		}
 }
 
@@ -721,7 +722,7 @@ Space.prototype.AddKMLLayer=function(url, opacity, id, start, end) 		// ADD KML 
 	var index=this.overlays.length;											// Get index
  	o.type="kml";															// KML
   	o.start=start;	o.end=end;												// Save start, end
-	o.opacity=opacity;														// Initial opacity
+	o.opacity=o.alpha=opacity;												// Initial opacity
 	o.tag=curJson.mobs[id].id;												// Add id into tag
 	o.show=curJson.mobs[id].show;											// Add show tag
 	o.mob=id;																// Save original mob id

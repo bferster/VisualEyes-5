@@ -602,12 +602,14 @@
 				Draw(v[1])														// Redraw
 			}	
 		if (e.data && e.data.match(/StoryEdit=/i)) {							// If a Storyeditor
-			$("#esDesc").val(e.data.substring(10));								// Fill editor textbox			
-			$("#storyEditor").remove();											// Kill story editor
-			}
-		if (e.data && e.data.match(/RTEditor=changed/i)) 						// If a text change in rich text editor
-			eds.rtChanged++;													// Log change
-}
+			if (e.data.match(/=changed/i))										// A change
+				eds.rtChanged++;												// Log it
+			else{																// Fill
+				$("#esDesc").val(e.data.substring(10));							// Fill editor textbox			
+				$("#storyEditor").remove();										// Kill story editor
+				}
+		}
+	}
 
 	function RouteShivaMessage(data) 										// ROUTE MESSAGE FROM SHIVA
 	{

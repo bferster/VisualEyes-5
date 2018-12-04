@@ -2,23 +2,23 @@
 <html>
 <head>
 	<meta charset="UTF-8" />
- 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>	
 	<script src="ckeditor/ckeditor.js"></script>
- </head>
-<body>
+</head>
+<body onload="init()">
 	<textarea class="ckeditor" id="editor1" name="editor1"></textarea>
 <script>
 
-	$(document).ready(function() {											// WHEN PAGE LOADED
+	function init() 														// WHEN PAGE LOADED
+	{
 		if (window.addEventListener) 											// If supported this way
 			window.addEventListener("message",shivaEventHandler,false);			// Add event handler
 		else																	// Use other method
 			window.attachEvent("message",shivaEventHandler);					// Add handler
 		CKEDITOR.on('instanceLoaded', function(e) {								// When loaded
-			e.editor.resize("100%", $(window).height()-34);						// Resize editor
-			CKEDITOR.instances.editor1.on('change', function(e) { window.parent.postMessage("RTEditor=changed","*"); });	// Send change message
+			e.editor.resize("100%", window.innerHeight-34);						// Resize editor
+			CKEDITOR.instances.editor1.on('change', function(e) { window.parent.postMessage("StoryEdit=changed","*"); });	// Send change message
 			});
-		});
+	}
 
 	function shivaEventHandler(e)											// ON EVENT
 	{
@@ -33,4 +33,5 @@
 	}
 
 </script>
-</body></html>
+</body>
+</html>
