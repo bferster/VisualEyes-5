@@ -574,6 +574,10 @@
 				v[1]=e.data.match(/mask\|(.+)/)[1];								// Issue of handling |'s in regex
 				dtl.SetTagMask(v[1]);                                      		// Set mask
 				}
+			else if (e.data.match(/=play/i)) {									// Play timeline segment
+				vv=v[1].split(",");												// Split by ,
+				tln.PlaySeg(vv[0],vv[1],vv[2],vv[3]);							// Trigger animation
+				}
 			else if (e.data.match(/=var/i))	{									// Set user variable
 				vv=v[1].split(",");												// Split by ,
 				if ((vv[1].charAt(0) == '>') ||	(vv[1].charAt(0) == '-')) {		// Inc/dec

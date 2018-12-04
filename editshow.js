@@ -334,7 +334,7 @@ EditShow.prototype.ClickEditor=function(data)								// MAIN MENU
 	str+="<table><tr><td><b>Click actions&nbsp;</b></td><td>"+MakeSelect("ceClicks",false,[],"","style='max-width:240px'");
 	str+="&nbsp;&nbsp;<img id='ceAddBut' title='Add new action' style='vertical-align:-5px' src='img/addbut.gif'>";
 	str+="&nbsp;&nbsp;<img id='ceRemoveBut' title='Delete action' style='vertical-align:-5px' src='img/trashbut.gif'></td></tr>";
-	str+="<tr><td><b>Do this</b></td><td>"+MakeSelect("ceActions",false,["where","show","story","basemap","segment","zoomer","mask"]);
+	str+="<tr><td><b>Do this</b></td><td>"+MakeSelect("ceActions",false,["where","show","story","basemap","play","segment","zoomer","mask"]);
 	str+="<tr><td><b>With/to</b></td><td><input class='ve-is' style='width:100%' type='text' id='ceWith'></td></tr>";	
 	str+="<tr><td></td><td>&nbsp;&nbsp;<span id='cemc'><i>Click above to get map view</i></span></td></tr>";	
 	str+="</table>"
