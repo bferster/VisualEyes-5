@@ -107,7 +107,6 @@ Popup.prototype.ShowBooklet=function(div, id, width)					// SHOW BOOKLET
 		}
 }
 
-
 Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, date, end)	// SHOW POPUP
 {
 	$("#st-popup").remove();												// Remove any pre-existing popup
@@ -146,7 +145,7 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 		y=50;																// Near top			
 		}
 
-	if (desc.match(/\(BIG\)/)) {											// If (BIG) tag
+	if (desc.match(/\(BIG\)/) || (div == "#leftDiv")) {						// If (BIG) tag or map click
 		$("#popdesc").html($("#popdesc").html().replace(/\(BIG\)/,""));		// Remove tag
 		enlarge();															// Enlarge
 		}
@@ -187,7 +186,7 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 		var r=($("#poppic").width()/$("#poppic").height() < 1) ? .8 : 1;	// Make smaller if portait mode
 		$("#st-popup").css("max-width",$(div).width()*.55);					// Make it wider
 		$("#st-popup").css("max-height",h-200+"px");						// Make it taller
-		$("#poppic").css("max-height",h-100);								// Make pic taller
+		$("#poppic").css("max-height",h-250+"px");							// Make pic taller
 		$("#poppic").css("max-width",$(div).width()*(desc ? .25*r : .66*r)+"px");	// Make pic bigger
 		var x=($(div).width()-$("#st-popup").width())/2;					// Center it
 		var y=(h-$("#st-popup").height())/2;								// Center it
@@ -430,7 +429,6 @@ Popup.prototype.ColorPicker=function (name, transCol, init) 			//	DRAW COLORPICK
 
 }
 
-
 Popup.prototype.ShowWebPage=function(div, url, title)						// SHOW WEB PAGE
 {
 	var pan=false;
@@ -633,15 +631,9 @@ Popup.prototype.GetCookie=function(cname) {								// GET COOKIE
 
 Popup.prototype.Sound=function(sound, mute)								// PLAY SOUND
 {
-	var snd=new Audio();													// Init audio object
-	if (!snd.canPlayType("audio/mpeg") || (snd.canPlayType("audio/mpeg") == "maybe")) 
-		snd=new Audio("img/"+sound+".ogg");									// Use ogg
-	else	
-		snd=new Audio("img/"+sound+".mp3");									// Use mp3
-	if (!mute)																// If not initing or muting	
-		snd.play();															// Play sound
+	var snd=new Audio("img/"+sound+".mp3");									// Load mp3
+	if (!mute)	snd.play();													// If not initing or muting, play sound
 	}
-
 
 Popup.prototype.FormatTime=function(time, format) 						// FORMAT TIME TO DATE
 {

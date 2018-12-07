@@ -24,6 +24,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	var x=e.clientX,y=e.clientY;											// Get pos
 	$("#editShowDiv").remove();												// Remove it
 	$("#storyEditor").remove();												// Kill story editor
+	$("#clickEditor").remove();												// Kill click editor
 	if ((x < $("#leftDiv").width()) && (y < $("#leftDiv").height())) 		// In map area
 		this.curMode="map";													// Edit map item
 	else if ((x < $("#leftDiv").width()) && (y > $("#leftDiv").height())) 	// In timeline
@@ -129,6 +130,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	$("#esClose").on("click", function(e) {									// MAP COLOR HANDLER
 		$("#editShowDiv").remove();											// Remove editor
 		$("#storyEditor").remove();											// Kill story editor
+		$("#clickEditor").remove();											// Kill click editor
 	}); 
 
 	$("#esMarker").on("change", function(e) {								// MARKER CHANGE HANDLER
@@ -157,7 +159,8 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 		Sound("ding");														// Ding
 		$("#editShowDiv").remove();											// Remove editor
 		$("#storyEditor").remove();											// Kill story editor
-		});
+		$("#clickEditor").remove();											// Kill click editor
+	});
 
 	function getMobValues(o) {											// GET VALUES FROM INPUTS
 		if (!o)	return;														// Got to have an obj
@@ -212,6 +215,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 				InitProject(curJson);										// Reinit project
 				$("#editShowDiv").remove();									// Remove editor
 				$("#storyEditor").remove();									// Kill story editor
+				$("#clickEditor").remove();									// Kill click editor
 			});
 		});		
 
@@ -303,7 +307,7 @@ EditShow.prototype.FindMob=function()										// FIND MOB
 		autoComplete($(this).val());										// Set auto complete
 		}); 
 
-	$("#fmFindBut").on("click", function() {  									// ON FIND CLICK
+	$("#fmFindBut").on("click", function() {  								// ON FIND CLICK
 		for (i=0;i<curJson.mobs.length;++i)									// For each mob
 			if ((""+curJson.mobs[i].id).toLowerCase() == $("#fmId").val().toLowerCase())	{	// If found
 				_this.curId=i;												// Set id
@@ -328,8 +332,8 @@ EditShow.prototype.ClickEditor=function(data)								// MAIN MENU
 {
 	var i,v=[],vv=[];
 	var _this=this;															// Save context 
-	$("#storyEditor").remove();												// Kill story editor
-	str="<div id='storyEditor' class='ve-clickEditor'>";
+	$("#clickEditor").remove();												// Kill story editor
+	str="<div id='clickEditor' class='ve-clickEditor'>";
 	str+="<span style='font-size:14px;color:#666;font-weight:bold'>Click actions<span id='ceClose'style='float:right;cursor:pointer'><i>x</i></span></span><p><hr></p>";
 	str+="<table><tr><td><b>Click actions&nbsp;</b></td><td>"+MakeSelect("ceClicks",false,[],"","style='max-width:240px'");
 	str+="&nbsp;&nbsp;<img id='ceAddBut' title='Add new action' style='vertical-align:-5px' src='img/addbut.gif'>";
@@ -342,7 +346,7 @@ EditShow.prototype.ClickEditor=function(data)								// MAIN MENU
 	str+="<div>";																		
 	str+="<div id='ceSaveBut' class='ve-gbs'>Save click changes</div>";						
 	$("#editShowDiv").append(str);	
-	$("#storyEditor").draggable();											// Make it draggable
+	$("#clickEditor").draggable();											// Make it draggable
 	if (data)																// If some data
 		v=(""+data).split("+");												// Array of click actions
 	for (i=0;i<v.length;++i) 												// For each action
@@ -371,7 +375,7 @@ EditShow.prototype.ClickEditor=function(data)								// MAIN MENU
 			if (i != n-1)	s+="+";											// Add sep
 			}
 		$("#esClick").val(s);												// Save click actions
-		$("#storyEditor").remove();											// Kill dialog
+		$("#clickEditor").remove();											// Kill dialog
 		Sound("click");														// Click
 		});
 

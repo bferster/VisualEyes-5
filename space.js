@@ -461,6 +461,8 @@ Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show,
   	o.start=start;	o.end=end;	o.show=show; o.header=header				// Save start, end, show, and header
 	o.tag=curJson.mobs[id].id;												// Add id into tag
 	o.mob=id;																// Save original mob id
+	if (show && show.match(/h/i)) o.end=999999999999999999;					// Infinite end is holding	
+	
 	this.overlays.push(o);													// Add to overlay
   	o.src=new ol.Feature({ geometry: new ol.geom.LineString(dots)});		// Create line
   	o.id="Path-"+this.markerLayer.getSource().getFeatures().length;			// Make path id
@@ -498,10 +500,7 @@ Space.prototype.DrawPath=function(num, time, vis) 					// DRAW PATH
 
 	var animate=false;													// No animation
 	var end=o.end;														// End at last dot	
-	if (o.show) {														// If show field set
-		if (o.show.match(/a/i))	animate=true;							// Animate last dot
-		if (o.show.match(/h/i))	end=9999999999999999;					// Set infinite path end
-		}
+	if (o.show && o.show.match(/a/i))	animate=true;					// Animate last dot
 
 	for (e=1;e<o.dots.length;++e) {										// For each lineto dot
 		s=e-1;															// Point at start of line
