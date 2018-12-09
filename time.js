@@ -618,8 +618,6 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 		o.markerWidth=$("#svgMarker"+i)[0].getBBox().width;					// Save marker width
 
 		$("#svgMarker"+i).on('click', function(e) {							// ON MARKER CLICK
-;
-			var v,j,a;
 				var id=e.currentTarget.id.substr(9);						// Get ID
 				o=_this.sd.mobs[id];										// Point at mob
 			    str=o.desc;
@@ -635,6 +633,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 						}
 					var ss=curJson.hideTimelineDates ? 0 : o.start;			// Set start date
 					var ee=curJson.hideTimelineDates ? 0 : o.end;			// End
+//					clearToggledLayers();	
 					_this.pop.ShowPopup(_this.div,_this.timeFormat,e.pageX+8,e.pageY-70,o.title,str,o.pic,ss,ee);	// Show popup
 					}
 				_this.Goto(o.start);										// Position timeline

@@ -459,7 +459,7 @@ Popup.prototype.ShowWebPage=function(div, url, title)						// SHOW WEB PAGE
 
 Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 {
-	var i,j,a;
+	var i,j;
 	var v,v,vvv,str="";
 	if (!desc) return null;
 
@@ -515,13 +515,18 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 			}	
 		}
 	if (desc.match(/booklet\(/)) { 											// If booklet macro
-			v=(desc+" ").match(/booklet\(.*?\)/ig); 						// Extract show(s)
-			for (i=0;i<v.length;++i) {										// For each macro
-				vv=v[i].match(/booklet\(([^,]+),(.+)\)/i);					// Get parts
-				if (vv)														// If multi-part show with no visible part
-					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.ShowBooklet(\"#leftDiv\",\""+vv[2]+"\",\""+vv[3]+"\")'>"+vv[1]+"</a>"); // Replace with anchor tag
-				}   
-			}
+		var id;
+		v=(desc+" ").match(/booklet\(.*?\)/ig); 							// Extract show(s)
+		for (i=0;i<v.length;++i) {											// For each macro
+			vv=v[i].match(/booklet\(([^,]+),(.+)\)/i);						// Get parts
+			if (vv.length < 3)					return;						// Quit if not enough params
+			if ((id=FindMobByID(vv[2])) < 0)	return;						// Convert to mob index, quit if bad
+			var ss="<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.ShowBooklet(\"#leftDiv\",\""+vv[2]+"\",\""+vv[3]+"\")'>"+vv[1]+"</a>";
+			if (curJson.mobs[id].color)
+				ss="<div class='ve-gbs' style='background-color:"+curJson.mobs[id].color+"' onclick='sto.pop.Sound(\"click\",curJson.muteSound);pop.ShowBooklet(\"#leftDiv\",\""+vv[2]+"\",\""+vv[3]+"\")'>"+vv[1]+"</div>";
+			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),ss); // Replace with anchor tag
+			}   
+		}
 	if (desc.match(/opacity\(/)) {											// If opacity macro
 		v=(desc+" ").match(/opacity\(.*?\)/ig);								// Extract slider
 		for (i=0;i<v.length;++i) {											// For each macro

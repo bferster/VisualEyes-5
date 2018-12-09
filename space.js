@@ -225,13 +225,6 @@ Space.prototype.UpdateMapSize=function() 								// UPDATE MAP SIZE TO MATCH DIV
 
 Space.prototype.SetBaseMap=function(newMap) 							// SET BASE MAP
 {
-
-/* 
-  	Set base map
-  	@param {string} 	newMap	Name of map layer to show
-  
-*/
-
 	if (this.map)															// If OL initted
    		for (i=0;i<this.layers.length;++i) 									// For each layer
 	    	this.layers[i].set('visible',this.layers[i].get("title") == newMap); // Set visibility
