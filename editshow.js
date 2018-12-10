@@ -139,7 +139,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 
 	$("#esSaveBut").on("click", function() {  								// ON SAVE 
 		var i,o;
-		if (_this.curId == -1) {											// A new mob
+		if ((_this.curId == -1) || (_this.curId == undefined)) {			// A new mob
 			curJson.mobs.push({});											// Add new mob
 			_this.curId=curJson.mobs.length-1;								// Point at it
 			}
@@ -245,7 +245,7 @@ EditShow.prototype.setEventOptions=function()								// SET EVENT OPTIONS
 EditShow.prototype.EditEvent=function()									// EDIT ITEM
 {
 	var o={};
-	if (this.curId == -1) {													// Invalid event
+	if ((this.curId == -1) || (this.curId == undefined)) {					// Invalid event
 		$("#esHead").text("Add a new event");								// Add
 		$("#esRemoveBut").hide();											// Hide trashcan
 		$("#esSaveBut").text("Add new event");								// Say add
@@ -276,7 +276,7 @@ EditShow.prototype.EditEvent=function()									// EDIT ITEM
 	if (o.click)	$("#esClick").val(o.click);								// Click
 	if (o.where)	$("#esWhere").val(o.where);								// Where
 	if (o.citation)	$("#esCite").val(o.citation);							// Citation
-
+	if (this.curMode == "story") $("#esMarker").val("story")				// Force story id clicked in story
 	pop.ColorPicker("esMapColor",-1,true);									// Init color
 	pop.ColorPicker("esColor",-1,true);										// Init color
 	this.setEventOptions();													// Change event options

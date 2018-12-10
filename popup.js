@@ -92,6 +92,7 @@ Popup.prototype.ShowBooklet=function(div, id, width)					// SHOW BOOKLET
 			}
 		if (content) 														// If page set
 			str+=pop.ExpandMacros(content);									// Expand macros, if any
+		$("#st-bookPage").scrollTop(0);										// Scroll to top
 		$("#st-bookPage").html(str);										// Add content
 		$("#pageCtr").text("Page "+(num+1)+" of "+(pages.length));			// Page counter
 
