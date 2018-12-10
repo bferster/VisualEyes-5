@@ -460,13 +460,14 @@ Popup.prototype.ShowWebPage=function(div, url, title)						// SHOW WEB PAGE
 
 Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 {
-	var i,j;
+	var i,j,ss;
 	var v,v,vvv,str="";
 	if (!desc) return null;
 
 	if (desc.match(/where\(/)) {											// If where macro
 		v=(desc+" ").match(/where\(.*?\)/ig);								// Extract where(s)
 		for (i=0;i<v.length;++i) {											// For each macro
+			if (vv.length < 3)	return desc;								// Quit if not enough params
 			vv=v[i].match(/where\(([^,]+),(.+)\)/i);						// Get parts
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:mps.Goto(\""+vv[2].replace(/<.*?>/g,"")+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 			}	
@@ -475,7 +476,10 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 		v=(desc+" ").match(/link\(.*?\)/ig);								// Extract links(s)
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/link\(([^,]+),(.+)\)/i);							// Get parts
-			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a style='color:#000077' onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:ShowIframe2(\""+vv[2]+"\",\"map\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+			if (vv.length < 3)				return desc;					// Quit if not enough params
+			if (vv[2].match(/http:\/\//)) 	ss=vv[2];						// Insecure sites must use new tab
+			else	ss="javascript:ShowIframe2(\""+vv[2]+"\",\"map\")";		// Secure can show in iframe
+			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a style='color:#000077' target='_blank' onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='"+ss+"'>"+vv[1]+"</a>");	// Replace with anchor tag
 			}	
 		}
 	if (desc.match(/show\(/)) {												// If show macro
@@ -483,18 +487,18 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/show\(([^,]+),(.+)\)/i);							// Get parts
 			vvv=vv[2].split(",");											// Get params
-			if (vvv)															// If multi-part show with no visible part
+			if (vvv)														// If multi-part show with no visible part
 				desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:toggleLayer(\""+vvv[0]+"\",\""+vvv[1]+"\",\""+vvv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 			}	
 		}
-	if (desc && desc.match(/foot\(/)) {										// If foot macro
+	if (desc.match(/foot\(/)) {												// If foot macro
 		v=(desc+" ").match(/foot\(.*?\)/ig);								// Extract footnotes(s)
 		for (i=0;i<v.length;++i) {											// For each foot
 			title=v[i].substr(5,v[i].length-6);								// Extract text
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&"))," <a href='#' title='"+title+"'><b><sup></ul>"+(i+1)+"</b></sup></a> ");	// Replace with anchor tag
 			}	
 		}
-	if (desc && desc.match(/bar\(/)) {										// If bar macro
+	if (desc.match(/bar\(/)) {												// If bar macro
 		v=(desc+" ").match(/bar\(.*?\)/ig);									// Extract bar(s)
 		for (i=0;i<v.length;++i) {											// For each bar
 			title=v[i].substr(4,v[i].length-5);								// Extract title bar
@@ -505,6 +509,7 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 		v=(desc+" ").match(/zoomer\(.*?\)/ig);								// Extract zoomer(s)
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/zoomer\(([^,]+),(.+)\)/i);						// Get parts
+			if (vv.length < 3) return desc;									// Quit if not enough params
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.ShowWebPage(\"#leftDiv\",\""+vv[2]+"\",\"zoomer\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 			}	
 		}
@@ -512,19 +517,19 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 		v=(desc+" ").match(/story\(.*?\)/ig);								// Extract story element(s)
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/story\(([^,]+),(.+)\)/i);						// Get parts
+			if (vv.length < 3) return desc;									// Quit if not enough params
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:sto.Open(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 			}	
 		}
 	if (desc.match(/booklet\(/)) { 											// If booklet macro
-		var id;
 		v=(desc+" ").match(/booklet\(.*?\)/ig); 							// Extract show(s)
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/booklet\(([^,]+),(.+)\)/i);						// Get parts
-			if (vv.length < 3)					return;						// Quit if not enough params
-			if ((id=FindMobByID(vv[2])) < 0)	return;						// Convert to mob index, quit if bad
+			if (vv.length < 3)				return desc;					// Quit if not enough params
+			if ((j=FindMobByID(vv[2])) < 0)	return desc;					// Convert to mob index, quit if bad
 			var ss="<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.ShowBooklet(\"#leftDiv\",\""+vv[2]+"\",\""+vv[3]+"\")'>"+vv[1]+"</a>";
-			if (curJson.mobs[id].color)
-				ss="<div class='ve-gbs' style='background-color:"+curJson.mobs[id].color+"' onclick='sto.pop.Sound(\"click\",curJson.muteSound);pop.ShowBooklet(\"#leftDiv\",\""+vv[2]+"\",\""+vv[3]+"\")'>"+vv[1]+"</div>";
+			if (curJson.mobs[j].color)
+				ss="<div class='ve-gbs' style='background-color:"+curJson.mobs[j].color+"' onclick='sto.pop.Sound(\"click\",curJson.muteSound);pop.ShowBooklet(\"#leftDiv\",\""+vv[2]+"\",\""+vv[3]+"\")'>"+vv[1]+"</div>";
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),ss); // Replace with anchor tag
 			}   
 		}
@@ -532,6 +537,7 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 		v=(desc+" ").match(/opacity\(.*?\)/ig);								// Extract slider
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/opacity\(([^,]+),(.+)\)/i);						// Get macro (title,val,id)
+			if (vv.length < 3)				return desc;					// Quit if not enough params
 			vvv=vv[2].split(",");											// Get params
 			str=vv[1]+": <input id='alphaVal' style='vertical-align:-8px' type='range' min='0' max='100' value='100' ";
 			str+="oninput='layerAlpha(\""+vvv[0]+"\",this.value)' ";
@@ -543,6 +549,7 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 		v=(desc+" ").match(/button\(.*?\)/ig);								// Extract button
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/button\(([^,]+),(.+)\)/i);						// Get macro (x,title,params)
+			if (vv.length < 3) return desc;									// Quit if not enough params
 			str="<button class='ve-is' style='width:auto;margin-bottom:4px;' onclick='"; // Header
 			if (!vv[2].match(/:/))											// If not an action
 				vv[2]="mask:"+vv[2];										// Force regex into an action
@@ -556,6 +563,7 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 		v=(desc+" ").match(/radio\(.*?\)/ig);								// Extract radio
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/radio\(([^,]+),(.+)\)/i);						// Get macro (title, cmd)
+			if (vv.length < 3) return desc;									// Quit if not enough params
 			vvv=vv[2].split(",");											// Get params
 			if (vvv[vvv.length-1].toLowerCase() == "on")					// An on command
 				vvv.pop();													// Remove it
@@ -571,7 +579,7 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),str);	// Replace with anchor tag
 			}	
 		}
-	if (desc && desc.match(/mask\(/)) {                                   	// If mask macro
+	if (desc.match(/mask\(/)) {                                   			// If mask macro
         v=(desc+" ").match(/mask\(.*?\)/ig);                       			// Extract segment
         vv=v[0].match(/mask\(([^,\)]*),*(.*)\)/i);                  		// Get parts
         dtl.SetTagMask(vv[1]);                                      		// Set mask
@@ -590,6 +598,7 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 	if (desc.match(/action\(/)) {											// If an action macro
 		v=(desc+" ").match(/action\(.*?\)/ig);								// Extract action(s)
 		for (i=0;i<v.length;++i) {											// For each one
+			if (v.length < 2) return desc;									// Quit if not enough params
 			vv=v[i].match(/action\(([^,]+),(.+)\)/i);						// Get parts
 			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.SendActions(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 			}
