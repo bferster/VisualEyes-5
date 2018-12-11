@@ -519,66 +519,31 @@ Space.prototype.DrawPath=function(num, time, vis) 					// DRAW PATH
 
 Space.prototype.AddMarkerLayer=function(pos, style, id, start, end, show) 	// ADD MARKER LAYER TO MAP						
 {
-
-/* 	
- 	Add marker to marker layer.
- 	@param {string} pos 	Contains bounds for the image "latitude,longitude".
-  					    	Rotation is optional and defaults to 0 degrees.				
-	@param {object} style 	Consists of a style object :
-						a: {number} opacity (0-1)
-						f: {string} fill color "#rrggbb"
-						s: {string} stroke color "#rrggbb"
-						r: {number} rotation
-						w: {number} width
-						d: {string} description for popup
-						m: {string} type
-						t: {string} label
-						tc: {string} text color
-						ts: {string} text format
-	@param {number} id 		Mob id
-	@param {number} start 	Starting time of marker in number of mins += 1/1/1970
-	@param {number} end 	Ending time of marker in number of mins += 1/1/1970
-	@param {string} show 	Show status of marker
-	@return {object} 	obj	Pointer to feature added to markerLayer
-
-*/
-
 	var o={};
 	o.type="icon";															// Icon
   	o.start=start;	o.end=end; 	o.show=show;								// Save start, end, show
   	o.mob=id;																// Save original mob id
-	  
 	if (!isNaN(id))	o.tag=curJson.mobs[id].id;								// Add id into tag, if not a header
-
 	var index=this.overlays.length;											// Get index
 	this.overlays.push(o);													// Add to overlay
   	var v=(""+pos).split(",");												// Split into parts
 	var c=ol.proj.transform([v[0]-0,""+v[1]-0],'EPSG:4326',this.curProjection);	// Transform
 	o.src=new ol.Feature({ geometry: new ol.geom.Point(c) });				// Create feature at coord
  	o.src.setId("Mob-"+id);													// Set id of mob
- 	this.markerLayer.getSource().addFeature(o.src);							// Add it
- 	this.StyleMarker([index],style);										// Style marker
+	try {																	// Try
+		this.markerLayer.getSource().addFeature(o.src);						// Add it
+		this.StyleMarker([index],style);									// Style marker
+		}
+	catch(err) {															// If error
+		trace("CATCH ERR ->",err);											// Show it
+		this.overlays.pop();												// Add to overlay
+		return -1;															// Return -1
+		}
 	return index;															// Return feature
 }
 
 Space.prototype.StyleMarker=function(indices, sty)						// STYLE MARKERS(s)			
 {
-	
-/* 
- 	@param {array} 	indices An array of indices specifying the marker(s) to hide or show.
-	@param {object} style 	Consists of a style object :
-						a: {number} opacity (0-1)
-						f: {string} fill color "#rrggbb"
-						s: {string} stroke color "#rrggbb"
-						r: {number} rotation
-						w: {number} width
-						d: {string} description for popup
-						m: {string} type
-						t: {string} label
-						tc: {string} text color
-						tf: {string} text format
- */
-
 	var i,image;
 	var w2=sty.w ? sty.w*.6667 : 8;											// Set size
 	if (sty.f && sty.f != "none") {											// If fill spec'd
@@ -823,17 +788,6 @@ Space.prototype.StyleKMLFeatures=function(num, styles)					// STYLE KML FEATURE(
 
 Space.prototype.AddImageLayer=function(url, geoRef, alpha, start, end, id) 	// ADD MAP IMAGE TO PROJECT
 {    
-
-/* 
-  	@param {string} url 	URL of image file (jpeg, png or gif)
- 	@param {string} geoRef 	Contains bounds for the image "north,south,east,west,rotation".
-  							Rotation is optional and defaults to 0 degrees.				
- 	@param {number} start 	Starting time of marker in number of mins += 1/1/1970
-	@param {number} end 	Ending time of marker in number of mins += 1/1/1970
-	@param {number} id 		Mob id
- 	@return {number}		index of new layer added to overlays array.
-*/
-
 	var o={};
 	var index=this.overlays.length;											// Get index
  	o.type="image";															// Image
@@ -850,21 +804,12 @@ Space.prototype.AddImageLayer=function(url, geoRef, alpha, start, end, id) 	// A
 	
 function MapImage(url, geoRef, _this) 									// MAPIMAGE CONSTRUCTOR
 {    
-
-/* 
- 	@constructor
- 	@param {string} url URL of image file (jpeg, png or gif)
- 	@param {string} geoReg Contains bounds for the image "north,south,east,west,rotation".
- 					rotation is optional and defaults to 0 degrees.				
- 	@param {object} 	_this Context of the Space object
-*/
-
-    this.img=new Image();												// Alloc image
-    this.img.onload=_this.ShowProgress;									// Add handler to remove from count after loaded
-    this.img.onerror=_this.ShowProgress;								// Add handler to remove from count if error
-    this.imgWidth;	 this.imgHeight;									// Set size, if any
-    var v=geoRef.split(",");											// Split into parts
-    this.n=v[0]-0;														// Set bounds
+    this.img=new Image();													// Alloc image
+    this.img.onload=_this.ShowProgress;										// Add handler to remove from count after loaded
+    this.img.onerror=_this.ShowProgress;									// Add handler to remove from count if error
+    this.imgWidth;	 this.imgHeight;										// Set size, if any
+    var v=geoRef.split(",");												// Split into parts
+    this.n=v[0]-0;															// Set bounds
     this.s=v[1]-0;
     this.e=v[2]-0;
     this.w=v[3]-0;
@@ -878,8 +823,8 @@ function MapImage(url, geoRef, _this) 									// MAPIMAGE CONSTRUCTOR
     this.centerXCoord = this.w + (Math.abs(this.e - this.w) / 2);
     this.centerYCoord = this.s + (Math.abs(this.n - this.s) / 2);
     this.center=ol.proj.transform([this.centerXCoord, this.centerYCoord], 'EPSG:4326', _this.curProjection);	// Get center
-    this.rotation=v[4]*-1;												// Reverse direction
-	this.img.src=url;													// Set url
+    this.rotation=v[4]*-1;													// Reverse direction
+	this.img.src=url;														// Set url
 }
 
 MapImage.prototype.drawMapImage=function(opacity, _this)           	// DRAW IMAGE
@@ -1127,7 +1072,6 @@ Space.prototype.GeoReference=function(url, where, edit)					// GEO REFERENCE IMA
 
 	function startGeoRef()
 	{
-
 		_this.geoRef={ a:1 };												// Create georef obj
 		_this.geoRef.img=new Image();										// Make new img
 		_this.geoRef.img.src=url;											// Set  url
