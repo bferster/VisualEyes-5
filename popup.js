@@ -119,6 +119,7 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 	str+="<div class='popup-title'>";										// Title div
 	if (title)																// If title set
 		str+="<b>"+title+"</b>";											// Add it
+	str+="<img src='img/closedot.gif' style='float:right;cursor:pointer' onclick='$(\"#st-popup\").remove()'>";
 	if (date) {																// If date set
 		date=this.FormatTime(date,timeFormat);								// Format time to date
 		str+="<span class='popup-date'>&nbsp;&nbsp;"+date+"</span>";		// Add it
@@ -197,7 +198,6 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 
 }
  
-	
 Popup.prototype.GetTextBox=function (title, content, def, callback)		// GET TEXT LINE BOX
 {
 	this.Sound("click");													// Ding sound
