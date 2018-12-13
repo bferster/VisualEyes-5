@@ -79,10 +79,6 @@ Space.prototype.DrawMapLayers=function()								// DRAW OVERLAY LAYERS
 
 Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
 {
-/* 
-  	Init map library.
- 
-*/
 	this.showBoxes=false;													// Show boxes
 	this.showRoads=false;													// Hide Roads/borders
 	this.showScale=true;													// Hide or show scale
@@ -435,19 +431,6 @@ Space.prototype.DrawChoropleth=function(num, time, vis) 				// DRAW CHOROPLETH
 
 Space.prototype.AddPathLayer=function(dots, col, wid, opacity, start, end, show, header, id) 	// ADD PATH LAYER TO MAP						
 {
-
-/* 	Add path to marker layer.
- 	@param {array} 		dots 	Array of lat/long,time triplets separated by commas ie. [[-77,40,-4526267], ...]
- 	@param {string} 	col 	Color of path
- 	@param {number} 	wid 	Width of path in pixels
- 	@param {number} 	opacity Opacity of path 0-1
- 	@param {number} 	start 	Starting time of marker in number of mins += 1/1/1970
-	@param {number} 	end 	Ending time of marker in number of mins += 1/1/1970
-	@param {number} 	header 	Header
-	@param {number} 	id 		Mob id	
-	@return {number} 	index	Index of layer added
-*/
-
 	var i,v,o={};
 	var index=this.overlays.length;											// Get index
 	o.type="path";															// Path
@@ -868,16 +851,17 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
   	var _this=this;															// Save context for callbacks
 
  	this.map.on('click', function(evt) {									// ON MAP CLICK
-  			var lay;
+		var lay,id;
   			var feature=_this.map.forEachFeatureAtPixel(evt.pixel,			// Look through features
       			function(feature, layer) {									// On match to location
          			lay=layer;												// Save layer
+  				id=feature.getId();
+				if (id && id.match(/mob-.+h/i))	feature=null;				// Skip path header
           			return feature;											// Return feature
       			});
 			if (feature) {													// If one found
   				var j;
-  				var id=feature.getId();
-    			if (lay && (lay.get("kmlId"))) {							// If a KML id
+				if (lay && (lay.get("kmlId"))) {							// If a KML id
  	 				var fa=lay.getSource().getFeatures();					// Point at all features
  					for (j=0;j<fa.length;++j)								// For each one
  						if (fa[j].getId() == id)							// A match for id
@@ -893,7 +877,7 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
  	 				}
 				  if (!id) 
 						return;	
-				  if (id.match(/Mob-/)) {									// If a mob
+					if (id.match(/Mob-/)) {									// If a mob
   					var i=id.substr(4);										// Strip off header
 					if (isNaN(i))											// Must be a path header
 						return;												// Quit

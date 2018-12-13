@@ -5,16 +5,9 @@
 
 function Popup()														// CONSTRUCTOR
 {
-
-/* 
-  	@constructor
-  	Styling of popups dependent on css: .popup-*.*
-
-*/
 		this.Sound("click",true);											// Init sound
 		this.Sound("ding",true);											// Init sound
 		this.Sound("delete",true);											// Init sound
-
 }
 
 Popup.prototype.ShowBooklet=function(div, id, width)					// SHOW BOOKLET
@@ -260,6 +253,7 @@ Popup.prototype.FileSelect=function (files, callback)					// SELECT FILE FROM LI
 
 }
 
+
 Popup.prototype.Dialog=function (title, content, callback, callback2) // DIALOG BOX
 {
 	this.Sound("click");												// Ding sound
@@ -467,28 +461,31 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 	if (desc.match(/where\(/)) {											// If where macro
 		v=(desc+" ").match(/where\(.*?\)/ig);								// Extract where(s)
 		for (i=0;i<v.length;++i) {											// For each macro
-			if (vv.length < 3)	return desc;								// Quit if not enough params
 			vv=v[i].match(/where\(([^,]+),(.+)\)/i);						// Get parts
-			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:mps.Goto(\""+vv[2].replace(/<.*?>/g,"")+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+			if (vv && (vv.length > 2)) 										// If enough params
+				desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:mps.Goto(\""+vv[2].replace(/<.*?>/g,"")+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 			}	
 		}
 	if (desc.match(/link\(/)) {												// If link macro
 		v=(desc+" ").match(/link\(.*?\)/ig);								// Extract links(s)
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/link\(([^,]+),(.+)\)/i);							// Get parts
-			if (vv.length < 3)				return desc;					// Quit if not enough params
-			if (vv[2].match(/http:\/\//)) 	ss=vv[2];						// Insecure sites must use new tab
-			else	ss="javascript:ShowIframe2(\""+vv[2]+"\",\"map\")";		// Secure can show in iframe
-			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a style='color:#000077' target='_blank' onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='"+ss+"'>"+vv[1]+"</a>");	// Replace with anchor tag
+			if (vv && (vv.length > 2)) {									// If enough params
+				if (vv[2].match(/http:\/\//)) 	ss=vv[2];					// Insecure sites must use new tab
+				else	ss="javascript:ShowIframe2(\""+vv[2]+"\",\"map\")";	// Secure can show in iframe
+				desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a style='color:#000077' target='_blank' onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='"+ss+"'>"+vv[1]+"</a>");	// Replace with anchor tag
+				}
 			}	
 		}
 	if (desc.match(/show\(/)) {												// If show macro
 		v=(desc+" ").match(/show\(.*?\)/ig);								// Extract show(s)
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/show\(([^,]+),(.+)\)/i);							// Get parts
-			vvv=vv[2].split(",");											// Get params
-			if (vvv)														// If multi-part show with no visible part
-				desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:toggleLayer(\""+vvv[0]+"\",\""+vvv[1]+"\",\""+vvv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+			if (vv && (vv.length > 2)) {									// If enough params
+				vvv=vv[2].split(",");										// Get params
+				if (vvv)													// If multi-part show with no visible part
+					desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:toggleLayer(\""+vvv[0]+"\",\""+vvv[1]+"\",\""+vvv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+				}
 			}	
 		}
 	if (desc.match(/foot\(/)) {												// If foot macro
@@ -509,28 +506,28 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 		v=(desc+" ").match(/zoomer\(.*?\)/ig);								// Extract zoomer(s)
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/zoomer\(([^,]+),(.+)\)/i);						// Get parts
-			if (vv.length < 3) return desc;									// Quit if not enough params
-			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.ShowWebPage(\"#leftDiv\",\""+vv[2]+"\",\"zoomer\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+			if (vv && (vv.length > 2)) 										// If enough params
+				desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.ShowWebPage(\"#leftDiv\",\""+vv[2]+"\",\"zoomer\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 			}	
 		}
 	if (desc.match(/story\(/)) {											// If story macro
 		v=(desc+" ").match(/story\(.*?\)/ig);								// Extract story element(s)
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/story\(([^,]+),(.+)\)/i);						// Get parts
-			if (vv.length < 3) return desc;									// Quit if not enough params
-			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:sto.Open(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+			if (vv && (vv.length > 2)) 										// If enough params
+				desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:sto.Open(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 			}	
 		}
 	if (desc.match(/booklet\(/)) { 											// If booklet macro
 		v=(desc+" ").match(/booklet\(.*?\)/ig); 							// Extract show(s)
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/booklet\(([^,]+),(.+)\)/i);						// Get parts
-			if (vv.length < 3)				return desc;					// Quit if not enough params
-			if ((j=FindMobByID(vv[2])) < 0)	return desc;					// Convert to mob index, quit if bad
-			var ss="<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.ShowBooklet(\"#leftDiv\",\""+vv[2]+"\",\""+vv[3]+"\")'>"+vv[1]+"</a>";
-			if (curJson.mobs[j].color)
-				ss="<div class='ve-gbs' style='background-color:"+curJson.mobs[j].color+"' onclick='sto.pop.Sound(\"click\",curJson.muteSound);pop.ShowBooklet(\"#leftDiv\",\""+vv[2]+"\",\""+vv[3]+"\")'>"+vv[1]+"</div>";
-			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),ss); // Replace with anchor tag
+			if (vv && (vv.length > 2) && ((j=FindMobByID(vv[2])) >= 0)) {	// If enough params and a good id
+				var ss="<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.ShowBooklet(\"#leftDiv\",\""+vv[2]+"\",\""+vv[3]+"\")'>"+vv[1]+"</a>";
+				if (curJson.mobs[j].color)
+					ss="<div class='ve-gbs' style='background-color:"+curJson.mobs[j].color+"' onclick='sto.pop.Sound(\"click\",curJson.muteSound);pop.ShowBooklet(\"#leftDiv\",\""+vv[2]+"\",\""+vv[3]+"\")'>"+vv[1]+"</div>";
+				desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),ss); // Replace with anchor tag
+				}
 			}   
 		}
 	if (desc.match(/opacity\(/)) {											// If opacity macro
@@ -589,18 +586,20 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 		v=(desc+" ").match(/play\(.*?\)/ig);								// Extract play element(s)
 		for (i=0;i<v.length;++i) {											// For each macro
 			vv=v[i].match(/play\(([^,]+),(.+)\)/i);							// Get parts
-			vvv=vv[2].split(",");											// Get params
-			if (vv[1] == 'auto' && (sto.storyMode == "Stepped"))			// Stepped mode and auto
-				tln.PlaySeg(vvv[0],vvv[1],vvv[2],vvv[3]),vv[1]="";			// Trigger animation
-			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:tln.PlaySeg(\""+vvv[0]+"\",\""+vvv[1]+"\",\""+vvv[2]+"\",\""+vvv[3]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+			if (vv && (vv.length > 2)) {									// If enough params
+				vvv=vv[2].split(",");										// Get params
+				if (vv[1] == 'auto' && (sto.storyMode == "Stepped"))		// Stepped mode and auto
+					tln.PlaySeg(vvv[0],vvv[1],vvv[2],vvv[3]),vv[1]="";		// Trigger animation
+				desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:tln.PlaySeg(\""+vvv[0]+"\",\""+vvv[1]+"\",\""+vvv[2]+"\",\""+vvv[3]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+				}
 			}	
 		}
 	if (desc.match(/action\(/)) {											// If an action macro
 		v=(desc+" ").match(/action\(.*?\)/ig);								// Extract action(s)
 		for (i=0;i<v.length;++i) {											// For each one
-			if (v.length < 2) return desc;									// Quit if not enough params
 			vv=v[i].match(/action\(([^,]+),(.+)\)/i);						// Get parts
-			desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.SendActions(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
+			if (vv && (vv.length > 2)) 										// If enough params
+				desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.SendActions(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 			}
 		}
 
