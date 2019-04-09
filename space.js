@@ -42,19 +42,17 @@ Space.prototype.DrawMapLayers=function()								// DRAW OVERLAY LAYERS
 				if ((o.start >= tln.curStart) && (o.start < tln.curEnd)) 	// In current time
 					vis=true;												// Show it
 				}
-	        a=(o.opacity != undefined) ? o.opacity : 1						// Use defined opacity or 1
-	
+	        a=((o.opacity == undefined) || (o.opacity == "")) ? 1 : o.opacity;	// Use defined opacity or 1
 			if (o.show == "off")			vis=false;						// If hidded in spreadsheet, hide it
 			if (o.vis == "off")				vis=false;						// If toggled hidden, hide it
 			else if (o.vis == "on")			vis=true;						// If toggled showing, show it
 			if (!dtl.ShowElement(o.tag))	vis=false;						// If not being shown, hide it
 			if (vis && (o.type == "image"))	{								// If a visible image 
-           		(o.alpha == undefined) ? a=1 : a=o.alpha;					// Let alpha control opacity if defined
-           		if (!vis) a=0;												// Hide if invisible
+           		a=((o.alpha == undefined) || (o.alpha == "")) ? 1 : o.alpha;	// Let alpha control opacity if defined
             	o.src.drawMapImage(a,this);   								// Draw it   
         		}
         	else if (o.type == "kml") {										// If a kml 
-				(o.alpha == undefined) ? a=1 : a=o.alpha;					// Let alpha control opacity if defined
+				a=((o.alpha == undefined) || (o.alpha == "")) ? 1 : o.alpha;	// Let alpha control opacity if defined
 				if (!vis) a=0;												// Hide if invisible
 			   	o.src.set('visible',vis);									// Show/hide it
             	o.src.set("opacity",a);										// Set opacity								
@@ -862,7 +860,9 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
 			if (feature) {													// If one found
   				var j;
 				if (lay && (lay.get("kmlId"))) {							// If a KML id
- 	 				var fa=lay.getSource().getFeatures();					// Point at all features
+					var c=curJson.mobs[lay.get("kmlId")].click;				// Get click of kml mob
+					if (c)  pop.SendActions(c);								// Send actions	
+					var fa=lay.getSource().getFeatures();					// Point at all features
  					for (j=0;j<fa.length;++j)								// For each one
  						if (fa[j].getId() == id)							// A match for id
  							break;											// Quit looking
