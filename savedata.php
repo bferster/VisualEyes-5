@@ -5,9 +5,8 @@ header('Pragma: no-cache');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Max-Age: 1000');
-require_once('config.php');
-			
-
+require_once('config7.php');
+	
 	$email="";	$password=""; $title=""; $type="";	$data="";	// Declare vars
 	$email=strtolower($_REQUEST['email']);						// Get email
 	$password=$_REQUEST['password'];							// Get password
@@ -18,32 +17,34 @@ require_once('config.php');
 	if (!$email || !$data || !$type) {							// Not enough data
 		if (!$email)											// If no email
 			print("data");										// Show error 
-		mysql_close();											// Close session
+		mysqli_close($link);									// Close session
 		exit();													// Quit
 		}
 									
 	$query="INSERT INTO qdata (email, password, type, title, data ) VALUES ('";
-	$query.=addEscapes($email)."','";							// Email
-	$query.=addEscapes($password)."','";						// Password
-	$query.=addEscapes($type)."','";							// Title
-	$query.=addEscapes($title)."','";							// Type
-	$query.=addEscapes($data)."')";								// Data
-	$result=mysql_query($query);								// Add row
+	$query.=addEscapes($link,$email)."','";						// Email
+	$query.=addEscapes($link,$password)."','";					// Password
+	$query.=addEscapes($link,$type)."','";						// Title
+	$query.=addEscapes($link,$title)."','";						// Type
+	$query.=addEscapes($link,$data)."')";						// Data
+	$result=mysqli_query($link, $query);						// Run query
 		
 	if ($result == false)										// Bad save
 		print($query);											// Show error 
 	else
-		print("new:".mysql_insert_id()."\n");					// Return ID of new user
-	mysql_close();												// Close session
+		print("new:".mysqli_insert_id()."\n");					// Return ID of new user
+
+	if ($result)	mysqli_free_result($result);				// Free
+	mysqli_close($link);										// Close session
 	
-	function addEscapes($str)									// ESCAPE ENTRIES
-	{
-		if (!$str)												// If nothing
-			return $str;										// Quit
-		$str=mysql_real_escape_string($str);					// Add slashes
-		$str=str_replace("\r","",$str);							// No crs
-		return $str;
-	}
+	function addEscapes($lnk, $str)								// ESCAPE ENTRIES
+		{
+			if (!$str)												// If nothing
+				return $str;										// Quit
+			$str=mysqli_real_escape_string($lnk, $str);				// Add slashes
+			$str=str_replace("\r","", $str);						// No crs
+			return $str;
+		}
 
 ?>
 	
