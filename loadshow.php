@@ -2,7 +2,7 @@
 header('Cache-Control: no-cache, no-store, must-revalidate'); 
 header('Expires: Sun, 01 Jul 2005 00:00:00 GMT'); 
 header('Pragma: no-cache'); 
-require_once('config.php');
+require_once('config7.php');
 	
 	$id="";	$password="";										// Declare vars
 	$id=$_GET['id'];											// Get ID
@@ -12,17 +12,19 @@ require_once('config.php');
 		}
 	$id=addEscapes($id);										// ID
 	$query="SELECT * FROM qshow WHERE id = '$id'";				// Make query
-	$result=mysql_query($query);								// Run query
-	if (($result == false) || (!mysql_numrows($result)))		// Error
+	$result=mysqli_query($link, $query);						// Run query
+	if (($result == false) || (!mysqli_num_rows($result)))		// Error
 			print("LoadShow({ \"qmfmsg\":\"error\"})");
 	else{														// Good result
-		if (mysql_result($result,0,"private") && (mysql_result($result,0,"password") != $password) && ($password != "*"))
+		$row=mysqli_fetch_assoc($result);						// Get row
+		if ($row["private"] && ($row["password"] != $password) && ($password != "*"))
 			print("LoadShow({ \"qmfmsg\":\"private\"})");
 		else	
-			print(mysql_result($result,0,"script"));
+			print($row["script"]);
 		}
-	mysql_close();												// Close
-	
+	mysqli_free_result($result);								// Free
+	mysqli_close($link);										// Close session
+		
 	function addEscapes($str)									// ESCAPE ENTRIES
 	{
 		if (!$str)												// If nothing
