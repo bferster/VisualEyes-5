@@ -31,10 +31,10 @@ require_once('config7.php');
 		
 	if ($result == false)										// Bad save
 		print($query);											// Show error 
-	else
-		print("new:".mysqli_insert_id()."\n");					// Return ID of new user
-
-	if ($result)	mysqli_free_result($result);				// Free
+	else{
+		mysqli_free_result($result);							// Free
+		print("new:".mysqli_insert_id($link)."\n");				// Return ID of new user
+		}
 	mysqli_close($link);										// Close session
 	
 	function addEscapes($lnk, $str)								// ESCAPE ENTRIES
