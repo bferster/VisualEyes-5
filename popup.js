@@ -444,7 +444,7 @@ Popup.prototype.ShowWebPage=function(div, url, title)						// SHOW WEB PAGE
 		this.DrawZoomer("st-webpage",url,2,4);								// Add it
 		}
 	else{																	// Web page
-		str+="<iframe id='popupIF' frameborder='0' height='100%' width='100%' style='opacity:0,border:1px solid #666' src='"+url+"'></iframe>";	// Add iframe
+		str+="<iframe id='popupIF' allowfullscreen frameborder='0' height='100%' width='100%' style='opacity:0,border:1px solid #666' src='"+url+"'></iframe>";	// Add iframe
 		$("body").append(str+"</div>");										// Add popup
 		}
 	$("#st-close").css("left",$("#st-webpage").width()-4+"px");				// Far right
