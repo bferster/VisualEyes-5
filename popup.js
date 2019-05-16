@@ -602,7 +602,17 @@ Popup.prototype.ExpandMacros=function(desc)								// EXPAND MACROS
 				desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a onclick='sto.pop.Sound(\"click\",curJson.muteSound)' href='javascript:pop.SendActions(\""+vv[2]+"\")'>"+vv[1]+"</a>");	// Replace with anchor tag
 			}
 		}
-
+	if (desc.match(/fold\(/i)) {											// If fold macro
+		v=(desc+" ").match(/fold\(.*?\).+fe\(\)/ig);						// Extract folds(s)
+		for (i=0;i<v.length;++i) {											// For each macro
+			vv=v[i].match(/fold\((.*?)\)(.*?)fs\(\)(.+?)fe\(\)/i);			// Get parts
+			if (vv.length > 3) {											// Valid
+				str=vv[2]+"<div style='display:none' id='fs-"+i+"'>"+vv[3]+"</div>";	// Hidden text
+				desc=desc.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"<a id='afs-"+i+"' onclick='sto.pop.Sound(\"click\",curJson.muteSound),$(\"#\"+this.id.substr(1)).toggle()' href='javascript:'>"+vv[1]+"</a>"+str);	// Replace with anchor tag
+				}
+			}
+		}
+	
 	return desc;															// Return expanded html
 }
 
