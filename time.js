@@ -498,7 +498,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 	str+="<g id='svgMarkers'>";												// Markers group head
 	for (i=0;i<this.sd.mobs.length;++i) {									// For each mob
 		o=this.sd.mobs[i];													// Point at mob
-		if (!o.marker || (o.type != "icon"))								// No marker set, or not an icon
+		if (!o.marker || (o.type != "icon") || (o.marker == "none"))		// No marker set, or not an icon, or a none icon
 			continue;														// Skip
 		m=o.marker.toLowerCase();											// Force lowercase
 		w2=o.size ? o.size/2 : 6;											// Set size
@@ -613,7 +613,7 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 
 	for (i=0;i<this.sd.mobs.length;++i) {									// For each mob
 		o=this.sd.mobs[i];													// Point at mob
-		if (!o.marker || (o.type != "icon"))								// No marker set, or not an icon
+		if (!o.marker || (o.type != "icon") || (o.marker == "none"))		// No marker set, or not an icon, or a none icon
 			continue;														// Skip
 		o.markerWidth=$("#svgMarker"+i)[0].getBBox().width;					// Save marker width
 
