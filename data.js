@@ -45,8 +45,6 @@ DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendErr
 {
 	this.spreadsheetError=null;
 	if (url.indexOf("google.com") != -1) {									// If Google doc
-//		var query=new google.visualization.Query(url);						// Make query object	
-//		query.send(handleGoogleResponse);									// Fetch data
 		url=url.match(/\/d\/(.+)\//)[1];									// Extract id
 		var str="https://docs.google.com/spreadsheets/d/"+url+"/export?format=tsv";		// Access
 		var xhr=new XMLHttpRequest();										// Ajax

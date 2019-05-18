@@ -229,11 +229,16 @@
    		if (data.sheet) {														// If a spreadsheet spec'd
 		 	dtl.GetSpreadsheet(data.sheet,true,null,function(mobs) {			// Get spreadsheet data
 				var i,key;
-				for (i=0;i<mobs.length;++i) 									// For each mob
+				for (i=0;i<mobs.length;++i) {									// For each mob
 				    for (key in mobs[i]) {										// For each field in mob
    						if (mobs[i][key])										// If not null
    							mobs[i][key]=(""+mobs[i][key]).replace(/(\s)$/,"");	// Strip trailing space
-   						}
+					   }
+				   	if (!isNaN(mobs[i].start) && (mobs[i].start < -2500) || (mobs[i].start > 2500))	// Already in minutes
+				  		mobs[i].start=pop.FormatTime(mobs[i].start,"Mo/Day/Year");					// Make human readible
+					if (!isNaN(mobs[i].end) && (mobs[i].end < -2500) || (mobs[i].end > 2500))		// Already in minutes
+				  		mobs[i].end=pop.FormatTime(mobs[i].end,"Mo/Day/Year");						// Make human readible
+					}
 				data.mobs=mobs;													// Set mobs
 				InitProject(data);												// Re-init project
 				},true);
