@@ -244,7 +244,7 @@
 			window.parent.postMessage("Editor=load|"+curShow,"*");				// Send load message to editor
    	}
 
-	function InitProject(data)												// INIT PROJECT
+	function InitProject(data, dontSaveOrigs)								// INIT PROJECT
 	{
 		var i,s,e,v,t,id;
 		if (data)							curJson=data;						// If data, set it
@@ -265,7 +265,7 @@
 			o.color=ColorToHex(o.color);										// Convert named color
 			o.mapColor=ColorToHex(o.mapColor);									// Convert named color
 			o.edge=ColorToHex(o.edge);											// Convert named color
-			o.startO=o.start;	o.endO=o.end;	o.opacityO=o.opacity;			// Save original values
+			if (!dontSaveOrigs) { o.startO=o.start;	o.endO=o.end;	o.opacityO=o.opacity; };	// Save original values
 			if (o.start)		o.start=Math.round(pop.DateToTime(o.start));	// Convert date to time
 			if (o.end)			o.end=Math.round(pop.DateToTime(o.end));		// Convert date to time
 			if (o.opacity > 1)	o.opacity/=100;									// 0-100 to 0-1

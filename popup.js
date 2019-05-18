@@ -695,7 +695,7 @@ Popup.prototype.DateToTime=function(dateString) 						// CONVERT DATE TO MINS +/
 	var mins=0;																// Assume no extra time
 	if (!dateString)														// No date
 		return 0;															// Quit
-	if (!isNaN(dateString) && (dateString < -2500) || (dateString > 2500))	// Already in minutea
+	if (!isNaN(dateString) && (dateString < -2500) || (dateString > 2500))	// Already in minutes
 		return dateString;													// Return original
 	var d=new Date();														// Make new date
 	dateString+="";															// Make sure it's a string

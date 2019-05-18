@@ -154,13 +154,13 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 			o.start=o.startO;	o.end=o.endO;	o.opacity=o.opacityO;		// Restore original values
 			}
 		o=curJson.mobs[_this.curId];										// Point at mob
-		getMobValues(o);													// Get values from inputa	
+		getMobValues(o);													// Get values from inputs	
 		InitProject(curJson);												// Reinit project
 		Sound("ding");														// Ding
 		$("#editShowDiv").remove();											// Remove editor
 		$("#storyEditor").remove();											// Kill story editor
 		$("#clickEditor").remove();											// Kill click editor
-	});
+		});
 
 	function getMobValues(o) {											// GET VALUES FROM INPUTS
 		if (!o)	return;														// Got to have an obj
@@ -212,7 +212,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 		if (_this.curId >= 0)												// Valid mob
 			ConfirmBox("Are you sure?",	function() {						// Sure?
 				curJson.mobs.splice(_this.curId,1);							// Remove it
-				InitProject(curJson);										// Reinit project
+				InitProject(curJson,true);									// Reinit project
 				$("#editShowDiv").remove();									// Remove editor
 				$("#storyEditor").remove();									// Kill story editor
 				$("#clickEditor").remove();									// Kill click editor
