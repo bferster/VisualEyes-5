@@ -599,6 +599,17 @@
 				tln.timeViewScale=v[1]/100;										// Set timescale (0-800)			
 				tln.UpdateTimeline(); 											// Redraw timeline 
 				}
+			else if (e.data.match(/=popup/i)) {									// Show popup
+				vv=v[1].split(",");												// Split by ,
+				if (FindMobByID(vv[0]) != -1) { 								// Found mob
+					var o=curJson.mobs[FindMobByID(vv[0])];						// Point at mob
+					var ss=curJson.hideTimelineDates ? 0 : o.start;				// Set start date
+					var ee=curJson.hideTimelineDates ? 0 : o.end;				// End
+					var x=$(mps.div).width()/2;									// Center x
+					var y=$(mps.div).height()/2;								// Y
+					pop.ShowPopup(mps.div,mps.timeFormat,x,y,o.title,o.desc,o.pic,ss,ee);	// Show popup
+					}
+				}
 			}
 		if (e.data && e.data.match(/Space=/)) {									// If just a space event
 			var v=e.data.split("|");											// Split into parts

@@ -895,7 +895,6 @@ Space.prototype.InitPopups=function()									// HANDLE POPUPS ON FEATURES
 					if (o.desc) {
 						if (desc.match(/\(NOTIME\)/i))						// If not showing in time
 							desc=desc.replace(/\(NOTIME\)/i,"");			// Remove tag
-						if (!desc.match(/\(NOMAP\)/i))						// If showing in map
 						var ss=curJson.hideTimelineDates ? 0 : o.start;		// Set start date
 						var ee=curJson.hideTimelineDates ? 0 : o.end;		// End
 						_this.pop.ShowPopup(_this.div,_this.timeFormat,evt.pixel[0],evt.pixel[1],title,desc,pic,ss,ee);
