@@ -134,7 +134,7 @@ DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendErr
 	function handleTSVResponse(tsv) {									// HANDLE INCOMING TSV DATA
 		var i,j,v,o,blank;
 		var data=[];														
-		if (tsv) tsv.replace(/\\r/,"");										// Remove CRs
+		if (tsv) tsv=tsv.replace(/\r/g,"");									// Remove CRs
 		tsv=tsv.split("\n");												// Split into lines
 		var fields=tsv[0].split("\t");										// Get field names
 		for (i=1;i<tsv.length;++i) {										// For each line of data past header
