@@ -44,7 +44,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 	str+="<tr><td><b>Desc&nbsp;&nbsp;&nbsp;<img src='img/editbut.gif' onclick='sto.StoryEditor(\"edit\")' style='vertical-align:-4px;cursor:pointer'></b></td><td>";
 	str+="<textarea class='ve-is'  style='width:calc(100% - 18px);height:"+descHgt+"px' id='esDesc'></textarea></td></tr>";	
 	str+="<tr><td><b>Image</b></td><td><input class='ve-is' style='width:calc(100% - 18px)' type='text' id='esPic'></td></tr>";	
-	str+="<tr><td><b>Marker</b></td><td>"+MakeSelect("esMarker",false,["dot","diamond","star","bar","box","rbar","line","triup","tridown","triright","trileft","ndot","none","------------","segment","path","over","story","booklet"]);
+	str+="<tr><td><b>Marker</b></td><td>"+MakeSelect("esMarker",false,["dot","diamond","star","bar","box","rbar","line","rule","triup","tridown","triright","trileft","ndot","none","------------","segment","path","over","story","booklet"]);
 	str+="&nbsp;&nbsp;<b>Size</b>&nbsp;&nbsp;<input class='ve-is' style='width:30px' type='text' id='esSize'>";
 	str+="&nbsp;&nbsp;<b>Color</b>&nbsp;&nbsp;<input class='ve-is' style='width:30px' type='text' id='esColor'>";
 	str+="&nbsp;&nbsp;<b>Position</b>&nbsp;&nbsp;"+MakeSelect("esPos",false,["","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"])+"</td></tr>";

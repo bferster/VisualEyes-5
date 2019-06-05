@@ -551,7 +551,15 @@ Timeline.prototype.AddTimeView=function() 								// ADD TIME VIEW
 			str+="<line id='svgMarkerEnd"+i+"' stroke='"+o.color+"' ";		// Line middle
 			str+="x1=100 y1="+(-w2-2)+" x2=100 y2=0/>";						// Points
 			}
-		else if (m == "box") {												// A hollow box
+		else if (m == "rule") {												// A rule
+			str+="<line stroke='"+o.color+"' ";								// Line start
+			str+="x1=0 y1="+(-w2-5)+" x2=0 y2="+(-w2+1)+"/>";				// Points
+			str+="<line id='svgMarkerMid"+i+"' stroke='"+o.color+"' ";		// Line end
+			str+="x1=0 y1="+(-w2-2)+" x2=100 y2="+(-w2-2)+"/>";				// Points
+			str+="<line id='svgMarkerEnd"+i+"' stroke='"+o.color+"' ";		// Line middle
+			str+="x1=100 y1="+(-w2-5)+" x2=100 y2="+(-w2+1)+"/>";			// Points
+			}
+			else if (m == "box") {												// A hollow box
 			str+="<rect id='svgMarkerBar"+i+"' y="+(-w2-2)+" rx=2 ry=2 height="+(w2+w2+4)+" fill-opacity='0' stroke='"+o.color+"'/>"; 	// Add box
 			}
 		else if (m == "rbox") {												// A hollow round box
