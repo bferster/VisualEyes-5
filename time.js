@@ -189,7 +189,7 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 				y=h-(o.tpos*rowHgt+(o.tpos-1)*rowPad);						// Position it
 			$("#svgMarker"+i).attr("transform","translate("+x+","+y+")");	// Move marker
 			if (o.marker) tmp=o.marker.toLowerCase();						// Marker type as lc
-			if (o.end && ((tmp == "line") || (tmp == "bar") || (tmp == "box")|| (tmp == "rbox")|| (tmp == "rbar"))) {	// If a spanned event
+			if (o.end && ((tmp == "line") || (tmp == "bar") || (tmp == "box")|| (tmp == "rbox")|| (tmp == "rbar") || (tmp == "rule"))) {	// If a spanned event
 				x=(o.end-o.start)/dur*w;									// Calc end
 				$("#svgMarkerBar"+i).attr("width",x);						// Move bar
 				$("#svgMarkerEnd"+i).attr("x1",x);							// Move end line
