@@ -54,14 +54,12 @@ Timeline.prototype.InitTimeline=function(data)							// INIT TIMELINE
 	$("#segmentBar").remove();												// Remove old
 	$("#timePlayer").remove();												// Remove old
 	$("#timeViewBar").remove();												// Remove old
-	$("#timeCrunch").remove();												// Remove old
-
+	
 	if (this.hasTimeBar) 													// If a timebar
 		this.AddTimeBar();													// Add it
 	if (this.playerSpeed) 													// If it has player
 		this.AddPlayer();													// Add it
 	this.AddTimeSegments();													// Add time segments, if any
-	this.AddTimeSlider();													// Add time slider if any
 	if (this.hasTimeView) 													// If it has time view
 		this.AddTimeView();													// Add it
 	this.UpdateTimeline();													// Resize 
@@ -74,8 +72,7 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 	var i,w2,m=this.margin;
 	var w=$(this.div).width()-m-m;											// Width of time area
 	var t=$(this.div).height()-$("#timeBar").height()-20-m;					// Top position
-	if ($("#timeCrunch").length) t-=16										// Shift up
-
+	
 	if (($(this.div).width() < 20) || ($(this.div).height() < 20)) {		// Too small
 		$(this.div).hide(0);												// Hide it
 		return;																// Don't draw
@@ -97,8 +94,7 @@ Timeline.prototype.UpdateTimeline=function(start) 						// UPDATE TIMELINE PANES
 	var l=m+sw;																// Left side of time area
 	$("#timeSlider").width(w);												// Set slider width
 	$("#timePlayer").css({top:t-1+"px",left:w+ew+l+"px"});					// Position player
-	$("#timeCrunch").css({top:t+44+"px",left:l+"px", width:w-18+"px"});		// Position timecrunch
-	
+		
 	if (this.hasTimeBar)													// If a timebar
 		w=$("#timeSlider").width();											// Width of slider bar
 	else 																	// No timebar
@@ -388,37 +384,6 @@ Timeline.prototype.AddPlayer=function() 								// ADD TIME PLAYER
 
 }
 
-Timeline.prototype.AddTimeSlider=function() 							// ADD TIME SLIDER
-{
-	var i,o,str;
-	var _this=this;															// Save context for callback
-	for (i=0;i<this.sd.mobs.length;++i) {									// For each mob
-		o=this.sd.mobs[i];													// Point at mob
-		if (o.type == "timeslider")	{										// If  a slider
-			str="<div id='timeCrunch' style='position:absolute;";			 // Add div
-			str+="text-align:center;padding:0 8px 0 8px;cursor:grab;height:12px;";	// Style
-			str+="color:#444;border-radius:16px;background-color:"+(o.color ? o.color : "#ccc")+"'>";	
-			$(this.div).append(str);										// Add slider bar				
-
-			$("#timeCrunch").css({width:"80%"})
-			str="<div style='float:left;cursor:e-resize'>"+this.pop.FormatTime(this.start,this.timeFormat)+"</div>";
-			str+=o.title;
-			str+="<div style='float:right;cursor:w-resize'>"+this.pop.FormatTime(this.end,this.timeFormat)+"</div>";
-			$("#timeCrunch").html(str);
-			$("#timeCrunch").hover(											// ON HOVER
-				function(){ $(this).css("color","#009900")},				// Highlight
-				function(){ $(this).css("color","#444")} 					// Hide
-				);
-			$("#timeCrunch").click( function(e) {							// ON  CLICK
-				$("#timeCrunch").css("background-color","#acc3db");			// Make blue
-				
-				});
-	
-			}
-
-		}
-}
-
 Timeline.prototype.AddTimeSegments=function() 							// ADD TIME SEGMENTS
 {
 	var i,k=0,o,oo,str;
@@ -491,7 +456,6 @@ Timeline.prototype.SetSegment=function(id, sendActions) 				// SET SEGMENT
 	for (i=0;i<ts.length;++i)  												// For each segment
 		$("#timeseg"+i).css({"background-color":ts[i].col});				// Clear it
 	$($("#timeseg"+id)).css({"background-color":"#acc3db" });				// Highlight picked one
-	$("#timeCrunch").css("background-color","#ccc");						// Unset timecrunch
 	var s=this.start;														// Assume timeline start
 	if (!ts[id].all) {														// If a regular seg
 		this.curSeg=id;														// Its current
