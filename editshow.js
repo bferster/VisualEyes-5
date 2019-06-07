@@ -189,6 +189,11 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 		o=curJson.mobs[_this.curId];										// Point at mob
 		getMobValues(o);													// Get values from inputs	
 		var v=_this.MakeTabFile(curJson).split("\n");						// Split into rows
+		if (!v) {															// If nothing there
+			_this.PopUp("<b>ERROR!</b>Project NOT saved!");					// Show popup
+			Sound("delete");											// Sound
+			return;															// Don't save
+			}
 		for (i=0;i<v.length;++i)											// For each row
 			d.push(v[i].split("\t"));										// Add array of fields
 		var str=curJson.sheet.match(/\/d\/(.+)\//)[1];						// Extract id
