@@ -37,8 +37,9 @@ Popup.prototype.ShowBooklet=function(div, id, width)					// SHOW BOOKLET
 	setPage(id,num);														// Fill page
 	$("#st-booklet").css({ width: o.size+"%"});								// Set width
 	$("#st-booklet").height($("#st-booklet").width()*.66);					// Set height
-	var x=$(div).width()/2-$("#st-booklet").width()/2;						// Center it
-	var y=$(div).height()/2-$("#st-booklet").height()/2;					// Center
+	var x=Math.max($(div).width()/2-$("#st-booklet").width()/2,0);			// Center it
+	var y=Math.max($(div).height()/2-$("#st-booklet").height()/2,0);		// Center
+	
 	$("#st-booklet").css({left:x+"px",top:y+"px"});							// Position
 	$("#st-booklet").draggable();											// Make it draggable
 	$("#st-booklet").resizable({ resize: function() {	posLabels() } });	// Make it resizable
