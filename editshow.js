@@ -186,12 +186,17 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 
 	$("#esCopyBut").on("click", function() {  								// ON COPY TO GDRIVE
 		var o,i,d=[];
+		if (!document.URL.match(/https/i)) {								// Not secure
+			_this.PopUp("<b>Needs HTTPS!</b><br><br>Make sure you are running the secure version<br>(i.e. <b>https:</b>//viseyes.org/visualeyes)",10);	// Show popup
+			Sound("delete");												// Sound
+			return;															// Don't save
+			}
 		o=curJson.mobs[_this.curId];										// Point at mob
 		getMobValues(o);													// Get values from inputs	
 		var v=_this.MakeTabFile(curJson).split("\n");						// Split into rows
 		if (!v) {															// If nothing there
 			_this.PopUp("<b>ERROR!</b>Project NOT saved!");					// Show popup
-			Sound("delete");											// Sound
+			Sound("delete");												// Sound
 			return;															// Don't save
 			}
 		for (i=0;i<v.length;++i)											// For each row
@@ -524,12 +529,13 @@ EditShow.prototype.SaveSpreadsheet=function(id, data)										// CLEAR AND SAVE
 		});
 }
 
-EditShow.prototype.PopUp=function(msg)														// TIMED POPUP
+EditShow.prototype.PopUp=function(msg, time)												// TIMED POPUP
 {
 	$("#popupDiv").remove();																	// Kill old one, if any
 	var str="<div id='popupDiv' class='ve-popup'>"; 											// Add div
 	str+=msg+"</div>"; 																			// Add div
 	$("body").append(str);																		// Add to  body
-	$("#popupDiv").fadeIn(500).delay(2000).fadeOut(500)											// Animate in and out		
+	time=time ? time*=1000 :2000;																// Set time
+	$("#popupDiv").fadeIn(500).delay(time).fadeOut(500)											// Animate in and out		
 }
 
