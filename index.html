@@ -441,12 +441,12 @@
 		qmf=new QmediaFile("//viseyes.org/visualeyes/",4);						// Alloc file system
 
 		drupalMan=(""+url).match(/pr=d/);										// If called from Drupal manager
-		if (!url)																// Nothing on command line
-			url=456;															// Use default
-		if (drupalMan)	url="";													// If drupal, kill url
 		if (url && url.match(/gid=/i)) {										// If id spec'd via gid=
 			url=url.match(/gid=(\d*)/i)[1];										// Extract number
 			}
+		if (!url)																// Nothing on command line
+			url=456;															// Use default
+		if (drupalMan)	url="";													// If drupal, kill url
 		if (url && !isNaN(url)) {												// If a number
 			if (url < 0)    noSplash=true,$("#splashDiv").hide(0);			 	// Inhibit splash
 			curShow=Math.abs(url);                                              // Save show number
