@@ -446,7 +446,8 @@
 			}
 		if (!url)																// Nothing on command line
 			url=456;															// Use default
-		if (drupalMan)	url="";													// If drupal, kill url
+		if (drupalMan) 															// If drupal,
+			url="";																// Kill url
 		if (url && !isNaN(url)) {												// If a number
 			if (url < 0)    noSplash=true,$("#splashDiv").hide(0);			 	// Inhibit splash
 			curShow=Math.abs(url);                                              // Save show number
@@ -522,8 +523,7 @@
 		mps.InitMap();															// Init map
 		InitProject();															// Init project
 		if (drupalMan) 															// If called from Drupal manager
-			window.parent.postMessage("ShivaReady=true","*");					// Send message to parent wind		
-
+			window.parent.postMessage("Ready=true","*");						// Send message to parent wind		
 		$("#setwhere").on("change", function() {								// ON LOCATION CHANGE
 			mps.Goto($(this).val());											// Go there
 			});
@@ -553,7 +553,16 @@
 	function shivaEventHandler(e)											// ON SHIVA EVENT
 	{
 //		trace(e.data);
-		if (e.data && (e.data.match(/Space=/) || e.data.match(/Time=/) || e.data.match(/Popup=/))) {	// If a space, time, or popup event
+		if (e.data.indexOf("GetJSON") != -1) {									// If asking for JSON
+			var o=JSON.parse(JSON.stringify(curJson));							// Clone
+			o.mobs=[];															// Remove mobs
+			e.source.postMessage("GetJSON="+JSON.stringify(o),"*");				// Return JSON
+			}
+		else if (e.data.indexOf("PutJSON=") != -1) {							// If setting JSON
+			curJson=JSON.parse(e.data.substr(8));								// Extract as object
+			ReloadShow();														// Reload	
+			}
+		else if (e.data && (e.data.match(/Space=/) || e.data.match(/Time=/) || e.data.match(/Popup=/))) {	// If a space, time, or popup event
 			var j,vv;
 			var v=e.data.split("|");											// Split into parts
 			if (e.data.match(/=where/i))										// Set position
@@ -706,7 +715,9 @@
 						curJson.mobs=data;										// Set mobs
 						InitProject(curJson);									// Re-init project
 						},true);
-	 				}
+				if (drupalMan) 													// If called from Drupal manager
+					window.parent.postMessage("DataChanged=true","*");			// Send change message
+	 			}
 	 			else															// No sheet spec'd
 					InitProject(curJson);										// Re-init project
 			});

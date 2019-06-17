@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="img/shanti.ico">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes, user-scalable=yes">
+	<title>Test</title>
+</head>
+<iframe id='appIF' width='100%' height='600' src='index.html?pr=d'></iframe><br><br>
+<input type='button' value='Get JSON' onclick='GetJSON()'>&nbsp;&nbsp;&nbsp;
+<input type='button' value='Put JSON' onclick='PutJSON()'><br>
+<br>USAGE:<br><br>
+VisualEyes send 'Ready=true' when loaded and redy to recieve JSON (see console)<br>
+GetJSON: Send 'GetJSON' to iframe, get current  JSON in return (see console)<br>
+SetJSON: Send 'SetJSON={ json text }' to iframe, VisualEyes is updated<br>
+VisualEyes send 'DataChanged=true' when settings changed by user (see console)<br>
+<body>
+</body>
+<script>
+
+var times=1;
+
+function GetJSON()
+{
+	document.getElementById("appIF").contentWindow.postMessage("GetJSON","*");	 				// Send message to Iframe
+}
+
+function PutJSON()
+{
+	var str='{"sheet":"https://docs.google.com/spreadsheets/d/1eIVvLS7mt7pdSGI83UvdklzddBZ-N0_9gBkmWnEaxLg/edit?usp=sharing","upDownSplit":0.6416666666666667,"leftRightSplit":0.66,"mapTextCol":"#ff9900","mapTextFont":"bold 12px sans-serif ","baseMap":"Satellite","timeFormat":"Mo/Year","start":"1/1740","end":"1/1830","muteSound":false,"mapStartPos":"-77.0262,38.6073,611","title":"Changed title '+times+'","panTime":"0.5","mobs":[],"storyMode":"Stepped","defaultSpeed":"","autoSizeTimeline":true,"hideTimelineDates":false}'
+	document.getElementById("appIF").contentWindow.postMessage("PutJSON="+str,"*");	 			// Send message to Iframe
+	times++;
+}
+
+///////////////////////////////////////////// PLUMBING //////////////////////////////////////////////////////
+
+if (window.addEventListener) 											// If supported this way
+	window.addEventListener("message",shivaEventHandler,false);			// Add event handler
+	else																// Use other method
+		window.attachEvent("message",shivaEventHandler);				// Add handler
+
+function SendShivaMessage(src, msg) 									// SEND SHIVA MESSAGE 
+	{
+		var str=src;															// Add src and window						
+		if (msg)																// If more to it
+			str+="|"+msg;														// Add it
+		if (window.parent)														// If has a parent
+			window.parent.postMessage(str,"*");									// Send message to parent wind
+		else																	// Local	
+			window.postMessage(str,"*");										// Send message to wind
+	}
+
+	function shivaEventHandler(e)											// ON SHIVA EVENT
+	{
+		trace(e.data);
+	}
+
+	function trace(msg, p1, p2, p3, p4)										// CONSOLE 
+	{
+		if (p4 != undefined)
+			console.log(msg,p1,p2,p3,p4);
+		else if (p3 != undefined)
+			console.log(msg,p1,p2,p3);
+		else if (p2 != undefined)
+			console.log(msg,p1,p2);
+		else if (p1 != undefined)
+			console.log(msg,p1);
+		else
+			console.log(msg);
+	}	
+</script>
+</body></html> 
