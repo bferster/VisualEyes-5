@@ -144,7 +144,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 			_this.curId=curJson.mobs.length-1;								// Point at it
 			}
 		if (_this.rtChanged) {
-			ConfirmBox("You have unsave changes in the editor. Save them?",	()=> { // Sure?
+			ConfirmBox("You have unsave changes in the editor. Save them?",	function() { // Sure?
 				$("#seSaveBut").trigger("click");							// Save it
 				});
 			return;

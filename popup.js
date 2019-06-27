@@ -154,7 +154,7 @@ Popup.prototype.ShowPopup=function(div, timeFormat, x, y,  title, desc, pic, dat
 		}
 	$("#st-popup").fadeIn(300);												// Fade in 
 	
-	$("#st-popup").click( ()=> { enlarge(); });								// ON CLICK OF TEXT
+	$("#st-popup").click( function() { enlarge(); });						// ON CLICK OF TEXT
 
 	$("#poppic").click( function(e) {										// ON CLICK OF PIC
 		if ($("#st-popup").width() < 301)									// If not enlarged
