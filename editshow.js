@@ -8,12 +8,20 @@ function EditShow()														// CONSTRUCTOR
 	this.curMode="";														// Current curMode
 	this.curId=-1;															// Current id
 	this.rtChanged=0;														// Rich text changed
-	$("body").contextmenu(function(e) { 									// Add context menu handler
-		if (e.ctrlKey && e.altKey) {										// If control+alt key
-			_this.Draw(e); 													// Show editor
+
+	if (window.navigator.userAgent && window.navigator.userAgent.match(/CrOS/))	// IF a CHROMEBOOK
+		$("body").on("mousedown",function(e) { 								// Add mousedown menu handler
+			if (e.ctrlKey && e.altKey && (e.which == 3)) {					// If control+alt key and right button
+ 			_this.Draw(e); 													// Show editor
 			return false;													// Inhibit browser comtext menu
-			} 
-		});	
+			}}); 
+	else
+		$("body").contextmenu(function(e) { 								// Add context menu handler
+			if (e.ctrlKey && e.altKey) {									// If control+alt key
+				_this.Draw(e); 												// Show editor
+				return false;												// Inhibit browser comtext menu
+				} 
+			});	
 }
 
 EditShow.prototype.Draw=function(e)										// MAIN MENU
