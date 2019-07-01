@@ -9,9 +9,9 @@ function EditShow()														// CONSTRUCTOR
 	this.curId=-1;															// Current id
 	this.rtChanged=0;														// Rich text changed
 
-	if (window.navigator.userAgent && window.navigator.userAgent.match(/CrOS/))	// IF a CHROMEBOOK
+	if (window.navigator.userAgent && window.navigator.userAgent.match(/CrOS/))	// IF a ChromeBook
 		$("body").on("mousedown",function(e) { 								// Add mousedown menu handler
-			if (e.ctrlKey && e.altKey && (e.which == 3)) {					// If control+alt key and right button
+			if (e.ctrlKey && (e.which == 3)) {								// If control+alt key and right button
  			_this.Draw(e); 													// Show editor
 			return false;													// Inhibit browser comtext menu
 			}}); 
