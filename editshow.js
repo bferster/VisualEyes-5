@@ -211,6 +211,7 @@ EditShow.prototype.Draw=function(e)										// MAIN MENU
 			d.push(v[i].split("\t"));										// Add array of fields
 		var str=curJson.sheet.match(/\/d\/(.+)\//)[1];						// Extract id
 		_this.SaveSpreadsheet(str,d);										// Save to GDrive
+		Sound("click");														// Acknowledge click
 		});
 
 	$("#esCopyLineBut").on("click", function() {  							// ON COPY LINE TO CLIPBOARD
@@ -504,10 +505,16 @@ EditShow.prototype.SaveSpreadsheet=function(id, data)										// CLEAR AND SAVE
 {
 	if (!id)	return;																			// Quit if no id
 	var _this=this;																				// Save context
+	var key="AIzaSyD0jrIlONfTgL-qkfnMTNdjizsNbLBBjTk";											// Viseyes id and key
+	var gid= "453812393680-8tb3isinl1bap0vqamv45cc5d9c7ohai.apps.googleusercontent.com";
+	if (window.location.hostname.match("virginia.edu") || window.location.hostname.match("visuals.dd")) {
+		gid="783824671276-f555r8jak4qqrunab0ksmn1elg01hjhc.apps.googleusercontent.com"; 		// UVA client id & api key
+		key="AIzaSyDO7EDm14EXi44pLkarnB8jjqI90LSa61g";
+		}
+
 	gapi.load('client:auth2', function() {														// Start oauto
 			gapi.client.init({																	// Init
-          	apiKey: "AIzaSyD0jrIlONfTgL-qkfnMTNdjizsNbLBBjTk",									// Key
-			clientId: "453812393680-8tb3isinl1bap0vqamv45cc5d9c7ohai.apps.googleusercontent.com", // Google client id 
+          	apiKey:key,	clientId:gid, 															// Google client id and key				
 			scope:"https://www.googleapis.com/auth/drive",										// Scope
           	discoveryDocs:["https://sheets.googleapis.com/$discovery/rest?version=v4"],			// API discovery
         	}).then(function () {																// When initted, listen for sign-in state changes.
