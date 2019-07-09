@@ -258,7 +258,7 @@ EditShow.prototype.setEventOptions=function()								// SET EVENT OPTIONS
 	if (marker == "over")														// If overlay
 		$("#esGeo").html("<a href='javascript:void(0)' onclick='eds.GeoRef()'>Click to georeference</a>");
 	else																		// Regular
-		$("#esGeo").html("<i>Ctrl-click on map to capture</i>");				// Map click
+		$("#esGeo").html("<i>Alt-click on map to capture</i>");				// Map click
 }
 
 EditShow.prototype.EditEvent=function()									// EDIT ITEM
@@ -347,7 +347,7 @@ EditShow.prototype.FindMob=function()										// FIND MOB
 	}		
 }
 
-EditShow.prototype.ClickEditor=function(data)								// MAIN MENU
+EditShow.prototype.ClickEditor=function(data)							// MAIN MENU
 {
 	var i,v=[],vv=[];
 	var _this=this;															// Save context 
@@ -382,7 +382,7 @@ EditShow.prototype.ClickEditor=function(data)								// MAIN MENU
 		}
 
 	$("#ceClose").on("click", function(e) {									// MAP COLOR HANDLER
-		$("#storyEditor").remove();											// Kill dialog
+		$("#clickEditor").remove();											// Kill dialog
 		}); 
 
 	$("#ceSaveBut").on("click", function() {  								// ON SAVE 
