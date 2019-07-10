@@ -440,12 +440,18 @@
 		var url=window.location.search.substring(1);							// Get query string
 		qmf=new QmediaFile("//viseyes.org/visualeyes/",4);						// Alloc file system
 
-		drupalMan=(""+url).match(/pr=d/);										// If called from Drupal manager
 		if (url && url.match(/gid=/i)) {										// If id spec'd via gid=
 			url=url.match(/gid=(\d*)/i)[1];										// Extract number
 			}
 		if (!url)		url=456;												// Nothing on command line, use default
-		if (drupalMan) 	url="";													// If drupal, kill url
+		if ((""+url).match(/m=/)) {												// If drupal flag
+			if (url.length > 2) {												// If file spec'd
+				if (url.indexOf("?") == -1)	$.getJSON(url.substr(2)+"?callback=?");		// If no ? in url
+				else						$.getJSON(query.substr(2)+"&callback=?");	// Already has ?, so use &
+				}
+			drupalMan=true;														// Set flag
+			url="";																// If dkill url
+			}
 		if (url && !isNaN(url)) {												// If a number
 			if (url < 0)    noSplash=true,$("#splashDiv").hide(0);			 	// Inhibit splash
 			curShow=Math.abs(url);                                              // Save show number
@@ -536,6 +542,12 @@
 			 });
 
 	});
+
+	function shivaDataWrapper(data)											// HANDLE GETJSON DATA FROM DRUPAL
+	{
+		trace(data)
+		InitProject(data);														// Init project
+	}
 
 	function SendShivaMessage(src, msg) 									// SEND SHIVA MESSAGE 
 	{
@@ -700,11 +712,11 @@
 		str+="<tr><td>Timeline&nbsp;speed&nbsp;</td><td><input id='setspeed' class='ve-is' style='width:80px' type='input'>&nbsp;<i>(1-100)</i></td></tr>";
 		str+="<tr><td>Story mode</td><td>";
 		str+=MakeSelect("setstory",false,["Scrolled", "Stepped"],curJson.storyMode)+"</td></tr>";
-		str+="<tr><td colspan=2><br></td> <tr>";
-		var ops=["Choose","Load","Save","Save as...","Delete","Undelete","Drawing","Geo-reference","Story editor"];
-		if (drupalMan)	ops.splice(1,3);
-		str+="<tr><td>Options</td><td>"+MakeSelect("setfile",false,ops,"Save/Load");
-		str+="&nbsp;&nbsp;&nbsp<i><span id='showInd'>"+(curShow ? "#"+curShow : '')+"</span></i></span>&nbsp;&nbsp;&nbsp;"
+		str+="<tr><td colspan=2><br></td></tr>";
+		if (!drupalMan) {
+			str+="<tr><td>Options</td><td>"+MakeSelect("setfile",false,["Choose","Load","Save","Save as...","Delete","Undelete","Drawing","Geo-reference","Story editor"],"Save/Load");
+			str+="&nbsp;&nbsp;&nbsp<i><span id='showInd'>"+(curShow ? "#"+curShow : '')+"</span></i></span>&nbsp;&nbsp;&nbsp;"
+			}
 		str+="Help <a href='https://docs.google.com/document/d/1TBCCF03Wc5NpkG4EVJdxYuhUdauV1b_KICUOhNZQhEI' target='_blank'>";
 		str+="<img src='img/helpicon.gif' style='vertical-align:bottom' title='Show help'></a></td>";
 		str+="</tr></table></div>";
