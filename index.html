@@ -545,8 +545,8 @@
 
 	function shivaDataWrapper(data)											// HANDLE GETJSON DATA FROM DRUPAL
 	{
-		trace(data)
 		InitProject(data);														// Init project
+		ReloadShow();															// Refresh show
 	}
 
 	function SendShivaMessage(src, msg) 									// SEND SHIVA MESSAGE 
@@ -570,6 +570,9 @@
 			}
 		else if (e.data.indexOf("PutJSON=") != -1) {							// If setting JSON
 			curJson=JSON.parse(e.data.substr(8));								// Extract as object
+			ReloadShow();														// Reload	
+			}
+		else if (e.data.indexOf("Reload") != -1) {								// If reloading
 			ReloadShow();														// Reload	
 			}
 		else if (e.data && (e.data.match(/Space=/) || e.data.match(/Time=/) || e.data.match(/Popup=/))) {	// If a space, time, or popup event
@@ -695,7 +698,7 @@
 		str+="<table><tr height='18'>";
 		str+="<tr><td>Mute clicks?</td><td><input id='setmute' type='checkbox'></td></tr>";
 		str+="<tr><td>Title</td><td><input id='settitle' class='ve-is' style='width:220px' type='input'></td></tr>";
-		str+="<tr><td>Spreadsheet</td><td><input id='setsheet' class='ve-is' style='width:220px' type='input'>&nbsp;&nbsp;<img id='showgdoc' style='cursor:pointer' title='Open spreadsheet' src='img/gdrive.png'></td></tr>";
+		str+="<tr><td>Spreadsheet</td><td><input id='setsheet' class='ve-is' style='width:220px' type='input' placeholder='Click icon for Google Docs'>&nbsp;&nbsp;<img id='showgdoc' style='cursor:pointer' title='Open spreadsheet' src='img/gdrive.png'></td></tr>";
 		str+="<tr><td>L-R split&nbsp;% </td><td>";
 		str+="<input id='setlr' class='ve-is' style='width:30px' type='input'>&nbsp;&nbsp;U-D&nbsp;split&nbsp; ";
 		str+="<input id='setud' class='ve-is' style='width:30px' type='input'>&nbsp;&nbsp;Auto?<input id='setauto' type='checkbox'></td></tr>";
@@ -754,7 +757,8 @@
 		pop.ColorPicker("setstcol",-1,true);									// Init color
 
 		$("#showgdoc").on("click",function() {									// Show google doc
-			window.open($("#setsheet").val(), '_blank');						// Show it	
+			var url=$("#setsheet").val() ? $("#setsheet").val() : "https://drive.google.com";	// Set url, go to gdocs if blank
+			window.open(url, '_blank');						q					// Show it	
 			});
 
 		function getDataFromInputs() {											// GET DATA FROM DIALOG ELEMENTS
