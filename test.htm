@@ -1,69 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8" />
-	<link REL="SHORTCUT ICON" HREF="img/shanti.ico">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes, user-scalable=yes">
-	<title>Test</title>
-</head>
-<iframe id='appIF' width='100%' height='600' src='index.html?m='></iframe><br><br>
-<input type='button' value='Get JSON' onclick='GetJSON()'>&nbsp;&nbsp;&nbsp;
-<input type='button' value='Put JSON' onclick='PutJSON()'>&nbsp;&nbsp;&nbsp;
-<input type='button' value='Reload' onclick='Reload()'><br>
-<br>USAGE:<br><br>
-VisualEyes send 'Ready=true' when loaded and redy to recieve JSON (see console)<br>
-GetJSON: Send 'GetJSON' to iframe, get current  JSON in return (see console)<br>
-SetJSON: Send 'SetJSON={ json text }' to iframe, VisualEyes is updated<br>
-Reload: Send 'Reload=true' to iframe,to reload the spreadsheet is updated<br>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>ArcGIS test</title>
+	<link rel="stylesheet" href="https://js.arcgis.com/4.11/esri/themes/light/main.css">
+	<script src="https://js.arcgis.com/4.11/"></script>
+ 	<style>
+    	html, body, #viewDiv {	padding:0; margin:0; height:100%; width: 100%;  }
+		#infoDiv { position: absolute; top: 15px;  left: 60px; }
+		#infoDiv input { border: none; box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 2px; }
+	</style>
+  </head>
+  <body>
+	<div id="viewDiv"></div>
+	<div id="infoDiv">
+		<input  class="esri-component esri-widget--button esri-widget esri-interactive" type="button" id="base-btn" value="B" title="Change base map"/>
+		<input  class="esri-component esri-widget--button esri-widget esri-interactive" type="button" id="switch-btn" value="3D" title="Change view" />
+	  </div>
+	<script>
 
-VisualEyes send 'DataChanged=true' when settings changed by user (see console)<br>
-<body>
-</body>
-<script>
+	var app={ base:null, container: "viewDiv",
+			  mapView: null,  sceneView: null, activeView: null,
+   			  center: [91.1721, 29.6524], zoom: 12
+	    	  };
+	
+	var switchButton=document.getElementById("switch-btn");
+	switchButton.addEventListener("click", function() { SwitchView();  });
+	document.getElementById("base-btn").addEventListener("click", function()   { PickBaseMap(); });
 
-var times=1;
+	require(["esri/Map","esri/views/MapView","esri/views/SceneView", "esri/widgets/BasemapGallery"],
+		function(Map, MapView, SceneView, BasemapGallery) {
+		
+			var map=new Map({
+				basemap: "topo-vector",
+				});
 
-function GetJSON()
-{
-	document.getElementById("appIF").contentWindow.postMessage("GetJSON","*");	 				// Send message to Iframe
-}
+			app.activeView=app.mapView=new MapView({
+				map: map,
+				container: app.container, 
+				center: app.center,
+				zoom: app.zoom
+				});
 
-function PutJSON()
-{
-	var str='{"sheet":"https://docs.google.com/spreadsheets/d/1eIVvLS7mt7pdSGI83UvdklzddBZ-N0_9gBkmWnEaxLg/edit?usp=sharing","upDownSplit":0.6416666666666667,"leftRightSplit":0.66,"mapTextCol":"#ff9900","mapTextFont":"bold 12px sans-serif ","baseMap":"Satellite","timeFormat":"Mo/Year","start":"1/1740","end":"1/1830","muteSound":false,"mapStartPos":"-77.0262,38.6073,611","title":"Changed title '+times+'","panTime":"0.5","mobs":[],"storyMode":"Stepped","defaultSpeed":"","autoSizeTimeline":true,"hideTimelineDates":false}'
-	document.getElementById("appIF").contentWindow.postMessage("PutJSON="+str,"*");	 			// Send message to Iframe
-	times++;
-}
+			app.sceneView=new SceneView( { container:null, map: map	});
+	
+			app.base = new BasemapGallery({
+				view: app.mapView,
+				source: { portal: { url: "https://www.arcgis.com", useVectorBasemaps: true } }
+				});
+			app.base.visible=false;
+		});
 
-function Reload()
-{
-	document.getElementById("appIF").contentWindow.postMessage("Reload=true","*");	 			// Send message to Iframe
-}
+// HELPERS //////////////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////// PLUMBING //////////////////////////////////////////////////////
-
-if (window.addEventListener) 											// If supported this way
-	window.addEventListener("message",shivaEventHandler,false);			// Add event handler
-	else																// Use other method
-		window.attachEvent("message",shivaEventHandler);				// Add handler
-
-function SendShivaMessage(src, msg) 									// SEND SHIVA MESSAGE 
+	function PickBaseMap()
 	{
-		var str=src;															// Add src and window						
-		if (msg)																// If more to it
-			str+="|"+msg;														// Add it
-		if (window.parent)														// If has a parent
-			window.parent.postMessage(str,"*");									// Send message to parent wind
-		else																	// Local	
-			window.postMessage(str,"*");										// Send message to wind
+		if (app.base.visible)		app.activeView.ui.remove(app.base);
+		else						app.activeView.ui.add(app.base,"top-right");
+		app.base.visible=!app.base.visible;
 	}
 
-	function shivaEventHandler(e)											// ON SHIVA EVENT
+	function SwitchView() 
 	{
-		trace(e.data);
-	}
+		var is3D=app.activeView.type === "3d";
+		var activeViewpoint=app.activeView.viewpoint.clone();
+		app.activeView.container=null;
+		
+		if (is3D) {
+			// if the input view is a SceneView, set the viewpoint on the
+			// mapView instance. Set the container on the mapView and flag
+			// it as the active view
+			app.mapView.viewpoint = activeViewpoint;
+			app.mapView.container = app.container;
+			app.activeView = app.mapView;
+			switchButton.value = "3D";
+			} 
+		else {
+			app.sceneView.viewpoint = activeViewpoint;
+			app.sceneView.container = app.container;
+			app.activeView = app.sceneView;
+			switchButton.value = "2D";
+			}
+	}		
 
-	function trace(msg, p1, p2, p3, p4)										// CONSOLE 
+	function trace(msg, p1, p2, p3, p4)									
 	{
 		if (p4 != undefined)
 			console.log(msg,p1,p2,p3,p4);
@@ -75,6 +96,9 @@ function SendShivaMessage(src, msg) 									// SEND SHIVA MESSAGE
 			console.log(msg,p1);
 		else
 			console.log(msg);
-	}	
+	}
+
 </script>
-</body></html> 
+</body>
+</html>
+
