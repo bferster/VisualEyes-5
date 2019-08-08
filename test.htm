@@ -20,31 +20,49 @@
 	  </div>
 	<script>
 
-	var app={ basePick:null, container: "viewDiv",																	// Holds startup parameters
+	var app={ basePick:null, container: "viewDiv",map:null,																	// Holds startup parameters
 			  mapView: null,  sceneView: null, activeView: null, baseMap: "topo-vector",
-   			  center: [91.1721, 29.6524], zoom: 12, tilt:65,
+   			  center: [91.1721, 29.6524], zoom: 12,
 			  switchButton: document.getElementById("switch-btn")
 	    	  };
+
 	
 	app.switchButton.addEventListener("click", function() { app.SwitchView();  });									// SWITCH VIEW BUTTON HANDLER
 	document.getElementById("base-btn").addEventListener("click", function()   { app.PickBaseMap(); });				// SWITCH BASEMAP BUTTON HANDLER
 
-	require(["esri/Map","esri/views/MapView","esri/views/SceneView", "esri/widgets/BasemapGallery"],				// ARCGIS REQUIRED  MODULES
+	require(["esri/Map","esri/WebMap","esri/views/MapView","esri/views/SceneView", "esri/widgets/BasemapGallery","esri/widgets/Legend","esri/widgets/ScaleBar"],	// ARCGIS REQUIRED  MODULES
 	
-		function(Map, MapView, SceneView, BasemapGallery) {																// When loaded
-		
-			var map=new Map({ basemap:app.baseMap});																	// Make new map
-			app.sceneView=new SceneView( { 	container:null,	map: map });												// 3D view (hidden)
+		function(Map, WebMap, MapView, SceneView, BasemapGallery, Legend, ScaleBar) {									// When loaded
+			var url=window.location.search.substring(1);																// Get query string
+			if (url && url.match(/id=/i)) {																				// If id spec'd via id=
+				url=url.match(/id=(.*)/i)[1];																			// Extract number
+				}
+			if (url) {	
+				app.map=new WebMap({ portalItem: { id: url }});															// Get webmap
+				app.map.load().then(function() {
+					trace(app.map.portalItem)
+					app.center[0]=app.map.portalItem.extent.center.longitude;
+					app.center[1]=app.map.portalItem.extent.center.latitude;
+					app.zoom=5	
+				});
+				}
+			else
+				app.map=new Map({ basemap:app.baseMap});																// Make new map
+			
+			app.sceneView=new SceneView( { 	container:null,	map: app.map });											// 3D view (hidden)
 			app.activeView=app.mapView=new MapView({																	// 2D view
-				container: app.container, map: map, 																	// Primary view
-				center: app.center,	zoom: app.zoom
+				container: app.container, map: app.map 																	// Primary view
 				});
 			app.basePick=new BasemapGallery({																			// Make basemap picker
 				view: app.mapView,
 				source: { portal: { url: "https://www.arcgis.com", useVectorBasemaps: true } }
 				});
 			app.basePick.visible=false;																					// Hide gallery
+//			app.mapView.ui.add(new Legend({ view: app.mapView }), "top-right");											// Add legend
+			app.mapView.ui.add(new ScaleBar({ view: app.mapView }), "bottom-left");										// Add scale
 
+			app.mapView.when(function() { app.activeView.goTo({ center:app.center, zoom: app.zoom }) });
+			
 			app.PickBaseMap=function()																				// HIDE/SHOW BASEMAP GALLERY
 			{
 				if (app.basePick.visible)		app.activeView.ui.remove(app.basePick);									// If visible, hide
