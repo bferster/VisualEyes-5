@@ -20,69 +20,57 @@
 	  </div>
 	<script>
 
-	var app={ base:null, container: "viewDiv",
-			  mapView: null,  sceneView: null, activeView: null,
-   			  center: [91.1721, 29.6524], zoom: 12
+	var app={ basePick:null, container: "viewDiv",																	// Holds startup parameters
+			  mapView: null,  sceneView: null, activeView: null, baseMap: "topo-vector",
+   			  center: [91.1721, 29.6524], zoom: 12, tilt:65,
+			  switchButton: document.getElementById("switch-btn")
 	    	  };
 	
-	var switchButton=document.getElementById("switch-btn");
-	switchButton.addEventListener("click", function() { SwitchView();  });
-	document.getElementById("base-btn").addEventListener("click", function()   { PickBaseMap(); });
+	app.switchButton.addEventListener("click", function() { app.SwitchView();  });									// SWITCH VIEW BUTTON HANDLER
+	document.getElementById("base-btn").addEventListener("click", function()   { app.PickBaseMap(); });				// SWITCH BASEMAP BUTTON HANDLER
 
-	require(["esri/Map","esri/views/MapView","esri/views/SceneView", "esri/widgets/BasemapGallery"],
-		function(Map, MapView, SceneView, BasemapGallery) {
-		
-			var map=new Map({
-				basemap: "topo-vector",
-				});
-
-			app.activeView=app.mapView=new MapView({
-				map: map,
-				container: app.container, 
-				center: app.center,
-				zoom: app.zoom
-				});
-
-			app.sceneView=new SceneView( { container:null, map: map	});
+	require(["esri/Map","esri/views/MapView","esri/views/SceneView", "esri/widgets/BasemapGallery"],				// ARCGIS REQUIRED  MODULES
 	
-			app.base = new BasemapGallery({
+		function(Map, MapView, SceneView, BasemapGallery) {																// When loaded
+		
+			var map=new Map({ basemap:app.baseMap});																	// Make new map
+			app.sceneView=new SceneView( { 	container:null,	map: map });												// 3D view (hidden)
+			app.activeView=app.mapView=new MapView({																	// 2D view
+				container: app.container, map: map, 																	// Primary view
+				center: app.center,	zoom: app.zoom
+				});
+			app.basePick=new BasemapGallery({																			// Make basemap picker
 				view: app.mapView,
 				source: { portal: { url: "https://www.arcgis.com", useVectorBasemaps: true } }
 				});
-			app.base.visible=false;
-		});
+			app.basePick.visible=false;																					// Hide gallery
 
-// HELPERS //////////////////////////////////////////////////////////////////////////////////////
-
-	function PickBaseMap()
-	{
-		if (app.base.visible)		app.activeView.ui.remove(app.base);
-		else						app.activeView.ui.add(app.base,"top-right");
-		app.base.visible=!app.base.visible;
-	}
-
-	function SwitchView() 
-	{
-		var is3D=app.activeView.type === "3d";
-		var activeViewpoint=app.activeView.viewpoint.clone();
-		app.activeView.container=null;
-		
-		if (is3D) {
-			// if the input view is a SceneView, set the viewpoint on the
-			// mapView instance. Set the container on the mapView and flag
-			// it as the active view
-			app.mapView.viewpoint = activeViewpoint;
-			app.mapView.container = app.container;
-			app.activeView = app.mapView;
-			switchButton.value = "3D";
-			} 
-		else {
-			app.sceneView.viewpoint = activeViewpoint;
-			app.sceneView.container = app.container;
-			app.activeView = app.sceneView;
-			switchButton.value = "2D";
+			app.PickBaseMap=function()																				// HIDE/SHOW BASEMAP GALLERY
+			{
+				if (app.basePick.visible)		app.activeView.ui.remove(app.basePick);									// If visible, hide
+				else							app.activeView.ui.add(app.basePick,"top-right");						// Else show
+				app.basePick.visible=!app.basePick.visible;																// Toggle flag (why?)
 			}
-	}		
+
+			app.SwitchView=function() 																				// SWITCH 2D/3D MODE
+			{
+				var is3D=app.activeView.type === "3d";																	// Current mode												
+				var activeViewpoint=app.activeView.viewpoint.clone();													// Clone viewport
+				app.activeView.container=null;																			// Hide current one
+				
+				if (is3D) {																								// If 3D now
+					app.activeView=app.mapView;																			// Use 2D view
+					app.switchButton.value="3D";																		// Set button
+					} 
+				else{																									// If 2D now
+					app.activeView=app.sceneView;																		// Use 2D view
+					app.switchButton.value="2D";																		// Set button
+					}
+				app.activeView.viewpoint=activeViewpoint;																// Set viewport
+				app.activeView.container=app.container;																	// Set container
+ 
+			}		
+	});
 
 	function trace(msg, p1, p2, p3, p4)									
 	{
