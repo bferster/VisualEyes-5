@@ -56,13 +56,16 @@
 				}
 			else
 				app.map=new Map({ basemap:app.baseMap});																// Make new map
-			
+
 			app.sceneView=new SceneView( { 	container:null,	map: app.map });											// 3D view (hidden)
 			app.activeView=app.mapView=new MapView({																	// 2D view
 				container: app.container, map: app.map, 																// Primary view
 				ground: "world-elevation"
  				});
-
+			
+			if (window.addEventListener) 	window.addEventListener("message",app.HandleMessage,false);					// Listen for cross-domain messages
+			else							window.attachEvent("message",app.HandleMessage);							// For other browsers				
+	
 // ADD WIDGETS 
 
 			app.basePick=new BasemapGallery({ view:app.mapView, source: { portal: { url:"https://www.arcgis.com", useVectorBasemaps: true } },visible:false }); // Add basemap picker
@@ -76,8 +79,23 @@
 			
 // POSITION
 
-			app.mapView.when(function() { app.mapView.goTo({ center:app.center, zoom: app.zoom }) });
-			app.sceneView.when(function() { app.sceneView.goTo({ center:app.center, zoom: app.zoom, tilt:80 }) })
+			app.mapView.when(function() { app.mapView.goTo({ center:app.center, zoom: app.zoom });	});
+			app.sceneView.when(function() { app.sceneView.goTo({ center:app.center, zoom: app.zoom, tilt:80 });	});
+
+// EVENTS
+			app.mapView.on("click", function(e) {
+				var lat=Math.round(e.mapPoint.latitude*1000)/1000;
+				var lon=Math.round(e.mapPoint.longitude*1000)/1000;
+				app.SendMessage("click|"+lat+"|"+lon);
+				});
+
+			app.sceneView.on("click", function(e) {
+				var lat=Math.round(e.mapPoint.latitude*1000)/1000;
+				var lon=Math.round(e.mapPoint.longitude*1000)/1000;
+				app.SendMessage("click|"+lat+"|"+lon);
+				});
+	
+	
 
 // HELPER FUNCTIONS //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -102,7 +120,7 @@
 				app.legend.visible=!app.legend.visible;																// Toggle flag (why?)
 			}
 
-		app.SwitchView=function() 																				// SWITCH 2D/3D MODE
+			app.SwitchView=function() 																				// SWITCH 2D/3D MODE
 			{
 				var is3D=app.activeView.type === "3d";																	// Current mode												
 				var activeViewpoint=app.activeView.viewpoint.clone();													// Clone viewport
@@ -118,7 +136,23 @@
 					}
 				app.activeView.viewpoint=activeViewpoint;																// Set viewport
 				app.activeView.container=app.container;																	// Set container
- 			}		
+			}		
+	
+			app.SendMessage=function(msg) 																			// SEND CROSS-DOMAIN MESSAGE
+			{
+				if (!msg)	return;																						// Nothing
+				msg="map="+msg;																							// Add header
+				if (window.parent)	window.parent.postMessage(msg,"*");													// If has a parent
+				else				window.postMessage(str,"*");														// Send message locally
+			}
+
+			app.HandleMessage=function(msg) 																		// HANDLE INCOMING  CROSS-DOMAIN MESSAGE
+			{
+				var m=msg.data;																							// Point at payload
+				trace(msg)
+	//			app.sceneView.goTo({ center:app.center, zoom: app.zoom, tilt:80 });
+			}
+
 	});
 
 	function trace(msg, p1, p2, p3, p4)									
