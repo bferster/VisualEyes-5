@@ -17,8 +17,8 @@
 	<div id="infoDiv">
 		<input class="esri-component esri-widget--button esri-widget esri-interactive" type="button" id="switch-btn" value="3D"                 title="Change view" />
 		<img   class="esri-component esri-widget--button esri-widget esri-interactive" type="button" id="base-btn"   src="img/basemapicon.gif"  title="Change base map"/>
-		<img   class="esri-component esri-widget--button esri-widget esri-interactive" type="button" id="book-btn"   src="img/bookmarkicon.gif" title="Show bookmarks" />
 		<img   class="esri-component esri-widget--button esri-widget esri-interactive" type="button" id="legend-btn" src="img/legendicon.gif"   title="Show legend" />
+		<img   class="esri-component esri-widget--button esri-widget esri-interactive" type="button" id="book-btn"   src="img/bookmarkicon.gif" title="Show bookmarks" />
 	  </div>
 
 <script>
@@ -67,7 +67,7 @@
 
 			app.basePick=new BasemapGallery({ view:app.mapView, source: { portal: { url:"https://www.arcgis.com", useVectorBasemaps: true } },visible:false }); // Add basemap picker
 			app.mapView.ui.add(new ScaleBar({ view:app.mapView }), "bottom-left");										// Add scale widget
-			app.mapView.ui.add(new Search({ view:app.mapView }), "top-right");										// Add scale widget
+			app.mapView.ui.add(new Search({ view:app.mapView }), "top-right");											// Add scale widget
 
 			app.bookmarks=new Bookmarks({ view:app.mapView, visible:false });											// Add bookmarks widget to map
 			document.getElementById("book-btn").addEventListener("click", function() { app.ShowBookmarks();  });		// Bookmarks button handle
