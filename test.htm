@@ -23,7 +23,7 @@
 
 <script>
 
-//			  http://localhost/test.htm?26fe0e56797449b0be29031512f9adaa
+//			  localhost/test.htm?26fe0e56797449b0be29031512f9adaa
 
 	var app={ basePick:null, container: "viewDiv", map:null, bookmarks:null, legend:null,							// Holds startup parameters
 			  mapView: null,  sceneView: null, activeView: null, baseMap: "topo-vector",
@@ -36,10 +36,11 @@
 	document.getElementById("base-btn").addEventListener("click", function()   { app.PickBaseMap(); });				// SWITCH BASEMAP BUTTON HANDLER
 
 	require( ["esri/Map","esri/WebMap", "esri/views/MapView", "esri/views/SceneView",								// ARCGIS required modules
-			  "esri/widgets/BasemapGallery", "esri/widgets/Legend",
-			  "esri/widgets/ScaleBar", "esri/widgets/Bookmarks"],	
+			  "esri/widgets/BasemapGallery", "esri/widgets/Legend","esri/widgets/ScaleBar",
+			   "esri/widgets/Bookmarks", "esri/widgets/Search"],	
 	
-		function(Map, WebMap, MapView, SceneView, BasemapGallery, Legend, ScaleBar, Bookmarks) {						// When loaded
+		function(Map, WebMap, MapView, SceneView, BasemapGallery, Legend, ScaleBar, Bookmarks, Search) {				// When loaded
+
 			var url=window.location.search.substring(1);																// Get query string
 			if (url && url.match(/id=/i)) {																				// If id spec'd via id=
 				url=url.match(/id=(.*)/i)[1];																			// Extract number
@@ -58,7 +59,7 @@
 			
 			app.sceneView=new SceneView( { 	container:null,	map: app.map });											// 3D view (hidden)
 			app.activeView=app.mapView=new MapView({																	// 2D view
-				container: app.container, map: app.map, 																	// Primary view
+				container: app.container, map: app.map, 																// Primary view
 				ground: "world-elevation"
  				});
 
@@ -66,6 +67,8 @@
 
 			app.basePick=new BasemapGallery({ view:app.mapView, source: { portal: { url:"https://www.arcgis.com", useVectorBasemaps: true } },visible:false }); // Add basemap picker
 			app.mapView.ui.add(new ScaleBar({ view:app.mapView }), "bottom-left");										// Add scale widget
+			app.mapView.ui.add(new Search({ view:app.mapView }), "top-right");										// Add scale widget
+
 			app.bookmarks=new Bookmarks({ view:app.mapView, visible:false });											// Add bookmarks widget to map
 			document.getElementById("book-btn").addEventListener("click", function() { app.ShowBookmarks();  });		// Bookmarks button handle
 			app.legend=new Legend({ view:app.mapView, visible:false });													// Add legend widget
