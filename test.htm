@@ -2,7 +2,8 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+	<link REL="SHORTCUT ICON" HREF="img/shanti.ico">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes, user-scalable=yes">
     <title>ArcGIS test</title>
 	<link rel="stylesheet" href="https://js.arcgis.com/4.12/esri/themes/light/main.css">
 	<script src="https://js.arcgis.com/4.12/"></script>
@@ -24,7 +25,6 @@
 	</div>
 	<div id="traceDiv" style="position:absolute;background-color:#fff;padding:4px;top:16px;left:16px"></div>
 
-
 <script>
 
 //			  localhost/test.htm?26fe0e56797449b0be29031512f9adaa
@@ -32,7 +32,7 @@
 	var app={ container: "viewDiv", map:null, baseMap:"topo-vector", opt:0xffff,									// Holds startup parameters
 			  bookmarks:null, legend:null, layer:null, basePick:null, sketch:null,				
 			  mapView: null,  sceneView: null, activeView: null, 
-   			  center: [91.1721, 29.6524], scale:3000000, kml:null,
+   			  center: [91.1721, 29.6524], zoom:6, kml:null,
 			  reqs:["esri/Map","esri/WebMap", "esri/views/MapView", "esri/views/SceneView", "esri/layers/KMLLayer"]
 			 };
 	
@@ -41,7 +41,7 @@
 	if (url && url.match(/base=/i)) 	app.baseMap=url.match(/base=([^&]*)/i)[1];										// If base map spec'd 
 	if (url && url.match(/lon=/i)) 		app.center[0]=url.match(/lon=([^&]*)/i)[1]-0;									// If lon spec'd 
 	if (url && url.match(/lat=/i)) 		app.center[1]=url.match(/lat=([^&]*)/i)[1]-0;									// If lat spec'd 
-	if (url && url.match(/scale=/i)) 	app.scale=url.match(/scale=([^&]*)/i)[1]-0;										// If scale spec'd 
+	if (url && url.match(/zoom=/i)) 	app.zoom=url.match(/zoom=([^&]*)/i)[1]-0;										// If zoom spec'd 
 	if (url && url.match(/tilt=/i)) 	app.tilt=url.match(/tilt=([^&]*)/i)[1]-0;										// If tilt spec'd 
 	if (url && url.match(/opt=/i)) 		app.opt=url.match(/opt=([^&]*)/i)[1]-0;											// Options are bitmapped: 1=Scale, 2=Search, 4=3D, 8=Base, 16=Layers, 32=Legend. 64=Sketch, 128=Bookmarks
 
@@ -84,11 +84,9 @@
 			if (url && url.match(/id=/i)) {																				// If WebMap id spec'd
 				url=url.match(/id=([^&]*)/i)[1];																		// Extract number
 				app.map=new WebMap({ portalItem: { id: url }});															// Get webmap
-				app.map.load().then(function() {
-					trace(app.map)
-					app.center[0]=app.map.portalItem.extent.center.longitude;
-					app.center[1]=app.map.portalItem.extent.center.latitude;
-					app.scale=app.map.portalItem.width*284857.39;														// KLUGE!
+				app.map.load().then(function() {																		// When loaded
+					app.center[0]=app.map.portalItem.extent.center.longitude;											// Set lon
+					app.center[1]=app.map.portalItem.extent.center.latitude;											// Set lat
 					});
 				}
 			else
@@ -134,8 +132,8 @@
 				
 // POSITION
 
-			app.mapView.when(function() { app.mapView.goTo({ center:app.center, scale: app.scale });	});
-			app.sceneView.when(function() { app.sceneView.goTo({ center:app.center, scale: app.scale, tilt:80 });	});
+			app.mapView.when(function() { app.mapView.goTo({ center:app.center, zoom: app.zoom });	});
+			app.sceneView.when(function() { app.sceneView.goTo({ center:app.center, zoom: app.zoom, tilt:80 });	});
 
 // EVENTS
 			app.mapView.on("click", function(e) {
@@ -192,7 +190,7 @@
 			{
 				var m=msg.data;																							// Point at payload
 				trace(msg)
-	//			app.sceneView.goTo({ center:app.center, scale: app.scale, tilt:80 });
+	//			app.sceneView.goTo({ center:app.center, zoom: app.zoom, tilt:80 });
 			}
 
 	});
