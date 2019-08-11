@@ -98,8 +98,12 @@
 				ground: "world-elevation"
  				});
 			
-			if (app.kml) app.map.add(new KMLLayer({	url:app.kml }));													// Add KML/KMZ if spec'd	
-			
+			if (app.kml) {																								// Add KML/KMZ if spec'd	
+				app.kml=new KMLLayer({ url:app.kml });																	// Make new layer
+				app.map.add(app.kml);																					// Add it to map
+//				app.kml.when(function() { ZoomToLayer(app.kml) });														// Go there														// When loaded
+				}
+
 			if (window.addEventListener) 	window.addEventListener("message",app.HandleMessage,false);					// Listen for cross-domain messages
 			else							window.attachEvent("message",app.HandleMessage);							// For other browsers				
 
@@ -132,7 +136,7 @@
 				
 // POSITION
 
-			app.mapView.when(function() { app.mapView.goTo({ center:app.center, zoom: app.zoom });	});
+			app.mapView.when(function() { if (app.kml != 112) app.mapView.goTo({ center:app.center, zoom: app.zoom });	});
 			app.sceneView.when(function() { app.sceneView.goTo({ center:app.center, zoom: app.zoom, tilt:80 });	});
 
 // EVENTS
@@ -152,6 +156,9 @@
 
 // HELPER FUNCTIONS //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+			app.ZoomToLayer=function(layer) {
+   				app.mapView.extent=layer.fullExtent;
+			}
 
 			app.ToggleOption=function(option)																		// HIDE/SHOW WIDGET OPTION
 			{
@@ -162,6 +169,8 @@
 	
 			app.SwitchView=function() 																				// SWITCH 2D/3D MODE
 			{
+
+//app.ZoomToLayer(app.kml); return;
 				var is3D=app.activeView.type === "3d";																	// Current mode												
 				var activeViewpoint=app.activeView.viewpoint.clone();													// Clone viewport
 				app.activeView.container=null;																			// Hide current one
