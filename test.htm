@@ -32,7 +32,7 @@
 	var app={ container: "viewDiv", map:null, baseMap:"topo-vector", opt:0xffff,									// Holds startup parameters
 			  bookmarks:null, legend:null, layer:null, basePick:null, sketch:null,				
 			  mapView: null,  sceneView: null, activeView: null, 
-   			  center: [91.1721, 29.6524], zoom:6, kml:null,
+   			  center: [91.1721, 29.6524], zoom:12, kml:null,
 			  reqs:["esri/Map","esri/WebMap", "esri/views/MapView", "esri/views/SceneView", "esri/layers/KMLLayer"]
 			 };
 	
@@ -74,135 +74,127 @@
 			else if (key == "Bookmarks")		Bookmarks=arguments[i];
 			}
 
-			document.getElementById("switch-btn").style.display=(app.opt&4) ? "block" : "none";							// Hide/show icons
-			document.getElementById("base-btn").style.display=(app.opt&8) ? "block" : "none";							
-			document.getElementById("layer-btn").style.display=(app.opt&16) ? "block" : "none";							
-			document.getElementById("sketch-btn").style.display=(app.opt&32) ? "block" : "none";						
-			document.getElementById("legend-btn").style.display=(app.opt&64) ? "block" : "none";						
-			document.getElementById("book-btn").style.display=(app.opt&128) ? "block" : "none";							
-			
-			if (url && url.match(/id=/i)) {																				// If WebMap id spec'd
-				url=url.match(/id=([^&]*)/i)[1];																		// Extract number
-				app.map=new WebMap({ portalItem: { id: url }});															// Get webmap
-				app.map.load().then(function() {																		// When loaded
-					app.center[0]=app.map.portalItem.extent.center.longitude;											// Set lon
-					app.center[1]=app.map.portalItem.extent.center.latitude;											// Set lat
-					});
-				}
-			else
-				app.map=new Map({ basemap:app.baseMap});																// Make new map
+		document.getElementById("switch-btn").style.display=(app.opt&4) ? "block" : "none";								// Hide/show icons
+		document.getElementById("base-btn").style.display=(app.opt&8) ? "block" : "none";							
+		document.getElementById("layer-btn").style.display=(app.opt&16) ? "block" : "none";							
+		document.getElementById("sketch-btn").style.display=(app.opt&32) ? "block" : "none";						
+		document.getElementById("legend-btn").style.display=(app.opt&64) ? "block" : "none";						
+		document.getElementById("book-btn").style.display=(app.opt&128) ? "block" : "none";							
+		
+		if (url && url.match(/id=/i)) 	app.map=new WebMap({ portalItem: { id: url.match(/id=([^&]*)/i)[1] }});			// If WebMap id spec'd, load it
+		else						  	app.map=new Map({ basemap:app.baseMap});										// Make new map
 
-			app.sceneView=new SceneView( { 	container:null,	map: app.map });											// 3D view (hidden)
-			app.activeView=app.mapView=new MapView({																	// 2D view
-				container: app.container, map: app.map, 																// Primary view
-				ground: "world-elevation"
- 				});
-			
-			if (app.kml) {																								// Add KML/KMZ if spec'd	
-				app.kml=new KMLLayer({ url:app.kml });																	// Make new layer
-				app.map.add(app.kml);																					// Add it to map
-//				app.kml.when(function() { ZoomToLayer(app.kml) });														// Go there														// When loaded
-				}
+		app.sceneView=new SceneView( { 	container:null,	map: app.map });												// 3D view (hidden)
+		app.activeView=app.mapView=new MapView({																		// 2D view
+			container: app.container, map: app.map, 																	// Primary view
+			ground: "world-elevation"
+			});
+		
+		if (app.kml) {																									// Add KML/KMZ if spec'd	
+			app.kml=new KMLLayer({ url:app.kml });																		// Make new layer
+			app.map.add(app.kml);																						// Add it to map
+//			app.kml.when(function() { ZoomToLayer(app.kml) });															// Go there, when loaded
+			}
 
-			if (window.addEventListener) 	window.addEventListener("message",app.HandleMessage,false);					// Listen for cross-domain messages
-			else							window.attachEvent("message",app.HandleMessage);							// For other browsers				
+		if (window.addEventListener) 	window.addEventListener("message",app.HandleMessage,false);						// Listen for cross-domain messages
+		else							window.attachEvent("message",app.HandleMessage);								// For other browsers				
 
 // ADD WIDGETS 
 
-			if (app.opt&1)  app.mapView.ui.add(new ScaleBar({ view:app.mapView }), "bottom-left");						// Add scale widget
-			if (app.opt&2)  app.mapView.ui.add(new Search({ view:app.mapView }), "top-right");							// Add Search widget
-			if (app.opt&4)	document.getElementById("switch-btn").addEventListener("click", function() { app.SwitchView();  });// 3D
-			if (app.opt&8) {																							// Add basemap picker
-				app.basePick=new BasemapGallery({ view:app.mapView, source: { portal: { url:"https://www.arcgis.com", useVectorBasemaps: true } }, visible:false }); 
-				document.getElementById("base-btn").addEventListener("click", function() { app.ToggleOption(app.basePick); });	 // Add button handler
-				}
-			if (app.opt&16) {																							// Layer list
-				app.layer=new LayerList({ view:app.mapView, visible:false });											// Add widger							
-				 document.getElementById("layer-btn").addEventListener("click", function() { app.ToggleOption(app.layer);  });	// Add button handler
-				}
-			 if (app.opt&32) {																							// Legend
-				app.legend=new Legend({ view:app.mapView, visible:false });												// Add widget					
-				document.getElementById("legend-btn").addEventListener("click", function() { app.ToggleOption(app.legend); });	// Add button handler
-				}
-			if (app.opt&64) {																							// Sketch 
-				var gl=new GraphicsLayer();  app.map.add(gl);															// Add new graphics layer to map
-				app.sketch=new Sketch({ view:app.mapView, visible:false, layer:gl });									// Add widget
-				document.getElementById("sketch-btn").addEventListener("click", function() { app.ToggleOption(app.sketch); });		// Add button handler
-				}
-			if (app.opt&128) {  																						// Bookmarks
-				app.bookmarks=new Bookmarks({ view:app.mapView, visible:false });										// Add widget
-				document.getElementById("book-btn").addEventListener("click", function() { app.ToggleOption(app.bookmarks); });	 // Add button handler
-				}
-				
+		if (app.opt&1)  app.mapView.ui.add(new ScaleBar({ view:app.mapView }), "bottom-left");							// Add scale widget
+		if (app.opt&2)  app.mapView.ui.add(new Search({ view:app.mapView }), "top-right");								// Add Search widget
+		if (app.opt&4)	document.getElementById("switch-btn").addEventListener("click", function() { app.SwitchView();  });// 3D
+		if (app.opt&8) {																								// Add basemap picker
+			app.basePick=new BasemapGallery({ view:app.mapView, source: { portal: { url:"https://www.arcgis.com", useVectorBasemaps: true } }, visible:false }); 
+			document.getElementById("base-btn").addEventListener("click", function() { app.ToggleOption(app.basePick); });	 // Add button handler
+			}
+		if (app.opt&16) {																								// Layer list
+			app.layer=new LayerList({ view:app.mapView, visible:false });												// Add widger							
+				document.getElementById("layer-btn").addEventListener("click", function() { app.ToggleOption(app.layer);  });	// Add button handler
+			}
+			if (app.opt&32) {																							// Legend
+			app.legend=new Legend({ view:app.mapView, visible:false });													// Add widget					
+			document.getElementById("legend-btn").addEventListener("click", function() { app.ToggleOption(app.legend); });	// Add button handler
+			}
+		if (app.opt&64) {																								// Sketch 
+			var gl=new GraphicsLayer();  app.map.add(gl);																// Add new graphics layer to map
+			app.sketch=new Sketch({ view:app.mapView, visible:false, layer:gl });										// Add widget
+			document.getElementById("sketch-btn").addEventListener("click", function() { app.ToggleOption(app.sketch); });	// Add button handler
+			}
+		if (app.opt&128) {  																							// Bookmarks
+			app.bookmarks=new Bookmarks({ view:app.mapView, visible:false });											// Add widget
+			document.getElementById("book-btn").addEventListener("click", function() { app.ToggleOption(app.bookmarks); });	 // Add button handler
+			}
+			
 // POSITION
 
-			app.mapView.when(function() { if (app.kml != 112) app.mapView.goTo({ center:app.center, zoom: app.zoom });	});
-			app.sceneView.when(function() { app.sceneView.goTo({ center:app.center, zoom: app.zoom, tilt:80 });	});
+		app.mapView.when(function() { 																					// When 2D map loads
+			if (!app.map.portalItem) app.mapView.goTo({ center:app.center, zoom:app.zoom });							// Center	
+			});
+		app.sceneView.when(function() { app.sceneView.goTo({ tilt:80 }); });											// When 3D loads, tilt
 
 // EVENTS
-			app.mapView.on("click", function(e) {
-				var lat=Math.round(e.mapPoint.latitude*1000)/1000;
-				var lon=Math.round(e.mapPoint.longitude*1000)/1000;
-				app.SendMessage("click|"+lat+"|"+lon);
-				});
+		app.mapView.on("click", function(e) {
+			var lat=Math.round(e.mapPoint.latitude*1000)/1000;
+			var lon=Math.round(e.mapPoint.longitude*1000)/1000;
+			app.SendMessage("click|"+lat+"|"+lon);
+			});
 
-			app.sceneView.on("click", function(e) {
-				var lat=Math.round(e.mapPoint.latitude*1000)/1000;
-				var lon=Math.round(e.mapPoint.longitude*1000)/1000;
-				app.SendMessage("click|"+lat+"|"+lon);
-				});
+		app.sceneView.on("click", function(e) {
+			var lat=Math.round(e.mapPoint.latitude*1000)/1000;
+			var lon=Math.round(e.mapPoint.longitude*1000)/1000;
+			app.SendMessage("click|"+lat+"|"+lon);
+			});
 	
-
-
 // HELPER FUNCTIONS //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			app.ZoomToLayer=function(layer) {
-   				app.mapView.extent=layer.fullExtent;
+		app.ZoomToLayer=function(layer) {																			// ZOOM TO A LAYER
+			app.mapView.extent=layer.fullExtent;																		// Zoom to layer's extent
 			}
 
-			app.ToggleOption=function(option)																		// HIDE/SHOW WIDGET OPTION
-			{
-				if (option.visible)	app.activeView.ui.remove(option);													// If visible, hide
-				else				app.activeView.ui.add(option,"top-right");											// Else show
-				option.visible=!option.visible;																			// Toggle flag (why?)
-			}
-	
-			app.SwitchView=function() 																				// SWITCH 2D/3D MODE
-			{
+		app.ToggleOption=function(option)																			// HIDE/SHOW WIDGET OPTION
+		{
+			if (option.visible)	app.activeView.ui.remove(option);														// If visible, hide
+			else				app.activeView.ui.add(option,"top-right");												// Else show
+			option.visible=!option.visible;																				// Toggle flag (why?)
+		}
+
+		app.SwitchView=function() 																					// SWITCH 2D/3D MODE
+		{
 
 //app.ZoomToLayer(app.kml); return;
-				var is3D=app.activeView.type === "3d";																	// Current mode												
-				var activeViewpoint=app.activeView.viewpoint.clone();													// Clone viewport
-				app.activeView.container=null;																			// Hide current one
-				
-				if (is3D) {																								// If 3D now
-					app.activeView=app.mapView;																			// Use 2D view
-					document.getElementById("switch-btn").value="3D";													// Set button
-					} 
-				else{																									// If 2D now
-					app.activeView=app.sceneView;																		// Use 2D view
-					document.getElementById("switch-btn").value="2D";													// Set button
-					}
-				app.activeView.viewpoint=activeViewpoint;																// Set viewport
-				app.activeView.container=app.container;																	// Set container
-			}		
-	
-			app.SendMessage=function(msg) 																			// SEND CROSS-DOMAIN MESSAGE
-			{
-				if (!msg)	return;																						// Nothing
-				msg="map="+msg;																							// Add header
-				if (window.parent)	window.parent.postMessage(msg,"*");													// If has a parent
-				else				window.postMessage(str,"*");														// Send message locally
-			}
+			var is3D=app.activeView.type === "3d";																		// Current mode												
+			var activeViewpoint=app.activeView.viewpoint.clone();														// Clone viewport
+			app.activeView.container=null;																				// Hide current one
+			
+			if (is3D) {																									// If 3D now
+				app.activeView=app.mapView;																				// Use 2D view
+				document.getElementById("switch-btn").value="3D";														// Set button
+				} 
+			else{																										// If 2D now
+				app.activeView=app.sceneView;																			// Use 2D view
+				document.getElementById("switch-btn").value="2D";														// Set button
+				}
+			app.activeView.viewpoint=activeViewpoint;																	// Set viewport
+			app.activeView.container=app.container;																		// Set container
+		}		
 
-			app.HandleMessage=function(msg) 																		// HANDLE INCOMING  CROSS-DOMAIN MESSAGE
-			{
-				var m=msg.data;																							// Point at payload
-				trace(msg)
-	//			app.sceneView.goTo({ center:app.center, zoom: app.zoom, tilt:80 });
-			}
+		app.SendMessage=function(msg) 																				// SEND CROSS-DOMAIN MESSAGE
+		{
+			if (!msg)	return;																							// Nothing
+			msg="map="+msg;																								// Add header
+			if (window.parent)	window.parent.postMessage(msg,"*");														// If has a parent
+			else				window.postMessage(str,"*");															// Send message locally
+		}
 
-	});
+		app.HandleMessage=function(msg) 																			// HANDLE INCOMING  CROSS-DOMAIN MESSAGE
+		{
+			var m=msg.data;																								// Point at payload
+			trace(msg)
+//			app.sceneView.goTo({ center:app.center, zoom: app.zoom, tilt:80 });
+		}
+
+	});	// REQUIRE() CLOSURE
 
 	function trace(msg, p1, p2, p3, p4)									
 	{
@@ -216,9 +208,9 @@
 			console.log(msg,p1);
 		else
 			console.log(msg);
-//		document.getElementById("traceDiv").innerHTML+=msg+"<br>";
+	//		document.getElementById("traceDiv").innerHTML+=msg+"<br>";
 
-	}
+}
 
 </script>
 </body>
