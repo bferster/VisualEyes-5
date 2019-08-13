@@ -16,12 +16,12 @@
   <body>
 	<div id="viewDiv"></div>
 	<div id="infoDiv">
-		<input class="esri-component esri-widget--button esri-widget esri-interactive" type="button" id="switch-btn" value="3D"                 title="Change view" />
-		<img   class="esri-component esri-widget--button esri-widget esri-interactive" type="button" id="base-btn"   src="img/basemapicon.gif"  title="Change base map"/>
-		<img   class="esri-component esri-widget--button esri-widget esri-interactive" type="button" id="layer-btn"  src="img/layericon.png"    title="Show list of layers" />
-		<img   class="esri-component esri-widget--button esri-widget esri-interactive" type="button" id="legend-btn" src="img/legendicon.gif"   title="Show legend" />
-		<img   class="esri-component esri-widget--button esri-widget esri-interactive" type="button" id="sketch-btn" src="img/sketchicon.gif"   title="Show legend" />
-		<img   class="esri-component esri-widget--button esri-widget esri-interactive" type="button" id="book-btn"   src="img/bookmarkicon.gif" title="Show bookmarks" />
+		<input class="esri-component esri-widget--button esri-widget esri-interactive" type="button" style="display:none" id="switch-btn" value="3D"                 title="Change view" />
+		<img   class="esri-component esri-widget--button esri-widget esri-interactive" type="button" style="display:none" id="base-btn"   src="img/basemapicon.gif"  title="Change base map"/>
+		<img   class="esri-component esri-widget--button esri-widget esri-interactive" type="button" style="display:none" id="layer-btn"  src="img/layericon.png"    title="Show list of layers" />
+		<img   class="esri-component esri-widget--button esri-widget esri-interactive" type="button" style="display:none" id="legend-btn" src="img/legendicon.gif"   title="Show legend" />
+		<img   class="esri-component esri-widget--button esri-widget esri-interactive" type="button" style="display:none" id="sketch-btn" src="img/sketchicon.gif"   title="Show legend" />
+		<img   class="esri-component esri-widget--button esri-widget esri-interactive" type="button" style="display:none" id="book-btn"   src="img/bookmarkicon.gif" title="Show bookmarks" />
 	</div>
 	<div id="traceDiv" style="position:absolute;background-color:#fff;padding:4px;top:16px;left:16px"></div>
 
@@ -29,14 +29,14 @@
 
 //			  localhost/test.htm?26fe0e56797449b0be29031512f9adaa
 
-	var app={ container: "viewDiv", map:null, baseMap:"topo-vector", opt:0xffff,									// Holds startup parameters
-			  bookmarks:null, legend:null, layer:null, basePick:null, sketch:null,				
-			  mapView: null,  sceneView: null, activeView: null, 
-   			  center: [91.1721, 29.6524], zoom:12, kml:null,
+	var app={ url:url=window.location.search.substring(1), container:"viewDiv",											// Holds startup parameters													
+			  map:null, baseMap:"topo-vector", kml:null, 								
+			  mapView: null,  sceneView: null, activeView:null, opt:0xffff, show:0,
+			  bookmarks:null, legend:null, layers:null, basePick:null, sketch:null,				
+   			  center: [91.1721, 29.6524], zoom:12,
 			  reqs:["esri/Map","esri/WebMap", "esri/views/MapView", "esri/views/SceneView", "esri/layers/KMLLayer"]
 			 };
-	
-	var url=window.location.search.substring(1);																		// Get query string
+
 	if (url && url.match(/kml=/i)) 		app.kml=url.match(/kml=([^&]*)/i)[1]											// If kml/kmz spec'd 
 	if (url && url.match(/base=/i)) 	app.baseMap=url.match(/base=([^&]*)/i)[1];										// If base map spec'd 
 	if (url && url.match(/lon=/i)) 		app.center[0]=url.match(/lon=([^&]*)/i)[1]-0;									// If lon spec'd 
@@ -44,6 +44,7 @@
 	if (url && url.match(/zoom=/i)) 	app.zoom=url.match(/zoom=([^&]*)/i)[1]-0;										// If zoom spec'd 
 	if (url && url.match(/tilt=/i)) 	app.tilt=url.match(/tilt=([^&]*)/i)[1]-0;										// If tilt spec'd 
 	if (url && url.match(/opt=/i)) 		app.opt=url.match(/opt=([^&]*)/i)[1]-0;											// Options are bitmapped: 1=Scale, 2=Search, 4=3D, 8=Base, 16=Layers, 32=Legend. 64=Sketch, 128=Bookmarks
+	if (url && url.match(/show=/i)) 	app.show=url.match(/show=([^&]*)/i)[1]-0;										// Show is bitmapped: 16=Layers, 32=Legend. 64=Sketch, 128=Bookmarks
 
 	if (app.opt&1)	 app.reqs[5]="esri/widgets/ScaleBar";																// Scalebar if spec'd
 	if (app.opt&2)	 app.reqs[6]="esri/widgets/Search";																	// Search
@@ -73,27 +74,47 @@
 			else if (key == "GraphicsLayer")	GraphicsLayer=arguments[i];
 			else if (key == "Bookmarks")		Bookmarks=arguments[i];
 			}
-
+		
+	app.ShowOptions=function() 																						// SHOW ACTIVE OPTIONS
+	{	
 		document.getElementById("switch-btn").style.display=(app.opt&4) ? "block" : "none";								// Hide/show icons
 		document.getElementById("base-btn").style.display=(app.opt&8) ? "block" : "none";							
-		document.getElementById("layer-btn").style.display=(app.opt&16) ? "block" : "none";							
+		document.getElementById("layer-btn").style.display=(app.opt&16 && (app.map.portalItem || app.kml)) ? "block" : "none";							
 		document.getElementById("sketch-btn").style.display=(app.opt&32) ? "block" : "none";						
-		document.getElementById("legend-btn").style.display=(app.opt&64) ? "block" : "none";						
-		document.getElementById("book-btn").style.display=(app.opt&128) ? "block" : "none";							
+		document.getElementById("legend-btn").style.display=(app.opt&64 && app.map.portalItem)  ? "block" : "none";						
+		document.getElementById("book-btn").style.display=(app.opt&128 && app.map.bookmarks) ? "block" : "none";							
+		if (app.opt&16  && app.show&16) 	setOption(app.layers);														// Layers
+		if (app.opt&32  && app.show&32) 	setOption(app.legend);														// Legend
+		if (app.opt&64  && app.show&64) 	setOption(app.sketch);														// Sketch
+		if (app.opt&128 && app.show&128) 	setOption(app.bookmarks);													// Bookmarks
 		
-		if (url && url.match(/id=/i)) 	app.map=new WebMap({ portalItem: { id: url.match(/id=([^&]*)/i)[1] }});			// If WebMap id spec'd, load it
-		else						  	app.map=new Map({ basemap:app.baseMap});										// Make new map
+		function setOption(option) {																					// SET OPTION ON
+			app.activeView.ui.add(option,"top-right");																	// Show
+			option.visible=true;																						// Show it's on
+			}
+	}
 
+	if (url && url.match(/id=/i)) {																					// If WebMap id spec'd	
+			app.map=new WebMap({ portalItem: { id: url.match(/id=([^&]*)/i)[1] }});										// Load it
+			app.map.load().then(function() { 
+				app.ShowOptions() 																						// Hide/show options on load
+				})
+			}
+		else{																											// Plain map
+			app.map=new Map({ basemap:app.baseMap});																	// Make new map
+			app.ShowOptions();																							// Hide/show options
+			}
+		
 		app.sceneView=new SceneView( { 	container:null,	map: app.map });												// 3D view (hidden)
 		app.activeView=app.mapView=new MapView({																		// 2D view
 			container: app.container, map: app.map, 																	// Primary view
 			ground: "world-elevation"
 			});
-		
+
 		if (app.kml) {																									// Add KML/KMZ if spec'd	
 			app.kml=new KMLLayer({ url:app.kml });																		// Make new layer
 			app.map.add(app.kml);																						// Add it to map
-//			app.kml.when(function() { ZoomToLayer(app.kml) });															// Go there, when loaded
+			app.kml.when(function() { ZoomToLayer(app.kml) });															// Go there, when loaded
 			}
 
 		if (window.addEventListener) 	window.addEventListener("message",app.HandleMessage,false);						// Listen for cross-domain messages
@@ -109,8 +130,8 @@
 			document.getElementById("base-btn").addEventListener("click", function() { app.ToggleOption(app.basePick); });	 // Add button handler
 			}
 		if (app.opt&16) {																								// Layer list
-			app.layer=new LayerList({ view:app.mapView, visible:false });												// Add widger							
-				document.getElementById("layer-btn").addEventListener("click", function() { app.ToggleOption(app.layer);  });	// Add button handler
+			app.layers=new LayerList({ view:app.mapView, visible:false });												// Add widger							
+				document.getElementById("layer-btn").addEventListener("click", function() { app.ToggleOption(app.layers);  });	// Add button handler
 			}
 			if (app.opt&32) {																							// Legend
 			app.legend=new Legend({ view:app.mapView, visible:false });													// Add widget					
@@ -148,16 +169,16 @@
 	
 // HELPER FUNCTIONS //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		app.ZoomToLayer=function(layer) {																			// ZOOM TO A LAYER
-			app.mapView.extent=layer.fullExtent;																		// Zoom to layer's extent
-			}
-
 		app.ToggleOption=function(option)																			// HIDE/SHOW WIDGET OPTION
 		{
 			if (option.visible)	app.activeView.ui.remove(option);														// If visible, hide
 			else				app.activeView.ui.add(option,"top-right");												// Else show
 			option.visible=!option.visible;																				// Toggle flag (why?)
 		}
+
+		app.ZoomToLayer=function(layer) {																			// ZOOM TO A LAYER
+			app.mapView.extent=layer.fullExtent;																		// Zoom to layer's extent
+			}
 
 		app.SwitchView=function() 																					// SWITCH 2D/3D MODE
 		{
