@@ -27,7 +27,33 @@
 
 <script>
 
-//			  localhost/test.htm?26fe0e56797449b0be29031512f9adaa
+
+/* DEPENDENCIES
+
+	Imaages:	img/shanti.ico
+				img/basemapicon.gif
+				img/layericon.png
+				img/legendicon.gif
+				img/sketchicon.gif
+				img/bookmarkicon.gif
+
+	ESRI:		https://js.arcgis.com/4.12
+				https://js.arcgis.com/4.12/esri/themes/light/main.css
+
+	Global var: app
+
+	Query opts:	kml=	full url of kml
+				base=	
+				lon=	longitude (decimal)
+				lat=	latitude (decimal)
+				zoom=	factor (integer 1-18)
+				tilt=	degree (integer 0-180)
+				opt= 	bitmapped integer: 1=Scale | 2=Search| 4=3D | 8=Base | 16=Layers | 32=Legend | 64=Sketch | 128=Bookmarks
+				show= 	bitmapped integer: 16=Layers | 32=Legend | 64=Sketch | 128=Bookmarks
+
+	Sample webmap:	localhost/test.htm?26fe0e56797449b0be29031512f9adaa
+
+*/
 
 	var app={ url:url=window.location.search.substring(1), container:"viewDiv",											// Holds startup parameters													
 			  map:null, baseMap:"topo-vector", kml:null, 								
@@ -37,14 +63,14 @@
 			  reqs:["esri/Map","esri/WebMap", "esri/views/MapView", "esri/views/SceneView", "esri/layers/KMLLayer"]
 			 };
 
-	if (url && url.match(/kml=/i)) 		app.kml=url.match(/kml=([^&]*)/i)[1]											// If kml/kmz spec'd 
-	if (url && url.match(/base=/i)) 	app.baseMap=url.match(/base=([^&]*)/i)[1];										// If base map spec'd 
-	if (url && url.match(/lon=/i)) 		app.center[0]=url.match(/lon=([^&]*)/i)[1]-0;									// If lon spec'd 
-	if (url && url.match(/lat=/i)) 		app.center[1]=url.match(/lat=([^&]*)/i)[1]-0;									// If lat spec'd 
-	if (url && url.match(/zoom=/i)) 	app.zoom=url.match(/zoom=([^&]*)/i)[1]-0;										// If zoom spec'd 
-	if (url && url.match(/tilt=/i)) 	app.tilt=url.match(/tilt=([^&]*)/i)[1]-0;										// If tilt spec'd 
-	if (url && url.match(/opt=/i)) 		app.opt=url.match(/opt=([^&]*)/i)[1]-0;											// Options are bitmapped: 1=Scale, 2=Search, 4=3D, 8=Base, 16=Layers, 32=Legend. 64=Sketch, 128=Bookmarks
-	if (url && url.match(/show=/i)) 	app.show=url.match(/show=([^&]*)/i)[1]-0;										// Show is bitmapped: 16=Layers, 32=Legend. 64=Sketch, 128=Bookmarks
+	if (app.url && app.url.match(/kml=/i)) 		app.kml=app.url.match(/kml=([^&]*)/i)[1]								// If kml/kmz spec'd 
+	if (app.url && app.url.match(/base=/i)) 	app.baseMap=app.url.match(/base=([^&]*)/i)[1];							// Base
+	if (app.url && app.url.match(/lon=/i)) 		app.center[0]=app.url.match(/lon=([^&]*)/i)[1]-0;						// Lon
+	if (app.url && app.url.match(/lat=/i)) 		app.center[1]=app.url.match(/lat=([^&]*)/i)[1]-0;						// Lat
+	if (app.url && app.url.match(/zoom=/i)) 	app.zoom=app.url.match(/zoom=([^&]*)/i)[1]-0;							// Zoom 
+	if (app.url && app.url.match(/tilt=/i)) 	app.tilt=app.url.match(/tilt=([^&]*)/i)[1]-0;							// Tilt 
+	if (app.url && app.url.match(/opt=/i)) 		app.opt=app.url.match(/opt=([^&]*)/i)[1]-0;								// Options to load
+	if (app.url && app.url.match(/show=/i)) 	app.show=app.url.match(/show=([^&]*)/i)[1]-0;							// Options to open on startup
 
 	if (app.opt&1)	 app.reqs[5]="esri/widgets/ScaleBar";																// Scalebar if spec'd
 	if (app.opt&2)	 app.reqs[6]="esri/widgets/Search";																	// Search
@@ -94,8 +120,8 @@
 			}
 	}
 
-	if (url && url.match(/id=/i)) {																					// If WebMap id spec'd	
-			app.map=new WebMap({ portalItem: { id: url.match(/id=([^&]*)/i)[1] }});										// Load it
+	if (app.url && app.url.match(/id=/i)) {																				// If WebMap id spec'd	
+			app.map=new WebMap({ portalItem: { id: app.url.match(/id=([^&]*)/i)[1] }});									// Load it
 			app.map.load().then(function() { 
 				app.ShowOptions() 																						// Hide/show options on load
 				})
