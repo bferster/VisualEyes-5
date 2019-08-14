@@ -42,16 +42,17 @@
 
 	Global var: app
 
-	Query opts:	kml=	full url of kml
-				base=	
-				lon=	longitude (decimal)
-				lat=	latitude (decimal)
-				zoom=	factor (integer 1-18)
-				tilt=	degree (integer 0-180)
-				opt= 	bitmapped integer: 1=Scale | 2=Search| 4=3D | 8=Base | 16=Layers | 32=Legend | 64=Sketch | 128=Bookmarks
-				show= 	bitmapped integer: 16=Layers | 32=Legend | 64=Sketch | 128=Bookmarks
+	Query opts:	id=		(integer) Id number of ArcGIS Online WebMap
+				kml=	(string)  Full url of kml file
+				base=	(string)  See: https://developers.arcgis.com/javascript/latest/api-reference/esri-Map.html#basemap
+				lon=	(decimal) Longitude 
+				lat=	(decimal) Latitude 
+				zoom=	(integer) Factor from 1-18
+				tilt=	(integer) Degrees fro 0-360
+				opt= 	(integer) Bitmapped: 1=Scale | 2=Search| 4=3D | 8=Base | 16=Layers | 32=Legend | 64=Sketch | 128=Bookmarks
+				show= 	(integer) Bitmapped: 16=Layers | 32=Legend | 64=Sketch | 128=Bookmarks
 
-	Sample webmap:	localhost/test.htm?26fe0e56797449b0be29031512f9adaa
+	Sample webmap:	localhost/test.htm?id=26fe0e56797449b0be29031512f9adaa
 
 */
 
