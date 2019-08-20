@@ -8,42 +8,47 @@
 	<title>Test</title>
 </head>
 <style> body { 	font-family:Verdana,Geneva,sans-serif; font-size:13px;margin:16px; } </style>
-<iframe id='appIF' width='100%' height='600' src='test.htm'></iframe><br><br>
 <body>
-Send: <input type='text' style='width:300px' onChange='Send(this.value)'> <input type='button' value='Reload' onclick='''><br>
-<br><b>USAGE:</b><br>
-goto|lon|lat|zoom|tilt ---- goto|-79|39|12|0<br>
-click|lon|lat ---- click|-79|39<br>
 
-<br><b>RESULTS:</b>
+	<iframe id='appIF' width='100%' height='600' src='test.htm'></iframe><br><br>
+	Send: <input type='text' style='width:300px' onChange='Send(this.value)'> <input type='button' value='Reload' onclick='''><br>
+	<br><b>USAGE:</b><br>
+	goto|lon|lat|zoom|tilt --- goto|-79|39|12|0<br>
+	click|lon|lat --- click|-79|39<br>
+	show|id2|id2| ... |idN<br> --- show| <br>
+	hide|id2|id2| ... |idN<br> --- hide| <br>
+	<br><b>RESULTS:</b>
+
 <script>
 
-var isReady=false;														// When Iframe is ready to recieve messages
-var msgQueue=[];														// Queue for unsent messages while witing to be ready
+	var isReady=false;														// When iFrame is ready to recieve messages
+	var msgQueue=[];														// Queue for unsent messages while witing to be ready
 
-function Send(msg)
-{
-	if (isReady) 	document.getElementById("appIF").contentWindow.postMessage("map="+msg,"*");	// If it's ready to recieve, send message to Iframe
-	else 			msgQueue.push(msg);															// Add to queue
-}
-
-///////////////////////////////////////////// PLUMBING //////////////////////////////////////////////////////
-
-if (window.addEventListener) 											// If supported this way
-	window.addEventListener("message",mapEventHandler,false);			// Add event handler
-	else																// Use other method
-		window.attachEvent("message",mapEventHandler);					// Add handler
-
-	function mapEventHandler(e)										// ON MESSAGE EVENT
+	function Send(msg)													// SEND MESSAGE TO IFRAME
 	{
-		if (e.data && e.data.match(/map=/i)) {
-			if (data.match(/map=ready/i))	isReady=true;				// Set ready flag
-			for (var i=0;i<msgQueue.length;++i) Send(msgQueue[i]);
-			$("body").append("<br>"+e.data.substr(4));					// Show event
-			}
+		if (isReady) document.getElementById("appIF").contentWindow.postMessage("map="+msg,"*");	// If it's ready to recieve, send message to Iframe
+		else 		 msgQueue.push(msg);															// Add to queue
 	}
 
-	function trace(msg, p1, p2, p3, p4)										// CONSOLE 
+	if (window.addEventListener) 											// If supported this way
+		window.addEventListener("message",mapEventHandler,false);			// Add event handler
+	else																	// Use other method
+		window.attachEvent("message",mapEventHandler);						// Add handler
+
+		function mapEventHandler(e)										// ON MESSAGE EVENT
+		{
+			if (e.data && e.data.match(/map=/i)) {
+				if (data.match(/map=ready/i)) {								// If iframe is ready to accept messages
+					isReady=true;											// Set ready flag
+					for (var i=0;i<msgQueue.length;++i) Send(msgQueue[i]);	// Send queued messages
+					}
+				$("body").append("<br>"+e.data.substr(4));					// Show event
+				}
+		}
+
+
+
+	function trace(msg, p1, p2, p3, p4)									// CONSOLE 
 	{
 		if (p4 != undefined)
 			console.log(msg,p1,p2,p3,p4);
