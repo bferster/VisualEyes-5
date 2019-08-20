@@ -18,22 +18,29 @@ click|lon|lat ---- click|-79|39<br>
 <br><b>RESULTS:</b>
 <script>
 
+var isReady=false;														// When Iframe is ready to recieve messages
+var msgQueue=[];														// Queue for unsent messages while witing to be ready
+
 function Send(msg)
 {
-	document.getElementById("appIF").contentWindow.postMessage("map="+msg,"*");	 				// Send message to Iframe
+	if (isReady) 	document.getElementById("appIF").contentWindow.postMessage("map="+msg,"*");	// If it's ready to recieve, send message to Iframe
+	else 			msgQueue.push(msg);															// Add to queue
 }
 
 ///////////////////////////////////////////// PLUMBING //////////////////////////////////////////////////////
 
 if (window.addEventListener) 											// If supported this way
-	window.addEventListener("message",shivaEventHandler,false);			// Add event handler
+	window.addEventListener("message",mapEventHandler,false);			// Add event handler
 	else																// Use other method
-		window.attachEvent("message",shivaEventHandler);				// Add handler
+		window.attachEvent("message",mapEventHandler);					// Add handler
 
-	function shivaEventHandler(e)											// ON SHIVA EVENT
+	function mapEventHandler(e)										// ON MESSAGE EVENT
 	{
-		if (e.data && e.data.match(/map=/i))
-			$("body").append("<br>"+e.data.substr(4))
+		if (e.data && e.data.match(/map=/i)) {
+			if (data.match(/map=ready/i))	isReady=true;				// Set ready flag
+			for (var i=0;i<msgQueue.length;++i) Send(msgQueue[i]);
+			$("body").append("<br>"+e.data.substr(4));					// Show event
+			}
 	}
 
 	function trace(msg, p1, p2, p3, p4)										// CONSOLE 
