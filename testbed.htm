@@ -30,17 +30,6 @@ if (window.addEventListener) 											// If supported this way
 	else																// Use other method
 		window.attachEvent("message",shivaEventHandler);				// Add handler
 
-function SendShivaMessage(src, msg) 									// SEND SHIVA MESSAGE 
-	{
-		var str=src;															// Add src and window						
-		if (msg)																// If more to it
-			str+="|"+msg;														// Add it
-		if (window.parent)														// If has a parent
-			window.parent.postMessage(str,"*");									// Send message to parent wind
-		else																	// Local	
-			window.postMessage(str,"*");										// Send message to wind
-	}
-
 	function shivaEventHandler(e)											// ON SHIVA EVENT
 	{
 		if (e.data && e.data.match(/map=/i))
