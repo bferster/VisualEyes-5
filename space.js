@@ -50,7 +50,7 @@ Space.prototype.DrawMapLayers=function()								// DRAW OVERLAY LAYERS
 			if (vis && (o.type == "image"))	{								// If a visible image 
            		a=((o.alpha == undefined) || (o.alpha == "")) ? 1 : o.alpha;	// Let alpha control opacity if defined
             	o.src.drawMapImage(a,this);   								// Draw it   
-        		}
+  				}
         	else if (o.type == "kml") {										// If a kml 
 				a=((o.alpha == undefined) || (o.alpha == "")) ? 1 : o.alpha;	// Let alpha control opacity if defined
 				if (!vis) a=0;												// Hide if invisible
@@ -248,7 +248,7 @@ Space.prototype.Goto=function(pos)										// SET VIEWPOINT
 		return;																// Quit
 	if (!v[2])	v[2]=fs;													// If no res set, use current one
 	if (v[3])  	duration=v[3]*1000;											// Set duration from pos
-	else		duration=this.panTime*1000;									// Use global duration
+	else		duration=Math.abs(this.panTime*1000);						// Use global duration
 	v[2]*=1440*curJson.leftRightSplit/$(this.div).width();					// Resize to normalized screen
 
 	if (manual) {															// If animating
