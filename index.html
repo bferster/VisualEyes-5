@@ -524,7 +524,7 @@
 		dtl=new DataLoad();														// Alloc data module
 		sto=new Story("rightDiv",pop);											// Alloc story module
 		eds=new EditShow();														// Alloc editing module
-		mps.InitMap();															// Init map
+		mps.InitMap(url.match(/2853/));											// Init map (KLUDGE TO INHIBIT DRAG FOR BLEAK HOUSE)
 		InitProject();															// Init project
 		if (drupalMan) 															// If called from Drupal manager
 			window.parent.postMessage("Ready=true","*");						// Send message to parent wind		

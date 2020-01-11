@@ -75,7 +75,7 @@ Space.prototype.DrawMapLayers=function()								// DRAW OVERLAY LAYERS
 }
 
 
-Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
+Space.prototype.InitMap=function(inActive)								// INIT OPENLAYERS MAP
 {
 	this.showBoxes=false;													// Show boxes
 	this.showRoads=false;													// Hide Roads/borders
@@ -131,8 +131,8 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
     this.map=new ol.Map( { target: this.div.substr(1),						// Alloc OL
 		loadTilesWhileInteracting: true,									// Load tiles
 		layers:this.layers,													// Layers array									
-		interactions: ol.interaction.defaults().extend([this.featureSelect]),	// Add feature select interaction
-       	controls: ol.control.defaults({										// Controls
+		interactions: inActive ? [] : ol.interaction.defaults().extend([this.featureSelect]),	// Add feature select interaction
+       	controls: inActive ? [] : ol.control.defaults({						// Controls
 				}).extend([ new ol.control.ScaleLine() ]),					// Add scale
         view: new ol.View({													// Views
           		center: ol.proj.transform( [-77,34],'EPSG:4326',this.curProjection),
@@ -143,7 +143,7 @@ Space.prototype.InitMap=function()										// INIT OPENLAYERS MAP
   	this.CreateOverlayLayer();												// Canvas and vector layer for map overlays
   	this.InitPopups();														// Init popup layer
   	var _this=this;															// Save context for callback
-   	
+	   
 	this.map.on('click', function(e) {										// ON CLICK
 		var c=ol.proj.transform(e.coordinate,_this.curProjection,'EPSG:4326');	// Get center
 		$("#setpoint").val(Math.floor(c[0]*10000)/10000+","+Math.floor(c[1]*10000)/10000);
