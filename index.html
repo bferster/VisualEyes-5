@@ -390,6 +390,7 @@
 					o.mapTextCol  ? sty.tc=o.mapTextCol  : sty.tc=curJson.mapTextCol;				
 					o.mapTextFont ? sty.tf=o.mapTextFont : sty.tf=curJson.mapTextFont;				
 					o.mapOpacity  ? sty.a=o.mapOpacity   : sty.a=eo;				
+					if (o.tags && o.tags.match(/mapTextCol=#/i))	sty.tc=o.tags.match(/mapTextCol=(.......)/i)[1];	// Text color from tags
 					o.lid=mps.AddMarkerLayer(o.where,sty,i,s,e,o.show);			// Add marker to overlays
 					}
 			}
