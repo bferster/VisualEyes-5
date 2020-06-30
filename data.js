@@ -43,24 +43,15 @@ DataLoad.prototype.ShowElement=function(tag)							// DETERMINE IF SHOWING MOB E
 
 DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendError) 	//	GET GOOGLE DOCS SPREADSHEET
 {
-	this.spreadsheetError=null;
+	
 	if (url.indexOf("google.com") != -1) {									// If Google doc
 		url=url.match(/\/d\/(.+)\//)[1];									// Extract id
-		var str="https://docs.google.com/spreadsheets/d/"+url+"/export?format=tsv";		// Access
-		var xhr=new XMLHttpRequest();										// Ajax
-		xhr.open("GET",str);												// Set open url
-		xhr.onload=function() { handleTSVResponse(xhr.responseText); };		// On successful load, init app from TSV file
-		xhr.send();															// Do it
-		
-		xhr.onreadystatechange=function(e) { 								// ON AJAX STATE CHANGE
-			if ((xhr.readyState === 4) && (xhr.status !== 200)) {  			// Ready, but no load
-				Sound("delete");											// Delete sound
-				PopUp("<p style='color:#990000'><b>Couldn't load Google Doc!</b></p>Make sure that <i>anyone</i><br>can view it in Google",5000); // Popup warning
-				}
-			};		
+		var str="https://spreadsheets.google.com/feeds/cells/"+url+"/1/public/values?alt=json";	// Make url
+		$.ajax( { url:str, dataType:'json'	})
+			.done((data)=>{	InitFromJSON(data.feed.entry); })				// Extract data								
+		.error(()=>{ alert("Couldn't load Google Doc!\nMake sure that it is \"Published to web\" in Google"); })
 		}
-		
-		else{																	// A CSV
+	else{																	// A CSV
 		$.ajax({															// Fetch file
 			type:  'GET',													// a GET
 			url:   'proxy.php',												// Use proxy for cross-domain issue
@@ -69,9 +60,9 @@ DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendErr
 			).complete(handleCSVResponse); 									// Callback
 		}
 
-   function handleCSVResponse(response) {								// HANDLE INCOMING DATA
+  function handleCSVResponse(response) {								// HANDLE INCOMING DATA
 	    var i,j,o,lab;
-		var keys=new Array();												
+ 		var keys=new Array();												
 		var theData=new Array();
 		if (!response.responseText && sendError) {							// If no data and sending
 			callback(null,url);												// Send to callback
@@ -130,72 +121,33 @@ DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendErr
 			return arr;														// Return nested arrays
 			}
 		}			
-     
-	function handleTSVResponse(tsv) {									// HANDLE INCOMING TSV DATA
-		var i,j,v,o,blank;
-		var data=[];														
-		if (tsv) tsv=tsv.replace(/\r/g,"");									// Remove CRs
-		tsv=tsv.split("\n");												// Split into lines
-		var fields=tsv[0].split("\t");										// Get field names
-		for (i=1;i<tsv.length;++i) {										// For each line of data past header
+
+	function InitFromJSON(cells) {										// HANDLE INCOMING JSON DATA
+		let i,j,v,col,row,con,o,blank,s=[];
+		let n=20;															// Number of fields
+		let data=[];
+		for (i=0;i<cells.length;++i) {										// For each cell
+			o=cells[i];														// Point at it
+			col=o.gs$cell.col-1; 	row=o.gs$cell.row-1;					// Get cell coords
+			con=o.content.$t;												// Get content
+			if (!con) 				continue;								// Skip blank cells
+			if (!s[row])			s[row]=new Array(n).fill("");			// Add new row if not there already
+			if (col < n)			s[row][col]=con;						// Add cell to array
+			}
+		for (i=1;i<s.length;++i) {											// For each line
+			v=s[i];															// Point atfields
+			if (!v) continue;												// Skip blank lines
 			o={};															// Fresh obj
 			blank=true;														// Assume it has no data
-			v=tsv[i].split("\t");											// Get data
-			for (j=0;j<fields.length;++j) {									// For each field
-				o[fields[j]]=v[j] ? v[j] : null;							// Fill out row
+			for (j=0;j<n;++j) {												// For each field
+				o[s[0][j]]=v[j] ? v[j] : null;								// Fill out row
 				if (v[j])	blank=false;									// Something there
 				}
 			if (!blank)		data.push(o)									// Add to data
-			}	
-		callback(data,url);													// Send to callback
-	}
+			}
 
-/* function handleGoogleResponse(response) {							// HANDLE INCOMING DATA
-	    var i,j,o,lab,val;
-		var keys=[],theData=[];
-		var data=response.getDataTable();									// Try getting table from Google
-//		data=new google.visualization.DataView(data);						// Use view to overcome some formatting issues
-		if (!data && sendError) {											// If no data and sending
-			callback(null,url);												// Send to callback
-			return(null)													// Return null
-			}
-		var cols=data.getNumberOfColumns();									// Get cols
-		var rows=data.getNumberOfRows();									// Get rows
-		var hasLabels=data.getColumnLabel(0) ? true : false;				// Is it a table with a header?
-		
-		for (i=0;i<cols;++i) {												// For each field
-		 	if (hasLabels)													// A table with labels
-		 		lab=$.trim(data.getColumnLabel(i));							// Get trimmed label
-			else															// No embedded label in data
-		 		lab=$.trim(data.getFormattedValue(0,i));					// Get trimmed value
-			if (!lab)														// If noting there
-		 		break;														// Quit
-			keys.push(lab);													// Add to keys array
-			}
-		cols=keys.length;													// Cols = keys length
-		if (fields) {														// If fielded JSON mode
-			var s=hasLabels ? 0 : 1;										// Starting row
-			for (i=s;i<rows;++i) {											// For each row
-				o={};														// New obj
-				for (j=0;j<keys.length;++j) {								// For each key
-					val=$.trim(data.getFormattedValue(i,j));				// Get data
-					o[keys[j]]=val ? val : null;							// Add string or null
-					}
-				theData.push(o);											// Add to result
-	 			}
-			}
-		else{																// Nested arrays
-			for (i=0;i<rows;++i) {											// For each row
- 				o=[];														// New sub-array
-				for (j=0;j<cols;++j) {										// For each col
-					val=data.getFormattedValue(i,j);						// Get data
-					o[keys[j]]=val ? val : null;							// Add string or null
-					}
-			   theData.push(o);
-				}
-			}
-		callback(theData,url);												// Send to callback
-	 }*/
+		callback(data,url);													// Send to callback
+		}
 
 }
 
