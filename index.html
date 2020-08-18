@@ -188,6 +188,7 @@
 	var _this=this;																// Save context for callbacks
 	var origLR=.66, origUD=.75;													// Pane size to come back to
 	var topDot=-1;																// Top most dot
+	var startingPage="";														// Starting page
 
 	function ResizePanes()													// RESIZE PANES
 	{ 
@@ -247,7 +248,7 @@
 			InitProject(data);													// Init project
 		if (window.parent)														// If within a window
 			window.parent.postMessage("Editor=load|"+curShow,"*");				// Send load message to editor
-   	}
+   		}
 
 	function InitProject(data, dontSaveOrigs)								// INIT PROJECT
 	{
@@ -408,6 +409,7 @@
 			}
 		ResizePanes();															// Resize panes
 		if (curJson.mapStartPos)		mps.Goto(curJson.mapStartPos);			// Position map
+		if (startingPage) 				sto.Open(startingPage);					// Goto this story page
 	}
 	
 	function Draw(time)														// DRAW PROJECT
@@ -440,7 +442,10 @@
 		isMobile=navigator.userAgent.match(/(ipad|iphone|ipod|android)/i) ? true : false; // Set mobile flag
 		var url=window.location.search.substring(1);							// Get query string
 		qmf=new QmediaFile("//viseyes.org/visualeyes/",4);						// Alloc file system
-
+		if (url && url.match(/p=/i)) {											// If an id spec'd via &p=
+			startingPage=url.match(/\&p=(.*)/i)[1];								// Extract id
+			url=url.replace(/\&p=.*/i,"");										// Remove id fron url
+			}
 		if (url && url.match(/gid=/i)) {										// If id spec'd via gid=
 			url=url.match(/gid=(\d*)/i)[1];										// Extract number
 			}
