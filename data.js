@@ -54,14 +54,14 @@ DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendErr
 	else{																	// A CSV
 		$.ajax({															// Fetch file
 			type:  'GET',													// a GET
-			url:   'proxy.php',												// Use proxy for cross-domain issue
-			data:  { url : url },											// Add url
+			url:   url,														// Use proxy for cross-domain issue
+//			data:  { url : url },											// Add url
 			async: false }													// Async									
 			).complete(handleCSVResponse); 									// Callback
 		}
 
   function handleCSVResponse(response) {								// HANDLE INCOMING DATA
-	    var i,j,o,lab;
+		var i,j,o,lab;
  		var keys=new Array();												
 		var theData=new Array();
 		if (!response.responseText && sendError) {							// If no data and sending
