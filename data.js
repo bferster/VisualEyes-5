@@ -43,24 +43,19 @@ DataLoad.prototype.ShowElement=function(tag)							// DETERMINE IF SHOWING MOB E
 
 DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendError) 	//	GET GOOGLE DOCS SPREADSHEET
 {
-	
-	if (url.indexOf("google.com") != -1) {									// If Google doc
-		url=url.match(/\/d\/(.+)\//)[1];									// Extract id
-		var str="https://spreadsheets.google.com/feeds/cells/"+url+"/1/public/values?alt=json";	// Make url
-		$.ajax( { url:str, dataType:'json'	})
-			.done((data)=>{	InitFromJSON(data.feed.entry); })				// Extract data								
-		.error(()=>{ alert("Couldn't load Google Doc!\nMake sure that it is \"Published to web\" in Google"); })
-		}
-	else{																	// A CSV
 		$.ajax({															// Fetch file
-			type:  'GET',													// a GET
-			url:   url,														// Use proxy for cross-domain issue
-//			data:  { url : url },											// Add url
-			async: false }													// Async									
-			).complete(handleCSVResponse); 									// Callback
-		}
+				type:  'GET',												// a GET
+				url:   "proxy.php",											// Use proxy for cross-domain issue
+				data:  { url : url }})										// Add url
+			.complete(handleCSVResponse) 									// Callback
 
   function handleCSVResponse(response) {								// HANDLE INCOMING DATA
+
+	if ((response.status != 200) || (response.responseText[0] == "<")) {	// Not properly loaded
+		callback([],url);													// Send to callback
+		trace(123)
+		return;																// Quit
+		}
 		var i,j,o,lab;
  		var keys=new Array();												
 		var theData=new Array();
@@ -309,3 +304,4 @@ DataLoad.prototype.Query=function(src, dst, query, fields, sort) 	// RUN QUERY
 		}
 	dst.splice(0,0,fields);												// Set header
 }
+
