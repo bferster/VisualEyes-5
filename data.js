@@ -53,7 +53,6 @@ DataLoad.prototype.GetSpreadsheet=function(url, fields, query, callback, sendErr
 
 	if ((response.status != 200) || (response.responseText[0] == "<")) {	// Not properly loaded
 		callback([],url);													// Send to callback
-		trace(123)
 		return;																// Quit
 		}
 		var i,j,o,lab;
